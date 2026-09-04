@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mocks Wallah</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --primary-light: #a29bfe;
+            --primary-dark: #5649c0;
+            --secondary: #00cec9;
+            --accent: #fd79a8;
+            --success: #00b894;
+            --warning: #fdcb6e;
+            --danger: #d63031;
+            --light: #f8f9fa;
+            --dark: #2d3436;
+            --gray: #636e72;
+            --light-gray: #dfe6e9;
+            --card-bg: #ffffff;
+            --body-bg: #f5f6fa;
+            --header-bg: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            --footer-bg: #ffffff;
+            --box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            --box-shadow-sm: 0 2px 10px rgba(0,0,0,0.05);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background-color: var(--body-bg);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            color: var(--dark);
+            line-height: 1.6;
+            padding-bottom: 80px; /* Space for fixed navigation */
+            overflow-x: hidden;
+        }
+        
+        /* Header Styles */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: var(--header-bg);
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            z-index: 1000;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .header-brand {
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .header-brand i {
+            margin-right: 8px;
+            font-size: 1.2rem;
+        }
+        
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .control-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .control-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .control-btn.active {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .timer-display {
+            background: rgba(0,0,0,0.2);
+            border-radius: 18px;
+            padding: 4px 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+        
+        .timer-display i {
+            margin-right: 6px;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-top: 60px;
+            padding: 16px;
+            min-height: calc(100vh - 140px);
+        }
+        
+        .question-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--box-shadow-sm);
+            border: none;
+            transition: var(--transition);
+        }
+        
+        .question-counter {
+            font-size: 0.9rem;
+            color: var(--gray);
+            text-align: center;
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+        
+        .question-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+        
+        .option-item {
+            margin-bottom: 12px;
+            position: relative;
+        }
+        
+        .option-input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+            .question-text {
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        hyphens: auto;
+        max-width: 100%;
+    }
+
+    .question-text img,
+    .option-label img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 8px 0;
+        border-radius: 8px;
+    }
+
+    .option-label {
+        overflow: hidden;
+    }
+
+    .question-card {
+        overflow: hidden;
+    }
+        
+        .option-label {
+            display: block;
+            padding: 14px 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--light-gray);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .option-label:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .option-input:checked + .option-label {
+            border-color: var(--primary);
+            background: rgba(108, 92, 231, 0.05);
+            box-shadow: 0 0 0 1px var(--primary);
+        }
+        
+        .option-input:checked + .option-label::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--primary);
+        }
+        
+        /* When reviewing answers */
+        .review-mode .option-input:checked + .option-label.correct {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.correct::after {
+            background: var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.incorrect {
+            border-color: var(--danger);
+            background: rgba(214, 48, 49, 0.05);
+            box-shadow: 0 0 0 1px var(--danger);
+        }
+        
+        .MathJax, .mjx-chtml {
+            overflow-x: auto;
+            max-width: 100%;
+            display: inline-block;
+        }
+
+        
+        .review-mode .option-input:checked + .option-label.incorrect::after {
+            background: var(--danger);
+        }
+        
+        .review-mode .option-label.correct-answer {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-label.correct-answer::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--success);
+        }
+        
+        .solution-container {
+            margin-top: 20px;
+            padding: 16px;
+            background: rgba(108, 92, 231, 0.05);
+            border-radius: 12px;
+            border-left: 3px solid var(--primary);
+        }
+        
+        .solution-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+        
+        /* Question Navigation */
+        .question-nav {
+            position: fixed;
+            top: 60px;
+            right: 0;
+            bottom: 80px;
+            width: 100%;
+            max-width: 320px;
+            background: var(--card-bg);
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            transform: translateX(100%);
+            transition: var(--transition);
+            z-index: 900;
+            overflow-y: auto;
+            padding: 16px;
+        }
+        
+        .question-nav.show {
+            transform: translateX(0);
+        }
+        
+        .nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .nav-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+        
+        .question-stats {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .stat-badge {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        
+        .section-selector {
+            width: 100%;
+            margin-bottom: 16px;
+            border-radius: 12px;
+            padding: 10px 16px;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            font-size: 0.9rem;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 16px;
+        }
+        
+        .question-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+            gap: 8px;
+        }
+        
+        .q-box {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .q-box:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .q-box.attempted {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .q-box.correct {
+            background-color: var(--success);
+            color: white;
+            border-color: var(--success);
+        }
+        
+        .q-box.incorrect {
+            background-color: var(--danger);
+            color: white;
+            border-color: var(--danger);
+        }
+        
+        .q-box.current {
+            border: 2px solid var(--accent) !important;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .q-box.unattempted {
+            background-color: var(--gray);
+            color: white;
+            border-color: var(--gray);
+        }
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: var(--footer-bg);
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            z-index: 800;
+        }
+        
+        .nav-btn {
+            height: 48px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 20px;
+            transition: var(--transition);
+            gap: 8px;
+        }
+        
+        .nav-btn i {
+            font-size: 1rem;
+        }
+        
+        .nav-btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .nav-btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+        
+        .nav-btn-outline:hover {
+            background: rgba(108, 92, 231, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        /* Overlay when nav is open */
+        .nav-overlay {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            bottom: 80px;
+            background: rgba(0,0,0,0.5);
+            z-index: 800;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+        }
+        
+        .nav-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        /* Results Modal */
+        .results-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1100;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+            padding: 16px;
+        }
+        
+        .results-modal.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .results-card {
+            background: white;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+            transform: translateY(20px);
+            transition: var(--transition);
+        }
+        
+        .results-modal.show .results-card {
+            transform: translateY(0);
+        }
+        
+        .results-header {
+            background: var(--header-bg);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .results-title {
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .results-body {
+            padding: 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            color: white;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+        
+        .results-footer {
+            padding: 16px 20px;
+            display: flex;
+            justify-content: center;
+            border-top: 1px solid var(--light-gray);
+        }
+        
+        /* Responsive Adjustments */
+        @media (min-width: 992px) {
+            .question-nav {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-right: 320px;
+            }
+            
+            .nav-overlay {
+                display: none;
+            }
+            
+            .bottom-nav {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .question-grid {
+                grid-template-columns: repeat(auto-fill, minmax(36px, 1fr));
+                gap: 6px;
+            }
+            
+            .q-box {
+                width: 36px;
+                height: 36px;
+                font-size: 0.9rem;
+            }
+            
+            .option-label {
+                padding: 12px 14px;
+            }
+            
+            .question-text {
+                font-size: 1rem;
+            }
+            
+            .header-brand {
+                font-size: 1rem;
+            }
+            
+            .control-btn {
+                width: 32px;
+                height: 32px;
+            }
+            
+            .timer-display {
+                font-size: 0.8rem;
+                padding: 4px 10px;
+            }
+            
+            .nav-btn {
+                height: 44px;
+                padding: 0 16px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="#" class="header-brand">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Mocks Wallah</span>
+            </a>
+            
+            <div class="header-controls">
+                <!-- Timer -->
+                <div class="timer-display">
+                    <i class="far fa-clock"></i>
+                    <span id="timer-display">15:00</span>
+                </div>
+                
+                <!-- Language toggle -->
+                <button class="control-btn" id="lang-btn" onclick="toggleLanguage()">
+                    <span id="lang-text">En</span>
+                </button>
+                
+                <!-- Submit button -->
+                <button class="control-btn" id="submit-btn" onclick="confirmSubmit()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+                
+                <!-- Questions toggle for mobile -->
+                <button class="control-btn nav-toggle-btn" id="nav-toggle" onclick="toggleNav()">
+                    <i class="fas fa-th"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main content -->
+    <main class="main-content" id="main-content">
+        <div class="question-counter" id="question-counter">Question 1 of 20</div>
+        
+        <!-- Questions will be displayed here -->
+        <div id="questions-container"></div>
+    </main>
+    
+    <!-- Overlay for mobile nav -->
+    <div class="nav-overlay" id="nav-overlay" onclick="toggleNav(false)"></div>
+    
+    <!-- Question navigation sidebar -->
+    <aside class="question-nav" id="question-nav">
+        <div class="nav-header">
+            <h3 class="nav-title">Questions</h3>
+            <div class="question-stats">
+                <span class="stat-badge bg-primary" id="attempted-count">0</span>
+                <span class="stat-badge bg-gray" id="total-count">20</span>
+                <button class="control-btn d-lg-none" onclick="toggleNav(false)">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Section selector -->
+        <select class="section-selector" id="section-selector" onchange="switchSection(this.value)">
+            <option value="all">All Sections</option>
+        </select>
+        
+        <!-- Question grid -->
+        <div class="question-grid" id="question-boxes"></div>
+    </aside>
+    
+    <!-- Bottom navigation for mobile -->
+    <nav class="bottom-nav d-lg-none">
+        <button class="nav-btn nav-btn-outline" onclick="prevQuestion()">
+            <i class="fas fa-chevron-left"></i>
+            <span>Previous</span>
+        </button>
+        <button class="nav-btn nav-btn-outline" onclick="nextQuestion()">
+            <span>Next</span>
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </nav>
+    
+    <!-- Results modal -->
+    <div class="results-modal" id="results-modal">
+        <div class="results-card">
+            <div class="results-header">
+                <h3 class="results-title">Test Results</h3>
+            </div>
+            <div class="results-body">
+                <div class="stats-grid">
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark))">
+                        <div class="stat-value" id="score-value">0</div>
+                        <div class="stat-label">Score</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--success), #1b9aaa)">
+                        <div class="stat-value" id="correct-value">0</div>
+                        <div class="stat-label">Correct</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--danger), var(--accent))">
+                        <div class="stat-value" id="incorrect-value">0</div>
+                        <div class="stat-label">Incorrect</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--gray), var(--dark))">
+                        <div class="stat-value" id="unattempted-value">0</div>
+                        <div class="stat-label">Unattempted</div>
+                    </div>
+                </div>
+            </div>
+            <div class="results-footer">
+                <button class="nav-btn nav-btn-primary" onclick="reviewTest()">
+                    <i class="fas fa-search me-1"></i>
+                    <span>Review Test</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Questions data
+        const questions = [];
+        const sections = {};
+        let currentLang = "en";
+        let currentQuestion = 0;
+        let answers = {};
+        let submitted = false;
+        let totalTime = 15 * 60;
+        
+        // Initialize the test
+        window.onload = function() {
+            initializeTest();
+            startTimer();
+            
+            // If on desktop, show the question navigation by default
+            if (window.innerWidth >= 992) {
+                document.getElementById('question-nav').classList.add('show');
+                document.getElementById('main-content').classList.add('with-nav');
+            }
+        };
+        
+        // Initialize test data
+        function initializeTest() {
+            // Add sections and questions
+            
+            sections["31"] = {
+                name: "Computer Knowledge",
+                start: 0,
+                end: 18
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="31">Computer Knowledge</option>`;
+            
+            sections["misc"] = {
+                name: "Miscellaneous",
+                start: 19,
+                end: 19
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="misc">Miscellaneous</option>`;
+            
+            
+                questions.push({
+                    id: "1",
+                    section: "31",
+                    question_en: "<p>1.<span style=\"font-family: Cambria Math;\"> Processors contain a control unit and a/an :</span></p>\n",
+                    question_hi: "<p>1.<span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">&#2346;&#2381;&#2352;&#2379;&#2360;&#2375;&#2360;&#2352; &#2350;&#2375;&#2306; &#2319;&#2325; &#2325;&#2306;&#2335;&#2381;&#2352;&#2379;&#2354; &#2351;&#2370;&#2344;&#2367;&#2335; &#2324;&#2352; &#2319;&#2325; </span><span style=\"font-family: Cambria Math;\">__________ </span><span style=\"font-family: Cambria Math;\">&#2361;&#2379;&#2340;&#2366; &#2361;&#2376;&#2404;</span></p>\n",
+                    options_en: ["<p>Control unit</p>\n", "<p>Primary storage unit</p>\n", 
+                                "<p>Input unit</p>\n", "<p>Arithmetic logic unit</p>\n"],
+                    options_hi: ["<p><span style=\"font-family: Cambria Math;\">&#2325;&#2306;&#2335;&#2381;&#2352;&#2379;&#2354; &#2351;&#2370;&#2344;&#2367;&#2335; </span><span style=\"font-family: Cambria Math;\">(Control unit) </span></p>\n", "<p><span style=\"font-family: Cambria Math;\">&#2346;&#2381;&#2352;&#2366;&#2311;&#2350;&#2352;&#2368; &#2360;&#2381;&#2335;&#2379;&#2352;&#2375;&#2332; &#2351;&#2370;&#2344;&#2367;&#2335; </span><span style=\"font-family: Cambria Math;\">(Primary storage unit) </span></p>\n",
+                                "<p><span style=\"font-weight: 400;\">&nbsp;&#2311;&#2344;&#2346;&#2369;&#2335; &#2351;&#2370;&#2344;&#2367;&#2335; (Input unit)</span></p>\n", "<p><span style=\"font-weight: 400;\">&#2309;&#2352;&#2367;&#2341;&#2350;&#2375;&#2335;&#2367;&#2325; &#2354;&#2377;&#2332;&#2367;&#2325; &#2351;&#2370;&#2344;&#2367;&#2335; (Arithmetic logic unit)</span></p>\n"],
+                    solution_en: "<p>1.(d) <span style=\"font-family: Cambria Math;\">The Central Processing Unit (CPU) is also known as the microprocessor or processor. The processor contains three sections called the </span><strong><span style=\"font-family: Cambria Math;\">Arithmetic Logic Unit (ALU)</span></strong><span style=\"font-family: Cambria Math;\"><strong>,Registers and the Control Unit</strong>.</span></p>\n",
+                    solution_hi: "<p>1.(d) <span style=\"font-family: Cambria Math;\">&#2360;&#2375;&#2306;&#2335;&#2381;&#2352;&#2354; &#2346;&#2381;&#2352;&#2379;&#2360;&#2375;&#2360;&#2367;&#2306;&#2327; &#2351;&#2370;&#2344;&#2367;&#2335; </span><span style=\"font-family: Cambria Math;\">(CPU) </span><span style=\"font-family: Cambria Math;\">&#2325;&#2379; &#2350;&#2366;&#2311;&#2325;&#2381;&#2352;&#2379;&#2346;&#2381;&#2352;&#2379;&#2360;&#2375;&#2360;&#2352; &#2351;&#2366; &#2346;&#2381;&#2352;&#2379;&#2360;&#2375;&#2360;&#2352; &#2325;&#2375; &#2352;&#2370;&#2346; &#2350;&#2375;&#2306; &#2349;&#2368; &#2332;&#2366;&#2344;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404; &#2346;&#2381;&#2352;&#2379;&#2360;&#2375;&#2360;&#2352; &#2350;&#2375;&#2306; </span><strong><span style=\"font-family: Cambria Math;\">&#2309;&#2352;&#2367;&#2341;&#2350;&#2375;&#2335;&#2367;&#2325; &#2354;&#2377;&#2332;&#2367;&#2325; &#2351;&#2370;&#2344;&#2367;&#2335; </span><span style=\"font-family: Cambria Math;\">(ALU)</span><span style=\"font-family: Cambria Math;\">, </span></strong><span style=\"font-family: Cambria Math;\"><strong>&#2352;&#2332;&#2367;&#2360;&#2381;&#2335;&#2352; &#2324;&#2352; &#2325;&#2306;&#2335;&#2381;&#2352;&#2379;&#2354; &#2351;&#2370;&#2344;&#2367;&#2335; &#2344;&#2366;&#2350;&#2325; &#2340;&#2368;&#2344; &#2349;&#2366;&#2327; &#2361;&#2379;&#2340;&#2375; &#2361;&#2376;&#2306;</strong>&#2404;</span></p>\n",
+                    correct: "d",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "2",
+                    section: "31",
+                    question_en: "<p>2.<span style=\"font-family: Cambria Math;\"> A complete electronic circuit with transistors and other electronic components on a small silicon chip is called a(n)_______ .</span></p>\n",
+                    question_hi: "<p>2.<span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">&#2319;&#2325; &#2331;&#2379;&#2335;&#2375; &#2360;&#2367;&#2354;&#2367;&#2325;&#2377;&#2344; &#2330;&#2367;&#2346; &#2346;&#2352; &#2335;&#2381;&#2352;&#2366;&#2306;&#2332;&#2367;&#2360;&#2381;&#2335;&#2352; &#2324;&#2352; &#2309;&#2344;&#2381;&#2351; &#2311;&#2354;&#2375;&#2325;&#2381;&#2335;&#2381;&#2352;&#2377;&#2344;&#2367;&#2325; &#2325;&#2306;&#2346;&#2379;&#2344;&#2375;&#2306;&#2335;&#2381;&#2360; &#2325;&#2375; &#2360;&#2366;&#2341; &#2319;&#2325; &#2346;&#2370;&#2352;&#2381;&#2339; &#2311;&#2354;&#2375;&#2325;&#2381;&#2335;&#2381;&#2352;&#2377;&#2344;&#2367;&#2325; &#2360;&#2352;&#2381;&#2325;&#2367;&#2335; &#2325;&#2379; &#2319;&#2325; </span><span style=\"font-family: Cambria Math;\">_______ </span><span style=\"font-family: Cambria Math;\">&#2325;&#2361;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404;</span></p>\n",
+                    options_en: ["<p>integrated circuit</p>\n", "<p>workstation</p>\n", 
+                                "<p>CPU</p>\n", "<p>magnetic disc</p>\n"],
+                    options_hi: ["<p><span style=\"font-family: Cambria Math;\">&#2311;&#2306;&#2335;&#2368;&#2327;&#2381;&#2352;&#2375;&#2335;&#2375;&#2337; &#2360;&#2352;&#2381;&#2325;&#2367;&#2335; </span><span style=\"font-family: Cambria Math;\">(integrated circuit) </span></p>\n", "<p><span style=\"font-weight: 400;\">&#2357;&#2352;&#2381;&#2325;&#2360;&#2381;&#2335;&#2375;&#2358;&#2344; (workstation)</span></p>\n",
+                                "<p>CPU</p>\n", "<p><span style=\"font-weight: 400;\">&#2350;&#2376;&#2327;&#2381;&#2344;&#2375;&#2335;&#2367;&#2325; &#2337;&#2367;&#2360;&#2381;&#2325; (magnetic disc)</span></p>\n"],
+                    solution_en: "<p>2.(a) <span style=\"font-family: Cambria Math;\">An </span><span style=\"font-family: Cambria Math;\">integrated circuit</span><span style=\"font-family: Cambria Math;\"> or monolithic integrated circuit is a set of electronic circuits on one small flat piece of <strong>semiconductor material, usually silicon</strong>.</span></p>\r\n<p><strong><span style=\"font-family: Cambria Math;\">Magnetic disc</span></strong><span style=\"font-family: Cambria Math;\">&rarr;</span><span style=\"font-family: Cambria Math;\">A</span><span style=\"font-family: Cambria Math;\"> magnetic disk</span><span style=\"font-family: Cambria Math;\"> is a storage device that uses a magnetization process to write, rewrite and access data.</span></p>\r\n<p><strong><span style=\"font-family: Cambria Math;\">Complex Circuit</span></strong><span style=\"font-family: Cambria Math;\">&rarr;</span><span style=\"font-family: Cambria Math;\">A complex circuit configuration is one that contains components that are neither parallel nor series with each other. </span></p>\r\n<p><strong><span style=\"font-family: Cambria Math;\">Work Station</span></strong><span style=\"font-family: Cambria Math;\">&rarr;</span><span style=\"font-family: Cambria Math;\">A workstation is a computer intended for individual use that is faster and more capable than a personal computer.</span></p>\n",
+                    solution_hi: "<p>2.(a) <span style=\"font-family: Cambria Math;\">&#2319;&#2325; </span><span style=\"font-family: Cambria Math;\">&#2311;&#2306;&#2335;&#2368;&#2327;&#2381;&#2352;&#2375;&#2335;&#2375;&#2337; &#2360;&#2352;&#2381;&#2325;&#2367;&#2335;</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">&#2351;&#2366; &#2350;&#2379;&#2344;&#2379;&#2354;&#2367;&#2341;&#2367;&#2325; &#2311;&#2306;&#2335;&#2368;&#2327;&#2381;&#2352;&#2375;&#2335;&#2375;&#2337; &#2360;&#2352;&#2381;&#2325;&#2367;&#2335; </span><span style=\"font-family: Cambria Math;\">(monolithic integrated circuit) </span><span style=\"font-family: Cambria Math;\">&#2360;&#2375;&#2350;&#2368;&#2325;&#2306;&#2337;&#2325;&#2381;&#2335;&#2352; &#2350;&#2335;&#2375;&#2352;&#2367;&#2351;&#2354; </span><span style=\"font-family: Cambria Math;\">(semiconductor material) </span><span style=\"font-family: Cambria Math;\">&#2325;&#2375; &#2319;&#2325; &#2331;&#2379;&#2335;&#2375; &#2360;&#2375; &#2347;&#2381;&#2354;&#2376;&#2335; &#2335;&#2369;&#2325;&#2337;&#2364;&#2375; </span><span style=\"font-family: Cambria Math;\">(flat piece) </span><span style=\"font-family: Cambria Math;\">&#2346;&#2352; <strong>&#2311;&#2354;&#2375;&#2325;&#2381;&#2335;&#2381;&#2352;&#2377;&#2344;&#2367;&#2325; &#2360;&#2352;&#2381;&#2325;&#2367;&#2335; &#2325;&#2366; &#2319;&#2325; &#2360;&#2375;&#2335; </strong></span><strong><span style=\"font-family: Cambria Math;\">(set) </span><span style=\"font-family: Cambria Math;\">&#2361;&#2376;</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Cambria Math;\">&#2310;&#2350;&#2340;&#2380;&#2352; &#2346;&#2352; &#2360;&#2367;&#2354;&#2367;&#2325;&#2377;&#2344; </span><span style=\"font-family: Cambria Math;\">(silicon)</span></strong><span style=\"font-family: Cambria Math;\">&#2404;</span></p>\r\n<p><strong><span style=\"font-family: Cambria Math;\">&#2350;&#2376;&#2327;&#2381;&#2344;&#2375;&#2335;&#2367;&#2325; &#2337;&#2367;&#2360;&#2381;&#2325;</span></strong><span style=\"font-family: Cambria Math;\"> &rarr; </span><span style=\"font-family: Cambria Math;\">&#2350;&#2376;&#2327;&#2381;&#2344;&#2375;&#2335;&#2367;&#2325; &#2337;&#2367;&#2360;&#2381;&#2325; &#2319;&#2325; &#2360;&#2381;&#2335;&#2379;&#2352;&#2375;&#2332; &#2337;&#2367;&#2357;&#2366;&#2311;&#2360; </span><span style=\"font-family: Cambria Math;\">(storage device) </span><span style=\"font-family: Cambria Math;\">&#2361;&#2376; &#2332;&#2379; &#2337;&#2375;&#2335;&#2366; &#2354;&#2367;&#2326;&#2344;&#2375; </span><span style=\"font-family: Cambria Math;\">(write), </span><span style=\"font-family: Cambria Math;\">&#2347;&#2367;&#2352; &#2360;&#2375; &#2354;&#2367;&#2326;&#2344;&#2375; </span><span style=\"font-family: Cambria Math;\">(rewrite) </span><span style=\"font-family: Cambria Math;\">&#2324;&#2352; &#2319;&#2325;&#2381;&#2360;&#2375;&#2360; </span><span style=\"font-family: Cambria Math;\">(access) </span><span style=\"font-family: Cambria Math;\">&#2325;&#2352;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2350;&#2376;&#2327;&#2381;&#2344;&#2375;&#2335;&#2366;&#2311;&#2332;&#2375;&#2358;&#2344; &#2346;&#2381;&#2352;&#2379;&#2360;&#2375;&#2360; </span><span style=\"font-family: Cambria Math;\">(magnetization process) </span><span style=\"font-family: Cambria Math;\">&#2325;&#2366; &#2311;&#2360;&#2381;&#2340;&#2375;&#2350;&#2366;&#2354; &#2325;&#2352;&#2340;&#2368; &#2361;&#2376;&#2404;</span></p>\r\n<p><strong><span style=\"font-family: Cambria Math;\">&#2325;&#2377;&#2350;&#2381;&#2346;&#2381;&#2354;&#2375;&#2325;&#2381;&#2360; &#2360;&#2352;&#2381;&#2325;&#2367;&#2335;</span></strong><span style=\"font-family: Cambria Math;\"><strong> </strong>&rarr; </span><span style=\"font-family: Cambria Math;\">&#2319;&#2325; &#2325;&#2377;&#2350;&#2381;&#2346;&#2381;&#2354;&#2375;&#2325;&#2381;&#2360; &#2360;&#2352;&#2381;&#2325;&#2367;&#2335; &#2325;&#2377;&#2344;&#2381;&#2347;&#2364;&#2367;&#2327;&#2352;&#2375;&#2358;&#2344; </span><span style=\"font-family: Cambria Math;\">(configuration) </span><span style=\"font-family: Cambria Math;\">&#2357;&#2361; &#2361;&#2379;&#2340;&#2366; &#2361;&#2376; &#2332;&#2367;&#2360;&#2350;&#2375;&#2306; &#2320;&#2360;&#2375; &#2325;&#2306;&#2346;&#2379;&#2344;&#2375;&#2306;&#2335;&#2381;&#2360; </span><span style=\"font-family: Cambria Math;\">(components) </span><span style=\"font-family: Cambria Math;\">&#2361;&#2379;&#2340;&#2375; &#2361;&#2376;&#2306; &#2332;&#2379; &#2344; &#2340;&#2379; &#2360;&#2350;&#2366;&#2344;&#2366;&#2306;&#2340;&#2352; &#2361;&#2379;&#2340;&#2375; &#2361;&#2376;&#2306; &#2324;&#2352; &#2344; &#2361;&#2368; &#2319;&#2325; &#2342;&#2370;&#2360;&#2352;&#2375; &#2325;&#2375; &#2360;&#2366;&#2341; &#2358;&#2381;&#2352;&#2371;&#2306;&#2326;&#2354;&#2366; </span><span style=\"font-family: Cambria Math;\">(series) </span><span style=\"font-family: Cambria Math;\">&#2350;&#2375;&#2306; &#2361;&#2379;&#2340;&#2375; &#2361;&#2376;&#2306;&#2404;</span></p>\r\n<p><strong><span style=\"font-family: Cambria Math;\">&#2357;&#2352;&#2381;&#2325; &#2360;&#2381;&#2335;&#2375;&#2358;&#2344;</span></strong><span style=\"font-family: Cambria Math;\"><strong> </strong>&rarr; </span><span style=\"font-family: Cambria Math;\">&#2357;&#2352;&#2381;&#2325;&#2360;&#2381;&#2335;&#2375;&#2358;&#2344; &#2357;&#2381;&#2351;&#2325;&#2381;&#2340;&#2367;&#2327;&#2340; &#2313;&#2346;&#2351;&#2379;&#2327; </span><span style=\"font-family: Cambria Math;\">(individual use) </span><span style=\"font-family: Cambria Math;\">&#2325;&#2375; &#2354;&#2367;&#2319; &#2348;&#2344;&#2366;&#2351;&#2366; &#2327;&#2351;&#2366; &#2319;&#2325; &#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352; &#2361;&#2376; &#2332;&#2379; &#2346;&#2352;&#2381;&#2360;&#2344;&#2354; &#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352; &#2325;&#2368; &#2340;&#2369;&#2354;&#2344;&#2366; &#2350;&#2375;&#2306; &#2340;&#2375;&#2332; </span><span style=\"font-family: Cambria Math;\">(fast) </span><span style=\"font-family: Cambria Math;\">&#2324;&#2352; &#2309;&#2343;&#2367;&#2325; &#2360;&#2325;&#2381;&#2359;&#2350; </span><span style=\"font-family: Cambria Math;\">(capable) </span><span style=\"font-family: Cambria Math;\">&#2361;&#2376;&#2404;</span></p>\n",
+                    correct: "a",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "3",
+                    section: "31",
+                    question_en: "<p>3.<span style=\"font-family: Cambria Math;\"> Which of the following executes the computer commands?</span></p>\n",
+                    question_hi: "<p>3.<span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">&#2344;&#2367;&#2350;&#2381;&#2344;&#2354;&#2367;&#2326;&#2367;&#2340; &#2350;&#2375;&#2306; &#2360;&#2375; &#2325;&#2380;&#2344; &#2360;&#2366; &#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352; &#2325;&#2350;&#2366;&#2306;&#2337; &#2344;&#2367;&#2359;&#2381;&#2346;&#2366;&#2342;&#2367;&#2340; </span><span style=\"font-family: Cambria Math;\">(executes) </span><span style=\"font-family: Cambria Math;\">&#2325;&#2352;&#2340;&#2366; &#2361;&#2376;</span><span style=\"font-family: Cambria Math;\">?</span></p>\n",
+                    options_en: ["<p>Control unit</p>\n", "<p>Arithmetic unit</p>\n", 
+                                "<p>Logic unit</p>\n", "<p>Both &lsquo;a&rsquo; and &lsquo;b&rsquo;</p>\n"],
+                    options_hi: ["<p><span style=\"font-weight: 400;\">&nbsp;&#2325;&#2306;&#2335;&#2381;&#2352;&#2379;&#2354; &#2351;&#2370;&#2344;&#2367;&#2335; (Control unit)</span></p>\n", "<p><span style=\"font-family: Cambria Math;\">&#2309;&#2352;&#2367;&#2341;&#2350;&#2375;&#2335;&#2367;&#2325; &#2351;&#2370;&#2344;&#2367;&#2335; </span><span style=\"font-family: Cambria Math;\">(Arithmetic unit) </span></p>\n",
+                                "<p><span style=\"font-weight: 400;\">&#2354;&#2377;&#2332;&#2367;&#2325; &#2351;&#2370;&#2344;&#2367;&#2335; (Logic unit)</span></p>\n", "<p>\'a\' <span style=\"font-family: Cambria Math;\">&#2324;&#2352; </span><span style=\"font-family: Cambria Math;\">\'b\' </span><span style=\"font-family: Cambria Math;\">&#2342;&#2379;&#2344;&#2379;&#2306;</span></p>\n"],
+                    solution_en: "<p>3.(a) <span style=\"font-family: Cambria Math;\">The <strong>control unit (CU)</strong></span><span style=\"font-family: Cambria Math;\"><strong> is a component of a computer\'s central processing unit (CPU)</strong> that directs the operation of the processor.The basic function of control unit is to fetch the </span><span style=\"font-family: Cambria Math;\">instruction stored in the main memory, identify the operations and the devices involved in it and accordingly generate control signals.</span></p>\r\n<p><span style=\"font-family: Cambria Math;\">An <strong>arithmetic logic unit (ALU)</strong></span><span style=\"font-family: Cambria Math;\"> is a digital circuit used to perform arithmetic and logic operations.</span></p>\n",
+                    solution_hi: "<p>3.(a) <strong><span style=\"font-family: Cambria Math;\">&#2325;&#2306;&#2335;&#2381;&#2352;&#2379;&#2354; &#2351;&#2370;&#2344;&#2367;&#2335; </span><span style=\"font-family: Cambria Math;\">(CU) </span><span style=\"font-family: Cambria Math;\">&#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352; &#2325;&#2368; &#2360;&#2375;&#2306;&#2335;&#2381;&#2352;&#2354; &#2346;&#2381;&#2352;&#2379;&#2360;&#2375;&#2360;&#2367;&#2306;&#2327; &#2351;&#2370;&#2344;&#2367;&#2335; </span><span style=\"font-family: Cambria Math;\">(CPU) </span></strong><span style=\"font-family: Cambria Math;\">&#2325;&#2366; &#2319;&#2325; &#2325;&#2377;&#2350;&#2381;&#2346;&#2379;&#2344;&#2375;&#2344;&#2381;&#2335; &#2361;&#2376; &#2332;&#2379; &#2346;&#2381;&#2352;&#2379;&#2360;&#2375;&#2360;&#2352; &#2325;&#2375; &#2360;&#2306;&#2330;&#2366;&#2354;&#2344; &#2325;&#2379; &#2344;&#2367;&#2352;&#2381;&#2342;&#2375;&#2358;&#2367;&#2340; &#2325;&#2352;&#2340;&#2366; &#2361;&#2376;&#2404; &#2325;&#2306;&#2335;&#2381;&#2352;&#2379;&#2354; &#2351;&#2370;&#2344;&#2367;&#2335; &#2325;&#2366; &#2350;&#2370;&#2354; &#2325;&#2366;&#2352;&#2381;&#2351; &#2350;&#2369;&#2326;&#2381;&#2351; &#2350;&#2375;&#2350;&#2379;&#2352;&#2368; &#2350;&#2375;&#2306; &#2360;&#2306;&#2327;&#2381;&#2352;&#2361;&#2368;&#2340; &#2344;&#2367;&#2352;&#2381;&#2342;&#2375;&#2358; &#2346;&#2381;&#2352;&#2366;&#2346;&#2381;&#2340; &#2325;&#2352;&#2344;&#2366;</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Cambria Math;\">&#2360;&#2306;&#2330;&#2366;&#2354;&#2344; &#2324;&#2352; &#2313;&#2360;&#2350;&#2375;&#2306; &#2358;&#2366;&#2350;&#2367;&#2354; &#2337;&#2367;&#2357;&#2366;&#2311;&#2360; &#2325;&#2368; &#2346;&#2361;&#2330;&#2366;&#2344; &#2325;&#2352;&#2344;&#2366; &#2324;&#2352; &#2340;&#2342;&#2344;&#2369;&#2360;&#2366;&#2352; &#2325;&#2306;&#2335;&#2381;&#2352;&#2379;&#2354; &#2360;&#2367;&#2327;&#2381;&#2344;&#2354;&#2381;&#2360; &#2313;&#2340;&#2381;&#2346;&#2344;&#2381;&#2344; &#2325;&#2352;&#2344;&#2366; &#2361;&#2376;&#2404;</span></p>\r\n<p><span style=\"font-family: Cambria Math;\">&#2319;&#2325; <strong>&#2309;&#2352;&#2367;&#2341;&#2350;&#2375;&#2335;&#2367;&#2325; &#2354;&#2377;&#2332;&#2367;&#2325; &#2351;&#2370;&#2344;&#2367;&#2335; </strong></span><span style=\"font-family: Cambria Math;\"><strong>(ALU)</strong> </span><span style=\"font-family: Cambria Math;\">&#2309;&#2352;&#2367;&#2341;&#2350;&#2375;&#2335;&#2367;&#2325; &#2324;&#2352; &#2354;&#2377;&#2332;&#2367;&#2325; &#2321;&#2346;&#2352;&#2375;&#2358;&#2344;&#2381;&#2360; &#2325;&#2352;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2313;&#2346;&#2351;&#2379;&#2327; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2344;&#2375; &#2357;&#2366;&#2354;&#2366; &#2319;&#2325; &#2337;&#2367;&#2332;&#2367;&#2335;&#2354; &#2360;&#2352;&#2381;&#2325;&#2367;&#2335; &#2361;&#2376;&#2404;</span></p>\n",
+                    correct: "a",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "4",
+                    section: "31",
+                    question_en: "<p><span style=\"font-family: Cambria Math;\">4.</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">Which of the following groups consists of only input devices? </span></p>\n",
+                    question_hi: "<p>4.<span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">&#2344;&#2367;&#2350;&#2381;&#2344; &#2350;&#2375;&#2306; &#2360;&#2375; &#2325;&#2367;&#2360; &#2360;&#2350;&#2370;&#2361; &#2350;&#2375;&#2306; &#2325;&#2375;&#2357;&#2354; &#2311;&#2344;&#2346;&#2369;&#2335; &#2337;&#2367;&#2357;&#2366;&#2311;&#2360; &#2361;&#2376;&#2306;</span><span style=\"font-family: Cambria Math;\">?</span></p>\n",
+                    options_en: ["<p>Mouse, Keyboard, Scanner</p>\n", "<p>Mouse, Keyboard, Monitor</p>\n", 
+                                "<p>Mouse, Keyboard, Printer</p>\n", "<p>Mouse, Keyboard, Plotter</p>\n"],
+                    options_hi: ["<p><span style=\"font-family: Cambria Math;\">&#2350;&#2366;&#2313;&#2360;</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Cambria Math;\">&#2325;&#2368;&#2348;&#2379;&#2352;&#2381;&#2337;</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Cambria Math;\">&#2360;&#2381;&#2325;&#2376;&#2344;&#2352;</span></p>\n", "<p><span style=\"font-family: Cambria Math;\">&#2350;&#2366;&#2313;&#2360;</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Cambria Math;\">&#2325;&#2368;&#2348;&#2379;&#2352;&#2381;&#2337;</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Cambria Math;\">&#2350;&#2377;&#2344;&#2367;&#2335;&#2352;</span></p>\n",
+                                "<p><span style=\"font-family: Cambria Math;\">&#2350;&#2366;&#2313;&#2360;</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Cambria Math;\">&#2325;&#2368;&#2348;&#2379;&#2352;&#2381;&#2337;</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Cambria Math;\">&#2346;&#2381;&#2352;&#2367;&#2306;&#2335;&#2352;</span></p>\n", "<p><span style=\"font-family: Cambria Math;\">&#2350;&#2366;&#2313;&#2360;</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Cambria Math;\">&#2325;&#2368;&#2348;&#2379;&#2352;&#2381;&#2337;</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Cambria Math;\">&#2346;&#2381;&#2354;&#2377;&#2335;&#2352;</span></p>\n"],
+                    solution_en: "<p>4.(a) <span style=\"font-family: Cambria Math;\"><strong>Mouse, keyboard, scanner</strong> are the input devices. <strong>Monitor,printer and plotter</strong> are output devices.</span></p>\n",
+                    solution_hi: "<p>4.(a) <strong><span style=\"font-family: Cambria Math;\">&#2350;&#2366;&#2313;&#2360;</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Cambria Math;\">&#2325;&#2368;&#2348;&#2379;&#2352;&#2381;&#2337;</span><span style=\"font-family: Cambria Math;\">, </span></strong><span style=\"font-family: Cambria Math;\"><strong>&#2360;&#2381;&#2325;&#2376;&#2344;&#2352; </strong>&#2311;&#2344;&#2346;&#2369;&#2335; &#2337;&#2367;&#2357;&#2366;&#2311;&#2360; &#2361;&#2376;&#2306;&#2404; <strong>&#2350;&#2377;&#2344;&#2367;&#2335;&#2352;</strong></span><strong><span style=\"font-family: Cambria Math;\">, </span></strong><span style=\"font-family: Cambria Math;\"><strong>&#2346;&#2381;&#2352;&#2367;&#2306;&#2335;&#2352; &#2324;&#2352; &#2346;&#2381;&#2354;&#2377;&#2335;&#2352;</strong> &#2310;&#2313;&#2335;&#2346;&#2369;&#2335; &#2337;&#2367;&#2357;&#2366;&#2311;&#2360; &#2361;&#2376;&#2306;&#2404;</span></p>\n",
+                    correct: "a",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "5",
+                    section: "31",
+                    question_en: "<p><span style=\"font-family: Cambria Math;\">5.</span><span style=\"font-family: Cambria Math;\"> Conversion of decimal number <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msub><mrow><mo>(</mo><mn>15</mn><mo>)</mo></mrow><mn>10</mn></msub></math></span><span style=\"font-family: Cambria Math;\">to hexadecimal number is________ .</span></p>\n",
+                    question_hi: "<p>5.<span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">&#2337;&#2375;&#2360;&#2368;&#2350;&#2354; &#2344;&#2306;&#2348;&#2352; <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msub><mrow><mo>(</mo><mn>15</mn><mo>)</mo></mrow><mn>10</mn></msub></math></span><span style=\"font-family: Cambria Math;\">&nbsp;</span><span style=\"font-family: Cambria Math;\">&#2325;&#2366; &#2361;&#2375;&#2325;&#2381;&#2360;&#2366;&#2337;&#2375;&#2360;&#2367;&#2350;&#2354; &#2344;&#2306;&#2348;&#2352; &#2350;&#2375;&#2306; &#2352;&#2370;&#2346;&#2366;&#2306;&#2340;&#2352;&#2339; </span><span style=\"font-family: Cambria Math;\">____ </span><span style=\"font-family: Cambria Math;\">&#2361;&#2376;&#2404;</span></p>\n",
+                    options_en: ["<p><span style=\"font-family: Cambria Math;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msub><mrow><mo>(</mo><mn>14</mn><mo>)</mo></mrow><mn>16</mn></msub></math></span></p>\n", "<p><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msub><mrow><mo>(</mo><mn>13</mn><mo>)</mo></mrow><mn>16</mn></msub></math></p>\n", 
+                                "<p><span style=\"font-family: Cambria Math;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msub><mrow><mo>(</mo><mn>7</mn><mi>F</mi><mo>)</mo></mrow><mn>16</mn></msub></math></span></p>\n", "<p><span style=\"font-family: Cambria Math;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msub><mrow><mo>(</mo><mi>F</mi><mo>)</mo></mrow><mn>16</mn></msub></math></span></p>\n"],
+                    options_hi: ["<p><span style=\"font-family: Cambria Math;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msub><mrow><mo>(</mo><mn>14</mn><mo>)</mo></mrow><mn>16</mn></msub></math></span></p>\n", "<p><span style=\"font-family: Cambria Math;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msub><mrow><mo>(</mo><mn>13</mn><mo>)</mo></mrow><mn>16</mn></msub></math></span></p>\n",
+                                "<p><span style=\"font-family: Cambria Math;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msub><mrow><mo>(</mo><mn>7</mn><mi>F</mi><mo>)</mo></mrow><mn>16</mn></msub></math></span></p>\n", "<p><span style=\"font-family: Cambria Math;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msub><mrow><mo>(</mo><mi>F</mi><mo>)</mo></mrow><mn>16</mn></msub></math></span></p>\n"],
+                    solution_en: "<p>5.(d)<span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">Step 1</span><span style=\"font-family: Cambria Math;\">: Divide <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msub><mrow><mo>(</mo><mn>15</mn><mo>)</mo></mrow><mn>10</mn></msub></math></span><span style=\"font-family: Cambria Math;\">&nbsp;successively by 16 until the quotient is 0:</span></p>\r\n<p><span style=\"font-family: Cambria Math;\">15/16 = 0, remainder is 15</span></p>\r\n<p><span style=\"font-family: Cambria Math;\">Step 2</span><span style=\"font-family: Cambria Math;\">: Read from the bottom (MSB) to top (LSB) as F. So, F is the hexadecimal equivalent of decimal number 15 (Answer).</span></p>\r\n<p><span style=\"font-family: Cambria Math;\"><img src=\"https://ssccglpinnacle.com/images/mceu_10626405811671610120627.png\"></span></p>\r\n<p>&nbsp;</p>\n",
+                    solution_hi: "<p>5.(d)<span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">&#2360;&#2381;&#2335;&#2375;&#2346; </span><span style=\"font-family: Cambria Math;\">1:</span><span style=\"font-family: Cambria Math;\"> <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msub><mrow><mo>(</mo><mn>15</mn><mo>)</mo></mrow><mn>10</mn></msub></math>&nbsp;</span><span style=\"font-family: Cambria Math;\">&#2325;&#2379; &#2325;&#2381;&#2352;&#2350;&#2367;&#2325; &#2352;&#2370;&#2346; &#2360;&#2375; </span><span style=\"font-family: Cambria Math;\">16 </span><span style=\"font-family: Cambria Math;\">&#2360;&#2375; &#2357;&#2367;&#2349;&#2366;&#2332;&#2367;&#2340; &#2325;&#2352;&#2375;&#2306; &#2332;&#2348; &#2340;&#2325; &#2325;&#2367; &#2349;&#2366;&#2327;&#2347;&#2354; </span><span style=\"font-family: Cambria Math;\">0 </span><span style=\"font-family: Cambria Math;\">&#2344; &#2361;&#2379;</span><span style=\"font-family: Cambria Math;\">:</span></p>\r\n<p><span style=\"font-family: Cambria Math;\">15/16 = 0, </span><span style=\"font-family: Cambria Math;\">&#2358;&#2375;&#2359;&#2347;&#2354; </span><span style=\"font-family: Cambria Math;\">15 </span><span style=\"font-family: Cambria Math;\">&#2361;&#2376;</span></p>\r\n<p><span style=\"font-family: Cambria Math;\">&#2360;&#2381;&#2335;&#2375;&#2346; </span><span style=\"font-family: Cambria Math;\">2: </span><span style=\"font-family: Cambria Math;\">&#2344;&#2368;&#2330;&#2375; </span><span style=\"font-family: Cambria Math;\">(MSB) </span><span style=\"font-family: Cambria Math;\">&#2360;&#2375; &#2314;&#2346;&#2352; </span><span style=\"font-family: Cambria Math;\">(LSB) </span><span style=\"font-family: Cambria Math;\">&#2325;&#2379; </span><span style=\"font-family: Cambria Math;\">F </span><span style=\"font-family: Cambria Math;\">&#2325;&#2375; &#2352;&#2370;&#2346; &#2350;&#2375;&#2306; &#2346;&#2338;&#2364;&#2375;&#2306;&#2404; &#2311;&#2360;&#2354;&#2367;&#2319;</span><span style=\"font-family: Cambria Math;\">, F </span><span style=\"font-family: Cambria Math;\">&#2337;&#2375;&#2360;&#2368;&#2350;&#2354; &#2344;&#2306;&#2348;&#2352; </span><span style=\"font-family: Cambria Math;\">15 (</span><span style=\"font-family: Cambria Math;\">&#2313;&#2340;&#2381;&#2340;&#2352;</span><span style=\"font-family: Cambria Math;\">) </span><span style=\"font-family: Cambria Math;\">&#2325;&#2366; &#2361;&#2375;&#2325;&#2381;&#2360;&#2366;&#2337;&#2375;&#2360;&#2367;&#2350;&#2354; &#2311;&#2325;&#2381;&#2357;&#2367;&#2357;&#2376;&#2354;&#2375;&#2306;&#2335; &#2361;&#2376;&#2404;</span></p>\r\n<p><img src=\"https://ssccglpinnacle.com/images/mceu_21521085111671610082599.png\"></p>\n",
+                    correct: "d",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "6",
+                    section: "31",
+                    question_en: "<p>6.<span style=\"font-family: Cambria Math;\"> Which types of software is used in organizations to keep track of products in stocks?</span></p>\n",
+                    question_hi: "<p>6.<span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">&#2360;&#2381;&#2335;&#2377;&#2325; &#2350;&#2375;&#2306; &#2313;&#2340;&#2381;&#2346;&#2366;&#2342;&#2379;&#2306; &#2346;&#2352; &#2344;&#2332;&#2364;&#2352; &#2352;&#2326;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2360;&#2306;&#2327;&#2336;&#2344;&#2379;&#2306; </span><span style=\"font-family: Cambria Math;\">(organizations) </span><span style=\"font-family: Cambria Math;\">&#2350;&#2375;&#2306; &#2325;&#2367;&#2360; &#2346;&#2381;&#2352;&#2325;&#2366;&#2352; &#2325;&#2375; &#2360;&#2377;&#2347;&#2364;&#2381;&#2335;&#2357;&#2375;&#2351;&#2352; &#2325;&#2366; &#2313;&#2346;&#2351;&#2379;&#2327; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;</span><span style=\"font-family: Cambria Math;\">?</span></p>\n",
+                    options_en: ["<p>Inventory management software</p>\n", "<p>Enterprise Resource Planning (ERP) software</p>\n", 
+                                "<p>Payroll Software</p>\n", "<p>Human resource planning software</p>\n"],
+                    options_hi: ["<p><span style=\"font-weight: 400;\">&#2311;&#2344;&#2381;&#2357;&#2375;&#2306;&#2335;&#2352;&#2368; &#2350;&#2376;&#2344;&#2375;&#2332;&#2350;&#2375;&#2306;&#2335; &#2360;&#2377;&#2347;&#2381;&#2335;&#2357;&#2375;&#2351;&#2352; (Inventory management software)</span></p>\n", "<p><span style=\"font-weight: 400;\">&#2319;&#2306;&#2335;&#2352;&#2346;&#2381;&#2352;&#2366;&#2311;&#2332; &#2352;&#2367;&#2360;&#2379;&#2352;&#2381;&#2360; &#2346;&#2381;&#2354;&#2366;&#2344;&#2367;&#2306;&#2327; (ERP) &#2360;&#2377;&#2347;&#2381;&#2335;&#2357;&#2375;&#2351;&#2352; (Enterprise Resource Planning software)</span></p>\n",
+                                "<p><span style=\"font-weight: 400;\">&#2346;&#2375;&#2352;&#2379;&#2354; &#2360;&#2377;&#2347;&#2381;&#2335;&#2357;&#2375;&#2351;&#2352; (Payroll Software)</span></p>\n", "<p><span style=\"font-weight: 400;\">&#2361;&#2381;&#2351;&#2370;&#2350;&#2344; &#2352;&#2367;&#2360;&#2379;&#2352;&#2381;&#2360; &#2346;&#2381;&#2354;&#2366;&#2344;&#2367;&#2306;&#2327; &#2360;&#2377;&#2347;&#2381;&#2335;&#2357;&#2375;&#2351;&#2352; (Human resource planning software)</span></p>\n"],
+                    solution_en: "<p>6.(a) <strong>Inventory management software</strong> is<span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">a software system for tracking inventory levels, orders, sales and deliveries. It can also be used in the manufacturing industry to create a work order, bill of materials and other production-related documents.</span></p>\n",
+                    solution_hi: "<p>6.(a)<span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\"><strong>&#2311;&#2344;&#2381;&#2357;&#2375;&#2306;&#2335;&#2352;&#2368; &#2350;&#2376;&#2344;&#2375;&#2332;&#2350;&#2375;&#2306;&#2335; &#2360;&#2377;&#2347;&#2381;&#2335;&#2357;&#2375;&#2351;&#2352;</strong> </span><span style=\"font-family: Cambria Math;\">&#2311;&#2344;&#2381;&#2357;&#2375;&#2306;&#2335;&#2381;&#2352;&#2368; &#2354;&#2375;&#2357;&#2354; </span><span style=\"font-family: Cambria Math;\">(inventory level), </span><span style=\"font-family: Cambria Math;\">&#2321;&#2352;&#2381;&#2337;&#2352; </span><span style=\"font-family: Cambria Math;\">(order), </span><span style=\"font-family: Cambria Math;\">&#2360;&#2375;&#2354; </span><span style=\"font-family: Cambria Math;\">(sales) </span><span style=\"font-family: Cambria Math;\">&#2324;&#2352; &#2337;&#2367;&#2354;&#2368;&#2357;&#2352;&#2368; </span><span style=\"font-family: Cambria Math;\">(delivery) </span><span style=\"font-family: Cambria Math;\">&#2325;&#2379; &#2335;&#2381;&#2352;&#2376;&#2325; </span><span style=\"font-family: Cambria Math;\">(track) </span><span style=\"font-family: Cambria Math;\">&#2325;&#2352;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2319;&#2325; &#2360;&#2377;&#2347;&#2381;&#2335;&#2357;&#2375;&#2351;&#2352; &#2360;&#2367;&#2360;&#2381;&#2335;&#2350; &#2361;&#2376;&#2404; &#2311;&#2360;&#2325;&#2366; &#2313;&#2346;&#2351;&#2379;&#2327; &#2344;&#2367;&#2352;&#2381;&#2350;&#2366;&#2339; &#2313;&#2342;&#2381;&#2351;&#2379;&#2327; </span><span style=\"font-family: Cambria Math;\">(manufacturing industry) </span><span style=\"font-family: Cambria Math;\">&#2350;&#2375;&#2306; &#2357;&#2352;&#2381;&#2325; &#2321;&#2352;&#2381;&#2337;&#2352; </span><span style=\"font-family: Cambria Math;\">(work order), </span><span style=\"font-family: Cambria Math;\">&#2350;&#2335;&#2375;&#2352;&#2367;&#2351;&#2354; &#2325;&#2366; &#2348;&#2367;&#2354; </span><span style=\"font-family: Cambria Math;\">(bill of materials) </span><span style=\"font-family: Cambria Math;\">&#2324;&#2352; &#2313;&#2340;&#2381;&#2346;&#2366;&#2342;&#2344; </span><span style=\"font-family: Cambria Math;\">(production) </span><span style=\"font-family: Cambria Math;\">&#2360;&#2375; &#2360;&#2306;&#2348;&#2306;&#2343;&#2367;&#2340; &#2309;&#2344;&#2381;&#2351; &#2337;&#2366;&#2325;&#2381;&#2351;&#2370;&#2350;&#2375;&#2306;&#2335;&#2381;&#2360; &#2348;&#2344;&#2366;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2349;&#2368; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366; &#2360;&#2325;&#2340;&#2366; &#2361;&#2376;&#2404;</span></p>\n",
+                    correct: "a",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "7",
+                    section: "31",
+                    question_en: "<p>7.<span style=\"font-family: Cambria Math;\"> Which of the following only uses text types one after another just as commands used in MS-DOS?</span></p>\n",
+                    question_hi: "<p>7. <span style=\"font-family: Cambria Math;\">&#2344;&#2367;&#2350;&#2381;&#2344;&#2354;&#2367;&#2326;&#2367;&#2340; &#2350;&#2375;&#2306; &#2360;&#2375; &#2325;&#2380;&#2344; &#2325;&#2375;&#2357;&#2354; </span><span style=\"font-family: Cambria Math;\">MS-DOS </span><span style=\"font-family: Cambria Math;\">&#2350;&#2375;&#2306; &#2346;&#2381;&#2352;&#2351;&#2369;&#2325;&#2381;&#2340; &#2325;&#2350;&#2366;&#2306;&#2337; &#2325;&#2368; &#2340;&#2352;&#2361; &#2319;&#2325; &#2325;&#2375; &#2348;&#2366;&#2342; &#2319;&#2325; &#2335;&#2375;&#2325;&#2381;&#2360;&#2381;&#2335; &#2335;&#2366;&#2311;&#2346; &#2325;&#2366; &#2313;&#2346;&#2351;&#2379;&#2327; &#2325;&#2352;&#2340;&#2366; &#2361;&#2376;</span><span style=\"font-family: Cambria Math;\">?</span></p>\n",
+                    options_en: ["<p>CLI</p>\n", "<p>CUI</p>\n", 
+                                "<p>GUI</p>\n", "<p>Both &lsquo;a&rsquo; and &lsquo;b&rsquo;</p>\n"],
+                    options_hi: ["<p><span style=\"font-weight: 400;\">&#2360;&#2368;&#2319;&#2354;&#2310;&#2312; (CLI)</span></p>\n", "<p><span style=\"font-weight: 400;\">&#2360;&#2368;&#2351;&#2370;&#2310;&#2312;(CUI)</span></p>\n",
+                                "<p><span style=\"font-weight: 400;\">&#2332;&#2368;&#2351;&#2370;&#2310;&#2312; (GUI)</span></p>\n", "<p>\'a\' <span style=\"font-family: Cambria Math;\">&#2324;&#2352; </span><span style=\"font-family: Cambria Math;\">\'b\' </span><span style=\"font-family: Cambria Math;\">&#2342;&#2379;&#2344;&#2379;&#2306; </span></p>\n"],
+                    solution_en: "<p>7.(d)<span style=\"font-family: Cambria Math;\"> <strong>Character User Interface (CUI)</strong> also known as <strong>Command Line Interface (CLI)</strong> </span><span style=\"font-family: Cambria Math;\">lets a user interact with their device/system with the help of various commands.</span></p>\n",
+                    solution_hi: "<p>7.(d) <strong><span style=\"font-family: Cambria Math;\">&#2325;&#2376;&#2352;&#2375;&#2325;&#2381;&#2335;&#2352; &#2351;&#2370;&#2332;&#2352; &#2311;&#2306;&#2335;&#2352;&#2347;&#2375;&#2360; </span></strong><span style=\"font-family: Cambria Math;\"><strong>(CUI)</strong> </span><span style=\"font-family: Cambria Math;\">&#2332;&#2367;&#2360;&#2375; <strong>&#2325;&#2350;&#2366;&#2306;&#2337; &#2354;&#2366;&#2311;&#2344; &#2311;&#2306;&#2335;&#2352;&#2347;&#2375;&#2360; </strong></span><span style=\"font-family: Cambria Math;\"><strong>(CLI)</strong> </span><span style=\"font-family: Cambria Math;\">&#2325;&#2375; &#2352;&#2370;&#2346; &#2350;&#2375;&#2306; &#2349;&#2368; &#2332;&#2366;&#2344;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Cambria Math;\">&#2313;&#2346;&#2351;&#2379;&#2327;&#2325;&#2352;&#2381;&#2340;&#2366; &#2325;&#2379; &#2357;&#2367;&#2349;&#2367;&#2344;&#2381;&#2344; &#2325;&#2350;&#2366;&#2306;&#2337; &#2325;&#2368; &#2350;&#2342;&#2342; &#2360;&#2375; &#2309;&#2346;&#2344;&#2375; &#2337;&#2367;&#2357;&#2366;&#2311;&#2360;</span><span style=\"font-family: Cambria Math;\">/</span><span style=\"font-family: Cambria Math;\">&#2360;&#2367;&#2360;&#2381;&#2335;&#2350; &#2325;&#2375; &#2360;&#2366;&#2341; &#2311;&#2306;&#2335;&#2352;&#2376;&#2325;&#2381;&#2335; &#2325;&#2352;&#2344;&#2375; &#2342;&#2375;&#2340;&#2366; &#2361;&#2376;&#2404;</span></p>\n",
+                    correct: "d",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "8",
+                    section: "31",
+                    question_en: "<p>8.<span style=\"font-family: Cambria Math;\"> Which of the following is not characteristic of COBOL?</span></p>\n",
+                    question_hi: "<p>8.<span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">&#2344;&#2367;&#2350;&#2381;&#2344;&#2354;&#2367;&#2326;&#2367;&#2340; &#2350;&#2375;&#2306; &#2360;&#2375; &#2325;&#2380;&#2344; </span><span style=\"font-family: Cambria Math;\">COBOL </span><span style=\"font-family: Cambria Math;\">&#2325;&#2368; &#2357;&#2367;&#2358;&#2375;&#2359;&#2340;&#2366; &#2344;&#2361;&#2368;&#2306; &#2361;&#2376;</span><span style=\"font-family: Cambria Math;\">?</span></p>\n",
+                    options_en: ["<p>It is a very standardized language</p>\n", "<p>It had limited facilities for mathematical notation</p>\n", 
+                                "<p>It is very readable language</p>\n", "<p>It is a very efficient in terms of coding and execution</p>\n"],
+                    options_hi: ["<p><span style=\"font-family: Cambria Math;\">&#2351;&#2361; &#2319;&#2325; &#2348;&#2361;&#2369;&#2340; &#2361;&#2368; &#2350;&#2366;&#2344;&#2325;&#2368;&#2325;&#2371;&#2340; &#2349;&#2366;&#2359;&#2366;</span><span style=\"font-family: Cambria Math;\">(standardized language) </span><span style=\"font-family: Cambria Math;\">&#2361;&#2376;</span><span style=\"font-family: Cambria Math;\">I</span></p>\n", "<p><span style=\"font-family: Cambria Math;\">&#2311;&#2360;&#2350;&#2375;&#2306; &#2327;&#2339;&#2367;&#2340;&#2368;&#2351; &#2344;&#2379;&#2335;&#2375;&#2358;&#2344;</span><span style=\"font-family: Cambria Math;\">(mathematical notation) </span><span style=\"font-family: Cambria Math;\">&#2325;&#2375; &#2354;&#2367;&#2319; &#2360;&#2368;&#2350;&#2367;&#2340; &#2360;&#2369;&#2357;&#2367;&#2343;&#2366;&#2319;&#2306; &#2361;&#2376;</span><span style=\"font-family: Cambria Math;\">I</span></p>\n",
+                                "<p><span style=\"font-family: Cambria Math;\">&#2351;&#2361; &#2348;&#2361;&#2369;&#2340; &#2346;&#2336;&#2344;&#2368;&#2351; &#2349;&#2366;&#2359;&#2366;</span><span style=\"font-family: Cambria Math;\">(readable language) </span><span style=\"font-family: Cambria Math;\">&#2361;&#2376;</span><span style=\"font-family: Cambria Math;\">I</span></p>\n", "<p><span style=\"font-family: Cambria Math;\">&#2351;&#2361; &#2325;&#2379;&#2337;&#2367;&#2306;&#2327; &#2324;&#2352; &#2319;&#2325;&#2381;&#2360;&#2375;&#2325;&#2381;&#2351;&#2369;&#2358;&#2344; &#2325;&#2375; &#2350;&#2366;&#2350;&#2354;&#2375; &#2350;&#2375;&#2306; &#2319;&#2325; &#2348;&#2361;&#2369;&#2340; &#2361;&#2368; &#2325;&#2369;&#2358;&#2354; &#2361;&#2376;</span><span style=\"font-family: Cambria Math;\">I</span></p>\n"],
+                    solution_en: "<p>8.(d)<span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">Compared to common programming languages today, COBOL is different, and in some ways very limited: <strong>you can\'t do dynamic memory allocation</strong>, you can\'t easily access <strong>low-level features</strong> of the operating system, you <strong>can&rsquo;t easily code in this language</strong>.</span></p>\n",
+                    solution_hi: "<p>8.(d) <span style=\"font-family: Cambria Math;\">&#2310;&#2332; &#2325;&#2368; &#2325;&#2377;&#2350;&#2344; &#2346;&#2381;&#2352;&#2379;&#2327;&#2381;&#2352;&#2366;&#2350;&#2367;&#2306;&#2327; &#2354;&#2376;&#2306;&#2327;&#2381;&#2357;&#2375;&#2332;&#2375;&#2332;</span><span style=\"font-family: Cambria Math;\">(</span><span style=\"font-family: Cambria Math;\">common programming languages</span><span style=\"font-family: Cambria Math;\">) </span><span style=\"font-family: Cambria Math;\">&#2325;&#2368; &#2340;&#2369;&#2354;&#2344;&#2366; &#2350;&#2375;&#2306;</span><span style=\"font-family: Cambria Math;\">, COBOL </span><span style=\"font-family: Cambria Math;\">&#2309;&#2354;&#2327; &#2361;&#2376;</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Cambria Math;\">&#2324;&#2352; &#2325;&#2369;&#2331; &#2350;&#2366;&#2351;&#2344;&#2379;&#2306; &#2350;&#2375;&#2306; &#2348;&#2361;&#2369;&#2340; &#2360;&#2368;&#2350;&#2367;&#2340; &#2361;&#2376;</span><span style=\"font-family: Cambria Math;\">: </span><span style=\"font-family: Cambria Math;\">&#2310;&#2346; &#2337;&#2366;&#2351;&#2344;&#2375;&#2350;&#2367;&#2325; &#2350;&#2375;&#2350;&#2379;&#2352;&#2368;</span><span style=\"font-family: Cambria Math;\">(</span><span style=\"font-family: Cambria Math;\">dynamic memory</span><span style=\"font-family: Cambria Math;\">) </span><strong><span style=\"font-family: Cambria Math;\">&#2310;&#2357;&#2306;&#2335;&#2344;</span><span style=\"font-family: Cambria Math;\">(</span><span style=\"font-family: Cambria Math;\">allocation</span><span style=\"font-family: Cambria Math;\">) </span><span style=\"font-family: Cambria Math;\">&#2344;&#2361;&#2368;&#2306; &#2325;&#2352; &#2360;&#2325;&#2340;&#2375;</span></strong><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Cambria Math;\">&#2310;&#2346; &#2321;&#2346;&#2352;&#2375;&#2335;&#2367;&#2306;&#2327; &#2360;&#2367;&#2360;&#2381;&#2335;&#2350; &#2325;&#2368; <strong>&#2354;&#2379; &#2354;&#2375;&#2357;&#2354;</strong></span><strong><span style=\"font-family: Cambria Math;\">(low-level) </span></strong><span style=\"font-family: Cambria Math;\"><strong>&#2360;&#2369;&#2357;&#2367;&#2343;&#2366;&#2323;&#2306; </strong>&#2340;&#2325; &#2310;&#2360;&#2366;&#2344;&#2368; &#2360;&#2375; &#2344;&#2361;&#2368;&#2306; &#2346;&#2361;&#2369;&#2305;&#2330; &#2360;&#2325;&#2340;&#2375;</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Cambria Math;\">&#2310;&#2346; &#2311;&#2360;&#2350;&#2375;&#2306; <strong>&#2310;&#2360;&#2366;&#2344;&#2368; &#2360;&#2375; &#2325;&#2379;&#2337; &#2344;&#2361;&#2368;&#2306; &#2325;&#2352; &#2360;&#2325;&#2340;&#2375;</strong>&#2404;</span></p>\n",
+                    correct: "d",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "9",
+                    section: "31",
+                    question_en: "<p>9.<span style=\"font-family: Cambria Math;\"> A computer message is &lsquo;&lsquo;Do you really want to delete the selected file (s)&rsquo;&rsquo;? The user clicks the &lsquo;Yes&rsquo; key. It is called</span></p>\n",
+                    question_hi: "<p>9. <span style=\"font-family: Cambria Math;\">&#2319;&#2325; &#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352; &#2360;&#2306;&#2342;&#2375;&#2358; &#2361;&#2376; </span><span style=\"font-family: Cambria Math;\">\'</span><span style=\"font-family: Cambria Math;\">&#2325;&#2381;&#2351;&#2366; &#2310;&#2346; &#2357;&#2366;&#2360;&#2381;&#2340;&#2357; &#2350;&#2375;&#2306; &#2330;&#2351;&#2344;&#2367;&#2340; &#2347;&#2364;&#2366;&#2311;&#2354; </span><span style=\"font-family: Cambria Math;\">(</span><span style=\"font-family: Cambria Math;\">&#2347;&#2364;&#2366;&#2311;&#2354;&#2379;&#2306;</span><span style=\"font-family: Cambria Math;\">) </span><span style=\"font-family: Cambria Math;\">&#2325;&#2379; &#2361;&#2335;&#2366;&#2344;&#2366; &#2330;&#2366;&#2361;&#2340;&#2375; &#2361;&#2376;&#2306;</span><span style=\"font-family: Cambria Math;\">\'? </span><span style=\"font-family: Cambria Math;\">&#2351;&#2370;&#2332;&#2352; </span><span style=\"font-family: Cambria Math;\">\'</span><span style=\"font-family: Cambria Math;\">&#2361;&#2366;&#2306;</span><span style=\"font-family: Cambria Math;\">\' </span><span style=\"font-family: Cambria Math;\">&#2325;&#2369;&#2306;&#2332;&#2368;</span><span style=\"font-family: Cambria Math;\">(key) </span><span style=\"font-family: Cambria Math;\">&#2325;&#2381;&#2354;&#2367;&#2325; &#2325;&#2352;&#2340;&#2366; &#2361;&#2376;&#2404; &#2351;&#2361; &#2325;&#2361;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;</span></p>\n",
+                    options_en: ["<p>program response</p>\n", "<p>user output</p>\n", 
+                                "<p>program output</p>\n", "<p>user response</p>\n"],
+                    options_hi: ["<p><span style=\"font-family: Cambria Math;\">&#2346;&#2381;&#2352;&#2379;&#2327;&#2381;&#2352;&#2366;&#2350; &#2352;&#2367;&#2360;&#2381;&#2346;&#2366;&#2306;&#2360;</span><span style=\"font-family: Cambria Math;\">(program response) </span></p>\n", "<p><span style=\"font-weight: 400;\">&#2351;&#2370;&#2332;&#2352; &#2310;&#2313;&#2335;&#2346;&#2369;&#2335;(user output)</span></p>\n",
+                                "<p><span style=\"font-weight: 400;\">&#2346;&#2381;&#2352;&#2379;&#2327;&#2381;&#2352;&#2366;&#2350; &#2310;&#2313;&#2335;&#2346;&#2369;&#2335;(program output)</span></p>\n", "<p><span style=\"font-weight: 400;\">&#2351;&#2370;&#2332;&#2352; &#2352;&#2367;&#2360;&#2381;&#2346;&#2366;&#2306;&#2360;(user response)</span></p>\n"],
+                    solution_en: "<p>9.(d)<span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\"><strong>User response</strong> is the user\'s answer to the computer\'s question, such as choosing OK, YES, or NO or by typing in text, for example the name of a file.</span></p>\n",
+                    solution_hi: "<p>9.(d) <span style=\"font-family: Cambria Math;\"><strong>&#2351;&#2370;&#2332;&#2352; &#2352;&#2367;&#2360;&#2381;&#2346;&#2366;&#2306;&#2360;</strong> &#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352; &#2325;&#2375; &#2346;&#2381;&#2352;&#2358;&#2381;&#2344; &#2325;&#2366; &#2313;&#2346;&#2351;&#2379;&#2327;&#2325;&#2352;&#2381;&#2340;&#2366; &#2325;&#2366; &#2313;&#2340;&#2381;&#2340;&#2352; &#2361;&#2376;</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Cambria Math;\">&#2332;&#2376;&#2360;&#2375; </span><span style=\"font-family: Cambria Math;\">OK, YES, </span><span style=\"font-family: Cambria Math;\">&#2351;&#2366; </span><span style=\"font-family: Cambria Math;\">NO </span><span style=\"font-family: Cambria Math;\">&#2330;&#2369;&#2344;&#2344;&#2366; &#2351;&#2366; &#2335;&#2375;&#2325;&#2381;&#2360;&#2381;&#2335; &#2335;&#2366;&#2311;&#2346; &#2325;&#2352;&#2344;&#2366;</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Cambria Math;\">&#2313;&#2342;&#2366;&#2361;&#2352;&#2339; &#2325;&#2375; &#2354;&#2367;&#2319; &#2347;&#2364;&#2366;&#2311;&#2354; &#2325;&#2366; &#2344;&#2366;&#2350;&#2404; </span></p>\n",
+                    correct: "d",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "10",
+                    section: "31",
+                    question_en: "<p>10.<span style=\"font-family: Cambria Math;\"> Which of the following general purpose softwares allow you to do mathematical or financial calculation?</span></p>\n",
+                    question_hi: "<p>10.<span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">&#2344;&#2367;&#2350;&#2381;&#2344;&#2354;&#2367;&#2326;&#2367;&#2340; &#2350;&#2375;&#2306; &#2360;&#2375; &#2325;&#2380;&#2344; &#2360;&#2366; &#2332;&#2344;&#2352;&#2354; &#2346;&#2352;&#2381;&#2346;&#2360; &#2360;&#2377;&#2347;&#2381;&#2335;&#2357;&#2375;&#2351;&#2352; </span><span style=\"font-family: Cambria Math;\">(general purpose softwares) </span><span style=\"font-family: Cambria Math;\">&#2310;&#2346;&#2325;&#2379; &#2327;&#2339;&#2367;&#2340;&#2368;&#2351; &#2351;&#2366; &#2357;&#2367;&#2340;&#2381;&#2340;&#2368;&#2351; &#2327;&#2339;&#2344;&#2366; </span><span style=\"font-family: Cambria Math;\">(mathematical or financial calculation) </span><span style=\"font-family: Cambria Math;\">&#2325;&#2352;&#2344;&#2375; &#2325;&#2368; &#2309;&#2344;&#2369;&#2350;&#2340;&#2367; &#2342;&#2375;&#2340;&#2366; &#2361;&#2376;</span><span style=\"font-family: Cambria Math;\">?</span></p>\n",
+                    options_en: ["<p>Spreadsheet program</p>\n", "<p>Word processing program</p>\n", 
+                                "<p>Database program</p>\n", "<p>Presentation program</p>\n"],
+                    options_hi: ["<p><span style=\"font-weight: 400;\">&#2360;&#2381;&#2346;&#2381;&#2352;&#2375;&#2337;&#2358;&#2368;&#2335; &#2346;&#2381;&#2352;&#2379;&#2327;&#2381;&#2352;&#2366;&#2350; (Spreadsheet program)</span></p>\n", "<p><span style=\"font-weight: 400;\">&#2357;&#2352;&#2381;&#2337; &#2346;&#2381;&#2352;&#2379;&#2360;&#2375;&#2360;&#2367;&#2306;&#2327; &#2346;&#2381;&#2352;&#2379;&#2327;&#2381;&#2352;&#2366;&#2350; (Word processing program)</span></p>\n",
+                                "<p><span style=\"font-weight: 400;\">&#2337;&#2375;&#2335;&#2366;&#2348;&#2375;&#2360; &#2346;&#2381;&#2352;&#2379;&#2327;&#2381;&#2352;&#2366;&#2350; (Database program)</span></p>\n", "<p><span style=\"font-weight: 400;\">&#2346;&#2381;&#2352;&#2375;&#2332;&#2375;&#2306;&#2335;&#2375;&#2358;&#2344; &#2346;&#2381;&#2352;&#2379;&#2327;&#2381;&#2352;&#2366;&#2350; (Presentation program)</span></p>\n"],
+                    solution_en: "<p>10.(a)<span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\"><strong>Spreadsheet program </strong>&rarr; </span><span style=\"font-family: Cambria Math;\">Spreadsheet software is used to forecast future performance, calculate tax, complete basic payroll, producing charts and calculating revenues for e.g. MS excel.</span></p>\r\n<p><span style=\"font-family: Cambria Math;\"><strong>Word processors </strong>&rarr; </span><span style=\"font-family: Cambria Math;\">A word processor is a software program capable of creating, storing and printing documents for e.g. MS Word.</span></p>\r\n<p><strong><span style=\"font-family: Cambria Math;\">DBMS </span></strong><span style=\"font-family: Cambria Math;\">&rarr; (Database Management System)</span><span style=\"font-family: Cambria Math;\">A DBMS refers to the software that is </span><span style=\"font-family: Cambria Math;\">responsible for sorting, maintaining and utilizing a database for e.g. MY SQL.</span></p>\r\n<p><span style=\"font-family: Cambria Math;\"><strong>Presentation program</strong> &rarr; </span><span style=\"font-family: Cambria Math;\">Presentation is the practice of showing and explaining the contents of a topic to an audience or a learner visually for e.g.keynote,ludus etc.</span></p>\n",
+                    solution_hi: "<p>10.(a)<span style=\"font-family: Cambria Math;\"> </span><strong><span style=\"font-family: Cambria Math;\">&#2360;&#2381;&#2346;&#2381;&#2352;&#2375;&#2337;&#2358;&#2368;&#2335; &#2346;&#2381;&#2352;&#2379;&#2327;&#2381;&#2352;&#2366;&#2350;</span></strong><span style=\"font-family: Cambria Math;\"> &rarr; </span><span style=\"font-family: Cambria Math;\">&#2360;&#2381;&#2346;&#2381;&#2352;&#2375;&#2337;&#2358;&#2368;&#2335; &#2360;&#2377;&#2347;&#2381;&#2335;&#2357;&#2375;&#2351;&#2352; &#2325;&#2366; &#2313;&#2346;&#2351;&#2379;&#2327; &#2349;&#2357;&#2367;&#2359;&#2381;&#2351; &#2325;&#2375; &#2346;&#2381;&#2352;&#2342;&#2352;&#2381;&#2358;&#2344; &#2325;&#2368; &#2349;&#2357;&#2367;&#2359;&#2381;&#2351;&#2357;&#2366;&#2339;&#2368; &#2325;&#2352;&#2344;&#2375; </span><span style=\"font-family: Cambria Math;\">(</span><span style=\"font-family: Cambria Math;\">forecast future performance)</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Cambria Math;\">&#2325;&#2352; &#2325;&#2368; &#2327;&#2339;&#2344;&#2366; &#2325;&#2352;&#2344;&#2375; </span><span style=\"font-family: Cambria Math;\">(</span><span style=\"font-family: Cambria Math;\">calculate tax)</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Cambria Math;\">&#2348;&#2375;&#2360;&#2367;&#2325; &#2346;&#2375;&#2352;&#2379;&#2354; &#2346;&#2370;&#2352;&#2366; &#2325;&#2352;&#2344;&#2375; </span><span style=\"font-family: Cambria Math;\">(</span><span style=\"font-family: Cambria Math;\">complete basic payroll)</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Cambria Math;\">&#2330;&#2366;&#2352;&#2381;&#2335; </span><span style=\"font-family: Cambria Math;\">(chart) </span><span style=\"font-family: Cambria Math;\">&#2348;&#2344;&#2366;&#2344;&#2375; &#2324;&#2352; &#2310;&#2351; &#2325;&#2368; &#2327;&#2339;&#2344;&#2366; </span><span style=\"font-family: Cambria Math;\">(calculating revenue) </span><span style=\"font-family: Cambria Math;\">&#2325;&#2352;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Cambria Math;\">&#2313;&#2342;&#2366;&#2361;&#2352;&#2339; &#2325;&#2375; &#2354;&#2367;&#2319; </span><span style=\"font-family: Cambria Math;\">MS </span><span style=\"font-family: Cambria Math;\">&#2319;&#2325;&#2381;&#2360;&#2375;&#2354;&#2404;</span></p>\r\n<p><strong><span style=\"font-family: Cambria Math;\">&#2357;&#2352;&#2381;&#2337; &#2346;&#2381;&#2352;&#2379;&#2360;&#2375;&#2360;&#2352; </span></strong><span style=\"font-family: Cambria Math;\">&rarr; </span><span style=\"font-family: Cambria Math;\">&#2357;&#2352;&#2381;&#2337; &#2346;&#2381;&#2352;&#2379;&#2360;&#2375;&#2360;&#2352; &#2319;&#2325; &#2360;&#2377;&#2347;&#2381;&#2335;&#2357;&#2375;&#2351;&#2352; &#2346;&#2381;&#2352;&#2379;&#2327;&#2381;&#2352;&#2366;&#2350; </span><span style=\"font-family: Cambria Math;\">(software program) </span><span style=\"font-family: Cambria Math;\">&#2361;&#2376; &#2332;&#2379; </span><span style=\"font-family: Cambria Math;\">MS </span><span style=\"font-family: Cambria Math;\">&#2357;&#2352;&#2381;&#2337; &#2332;&#2376;&#2360;&#2375; &#2337;&#2366;&#2325;&#2381;&#2351;&#2370;&#2350;&#2375;&#2306;&#2335;&#2381;&#2360; &#2325;&#2379; &#2348;&#2344;&#2366;&#2344;&#2375; </span><span style=\"font-family: Cambria Math;\">(create), </span><span style=\"font-family: Cambria Math;\">&#2360;&#2381;&#2335;&#2379;&#2352; </span><span style=\"font-family: Cambria Math;\">(store) </span><span style=\"font-family: Cambria Math;\">&#2325;&#2352;&#2344;&#2375; &#2324;&#2352; &#2346;&#2381;&#2352;&#2367;&#2306;&#2335; </span><span style=\"font-family: Cambria Math;\">(print) </span><span style=\"font-family: Cambria Math;\">&#2325;&#2352;&#2344;&#2375; &#2350;&#2375;&#2306; &#2360;&#2325;&#2381;&#2359;&#2350; &#2361;&#2376;&#2404;</span></p>\r\n<p><span style=\"font-family: Cambria Math;\"><strong>DBMS</strong> &rarr; (</span><span style=\"font-family: Cambria Math;\">&#2337;&#2375;&#2335;&#2366;&#2348;&#2375;&#2360; &#2350;&#2376;&#2344;&#2375;&#2332;&#2350;&#2375;&#2306;&#2335; &#2360;&#2367;&#2360;&#2381;&#2335;&#2350;</span><span style=\"font-family: Cambria Math;\">) </span><span style=\"font-family: Cambria Math;\">&#2319;&#2325; </span><span style=\"font-family: Cambria Math;\">DBMS </span><span style=\"font-family: Cambria Math;\">&#2313;&#2360; &#2360;&#2377;&#2347;&#2364;&#2381;&#2335;&#2357;&#2375;&#2351;&#2352; &#2325;&#2379; &#2360;&#2306;&#2342;&#2352;&#2381;&#2349;&#2367;&#2340; &#2325;&#2352;&#2340;&#2366; &#2361;&#2376; &#2332;&#2379; &#2319;&#2325; &#2337;&#2375;&#2335;&#2366;&#2348;&#2375;&#2360; &#2325;&#2379; &#2360;&#2377;&#2352;&#2381;&#2335; &#2325;&#2352;&#2344;&#2375;</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Cambria Math;\">&#2348;&#2344;&#2366;&#2319; &#2352;&#2326;&#2344;&#2375; &#2324;&#2352; &#2313;&#2346;&#2351;&#2379;&#2327; </span><span style=\"font-family: Cambria Math;\">(sorting, maintaining and utilizing) </span><span style=\"font-family: Cambria Math;\">&#2325;&#2352;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2332;&#2367;&#2350;&#2381;&#2350;&#2375;&#2342;&#2366;&#2352; &#2361;&#2379;&#2340;&#2366; &#2361;&#2376;</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Cambria Math;\">&#2313;&#2342;&#2366;&#2361;&#2352;&#2339; &#2325;&#2375; &#2354;&#2367;&#2319; </span><span style=\"font-family: Cambria Math;\">MY SQL </span></p>\r\n<p><span style=\"font-family: Cambria Math;\"><strong>&#2346;&#2381;&#2352;&#2375;&#2332;&#2375;&#2306;&#2335;&#2375;&#2358;&#2344; &#2346;&#2381;&#2352;&#2379;&#2327;&#2381;&#2352;&#2366;&#2350;</strong> </span><span style=\"font-family: Cambria Math;\">&rarr; </span><span style=\"font-family: Cambria Math;\">&#2346;&#2381;&#2352;&#2375;&#2332;&#2375;&#2306;&#2335;&#2375;&#2358;&#2344; &#2325;&#2367;&#2360;&#2368; &#2357;&#2367;&#2359;&#2351; &#2325;&#2368; &#2325;&#2306;&#2335;&#2375;&#2306;&#2335;&#2381;&#2360; </span><span style=\"font-family: Cambria Math;\">(contents) </span><span style=\"font-family: Cambria Math;\">&#2325;&#2379; &#2342;&#2352;&#2381;&#2358;&#2325;&#2379;&#2306; &#2351;&#2366; &#2358;&#2367;&#2325;&#2381;&#2359;&#2366;&#2352;&#2381;&#2341;&#2368; &#2325;&#2379; &#2342;&#2371;&#2358;&#2381;&#2351; &#2352;&#2370;&#2346; &#2360;&#2375; &#2342;&#2367;&#2326;&#2366;&#2344;&#2375; &#2324;&#2352; &#2360;&#2350;&#2333;&#2366;&#2344;&#2375; &#2325;&#2366; &#2309;&#2349;&#2381;&#2351;&#2366;&#2360; &#2361;&#2376;</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Cambria Math;\">&#2313;&#2342;&#2366;&#2361;&#2352;&#2339; &#2325;&#2375; &#2354;&#2367;&#2319; &#2325;&#2368;&#2344;&#2379;&#2335; </span><span style=\"font-family: Cambria Math;\">(keynote), </span><span style=\"font-family: Cambria Math;\">&#2354;&#2369;&#2337;&#2360; </span><span style=\"font-family: Cambria Math;\">(ludus) </span><span style=\"font-family: Cambria Math;\">&#2310;&#2342;&#2367;&#2404;</span></p>\n",
+                    correct: "a",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "11",
+                    section: "31",
+                    question_en: "<p>11.<span style=\"font-family: Cambria Math;\"> Restarting the computer is called ...... when the computer is already ON.</span></p>\n",
+                    question_hi: "<p>11. <span style=\"font-family: Cambria Math;\">&#2332;&#2348; &#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352; &#2346;&#2361;&#2354;&#2375; &#2360;&#2375; &#2361;&#2368; &#2321;&#2344; &#2361;&#2379; &#2340;&#2379; &#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352; &#2325;&#2379; &#2352;&#2368;&#2360;&#2381;&#2335;&#2366;&#2352;&#2381;&#2335;</span><span style=\"font-family: Cambria Math;\">(restart) </span><span style=\"font-family: Cambria Math;\">&#2325;&#2352;&#2344;&#2366; </span><span style=\"font-family: Cambria Math;\">&hellip;&hellip;.. </span><span style=\"font-family: Cambria Math;\">&#2325;&#2361;&#2354;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404;</span></p>\n",
+                    options_en: ["<p>cold booting</p>\n", "<p>logging off</p>\n", 
+                                "<p>shut down</p>\n", "<p>warm booting</p>\n"],
+                    options_hi: ["<p><span style=\"font-weight: 400;\">&#2325;&#2379;&#2354;&#2381;&#2337; &#2348;&#2370;&#2335;&#2367;&#2306;&#2327;(cold booting)</span></p>\n", "<p><span style=\"font-weight: 400;\">&#2354;&#2377;&#2327;&#2367;&#2306;&#2327; &#2321;&#2347;(logging off)</span></p>\n",
+                                "<p><span style=\"font-weight: 400;\">&#2358;&#2335; &#2337;&#2366;&#2313;&#2344; (shut down)</span></p>\n", "<p><span style=\"font-weight: 400;\">&#2357;&#2366;&#2352;&#2381;&#2350;&nbsp; &#2348;&#2370;&#2335;&#2367;&#2306;&#2327; (warm booting)</span></p>\n"],
+                    solution_en: "<p>11.(d) <strong>Warm Booting</strong>&rarr; <span style=\"font-family: Cambria Math;\">When a computer is restarted by pressing the combination of Ctrl + Alt + Del keys or by restart button.</span></p>\n",
+                    solution_hi: "<p>11.(d) <strong><span style=\"font-family: Cambria Math;\">&#2357;&#2366;&#2352;&#2381;&#2350; &#2348;&#2370;&#2335;&#2367;&#2306;&#2327;</span><span style=\"font-family: Cambria Math;\">(warm booting)</span></strong><span style=\"font-family: Cambria Math;\"> &rarr; </span><span style=\"font-family: Cambria Math;\">&#2332;&#2348; &#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352; &#2325;&#2379; </span><span style=\"font-family: Cambria Math;\">Ctrl + Alt + Del </span><span style=\"font-family: Cambria Math;\">&#2325;&#2369;&#2306;&#2332;&#2367;&#2351;&#2379;&#2306;</span><span style=\"font-family: Cambria Math;\">(keys) </span><span style=\"font-family: Cambria Math;\">&#2325;&#2375; &#2325;&#2377;&#2350;&#2381;&#2348;&#2367;&#2344;&#2375;&#2358;&#2344;</span><span style=\"font-family: Cambria Math;\">(combination) </span><span style=\"font-family: Cambria Math;\">&#2325;&#2379; &#2342;&#2348;&#2366;&#2325;&#2352; &#2351;&#2366; &#2352;&#2368;&#2360;&#2381;&#2335;&#2366;&#2352;&#2381;&#2335;</span><span style=\"font-family: Cambria Math;\">(restart) </span><span style=\"font-family: Cambria Math;\">&#2348;&#2335;&#2344; &#2342;&#2381;&#2357;&#2366;&#2352;&#2366; &#2352;&#2368;&#2360;&#2381;&#2335;&#2366;&#2352;&#2381;&#2335;</span><span style=\"font-family: Cambria Math;\">(restart) </span><span style=\"font-family: Cambria Math;\">&#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404;</span></p>\n",
+                    correct: "d",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "12",
+                    section: "31",
+                    question_en: "<p>12.<span style=\"font-family: Cambria Math;\"> ......... is string oriented.</span></p>\n",
+                    question_hi: "<p>12.<span style=\"font-family: Cambria Math;\"> ........ </span><span style=\"font-family: Cambria Math;\">&#2360;&#2381;&#2335;&#2381;&#2352;&#2367;&#2306;&#2327; &#2323;&#2352;&#2367;&#2319;&#2306;&#2335;&#2375;&#2337; &#2361;&#2376;&#2404;</span></p>\n",
+                    options_en: ["<p>SNOBOL</p>\n", "<p>PASCAL</p>\n", 
+                                "<p>PERL</p>\n", "<p>COBOL</p>\n"],
+                    options_hi: ["<p>SNOBOL</p>\n", "<p>PASCAL</p>\n",
+                                "<p>PERL</p>\n", "<p>COBOL</p>\n"],
+                    solution_en: "<p>12.(d)<span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\"><strong>COBOL</strong> uses the </span><span style=\"font-family: Cambria Math;\">string</span><span style=\"font-family: Cambria Math;\"> statement to concatenate string variables.</span></p>\n",
+                    solution_hi: "<p>12.(d) <span style=\"font-family: Cambria Math;\"><strong>COBOL</strong> </span><span style=\"font-family: Cambria Math;\">&#2360;&#2381;&#2335;&#2381;&#2352;&#2367;&#2306;&#2327; &#2357;&#2375;&#2352;&#2367;&#2319;&#2348;&#2354;&#2381;&#2360;</span><span style=\"font-family: Cambria Math;\">(</span><span style=\"font-family: Cambria Math;\">string variables</span><span style=\"font-family: Cambria Math;\">) </span><span style=\"font-family: Cambria Math;\">&#2325;&#2379; &#2332;&#2379;&#2337;&#2364;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2360;&#2381;&#2335;&#2381;&#2352;&#2367;&#2306;&#2327; &#2360;&#2381;&#2335;&#2375;&#2335;&#2350;&#2375;&#2306;&#2335;</span><span style=\"font-family: Cambria Math;\">(</span><span style=\"font-family: Cambria Math;\">string</span><span style=\"font-family: Cambria Math;\"> statement</span><span style=\"font-family: Cambria Math;\">) </span><span style=\"font-family: Cambria Math;\">&#2325;&#2366; &#2313;&#2346;&#2351;&#2379;&#2327; &#2325;&#2352;&#2340;&#2366; &#2361;&#2376;&#2404;</span></p>\n",
+                    correct: "d",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "13",
+                    section: "31",
+                    question_en: "<p>13.<span style=\"font-family: Cambria Math;\"> Which of the following keys is used to delete characters to the left of the cursor?</span></p>\n",
+                    question_hi: "<p>13.<span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">&#2344;&#2367;&#2350;&#2381;&#2344; &#2350;&#2375;&#2306; &#2360;&#2375; &#2325;&#2367;&#2360; &#2325;&#2369;&#2306;&#2332;&#2368;</span><span style=\"font-family: Cambria Math;\">(key) </span><span style=\"font-family: Cambria Math;\">&#2325;&#2366; &#2313;&#2346;&#2351;&#2379;&#2327; &#2325;&#2352;&#2381;&#2360;&#2352;</span><span style=\"font-family: Cambria Math;\">(cursor) </span><span style=\"font-family: Cambria Math;\">&#2325;&#2375; &#2348;&#2366;&#2351;&#2368;&#2306; &#2323;&#2352; &#2325;&#2375; &#2309;&#2325;&#2381;&#2359;&#2352;&#2379;&#2306; &#2325;&#2379; &#2361;&#2335;&#2366;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;</span><span style=\"font-family: Cambria Math;\">?</span></p>\n",
+                    options_en: ["<p>Alt + Delete</p>\n", "<p>Shift</p>\n", 
+                                "<p>Esc</p>\n", "<p>Backspace</p>\n"],
+                    options_hi: ["<p>Alt + Delete</p>\n", "<p>Shift</p>\n",
+                                "<p>Esc</p>\n", "<p>Backspace</p>\n"],
+                    solution_en: "<p>13.(d)<span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">The </span><span style=\"font-family: Cambria Math;\">Backspace</span><span style=\"font-family: Cambria Math;\"> key erases the text to the<strong> left of the insertion point one character at a time.</strong></span></p>\n",
+                    solution_hi: "<p>13.(d)<span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">&#2348;&#2376;&#2325;&#2360;&#2381;&#2346;&#2375;&#2360; &#2325;&#2368;</span><span style=\"font-family: Cambria Math;\">(Backspace key) </span><span style=\"font-family: Cambria Math;\">&#2360;&#2350;&#2381;&#2350;&#2367;&#2354;&#2344; &#2348;&#2367;&#2306;&#2342;&#2369;</span><span style=\"font-family: Cambria Math;\">(insertion point) </span><span style=\"font-family: Cambria Math;\">&#2325;&#2375; <strong>&#2348;&#2366;&#2312;&#2306; &#2323;&#2352; &#2325;&#2375; &#2335;&#2375;&#2325;&#2381;&#2360;&#2381;&#2335;</strong></span><strong><span style=\"font-family: Cambria Math;\">(text) </span><span style=\"font-family: Cambria Math;\">&#2325;&#2375; &#2319;&#2325; &#2348;&#2366;&#2352; &#2350;&#2375;&#2306; &#2319;&#2325; &#2325;&#2352;&#2376;&#2325;&#2381;&#2335;&#2352;</span><span style=\"font-family: Cambria Math;\">(character) </span></strong><span style=\"font-family: Cambria Math;\"><strong>&#2350;&#2367;&#2335;&#2366; &#2342;&#2375;&#2340;&#2368; &#2361;&#2376;</strong>&#2404;</span></p>\n",
+                    correct: "d",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "14",
+                    section: "31",
+                    question_en: "<p>14.<span style=\"font-family: Cambria Math;\"> In which, the database can be restored up to the last consistent state after the system failure?</span></p>\n",
+                    question_hi: "<p>14. <span style=\"font-family: Cambria Math;\">&#2325;&#2367;&#2360;&#2350;&#2375;&#2306;</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Cambria Math;\">&#2360;&#2367;&#2360;&#2381;&#2335;&#2350; &#2357;&#2367;&#2347;&#2354;&#2340;&#2366; &#2325;&#2375; &#2348;&#2366;&#2342; &#2337;&#2375;&#2335;&#2366;&#2348;&#2375;&#2360; &#2325;&#2379; &#2309;&#2306;&#2340;&#2367;&#2350; &#2360;&#2369;&#2360;&#2306;&#2327;&#2340; &#2360;&#2381;&#2341;&#2367;&#2340;&#2367;</span><span style=\"font-family: Cambria Math;\">(consist state) </span><span style=\"font-family: Cambria Math;\">&#2340;&#2325; &#2346;&#2369;&#2344;&#2352;&#2381;&#2360;&#2381;&#2341;&#2366;&#2346;&#2367;&#2340;</span><span style=\"font-family: Cambria Math;\">(restored) </span><span style=\"font-family: Cambria Math;\">&#2325;&#2367;&#2351;&#2366; &#2332;&#2366; &#2360;&#2325;&#2340;&#2366; &#2361;&#2376;</span><span style=\"font-family: Cambria Math;\">?</span></p>\n",
+                    options_en: ["<p>Recovery</p>\n", "<p>Backup</p>\n", 
+                                "<p>Redundancy</p>\n", "<p>Security</p>\n"],
+                    options_hi: ["<p><span style=\"font-weight: 400;\">&nbsp;&#2352;&#2367;&#2325;&#2357;&#2352;&#2368; (Recovery)</span></p>\n", "<p><span style=\"font-weight: 400;\">&#2348;&#2376;&#2325;&#2309;&#2346; (Backup)</span></p>\n",
+                                "<p><span style=\"font-weight: 400;\">&#2352;&#2375;&#2337;&#2370;&#2339;&#2381;</span><span style=\"font-weight: 400;\">&#2337;&#2344;&#2381;&zwnj;&#2360;&#2367; (</span><span style=\"font-weight: 400;\">Redundancy</span><span style=\"font-weight: 400;\">)</span></p>\n", "<p><span style=\"font-weight: 400;\">&#2360;&#2367;&#2325;&#2381;&#2351;&#2379;&#2352;&#2367;&#2335;&#2368; (Security)</span></p>\n"],
+                    solution_en: "<p>14.(a) <strong><span style=\"font-family: Cambria Math;\">Recovery</span></strong><span style=\"font-family: Cambria Math;\"><strong> is the rebuilding</strong> of a database or table space after a problem such as media or storage failure, power interruption, or application failure.A<strong> </strong></span><strong><span style=\"font-family: Cambria Math;\">backup</span></strong><span style=\"font-family: Cambria Math;\"> is a copy of data from your database that can be used to reconstruct that data.</span><strong><span style=\"font-family: Cambria Math;\">Data redundancy</span></strong><span style=\"font-family: Cambria Math;\"> is a condition created within a database or data storage technology in which the same piece of data is held in two separate places.</span><strong><span style=\"font-family: Cambria Math;\">Security of databases</span></strong><span style=\"font-family: Cambria Math;\"> refers to the array of controls, tools, and procedures designed to ensure and safeguard confidentiality, integrity, and accessibility.</span></p>\n",
+                    solution_hi: "<p>14.(a)<span style=\"font-family: Cambria Math;\"> </span><strong><span style=\"font-family: Cambria Math;\">&#2352;&#2367;&#2325;&#2357;&#2352;&#2368;</span><span style=\"font-family: Cambria Math;\"> </span></strong><span style=\"font-family: Cambria Math;\">&#2350;&#2368;&#2337;&#2367;&#2351;&#2366; &#2351;&#2366; &#2349;&#2306;&#2337;&#2366;&#2352;&#2339; &#2357;&#2367;&#2347;&#2354;&#2340;&#2366;</span><span style=\"font-family: Cambria Math;\">(storage failure), </span><span style=\"font-family: Cambria Math;\">&#2348;&#2367;&#2332;&#2354;&#2368; &#2352;&#2369;&#2325;&#2366;&#2357;&#2335;</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Cambria Math;\">&#2351;&#2366; &#2309;&#2344;&#2369;&#2346;&#2381;&#2352;&#2351;&#2379;&#2327; &#2357;&#2367;&#2347;&#2354;&#2340;&#2366; &#2332;&#2376;&#2360;&#2368; &#2325;&#2367;&#2360;&#2368; &#2360;&#2350;&#2360;&#2381;&#2351;&#2366; &#2325;&#2375; &#2348;&#2366;&#2342; &#2337;&#2375;&#2335;&#2366;&#2348;&#2375;&#2360; &#2351;&#2366; &#2340;&#2366;&#2354;&#2367;&#2325;&#2366; &#2360;&#2381;&#2341;&#2366;&#2344;</span><span style=\"font-family: Cambria Math;\">(table space) </span><span style=\"font-family: Cambria Math;\">&#2325;&#2366; &#2346;&#2369;&#2344;&#2352;&#2381;&#2344;&#2367;&#2352;&#2381;&#2350;&#2366;&#2339;</span><span style=\"font-family: Cambria Math;\">(rebuildung) </span><span style=\"font-family: Cambria Math;\">&#2361;&#2376;&#2404; </span><strong><span style=\"font-family: Cambria Math;\">&#2348;&#2376;&#2325;&#2309;&#2346;</span></strong><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">&#2310;&#2346;&#2325;&#2375; &#2337;&#2375;&#2335;&#2366;&#2348;&#2375;&#2360; &#2360;&#2375; &#2337;&#2375;&#2335;&#2366; &#2325;&#2368; &#2319;&#2325; &#2346;&#2381;&#2352;&#2340;&#2367; &#2361;&#2376; &#2332;&#2367;&#2360;&#2325;&#2366; &#2313;&#2346;&#2351;&#2379;&#2327; &#2313;&#2360; &#2337;&#2375;&#2335;&#2366; &#2325;&#2379; &#2347;&#2367;&#2352; &#2360;&#2375; &#2348;&#2344;&#2366;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366; &#2360;&#2325;&#2340;&#2366; &#2361;&#2376;&#2404; </span><strong><span style=\"font-family: Cambria Math;\">&#2337;&#2375;&#2335;&#2366; &#2352;&#2375;&#2337;&#2370;&#2339;&#2381;</span><span style=\"font-family: Cambria Math;\">&#2337;&#2344;&#2381;</span><span style=\"font-family: Cambria Math;\">&zwnj;</span><span style=\"font-family: Cambria Math;\">&#2360;&#2367;</span></strong><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">&#2319;&#2325; &#2337;&#2375;&#2335;&#2366;&#2348;&#2375;&#2360; &#2351;&#2366; &#2337;&#2375;&#2335;&#2366; &#2360;&#2381;&#2335;&#2379;&#2352;&#2375;&#2332; &#2340;&#2325;&#2344;&#2368;&#2325; &#2325;&#2375; &#2349;&#2368;&#2340;&#2352; &#2348;&#2344;&#2366;&#2312; &#2327;&#2312; &#2360;&#2381;&#2341;&#2367;&#2340;&#2367; &#2361;&#2376; &#2332;&#2367;&#2360;&#2350;&#2375;&#2306; &#2337;&#2375;&#2335;&#2366; &#2325;&#2366; &#2319;&#2325; &#2361;&#2368; &#2335;&#2369;&#2325;&#2337;&#2364;&#2366; &#2342;&#2379; &#2309;&#2354;&#2327;</span><span style=\"font-family: Cambria Math;\">-</span><span style=\"font-family: Cambria Math;\">&#2309;&#2354;&#2327; &#2360;&#2381;&#2341;&#2366;&#2344;&#2379;&#2306; &#2350;&#2375;&#2306; &#2352;&#2326;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404; </span><strong><span style=\"font-family: Cambria Math;\">&#2337;&#2375;&#2335;&#2366;&#2348;&#2375;&#2360; &#2325;&#2368; &#2360;&#2369;&#2352;&#2325;&#2381;&#2359;&#2366;</span><span style=\"font-family: Cambria Math;\">(security of database) </span></strong><span style=\"font-family: Cambria Math;\">&#2327;&#2379;&#2346;&#2344;&#2368;&#2351;&#2340;&#2366;</span><span style=\"font-family: Cambria Math;\">(</span><span style=\"font-family: Cambria Math;\">confidentiality</span><span style=\"font-family: Cambria Math;\">), </span><span style=\"font-family: Cambria Math;\">&#2309;&#2326;&#2306;&#2337;&#2340;&#2366;</span><span style=\"font-family: Cambria Math;\">(</span><span style=\"font-family: Cambria Math;\">integrity</span><span style=\"font-family: Cambria Math;\">) </span><span style=\"font-family: Cambria Math;\">&#2324;&#2352; &#2346;&#2361;&#2369;&#2306;&#2330;</span><span style=\"font-family: Cambria Math;\">(</span><span style=\"font-family: Cambria Math;\">accessibility</span><span style=\"font-family: Cambria Math;\">) </span><span style=\"font-family: Cambria Math;\">&#2325;&#2379; &#2360;&#2369;&#2344;&#2367;&#2358;&#2381;&#2330;&#2367;&#2340; &#2325;&#2352;&#2344;&#2375; &#2324;&#2352; &#2360;&#2369;&#2352;&#2325;&#2381;&#2359;&#2367;&#2340; &#2352;&#2326;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2337;&#2367;&#2332;&#2364;&#2366;&#2311;&#2344; &#2325;&#2367;&#2319; &#2327;&#2319; &#2344;&#2367;&#2351;&#2306;&#2340;&#2381;&#2352;&#2339;&#2379;&#2306;</span><span style=\"font-family: Cambria Math;\">(controls), </span><span style=\"font-family: Cambria Math;\">&#2313;&#2346;&#2325;&#2352;&#2339;&#2379;&#2306;</span><span style=\"font-family: Cambria Math;\">(array of tools) </span><span style=\"font-family: Cambria Math;\">&#2324;&#2352; &#2346;&#2381;&#2352;&#2325;&#2381;&#2352;&#2367;&#2351;&#2366;&#2323;&#2306;</span><span style=\"font-family: Cambria Math;\">(procedures) </span><span style=\"font-family: Cambria Math;\">&#2325;&#2368; &#2360;&#2352;&#2339;&#2368; &#2325;&#2379; &#2360;&#2306;&#2342;&#2352;&#2381;&#2349;&#2367;&#2340; &#2325;&#2352;&#2340;&#2368; &#2361;&#2376;&#2404;</span></p>\n",
+                    correct: "a",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "15",
+                    section: "31",
+                    question_en: "<p>15.<span style=\"font-family: Cambria Math;\"> Which of the following refers to a small, single-site network?</span></p>\n",
+                    question_hi: "<p>15.<span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">&#2344;&#2367;&#2350;&#2381;&#2344; &#2350;&#2375;&#2306; &#2360;&#2375; &#2325;&#2380;&#2344; &#2360;&#2366; &#2319;&#2325; &#2331;&#2379;&#2335;&#2375;</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Cambria Math;\">&#2360;&#2381;&#2350;&#2366;&#2354; </span><span style=\"font-family: Cambria Math;\">-</span><span style=\"font-family: Cambria Math;\">&#2360;&#2366;&#2311;&#2335; &#2344;&#2375;&#2335;&#2357;&#2352;&#2381;&#2325; &#2325;&#2379; &#2360;&#2306;&#2342;&#2352;&#2381;&#2349;&#2367;&#2340; &#2325;&#2352;&#2340;&#2366; &#2361;&#2376;</span><span style=\"font-family: Cambria Math;\">?</span></p>\n",
+                    options_en: ["<p>DSL</p>\n", "<p>RAM</p>\n", 
+                                "<p>USB</p>\n", "<p>PAN</p>\n"],
+                    options_hi: ["<p><span style=\"font-weight: 400;\">&#2337;&#2368;&#2319;&#2360;&#2319;&#2354;(DSL)</span></p>\n", "<p><span style=\"font-family: Cambria Math;\">&#2352;&#2376;&#2350; </span><span style=\"font-family: Cambria Math;\">(RAM) </span></p>\n",
+                                "<p><span style=\"font-weight: 400;\">&#2351;&#2370;&#2319;&#2360;&#2348;&#2368; (USB)</span></p>\n", "<p><span style=\"font-weight: 400;\">&#2346;&#2376;&#2344;(PAN)</span></p>\n"],
+                    solution_en: "<p>15.(d)<span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">A </span><strong><span style=\"font-family: Cambria Math;\">personal area network</span><span style=\"font-family: Cambria Math;\">, or </span><span style=\"font-family: Cambria Math;\">PAN</span></strong><span style=\"font-family: Cambria Math;\">, is a computer network organized around an individual person within a single building. It is called a small</span><span style=\"font-family: Cambria Math;\">, single-site network.</span><strong><span style=\"font-family: Cambria Math;\">Universal Serial Bus</span><span style=\"font-family: Cambria Math;\"> (</span><span style=\"font-family: Cambria Math;\">USB</span></strong><span style=\"font-family: Cambria Math;\"><strong>)</strong> is an </span><span style=\"font-family: Cambria Math;\">industry standard</span><span style=\"font-family: Cambria Math;\"> that establishes specifications for cables, connectors and </span><span style=\"font-family: Cambria Math;\">protocols</span><span style=\"font-family: Cambria Math;\"> for connection, communication and power supply (</span><span style=\"font-family: Cambria Math;\">interfacing</span><span style=\"font-family: Cambria Math;\">) between computers, </span><span style=\"font-family: Cambria Math;\">peripherals</span><span style=\"font-family: Cambria Math;\"> and other computers.</span></p>\r\n<p><strong><span style=\"font-family: Cambria Math;\">DSL (Digital Subscriber Line)</span></strong><span style=\"font-family: Cambria Math;\"> is a modem technology that uses existing telephone lines to transport high-bandwidth data, such as multimedia and video, to service subscribers.</span></p>\n",
+                    solution_hi: "<p>15.(d)<span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">&#2319;&#2325; <strong>&#2357;&#2381;&#2351;&#2325;&#2381;&#2340;&#2367;&#2327;&#2340; &#2325;&#2381;&#2359;&#2375;&#2340;&#2381;&#2352; &#2344;&#2375;&#2335;&#2357;&#2352;&#2381;&#2325;</strong></span><strong><span style=\"font-family: Cambria Math;\">(personal area network), </span><span style=\"font-family: Cambria Math;\">&#2351;&#2366; &#2346;&#2376;&#2344;</span></strong><span style=\"font-family: Cambria Math;\"><strong>(PAN)</strong>, </span><span style=\"font-family: Cambria Math;\">&#2319;&#2325; &#2319;&#2325;&#2354; &#2349;&#2357;&#2344;</span><span style=\"font-family: Cambria Math;\">(single building) </span><span style=\"font-family: Cambria Math;\">&#2325;&#2375; &#2349;&#2368;&#2340;&#2352; &#2319;&#2325; &#2357;&#2381;&#2351;&#2325;&#2381;&#2340;&#2367; &#2325;&#2375; &#2330;&#2366;&#2352;&#2379;&#2306; &#2323;&#2352; &#2357;&#2381;&#2351;&#2357;&#2360;&#2381;&#2341;&#2367;&#2340; &#2319;&#2325; &#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352; &#2344;&#2375;&#2335;&#2357;&#2352;&#2381;&#2325; &#2361;&#2376;&#2404; &#2311;&#2360;&#2375; &#2319;&#2325; &#2331;&#2379;&#2335;&#2366;</span><span style=\"font-family: Cambria Math;\">,</span><span style=\"font-family: Cambria Math;\">&#2360;&#2367;&#2306;&#2327;&#2354; </span><span style=\"font-family: Cambria Math;\">-</span><span style=\"font-family: Cambria Math;\">&#2360;&#2366;&#2311;&#2335; &#2344;&#2375;&#2335;&#2357;&#2352;&#2381;&#2325; &#2325;&#2361;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404;</span><span style=\"font-family: Cambria Math;\"> </span><strong><span style=\"font-family: Cambria Math;\">&#2351;&#2370;&#2344;&#2367;&#2357;&#2352;&#2381;&#2360;&#2354; &#2360;&#2368;&#2352;&#2367;&#2351;&#2354; &#2348;&#2360;</span></strong><span style=\"font-family: Cambria Math;\"><strong> (USB)(universal serial bus)</strong> </span><span style=\"font-family: Cambria Math;\">&#2319;&#2325; &#2313;&#2342;&#2381;&#2351;&#2379;&#2327; &#2350;&#2366;&#2344;&#2325; &#2361;&#2376; &#2332;&#2379; &#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352;</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Cambria Math;\">&#2348;&#2366;&#2361;&#2381;&#2351; &#2313;&#2346;&#2325;&#2352;&#2339;&#2379;&#2306; &#2324;&#2352; &#2309;&#2344;&#2381;&#2351; &#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352;&#2379;&#2306; &#2325;&#2375; &#2348;&#2368;&#2330; &#2325;&#2344;&#2375;&#2325;&#2381;&#2358;&#2344;</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Cambria Math;\">&#2360;&#2306;&#2330;&#2366;&#2352; &#2324;&#2352; &#2348;&#2367;&#2332;&#2354;&#2368; &#2310;&#2346;&#2370;&#2352;&#2381;&#2340;&#2367; </span><span style=\"font-family: Cambria Math;\">(</span><span style=\"font-family: Cambria Math;\">&#2311;&#2306;&#2335;&#2352;&#2347;&#2375;&#2360;&#2367;&#2306;&#2327;</span><span style=\"font-family: Cambria Math;\">) </span><span style=\"font-family: Cambria Math;\">&#2325;&#2375; &#2354;&#2367;&#2319; &#2325;&#2375;&#2348;&#2354;</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Cambria Math;\">&#2325;&#2344;&#2375;&#2325;&#2381;&#2335;&#2352; &#2324;&#2352; &#2346;&#2381;&#2352;&#2379;&#2335;&#2379;&#2325;&#2377;&#2354; &#2325;&#2375; &#2354;&#2367;&#2319; &#2357;&#2367;&#2344;&#2367;&#2352;&#2381;&#2342;&#2375;&#2358; &#2360;&#2381;&#2341;&#2366;&#2346;&#2367;&#2340; &#2325;&#2352;&#2340;&#2366; &#2361;&#2376;&#2404;</span></p>\r\n<p><strong><span style=\"font-family: Cambria Math;\">&#2337;&#2368;&#2319;&#2360;&#2319;&#2354; </span><span style=\"font-family: Cambria Math;\">(</span><span style=\"font-family: Cambria Math;\">&#2337;&#2367;&#2332;&#2367;&#2335;&#2354; &#2360;&#2348;&#2381;&#2360;&#2325;&#2381;&#2352;&#2366;&#2311;&#2348;&#2352; &#2354;&#2366;&#2311;&#2344;</span><span style=\"font-family: Cambria Math;\">)</span></strong><span style=\"font-family: Cambria Math;\"><strong>(digital subscriber line)</strong> </span><span style=\"font-family: Cambria Math;\">&#2319;&#2325; &#2310;&#2343;&#2369;&#2344;&#2367;&#2325; &#2340;&#2325;&#2344;&#2368;&#2325; &#2361;&#2376; &#2332;&#2379; &#2327;&#2381;&#2352;&#2366;&#2361;&#2325;&#2379;&#2306; &#2325;&#2379; &#2360;&#2375;&#2357;&#2366; &#2342;&#2375;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2350;&#2354;&#2381;&#2335;&#2368;&#2350;&#2368;&#2337;&#2367;&#2351;&#2366; &#2324;&#2352; &#2357;&#2368;&#2337;&#2367;&#2351;&#2379; &#2332;&#2376;&#2360;&#2375; &#2313;&#2330;&#2381;&#2330;</span><span style=\"font-family: Cambria Math;\">-</span><span style=\"font-family: Cambria Math;\">&#2348;&#2376;&#2306;&#2337;&#2357;&#2367;&#2337;&#2381;&#2341; &#2337;&#2375;&#2335;&#2366; &#2325;&#2375; &#2346;&#2352;&#2367;&#2357;&#2361;&#2344; &#2325;&#2375; &#2354;&#2367;&#2319; &#2350;&#2380;&#2332;&#2370;&#2342;&#2366; &#2335;&#2375;&#2354;&#2368;&#2347;&#2379;&#2344; &#2354;&#2366;&#2311;&#2344;&#2379;&#2306; &#2325;&#2366; &#2313;&#2346;&#2351;&#2379;&#2327; &#2325;&#2352;&#2340;&#2368; &#2361;&#2376;&#2404;</span></p>\n",
+                    correct: "d",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "16",
+                    section: "31",
+                    question_en: "<p><span style=\"font-family: Cambria Math;\">16.</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">The ......... service allows a group of Internet users to exchange their views on some </span><span style=\"font-family: Cambria Math;\">common topic.</span></p>\n",
+                    question_hi: "<p>16.<span style=\"font-family: Cambria Math;\"> _________</span><span style=\"font-family: Cambria Math;\">&#2360;&#2375;&#2357;&#2366; &#2311;&#2306;&#2335;&#2352;&#2344;&#2375;&#2335; &#2313;&#2346;&#2351;&#2379;&#2327;&#2325;&#2352;&#2381;&#2340;&#2366;&#2323;&#2306; &#2325;&#2375; &#2319;&#2325; &#2360;&#2350;&#2370;&#2361; &#2325;&#2379; &#2325;&#2369;&#2331; &#2346;&#2352; &#2309;&#2346;&#2344;&#2375; &#2357;&#2367;&#2330;&#2366;&#2352;&#2379;&#2306; &#2325;&#2366; &#2310;&#2342;&#2366;&#2344;</span><span style=\"font-family: Cambria Math;\">-</span><span style=\"font-family: Cambria Math;\">&#2346;&#2381;&#2352;&#2342;&#2366;&#2344; &#2325;&#2352;&#2344;&#2375; &#2325;&#2368; &#2309;&#2344;&#2369;&#2350;&#2340;&#2367; &#2342;&#2375;&#2340;&#2368; &#2361;&#2376; &#2360;&#2366;&#2350;&#2366;&#2344;&#2381;&#2351; &#2357;&#2367;&#2359;&#2351;&#2404;</span></p>\n",
+                    options_en: ["<p>telnet</p>\n", "<p>nicnet</p>\n", 
+                                "<p>milnet</p>\n", "<p>usenet</p>\n"],
+                    options_hi: ["<p><span style=\"font-weight: 400;\">&#2335;&#2375;&#2354;&#2344;&#2375;&#2335;(telnet)</span></p>\n", "<p><span style=\"font-weight: 400;\">&#2344;&#2367;&#2325;&#2344;&#2375;&#2335;(nicnet)</span></p>\n",
+                                "<p><span style=\"font-weight: 400;\">&#2350;&#2367;&#2354;&#2344;&#2375;&#2335;(milnet)</span></p>\n", "<p><span style=\"font-weight: 400;\">&#2351;&#2370;&#2332;&#2364;&#2344;&#2375;&#2335;(usenet)</span></p>\n"],
+                    solution_en: "<p>16.(d)<span style=\"font-family: Cambria Math;\"> </span><strong><span style=\"font-family: Cambria Math;\">Usenet service</span></strong><span style=\"font-family: Cambria Math;\"> enables a group of Internet users to exchange their views/ideas/information on some common topic of interest with all members belonging to the group.</span></p>\n",
+                    solution_hi: "<p>16.(d)<span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\"><strong>&#2351;&#2370;&#2332;&#2364;&#2344;&#2375;&#2335;</strong> &#2360;&#2375;&#2357;&#2366; &#2311;&#2306;&#2335;&#2352;&#2344;&#2375;&#2335;</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">&#2313;&#2346;&#2351;&#2379;&#2327;&#2325;&#2352;&#2381;&#2340;&#2366;&#2323;&#2306; &#2325;&#2375; &#2319;&#2325; &#2360;&#2350;&#2370;&#2361; &#2325;&#2379; &#2360;&#2350;&#2370;&#2361; &#2360;&#2375; &#2360;&#2306;&#2348;&#2306;&#2343;&#2367;&#2340; &#2360;&#2349;&#2368; &#2360;&#2342;&#2360;&#2381;&#2351;&#2379;&#2306; &#2325;&#2375; &#2360;&#2366;&#2341; &#2352;&#2369;&#2330;&#2367; &#2325;&#2375; &#2325;&#2369;&#2331; &#2360;&#2366;&#2350;&#2366;&#2344;&#2381;&#2351; &#2357;&#2367;&#2359;&#2351; &#2346;&#2352; &#2309;&#2346;&#2344;&#2375; &#2357;&#2367;&#2330;&#2366;&#2352;&#2379;&#2306;</span><span style=\"font-family: Cambria Math;\">/</span><span style=\"font-family: Cambria Math;\">&#2357;&#2367;&#2330;&#2366;&#2352;&#2379;&#2306;</span><span style=\"font-family: Cambria Math;\">/</span><span style=\"font-family: Cambria Math;\">&#2360;&#2370;&#2330;&#2344;&#2366;&#2323;&#2306; &#2325;&#2366; &#2310;&#2342;&#2366;&#2344;</span><span style=\"font-family: Cambria Math;\">-</span><span style=\"font-family: Cambria Math;\">&#2346;&#2381;&#2352;&#2342;&#2366;&#2344; &#2325;&#2352;&#2344;&#2375; &#2350;&#2375;&#2306; &#2360;&#2325;&#2381;&#2359;&#2350; &#2348;&#2344;&#2366;&#2340;&#2368; &#2361;&#2376;&#2404;</span></p>\n",
+                    correct: "d",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "17",
+                    section: "31",
+                    question_en: "<p><span style=\"font-family: Cambria Math;\">17.</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">It takes advantage of basic hardware and software security characteristics.</span></p>\n",
+                    question_hi: "<p>17. <span style=\"font-family: Cambria Math;\">&#2351;&#2361; &#2348;&#2369;&#2344;&#2367;&#2351;&#2366;&#2342;&#2368; &#2361;&#2366;&#2352;&#2381;&#2337;&#2357;&#2375;&#2351;&#2352;</span><span style=\"font-family: Cambria Math;\">(basic hardware) </span><span style=\"font-family: Cambria Math;\">&#2324;&#2352; &#2360;&#2377;&#2347;&#2381;&#2335;&#2357;&#2375;&#2351;&#2352; &#2360;&#2369;&#2352;&#2325;&#2381;&#2359;&#2366; &#2357;&#2367;&#2358;&#2375;&#2359;&#2340;&#2366;&#2323;&#2306; &#2325;&#2366; &#2354;&#2366;&#2349; &#2313;&#2336;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404;</span></p>\n",
+                    options_en: ["<p>System design</p>\n", "<p>Data access control</p>\n", 
+                                "<p>System access control</p>\n", "<p>None of these</p>\n"],
+                    options_hi: ["<p><span style=\"font-weight: 400;\">&#2360;&#2367;&#2360;&#2381;&#2335;&#2350; &#2337;&#2367;&#2332;&#2366;&#2311;&#2344; (System design)</span></p>\n", "<p><span style=\"font-weight: 400;\">&#2337;&#2375;&#2335;&#2366; &#2319;&#2325;&#2381;&#2360;&#2375;&#2360; &#2325;&#2306;&#2335;&#2381;&#2352;&#2379;&#2354; (Data access control)</span></p>\n",
+                                "<p><span style=\"font-weight: 400;\">&#2360;&#2367;&#2360;&#2381;&#2335;&#2350; &#2319;&#2325;&#2381;&#2360;&#2375;&#2360; &#2325;&#2306;&#2335;&#2381;&#2352;&#2379;&#2354; (System access control)</span></p>\n", "<p><span style=\"font-weight: 400;\">&#2311;&#2344;&#2350;&#2375;&#2306; &#2360;&#2375; &#2325;&#2379;&#2312; &#2344;&#2361;&#2368;&#2306; (None of these)</span></p>\n"],
+                    solution_en: "<p>17.(a)<span style=\"font-family: Cambria Math;\"> </span><strong><span style=\"font-family: Cambria Math;\">Systems design</span></strong><span style=\"font-family: Cambria Math;\"> is the process of defining elements of a system like modules, architecture, components and their interfaces and data for a system based on the specified requirements.</span></p>\n",
+                    solution_hi: "<p>17.(a)<span style=\"font-family: Cambria Math;\"> </span><strong><span style=\"font-family: Cambria Math;\">&#2360;&#2367;&#2360;&#2381;&#2335;&#2350; &#2337;&#2367;&#2332;&#2364;&#2366;&#2311;&#2344;</span><span style=\"font-family: Cambria Math;\"> </span></strong><span style=\"font-family: Cambria Math;\">&#2344;&#2367;&#2352;&#2381;&#2342;&#2367;&#2359;&#2381;&#2335; &#2310;&#2357;&#2358;&#2381;&#2351;&#2325;&#2340;&#2366;&#2323;&#2306; &#2325;&#2375; &#2310;&#2343;&#2366;&#2352; &#2346;&#2352; &#2360;&#2367;&#2360;&#2381;&#2335;&#2350; &#2325;&#2375; &#2354;&#2367;&#2319; &#2350;&#2377;&#2337;&#2381;&#2351;&#2370;&#2354;</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Cambria Math;\">&#2310;&#2352;&#2381;&#2325;&#2367;&#2335;&#2375;&#2325;&#2381;&#2330;&#2352;</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Cambria Math;\">&#2328;&#2335;&#2325;&#2379;&#2306; &#2324;&#2352; &#2313;&#2344;&#2325;&#2375; &#2311;&#2306;&#2335;&#2352;&#2347;&#2375;&#2360; &#2324;&#2352; &#2337;&#2375;&#2335;&#2366; &#2332;&#2376;&#2360;&#2375; &#2360;&#2367;&#2360;&#2381;&#2335;&#2350; &#2325;&#2375; &#2340;&#2340;&#2381;&#2357;&#2379;&#2306; &#2325;&#2379; &#2346;&#2352;&#2367;&#2349;&#2366;&#2359;&#2367;&#2340; &#2325;&#2352;&#2344;&#2375; &#2325;&#2368; &#2346;&#2381;&#2352;&#2325;&#2381;&#2352;&#2367;&#2351;&#2366; &#2361;&#2376;&#2404;</span></p>\n",
+                    correct: "a",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "18",
+                    section: "31",
+                    question_en: "<p><span style=\"font-family: Cambria Math;\">18.</span><span style=\"font-family: Cambria Math;\"> To undo the last work, we have to use which of the following Windows shortcut key? </span></p>\n",
+                    question_hi: "<p><span style=\"font-family: Cambria Math;\">18.</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">&#2346;&#2367;&#2331;&#2354;&#2375; &#2325;&#2366;&#2352;&#2381;&#2351; &#2325;&#2379; &#2346;&#2370;&#2352;&#2381;&#2357;&#2357;&#2340; </span><span style=\"font-family: Cambria Math;\">(undo) </span><span style=\"font-family: Cambria Math;\">&#2325;&#2352;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2361;&#2350;&#2375;&#2306; &#2344;&#2367;&#2350;&#2381;&#2344; &#2350;&#2375;&#2306; &#2360;&#2375; &#2325;&#2367;&#2360; &#2357;&#2367;&#2306;&#2337;&#2379;&#2332; &#2358;&#2377;&#2352;&#2381;&#2335;&#2325;&#2335; &#2325;&#2369;&#2306;&#2332;&#2368; </span><span style=\"font-family: Cambria Math;\">(Windows shortcut key) </span><span style=\"font-family: Cambria Math;\">&#2325;&#2366; &#2313;&#2346;&#2351;&#2379;&#2327; &#2325;&#2352;&#2344;&#2366; &#2361;&#2379;&#2327;&#2366;</span><span style=\"font-family: Cambria Math;\">?</span></p>\n",
+                    options_en: ["<p>Ctrl + P</p>\n", "<p>Ctrl + U</p>\n", 
+                                "<p>Ctrl + A</p>\n", "<p>Ctrl + Z</p>\n"],
+                    options_hi: ["<p>Ctrl + P</p>\n", "<p>Ctrl + U</p>\n",
+                                "<p>Ctrl + A</p>\n", "<p>Ctrl + Z</p>\n"],
+                    solution_en: "<p>18.(d)<span style=\"font-family: Cambria Math;\"> To undo the last action press </span><strong><span style=\"font-family: Cambria Math;\">Ctrl + Z</span><span style=\"font-family: Cambria Math;\">.</span></strong></p>\r\n<p><span style=\"font-family: Cambria Math;\">To print the document press </span><strong><span style=\"font-family: Cambria Math;\">Ctrl + P</span></strong><span style=\"font-family: Cambria Math;\">.</span></p>\r\n<p><span style=\"font-family: Cambria Math;\">To underline the document press </span><strong><span style=\"font-family: Cambria Math;\">Ctrl + U</span><span style=\"font-family: Cambria Math;\">.</span></strong></p>\r\n<p><strong><span style=\"font-family: Cambria Math;\">Ctrl + A</span></strong><span style=\"font-family: Cambria Math;\"> used to select the entire text.</span></p>\n",
+                    solution_hi: "<p>18.(d)<span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">&#2346;&#2367;&#2331;&#2354;&#2368; &#2325;&#2381;&#2352;&#2367;&#2351;&#2366; &#2325;&#2379; &#2346;&#2370;&#2352;&#2381;&#2357;&#2357;&#2340; </span><span style=\"font-family: Cambria Math;\">(undo) </span><span style=\"font-family: Cambria Math;\">&#2325;&#2352;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; </span><span style=\"font-family: Cambria Math;\"><strong>Ctrl + Z</strong> </span><span style=\"font-family: Cambria Math;\">&#2342;&#2348;&#2366;&#2319;&#2306;&#2404;</span></p>\r\n<p><span style=\"font-family: Cambria Math;\">&#2337;&#2377;&#2325;&#2381;&#2351;&#2370;&#2350;&#2375;&#2306;&#2335; &#2325;&#2379; &#2346;&#2381;&#2352;&#2367;&#2306;&#2335; </span><span style=\"font-family: Cambria Math;\">(print) </span><span style=\"font-family: Cambria Math;\">&#2325;&#2352;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; </span><span style=\"font-family: Cambria Math;\"><strong>Ctrl + P</strong> </span><span style=\"font-family: Cambria Math;\">&#2342;&#2348;&#2366;&#2319;&#2306;&#2404;</span></p>\r\n<p><span style=\"font-family: Cambria Math;\">&#2337;&#2377;&#2325;&#2381;&#2351;&#2370;&#2350;&#2375;&#2306;&#2335; &#2325;&#2379; &#2309;&#2306;&#2337;&#2352;&#2354;&#2366;&#2311;&#2344; </span><span style=\"font-family: Cambria Math;\">(underline) </span><span style=\"font-family: Cambria Math;\">&#2325;&#2352;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; </span><span style=\"font-family: Cambria Math;\"><strong>Ctrl + U</strong> </span><span style=\"font-family: Cambria Math;\">&#2342;&#2348;&#2366;&#2319;&#2306;&#2404;</span></p>\r\n<p><span style=\"font-family: Cambria Math;\"><strong>Ctrl + A</strong> </span><span style=\"font-family: Cambria Math;\">&#2346;&#2370;&#2352;&#2375; &#2335;&#2375;&#2325;&#2381;&#2360;&#2381;&#2335; &#2325;&#2379; &#2360;&#2375;&#2354;&#2375;&#2325;&#2381;&#2335; </span><span style=\"font-family: Cambria Math;\">(select) </span><span style=\"font-family: Cambria Math;\">&#2325;&#2352;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2346;&#2381;&#2352;&#2351;&#2379;&#2327; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404;</span></p>\n",
+                    correct: "d",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "19",
+                    section: "31",
+                    question_en: "<p>19.<span style=\"font-family: Cambria Math;\"> Integrated Circuit (IC) or chips used in computers are made with </span></p>\n",
+                    question_hi: "<p>19.<span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">&#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352; &#2350;&#2375;&#2306; &#2346;&#2381;&#2352;&#2351;&#2369;&#2325;&#2381;&#2340; &#2311;&#2306;&#2335;&#2368;&#2327;&#2381;&#2352;&#2375;&#2335;&#2375;&#2337; &#2360;&#2352;&#2381;&#2325;&#2367;&#2335; </span><span style=\"font-family: Cambria Math;\">(IC) </span><span style=\"font-family: Cambria Math;\">&#2351;&#2366; &#2330;&#2367;&#2346;&#2381;&#2360; </span><span style=\"font-family: Cambria Math;\">(chips) _____ </span><span style=\"font-family: Cambria Math;\">&#2360;&#2375; &#2348;&#2344;&#2375; &#2361;&#2379;&#2340;&#2375; &#2361;&#2376;&#2306;&#2404;</span></p>\n",
+                    options_en: ["<p>copper</p>\n", "<p>aluminum</p>\n", 
+                                "<p>gold</p>\n", "<p>silicon</p>\n"],
+                    options_hi: ["<p><span style=\"font-family: Cambria Math;\">&#2325;&#2377;&#2346;&#2352; </span><span style=\"font-family: Cambria Math;\">(copper) </span></p>\n", "<p><span style=\"font-weight: 400;\">&#2319;&#2354;&#2381;&#2351;&#2369;&#2350;&#2367;&#2344;&#2367;&#2351;&#2350; (aluminium)</span></p>\n",
+                                "<p><span style=\"font-weight: 400;\">&#2327;&#2379;&#2354;&#2381;&#2337; (gold)</span></p>\n", "<p><span style=\"font-weight: 400;\">&#2360;&#2367;&#2354;&#2367;&#2325;&#2377;&#2344; (silicon)</span></p>\n"],
+                    solution_en: "<p>19.(d) <span style=\"font-family: Cambria Math;\">Integrated circuits are <strong>made up of </strong></span><span style=\"font-family: Cambria Math;\"><strong>silicons</strong>.</span></p>\n",
+                    solution_hi: "<p>19.(d) <span style=\"font-family: Cambria Math;\">&#2311;&#2306;&#2335;&#2368;&#2327;&#2381;&#2352;&#2375;&#2335;&#2375;&#2337; &#2360;&#2352;&#2381;&#2325;&#2367;&#2335; <strong>&#2360;&#2367;&#2354;&#2367;&#2325;&#2377;&#2344;</strong> &#2360;&#2375; &#2348;&#2344;&#2375; &#2361;&#2379;&#2340;&#2375; &#2361;&#2376;&#2306;&#2404;</span></p>\n",
+                    correct: "d",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "20",
+                    section: "misc",
+                    question_en: "<p>20.<span style=\"font-family: Cambria Math;\"> Which of the following is a hexadecimal number equal to 3431 octal number?</span></p>\n",
+                    question_hi: "<p>20.<span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">&#2344;&#2367;&#2350;&#2381;&#2344; &#2350;&#2375;&#2306; &#2360;&#2375; &#2325;&#2380;&#2344; &#2360;&#2366; &#2361;&#2375;&#2325;&#2381;&#2360;&#2366;&#2337;&#2375;&#2360;&#2367;&#2350;&#2354; &#2344;&#2306;&#2348;&#2352; </span><span style=\"font-family: Cambria Math;\">3431 </span><span style=\"font-family: Cambria Math;\">&#2321;&#2325;&#2381;&#2335;&#2354; &#2344;&#2306;&#2348;&#2352; &#2325;&#2375; &#2348;&#2352;&#2366;&#2348;&#2352; &#2361;&#2376;</span><span style=\"font-family: Cambria Math;\">?</span></p>\n",
+                    options_en: ["<p>719</p>\n", "<p>197</p>\n", 
+                                "<p>917</p>\n", "<p>791</p>\n"],
+                    options_hi: ["<p>719</p>\n", "<p>197</p>\n",
+                                "<p>917</p>\n", "<p>791</p>\n"],
+                    solution_en: "<p>20.(a)<span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">Step 1</span><span style=\"font-family: Cambria Math;\">: Look up each octal digit to obtain the equivalent group of three binary digits. You can use the table below to make these conversions.</span></p>\r\n<p><span style=\"font-family: Cambria Math;\">Octal to Binary Conversion Table</span></p>\r\n<p><img src=\"https://ssccglpinnacle.com/images/mceu_48230315411671613354530.png\"></p>\r\n<p><span style=\"font-weight: 400;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msub><mrow><mo>(</mo><mn>3</mn><mo>)</mo></mrow><mn>8</mn></msub></math></span><span style=\"font-weight: 400;\"> =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msub><mrow><mo>(</mo><mn>011</mn><mo>)</mo></mrow><mn>2</mn></msub></math></span></p>\r\n<p><span style=\"font-weight: 400;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msub><mrow><mo>(</mo><mn>4</mn><mo>)</mo></mrow><mn>8</mn></msub></math></span><span style=\"font-weight: 400;\"> =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msub><mrow><mo>(</mo><mn>100</mn><mo>)</mo></mrow><mn>2</mn></msub></math></span></p>\r\n<p><span style=\"font-weight: 400;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msub><mrow><mo>(</mo><mn>3</mn><mo>)</mo></mrow><mn>8</mn></msub></math></span><span style=\"font-weight: 400;\"> =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msub><mrow><mo>(</mo><mn>011</mn><mo>)</mo></mrow><mn>2</mn></msub></math></span></p>\r\n<p><span style=\"font-weight: 400;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msub><mrow><mo>(</mo><mn>1</mn><mo>)</mo></mrow><mn>8</mn></msub></math></span><span style=\"font-weight: 400;\"> =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msub><mrow><mo>(</mo><mn>001</mn><mo>)</mo></mrow><mn>2</mn></msub></math></span></p>\r\n<p><strong>Step 2</strong><span style=\"font-weight: 400;\">: Group each value of step 1 to make a binary number.</span></p>\r\n<p><span style=\"font-weight: 400;\">011 100 011 001</span></p>\r\n<p><span style=\"font-weight: 400;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msub><mrow><mo>(</mo><mn>3431</mn><mo>)</mo></mrow><mn>8</mn></msub></math></span><span style=\"font-weight: 400;\"> = </span><span style=\"font-weight: 400;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msub><mrow><mo>(</mo><mn>11100011001</mn><mo>)</mo></mrow><mn>2</mn></msub></math></span></p>\r\n<p><strong>Step 3</strong><span style=\"font-weight: 400;\">: Now convert the binary number from step 2 to hexa by grouping all the digits of the binary in sets of four starting from the LSB (far right).</span></p>\r\n<p><span style=\"font-weight: 400;\">0111 0001 1001</span></p>\r\n<p><span style=\"font-weight: 400;\">Note: add zeros to the left of the last digit if there aren\'t enough digits to make a set of four.</span></p>\r\n<p><strong>Step 4</strong><span style=\"font-weight: 400;\">: Convert each group of four to the corresponding hexadecimal (use the table below),</span></p>\r\n<p><span style=\"font-weight: 400;\">0111=7, 0001=1, 1001=9.</span></p>\r\n<p><span style=\"font-weight: 400;\">So, the octal 3431 is equivalent to 719 in hexadecimal.</span></p>\r\n<p><span style=\"font-weight: 400;\">To convert from binary to hexadecimal use the following table:</span></p>\r\n<p><span style=\"font-weight: 400;\"><img src=\"https://ssccglpinnacle.com/images/mceu_80945416021671613737246.png\"></span></p>\n",
+                    solution_hi: "<p>20.(a)<span style=\"font-family: Cambria Math;\"> </span><strong><span style=\"font-family: Cambria Math;\">&#2360;&#2381;&#2335;&#2375;&#2346; </span></strong><span style=\"font-family: Cambria Math;\"><strong>1</strong>:</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">&#2340;&#2368;&#2344; &#2348;&#2366;&#2311;&#2344;&#2352;&#2368; &#2337;&#2367;&#2332;&#2367;&#2335; &#2325;&#2375; &#2311;&#2325;&#2381;&#2357;&#2367;&#2357;&#2376;&#2354;&#2375;&#2306;&#2335; &#2327;&#2381;&#2352;&#2369;&#2346; </span><span style=\"font-family: Cambria Math;\">(equivalent group) </span><span style=\"font-family: Cambria Math;\">&#2325;&#2379; &#2346;&#2381;&#2352;&#2366;&#2346;&#2381;&#2340; &#2325;&#2352;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2346;&#2381;&#2352;&#2340;&#2381;&#2351;&#2375;&#2325; &#2321;&#2325;&#2381;&#2335;&#2354; &#2337;&#2367;&#2332;&#2367;&#2335; </span><span style=\"font-family: Cambria Math;\">(octal digit) </span><span style=\"font-family: Cambria Math;\">&#2325;&#2379; &#2342;&#2375;&#2326;&#2375;&#2306;&#2404; &#2311;&#2344; &#2352;&#2370;&#2346;&#2366;&#2306;&#2340;&#2352;&#2339;&#2379;&#2306; &#2325;&#2379; &#2325;&#2352;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2310;&#2346; &#2344;&#2368;&#2330;&#2375; &#2342;&#2368; &#2327;&#2312; &#2340;&#2366;&#2354;&#2367;&#2325;&#2366; &#2325;&#2366; &#2313;&#2346;&#2351;&#2379;&#2327; &#2325;&#2352; &#2360;&#2325;&#2340;&#2375; &#2361;&#2376;&#2306;&#2404;</span></p>\r\n<p><span style=\"font-family: Cambria Math;\">&#2321;&#2325;&#2381;&#2335;&#2354; &#2360;&#2375; &#2348;&#2366;&#2311;&#2344;&#2352;&#2368; &#2352;&#2370;&#2346;&#2366;&#2306;&#2340;&#2352;&#2339; &#2340;&#2366;&#2354;&#2367;&#2325;&#2366;</span><span style=\"font-family: Cambria Math;\"> </span></p>\r\n<p><img src=\"https://ssccglpinnacle.com/images/mceu_15433309611671613827213.png\"></p>\r\n<p><span style=\"font-weight: 400;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msub><mrow><mo>(</mo><mn>3</mn><mo>)</mo></mrow><mn>8</mn></msub></math></span><span style=\"font-weight: 400;\"> =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msub><mrow><mo>(</mo><mn>011</mn><mo>)</mo></mrow><mn>2</mn></msub></math></span></p>\r\n<p><span style=\"font-weight: 400;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msub><mrow><mo>(</mo><mn>4</mn><mo>)</mo></mrow><mn>8</mn></msub></math></span><span style=\"font-weight: 400;\"> =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msub><mrow><mo>(</mo><mn>100</mn><mo>)</mo></mrow><mn>2</mn></msub></math></span></p>\r\n<p><span style=\"font-weight: 400;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msub><mrow><mo>(</mo><mn>3</mn><mo>)</mo></mrow><mn>8</mn></msub></math></span><span style=\"font-weight: 400;\"> =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msub><mrow><mo>(</mo><mn>011</mn><mo>)</mo></mrow><mn>2</mn></msub></math></span></p>\r\n<p><span style=\"font-weight: 400;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msub><mrow><mo>(</mo><mn>1</mn><mo>)</mo></mrow><mn>8</mn></msub></math> =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msub><mrow><mo>(</mo><mn>001</mn><mo>)</mo></mrow><mn>2</mn></msub></math></span></p>\r\n<p><strong>&#2360;&#2381;&#2335;&#2375;&#2346; 2:</strong><span style=\"font-weight: 400;\"> &#2348;&#2366;&#2311;&#2344;&#2352;&#2368; &#2344;&#2306;&#2348;&#2352; &#2348;&#2344;&#2366;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2360;&#2381;&#2335;&#2375;&#2346; 1 &#2325;&#2375; &#2346;&#2381;&#2352;&#2340;&#2381;&#2351;&#2375;&#2325; &#2350;&#2366;&#2344; &#2325;&#2379; &#2360;&#2350;&#2370;&#2361;&#2368;&#2325;&#2371;&#2340; &#2325;&#2352;&#2375;&#2306;&#2404;&nbsp;</span></p>\r\n<p><span style=\"font-weight: 400;\">011 100 011 001</span></p>\r\n<p><span style=\"font-weight: 400;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msub><mrow><mo>(</mo><mn>3431</mn><mo>)</mo></mrow><mn>8</mn></msub></math></span><span style=\"font-weight: 400;\"> = </span><span style=\"font-weight: 400;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msub><mrow><mo>(</mo><mn>11100011001</mn><mo>)</mo></mrow><mn>2</mn></msub></math></span></p>\r\n<p><strong>&#2360;&#2381;&#2335;&#2375;&#2346; 3:</strong><span style=\"font-weight: 400;\"> &#2309;&#2348; &#2348;&#2366;&#2311;&#2344;&#2352;&#2368; &#2344;&#2306;&#2348;&#2352; &#2325;&#2379; &#2360;&#2381;&#2335;&#2375;&#2346; 2 &#2360;&#2375; &#2361;&#2375;&#2325;&#2381;&#2360;&#2366; &#2350;&#2375;&#2306; &#2346;&#2352;&#2367;&#2357;&#2352;&#2381;&#2340;&#2367;&#2340; &#2325;&#2352;&#2375;&#2306;, &#2348;&#2366;&#2311;&#2344;&#2352;&#2368; &#2325;&#2375; &#2360;&#2349;&#2368; &#2337;&#2367;&#2332;&#2367;&#2335; &#2325;&#2379; LSB &#2360;&#2375; &#2358;&#2369;&#2352;&#2370; &#2325;&#2352;&#2340;&#2375; &#2361;&#2369;&#2319; &#2330;&#2366;&#2352; &#2325;&#2375; &#2360;&#2375;&#2335; &#2350;&#2375;&#2306; &#2360;&#2350;&#2370;&#2361;&#2367;&#2340; &#2325;&#2352;&#2375;&#2306; (&#2342;&#2366;&#2312;&#2306; &#2323;&#2352;)&#2404;</span></p>\r\n<p><span style=\"font-weight: 400;\">0111 0001 1001</span></p>\r\n<p><strong>&#2344;&#2379;&#2335;:</strong><span style=\"font-weight: 400;\"> &#2351;&#2342;&#2367; &#2330;&#2366;&#2352; &#2325;&#2366; &#2319;&#2325; &#2360;&#2375;&#2335; &#2348;&#2344;&#2366;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2346;&#2352;&#2381;&#2351;&#2366;&#2346;&#2381;&#2340; &#2309;&#2306;&#2325; &#2344;&#2361;&#2368;&#2306; &#2361;&#2376;&#2306; &#2340;&#2379; &#2309;&#2306;&#2340;&#2367;&#2350; &#2309;&#2306;&#2325; &#2325;&#2375; &#2348;&#2366;&#2312;&#2306; &#2323;&#2352; &#2358;&#2370;&#2344;&#2381;&#2351; &#2332;&#2379;&#2337;&#2364;&#2375;&#2306;&#2404;</span></p>\r\n<p><strong>&#2360;&#2381;&#2335;&#2375;&#2346; 4:</strong><span style=\"font-weight: 400;\"> &#2330;&#2366;&#2352; &#2325;&#2375; &#2346;&#2381;&#2352;&#2340;&#2381;&#2351;&#2375;&#2325; &#2360;&#2350;&#2370;&#2361; &#2325;&#2379; &#2360;&#2306;&#2348;&#2306;&#2343;&#2367;&#2340; &#2361;&#2375;&#2325;&#2381;&#2360;&#2366;&#2337;&#2375;&#2360;&#2367;&#2350;&#2354; &#2350;&#2375;&#2306; &#2348;&#2342;&#2354;&#2375;&#2306; (&#2344;&#2368;&#2330;&#2375; &#2342;&#2368; &#2327;&#2312; &#2340;&#2366;&#2354;&#2367;&#2325;&#2366; &#2325;&#2366; &#2313;&#2346;&#2351;&#2379;&#2327; &#2325;&#2352;&#2375;&#2306;),</span></p>\r\n<p><span style=\"font-weight: 400;\">0111=7, 0001=1, 1001=9&nbsp;</span></p>\r\n<p><span style=\"font-weight: 400;\">&#2309;&#2340;&#2307; &#2321;&#2325;&#2381;&#2335;&#2354; 3431 &#2361;&#2375;&#2325;&#2381;&#2360;&#2366;&#2337;&#2375;&#2360;&#2367;&#2350;&#2354; &#2350;&#2375;&#2306; 719 &#2325;&#2375; &#2348;&#2352;&#2366;&#2348;&#2352; &#2361;&#2376;&#2404;</span></p>\r\n<p>&nbsp;</p>\r\n<p><span style=\"font-weight: 400;\"><img src=\"https://ssccglpinnacle.com/images/mceu_18049056821671614233169.png\"></span></p>\r\n<p>&nbsp;</p>\n",
+                    correct: "a",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+            
+            // Generate question boxes
+            const boxesContainer = document.getElementById('question-boxes');
+            questions.forEach((q, index) => {
+                const box = document.createElement('div');
+                box.className = 'q-box';
+                box.textContent = index + 1;
+                box.onclick = () => showQuestion(index);
+                box.id = `box-${index}`;
+                boxesContainer.appendChild(box);
+            });
+            
+            // Show first question
+            showQuestion(0);
+            updateProgress();
+        }
+        
+        // Show a specific question
+        
+        function formatContent(text) {
+            if (!text) return '';
+            return text.replace(/<img/g, '<img style="max-width:100%;height:auto;"');
+        }
+        
+        function showQuestion(index) {
+            if (index < 0 || index >= questions.length) return;
+            
+            currentQuestion = index;
+            const question = questions[index];
+            
+            // Update question counter
+            document.getElementById('question-counter').textContent = `Question ${index + 1} of ${questions.length}`;
+            
+            // Update question boxes
+            document.querySelectorAll('.q-box').forEach(box => box.classList.remove('current'));
+            document.getElementById(`box-${index}`).classList.add('current');
+            
+            // Generate question HTML
+            let html = `
+                <div class="question-card">
+                    <div class="question-text">
+                        <div class="en">${formatContent(question.question_en)}</div>
+                        <div class="hi" style="display:none">${formatContent(question.question_hi)} </div>
+                    </div>
+                    <div class="options" id="options-container">`;
+            
+            // Add options
+            ['a', 'b', 'c', 'd'].forEach((opt, i) => {
+                let optionClass = '';
+                let isCorrectAnswer = opt === question.correct;
+                let isUserAnswer = answers[question.id] === opt;
+                
+                // When reviewing, add appropriate classes
+                if (submitted) {
+                    if (isCorrectAnswer) {
+                        optionClass += ' correct-answer';
+                    } else if (isUserAnswer && !isCorrectAnswer) {
+                        optionClass += ' incorrect';
+                    }
+                }
+                
+                html += `
+                    <div class="option-item">
+                        <input class="option-input" type="radio" name="q${index}" 
+                            id="opt-${index}-${opt}" value="${opt}" 
+                            ${isUserAnswer ? 'checked' : ''}
+                            onclick="selectAnswer('${question.id}', '${opt}')">
+                       <label class="option-label${optionClass}" for="opt-${index}-${opt}">
+                            <div class="en">${question.options_en[i]}</div>
+                            <div class="hi" style="display:none">${question.options_hi[i]}</div>
+                        </label>
+                    </div>`;
+            });
+            
+            // Add solution if submitted
+            if (submitted) {
+                const isCorrect = answers[question.id] === question.correct;
+                const resultText = answers[question.id] ? (isCorrect ? 'Correct!' : 'Incorrect!') : 'Not attempted';
+                
+                html += `
+                    <div class="solution-container">
+                        <div class="solution-title">${resultText}</div>
+                        <div class="solution-text">
+                            <div class="en">${question.solution_en}</div>
+                            <div class="hi" style="display:none">${question.solution_hi}</div>
+                        </div>
+                    </div>`;
+            }
+            
+            html += `</div></div>`;
+            
+            document.getElementById('questions-container').innerHTML = html;
+            
+            // Apply language settings
+            applyLanguage();
+            
+            // If in mobile view, close the menu
+            if (window.innerWidth < 992) {
+                toggleNav(false);
+            }
+            
+            // Add review mode class if submitted
+            if (submitted) {
+                document.getElementById('options-container').classList.add('review-mode');
+            }
+        }
+        
+        // Apply current language
+        function applyLanguage() {
+            document.querySelectorAll(`.${currentLang}`).forEach(el => el.style.display = 'block');
+            document.querySelectorAll(`.${currentLang === 'en' ? 'hi' : 'en'}`).forEach(el => el.style.display = 'none');
+            
+            // Update language button text
+            document.getElementById('lang-text').textContent = currentLang === 'en' ? 'Hi' : 'En';
+        }
+        
+        // Select an answer
+        function selectAnswer(qId, option) {
+            if (submitted) return;
+            
+            answers[qId] = option;
+            updateProgress();
+            
+            // Mark question as attempted in the navigation
+            const index = questions.findIndex(q => q.id === qId);
+            if (index >= 0) {
+                const box = document.getElementById(`box-${index}`);
+                box.classList.add('attempted');
+                box.classList.remove('unattempted');
+            }
+        }
+        
+        // Navigate to previous/next question
+        function prevQuestion() { 
+            if (currentQuestion > 0) showQuestion(currentQuestion - 1); 
+        }
+        
+        function nextQuestion() { 
+            if (currentQuestion < questions.length - 1) showQuestion(currentQuestion + 1); 
+        }
+        
+        // Switch section
+        function switchSection(sectionId) {
+            if (sectionId === 'all') {
+                showQuestion(0);
+                return;
+            }
+            
+            const section = sections[sectionId];
+            if (section) showQuestion(section.start);
+        }
+        
+        // Toggle language
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'hi' : 'en';
+            applyLanguage();
+        }
+        
+        // Toggle navigation sidebar
+        function toggleNav(show) {
+            const nav = document.getElementById('question-nav');
+            const overlay = document.getElementById('nav-overlay');
+            
+            if (show === undefined) {
+                show = !nav.classList.contains('show');
+            }
+            
+            if (show) {
+                nav.classList.add('show');
+                overlay.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            } else {
+                nav.classList.remove('show');
+                overlay.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+        }
+        
+        // Update progress
+        function updateProgress() {
+            const attempted = Object.keys(answers).length;
+            document.getElementById('attempted-count').textContent = attempted;
+        }
+        
+        // Start timer
+        function startTimer() {
+            const timerDisplay = document.getElementById('timer-display');
+            let timeLeft = totalTime;
+            
+            const timerInterval = setInterval(() => {
+                if (timeLeft <= 0 || submitted) {
+                    clearInterval(timerInterval);
+                    if (!submitted) submitTest();
+                    return;
+                }
+                
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                timeLeft--;
+            }, 1000);
+        }
+        
+        // Confirm before submitting
+        function confirmSubmit() {
+            if (submitted) return;
+            
+            const attempted = Object.keys(answers).length;
+            const remaining = questions.length - attempted;
+            
+            // Create a more modern confirmation dialog
+            const confirmHtml = `
+                <div style="text-align: center; padding: 20px;">
+                    <h4 style="margin-bottom: 16px; color: var(--dark);">Confirm Submission</h4>
+                    <p style="margin-bottom: 24px; color: var(--gray);">
+                        You have attempted ${attempted} of ${questions.length} questions.<br>
+                        ${remaining} questions are unattempted.
+                    </p>
+                    <div style="display: flex; justify-content: center; gap: 12px;">
+                        <button onclick="this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; border: 1px solid var(--light-gray); background: white; border-radius: 8px; cursor: pointer;">
+                            Cancel
+                        </button>
+                        <button onclick="submitTest(); this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer;">
+                            Submit Test
+                        </button>
+                    </div>
+                </div>`;
+            
+            // Create modal element
+            const modal = document.createElement('div');
+            modal.className = 'results-modal show';
+            modal.innerHTML = `
+                <div class="results-card" style="max-width: 400px;">
+                    <button class="cancel-btn" style="position: absolute; top: 12px; right: 12px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--gray);" onclick="this.closest('.results-modal').remove()">
+                        ×
+                    </button>
+                    ${confirmHtml}
+                </div>`;
+            
+            document.body.appendChild(modal);
+        }
+        
+        // Submit test
+        function submitTest() {
+            if (submitted) return;
+            
+            submitted = true;
+            
+            let score = 0;
+            let correctCount = 0;
+            let incorrectCount = 0;
+            let unattemptedCount = 0;
+            
+            questions.forEach((q, index) => {
+                const userAns = answers[q.id];
+                const box = document.getElementById(`box-${index}`);
+                
+                box.classList.remove('attempted');
+                
+                if (!userAns) {
+                    unattemptedCount++;
+                    box.classList.add('unattempted');
+                } else if (userAns === q.correct) {
+                    correctCount++;
+                    score += q.pos_marks;
+                    box.classList.add('correct');
+                } else {
+                    incorrectCount++;
+                    score -= q.neg_marks;
+                    box.classList.add('incorrect');
+                }
+            });
+            
+            // Update result values
+            document.getElementById('score-value').textContent = score.toFixed(2);
+            document.getElementById('correct-value').textContent = correctCount;
+            document.getElementById('incorrect-value').textContent = incorrectCount;
+            document.getElementById('unattempted-value').textContent = unattemptedCount;
+            
+            // Show the results modal
+            document.getElementById('results-modal').classList.add('show');
+            
+            // Disable submit button
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-check"></i>';
+            submitBtn.style.backgroundColor = 'var(--success)';
+            
+            // Refresh current question view to show solution
+            showQuestion(currentQuestion);
+        }
+        
+        // Review test
+        function reviewTest() {
+            document.getElementById('results-modal').classList.remove('show');
+            showQuestion(0);
+        }
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target === document.getElementById('results-modal')) {
+                document.getElementById('results-modal').classList.remove('show');
+            }
+        });
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') prevQuestion();
+            if (e.key === 'ArrowRight') nextQuestion();
+        });
+    </script>
+</body>
+</html>
