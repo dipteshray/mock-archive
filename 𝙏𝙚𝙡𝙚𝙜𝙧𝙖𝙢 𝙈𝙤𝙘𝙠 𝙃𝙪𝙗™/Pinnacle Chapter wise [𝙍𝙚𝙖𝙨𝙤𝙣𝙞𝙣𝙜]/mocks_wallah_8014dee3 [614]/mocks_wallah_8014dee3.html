@@ -1,0 +1,1449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mocks Wallah</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --primary-light: #a29bfe;
+            --primary-dark: #5649c0;
+            --secondary: #00cec9;
+            --accent: #fd79a8;
+            --success: #00b894;
+            --warning: #fdcb6e;
+            --danger: #d63031;
+            --light: #f8f9fa;
+            --dark: #2d3436;
+            --gray: #636e72;
+            --light-gray: #dfe6e9;
+            --card-bg: #ffffff;
+            --body-bg: #f5f6fa;
+            --header-bg: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            --footer-bg: #ffffff;
+            --box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            --box-shadow-sm: 0 2px 10px rgba(0,0,0,0.05);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background-color: var(--body-bg);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            color: var(--dark);
+            line-height: 1.6;
+            padding-bottom: 80px; /* Space for fixed navigation */
+            overflow-x: hidden;
+        }
+        
+        /* Header Styles */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: var(--header-bg);
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            z-index: 1000;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .header-brand {
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .header-brand i {
+            margin-right: 8px;
+            font-size: 1.2rem;
+        }
+        
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .control-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .control-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .control-btn.active {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .timer-display {
+            background: rgba(0,0,0,0.2);
+            border-radius: 18px;
+            padding: 4px 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+        
+        .timer-display i {
+            margin-right: 6px;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-top: 60px;
+            padding: 16px;
+            min-height: calc(100vh - 140px);
+        }
+        
+        .question-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--box-shadow-sm);
+            border: none;
+            transition: var(--transition);
+        }
+        
+        .question-counter {
+            font-size: 0.9rem;
+            color: var(--gray);
+            text-align: center;
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+        
+        .question-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+        
+        .option-item {
+            margin-bottom: 12px;
+            position: relative;
+        }
+        
+        .option-input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+            .question-text {
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        hyphens: auto;
+        max-width: 100%;
+    }
+
+    .question-text img,
+    .option-label img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 8px 0;
+        border-radius: 8px;
+    }
+
+    .option-label {
+        overflow: hidden;
+    }
+
+    .question-card {
+        overflow: hidden;
+    }
+        
+        .option-label {
+            display: block;
+            padding: 14px 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--light-gray);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .option-label:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .option-input:checked + .option-label {
+            border-color: var(--primary);
+            background: rgba(108, 92, 231, 0.05);
+            box-shadow: 0 0 0 1px var(--primary);
+        }
+        
+        .option-input:checked + .option-label::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--primary);
+        }
+        
+        /* When reviewing answers */
+        .review-mode .option-input:checked + .option-label.correct {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.correct::after {
+            background: var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.incorrect {
+            border-color: var(--danger);
+            background: rgba(214, 48, 49, 0.05);
+            box-shadow: 0 0 0 1px var(--danger);
+        }
+        
+        .MathJax, .mjx-chtml {
+            overflow-x: auto;
+            max-width: 100%;
+            display: inline-block;
+        }
+
+        
+        .review-mode .option-input:checked + .option-label.incorrect::after {
+            background: var(--danger);
+        }
+        
+        .review-mode .option-label.correct-answer {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-label.correct-answer::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--success);
+        }
+        
+        .solution-container {
+            margin-top: 20px;
+            padding: 16px;
+            background: rgba(108, 92, 231, 0.05);
+            border-radius: 12px;
+            border-left: 3px solid var(--primary);
+        }
+        
+        .solution-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+        
+        /* Question Navigation */
+        .question-nav {
+            position: fixed;
+            top: 60px;
+            right: 0;
+            bottom: 80px;
+            width: 100%;
+            max-width: 320px;
+            background: var(--card-bg);
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            transform: translateX(100%);
+            transition: var(--transition);
+            z-index: 900;
+            overflow-y: auto;
+            padding: 16px;
+        }
+        
+        .question-nav.show {
+            transform: translateX(0);
+        }
+        
+        .nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .nav-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+        
+        .question-stats {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .stat-badge {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        
+        .section-selector {
+            width: 100%;
+            margin-bottom: 16px;
+            border-radius: 12px;
+            padding: 10px 16px;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            font-size: 0.9rem;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 16px;
+        }
+        
+        .question-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+            gap: 8px;
+        }
+        
+        .q-box {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .q-box:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .q-box.attempted {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .q-box.correct {
+            background-color: var(--success);
+            color: white;
+            border-color: var(--success);
+        }
+        
+        .q-box.incorrect {
+            background-color: var(--danger);
+            color: white;
+            border-color: var(--danger);
+        }
+        
+        .q-box.current {
+            border: 2px solid var(--accent) !important;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .q-box.unattempted {
+            background-color: var(--gray);
+            color: white;
+            border-color: var(--gray);
+        }
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: var(--footer-bg);
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            z-index: 800;
+        }
+        
+        .nav-btn {
+            height: 48px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 20px;
+            transition: var(--transition);
+            gap: 8px;
+        }
+        
+        .nav-btn i {
+            font-size: 1rem;
+        }
+        
+        .nav-btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .nav-btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+        
+        .nav-btn-outline:hover {
+            background: rgba(108, 92, 231, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        /* Overlay when nav is open */
+        .nav-overlay {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            bottom: 80px;
+            background: rgba(0,0,0,0.5);
+            z-index: 800;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+        }
+        
+        .nav-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        /* Results Modal */
+        .results-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1100;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+            padding: 16px;
+        }
+        
+        .results-modal.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .results-card {
+            background: white;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+            transform: translateY(20px);
+            transition: var(--transition);
+        }
+        
+        .results-modal.show .results-card {
+            transform: translateY(0);
+        }
+        
+        .results-header {
+            background: var(--header-bg);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .results-title {
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .results-body {
+            padding: 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            color: white;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+        
+        .results-footer {
+            padding: 16px 20px;
+            display: flex;
+            justify-content: center;
+            border-top: 1px solid var(--light-gray);
+        }
+        
+        /* Responsive Adjustments */
+        @media (min-width: 992px) {
+            .question-nav {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-right: 320px;
+            }
+            
+            .nav-overlay {
+                display: none;
+            }
+            
+            .bottom-nav {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .question-grid {
+                grid-template-columns: repeat(auto-fill, minmax(36px, 1fr));
+                gap: 6px;
+            }
+            
+            .q-box {
+                width: 36px;
+                height: 36px;
+                font-size: 0.9rem;
+            }
+            
+            .option-label {
+                padding: 12px 14px;
+            }
+            
+            .question-text {
+                font-size: 1rem;
+            }
+            
+            .header-brand {
+                font-size: 1rem;
+            }
+            
+            .control-btn {
+                width: 32px;
+                height: 32px;
+            }
+            
+            .timer-display {
+                font-size: 0.8rem;
+                padding: 4px 10px;
+            }
+            
+            .nav-btn {
+                height: 44px;
+                padding: 0 16px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="#" class="header-brand">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Mocks Wallah</span>
+            </a>
+            
+            <div class="header-controls">
+                <!-- Timer -->
+                <div class="timer-display">
+                    <i class="far fa-clock"></i>
+                    <span id="timer-display">16:00</span>
+                </div>
+                
+                <!-- Language toggle -->
+                <button class="control-btn" id="lang-btn" onclick="toggleLanguage()">
+                    <span id="lang-text">En</span>
+                </button>
+                
+                <!-- Submit button -->
+                <button class="control-btn" id="submit-btn" onclick="confirmSubmit()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+                
+                <!-- Questions toggle for mobile -->
+                <button class="control-btn nav-toggle-btn" id="nav-toggle" onclick="toggleNav()">
+                    <i class="fas fa-th"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main content -->
+    <main class="main-content" id="main-content">
+        <div class="question-counter" id="question-counter">Question 1 of 23</div>
+        
+        <!-- Questions will be displayed here -->
+        <div id="questions-container"></div>
+    </main>
+    
+    <!-- Overlay for mobile nav -->
+    <div class="nav-overlay" id="nav-overlay" onclick="toggleNav(false)"></div>
+    
+    <!-- Question navigation sidebar -->
+    <aside class="question-nav" id="question-nav">
+        <div class="nav-header">
+            <h3 class="nav-title">Questions</h3>
+            <div class="question-stats">
+                <span class="stat-badge bg-primary" id="attempted-count">0</span>
+                <span class="stat-badge bg-gray" id="total-count">23</span>
+                <button class="control-btn d-lg-none" onclick="toggleNav(false)">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Section selector -->
+        <select class="section-selector" id="section-selector" onchange="switchSection(this.value)">
+            <option value="all">All Sections</option>
+        </select>
+        
+        <!-- Question grid -->
+        <div class="question-grid" id="question-boxes"></div>
+    </aside>
+    
+    <!-- Bottom navigation for mobile -->
+    <nav class="bottom-nav d-lg-none">
+        <button class="nav-btn nav-btn-outline" onclick="prevQuestion()">
+            <i class="fas fa-chevron-left"></i>
+            <span>Previous</span>
+        </button>
+        <button class="nav-btn nav-btn-outline" onclick="nextQuestion()">
+            <span>Next</span>
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </nav>
+    
+    <!-- Results modal -->
+    <div class="results-modal" id="results-modal">
+        <div class="results-card">
+            <div class="results-header">
+                <h3 class="results-title">Test Results</h3>
+            </div>
+            <div class="results-body">
+                <div class="stats-grid">
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark))">
+                        <div class="stat-value" id="score-value">0</div>
+                        <div class="stat-label">Score</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--success), #1b9aaa)">
+                        <div class="stat-value" id="correct-value">0</div>
+                        <div class="stat-label">Correct</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--danger), var(--accent))">
+                        <div class="stat-value" id="incorrect-value">0</div>
+                        <div class="stat-label">Incorrect</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--gray), var(--dark))">
+                        <div class="stat-value" id="unattempted-value">0</div>
+                        <div class="stat-label">Unattempted</div>
+                    </div>
+                </div>
+            </div>
+            <div class="results-footer">
+                <button class="nav-btn nav-btn-primary" onclick="reviewTest()">
+                    <i class="fas fa-search me-1"></i>
+                    <span>Review Test</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Questions data
+        const questions = [];
+        const sections = {};
+        let currentLang = "en";
+        let currentQuestion = 0;
+        let answers = {};
+        let submitted = false;
+        let totalTime = 16 * 60;
+        
+        // Initialize the test
+        window.onload = function() {
+            initializeTest();
+            startTimer();
+            
+            // If on desktop, show the question navigation by default
+            if (window.innerWidth >= 992) {
+                document.getElementById('question-nav').classList.add('show');
+                document.getElementById('main-content').classList.add('with-nav');
+            }
+        };
+        
+        // Initialize test data
+        function initializeTest() {
+            // Add sections and questions
+            
+            sections["6"] = {
+                name: "Reasoning",
+                start: 0,
+                end: 21
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="6">Reasoning</option>`;
+            
+            sections["misc"] = {
+                name: "Miscellaneous",
+                start: 22,
+                end: 22
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="misc">Miscellaneous</option>`;
+            
+            
+                questions.push({
+                    id: "1",
+                    section: "6",
+                    question_en: "<p>1. Select the set of classes the relationship among which is best illustrated by the following Venn diagram.</p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image18.png\" width=\"85\" height=\"82\"></p>",
+                    question_hi: "<p>1.<span style=\"font-family: Palanquin Dark;\"> वर्गों के उस समुच्चय का चयन कीजिये जिसके बीच का संबंध निम्नलिखित वेन आरेख द्वारा सर्वोत्तम रूप से दर्शाया गया है।</span></p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image18.png\" width=\"83\" height=\"80\"></p>",
+                    options_en: ["<p>Fathers, Brothers, Males</p>", "<p>Grandfathers, Fathers, Males</p>", 
+                                "<p>Literates, Engineers, Farmers</p>", "<p>Mothers, Aunts, Doctors</p>"],
+                    options_hi: ["<p>पिता, भाई, पुरुष</p>", "<p>दादाजी, पिता, पुरुष</p>",
+                                "<p>साक्षर, इंजीनियर, किसान</p>", "<p>मां, चाची, डॉक्टर</p>"],
+                    solution_en: "<p>1.(b)</p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image22.png\" width=\"136\" height=\"119\"></p>\n<p><span style=\"font-family: Palanquin Dark;\">All Grandfathers are fathers, and all fathers are male.</span></p>",
+                    solution_hi: "<p>1.(b)</p>\n<p><strong id=\"docs-internal-guid-77b8de44-7fff-9292-62a0-f1391c3dd83d\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXf7yAsSo_S9BvbcknHFZVbdF-NRSsI811a111gUUb9-Bj2L1LVpijSnRYVwPvjqbo6-ThAzxmh9kyUZRcyKM44E7QSnYUt3yTBYVmCdCWbOV2Qg3uQNMFPsTV-LaLzkRu3boFmFhA?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"152\" height=\"102\"></strong></p>\n<p><span style=\"font-family: Palanquin Dark;\">सभी दादा ,पिता हैं और सभी पिता , पुरुष हैं।</span></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "2",
+                    section: "6",
+                    question_en: "<p>2.<span style=\"font-family: Palanquin Dark;\"> In the following Venn diagram, the hexagon stands for &lsquo;police officers&rsquo;, </span><span style=\"font-family: Palanquin Dark;\">the</span><span style=\"font-family: Palanquin Dark;\"> pentagon stands for &lsquo;graduates&rsquo; , the circle stands for &lsquo;females&rsquo; , and the square stands for &lsquo;Indians&rsquo;. The given numbers represent the number of persons in that particular category.</span></p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image26.png\" width=\"143\" height=\"118\"></p>\n<p><span style=\"font-family: Palanquin Dark;\">How many </span><span style=\"font-family: Palanquin Dark;\">Indian</span><span style=\"font-family: Palanquin Dark;\"> police officers are graduates but NOT females?</span></p>",
+                    question_hi: "<p>2.<span style=\"font-family: Palanquin Dark;\"> निम्नलिखित वेन आरेख में, षट्भुज \'पुलिस अधिकारियों\' के लिए है, पंचकोण \'स्नातक\' के लिए है, वृत्त \'महिलाओं\' के लिए है, और वर्ग \'भारतीयों\' के लिए है। दी गई संख्याएं उस विशेष श्रेणी में व्यक्तियों की संख्या दर्शाती हैं।</span></p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image26.png\" width=\"147\" height=\"122\"></p>\n<p><span style=\"font-family: Palanquin Dark;\">कितने भारतीय पुलिस अधिकारी स्नातक हैं, लेकिन महिला नहीं हैं?</span></p>",
+                    options_en: ["<p>11</p>", "<p>8</p>", 
+                                "<p>13</p>", "<p>19</p>"],
+                    options_hi: ["<p>11</p>", "<p>8</p>",
+                                "<p>13</p>", "<p>19</p>"],
+                    solution_en: "<p>2.(a) <span style=\"font-family: Palanquin Dark;\">Clearly, the common intersection point of pentagon, hexagon and square (excluding circle) is 11.</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">So, the number of </span><span style=\"font-family: Palanquin Dark;\">Indian</span><span style=\"font-family: Palanquin Dark;\"> police officers who are graduates but NOT females = 11.</span></p>",
+                    solution_hi: "<p>2.(a) <span style=\"font-family: Palanquin Dark;\">स्पष्ट रूप से, पंचभुज, षट्भुज और वर्ग (वृत्त को छोड़कर) का उभयनिष्ठ प्रतिच्छेदन बिंदु 11 है।</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">इसलिए, भारतीय पुलिस अधिकारियों की संख्या जो स्नातक हैं लेकिन महिलाएं नहीं हैं = 11.</span></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "3",
+                    section: "6",
+                    question_en: "<p>3. <span style=\"font-family: Palanquin Dark;\">Study the Venn diagram that best represents the relationship between the following.</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">Doctors, Married , Females</span></p>",
+                    question_hi: "<p>3.<span style=\"font-family: Palanquin Dark;\"> वेन आरेख का अध्ययन कीजिये जो निम्नलिखित के बीच संबंध को सर्वोत्तम रूप से दर्शाता है।</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">डॉक्टर, विवाहित , महिलाएं</span></p>",
+                    options_en: ["<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image83.png\" width=\"155\" height=\"62\"></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image30.png\" width=\"99\" height=\"87\"></p>", 
+                                "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image20.png\" width=\"96\" height=\"93\"></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image72.png\" width=\"91\" height=\"84\"></p>"],
+                    options_hi: ["<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image83.png\" width=\"145\" height=\"58\"></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image30.png\" width=\"101\" height=\"88\"></p>",
+                                "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image20.png\" width=\"91\" height=\"88\"></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image72.png\" width=\"92\" height=\"85\"></p>"],
+                    solution_en: "<p>3.(b)</p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image67.png\" width=\"125\" height=\"80\"></p>\n<p><span style=\"font-family: Palanquin Dark;\">There is a possibility that there may be a Doctor who is a married female, so option (b) is correct.</span></p>",
+                    solution_hi: "<p>3.(b)</p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image78.png\" width=\"130\" height=\"83\"></p>\n<p><span style=\"font-family: Palanquin Dark;\">ऐसी संभावना है कि कोई डॉक्टर हो जो एक विवाहित महिला हो, इसलिए विकल्प (b) सही है।</span></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "4",
+                    section: "6",
+                    question_en: "<p>4. <span style=\"font-family: Palanquin Dark;\">Selec the Venn diagram that best illustrates the relationship between the following classes.</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">Planet, Mars, Venus</span></p>",
+                    question_hi: "<p>4. <span style=\"font-family: Palanquin Dark;\">वेन आरेख का चयन करें जो निम्नलिखित वर्गों के बीच के संबंध को सर्वोत्तम रूप से दर्शाता है।</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">ग्रह, मंगल, शुक्र</span></p>",
+                    options_en: ["<p><strong id=\"docs-internal-guid-78841fb1-7fff-c3e9-454b-e288c6dad663\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfr2kpl2709AbdQsfWI0b1S782Or9trbu1no_temdBkXSLP-7XvbSba23VOd4Cg5VgDyDjaf6uCqvsHyxev0UCkvPGrbMV9jKyfqDRcI1fJ3ZEaTVp2gjIvqTsG13kfnsVdOr65Qw?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"147\" height=\"46\"></strong></p>", "<p><strong id=\"docs-internal-guid-33bd24d4-7fff-e4fd-c4f3-58a6615e26e4\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXchX20yOxRJk4gBx7uWfGHO5KHUCRC9ukZSwtfFdpMBOYy7G_q-h6ZtBUlwNHU1hXKhP65P9tqBSjdiPha8v4tGkfO_hsKc6E1FepLKm9RXpmNHujclUIRJB-Wij_vGvtB5AeAUQA?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"76\" height=\"76\"></strong></p>", 
+                                "<p><strong id=\"docs-internal-guid-53842342-7fff-fbd1-2a57-8321ec30da33\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXf9BOUlMNOGdBZRrrtdLdsCxFgFsd5ZilIooV_784mLMsAW3fW-RrZGMGRXoRpiiVXWJMikrfn0lufVVFm1zMhJImbPR7wdayTad1rjYCXbEymqdSBJUcqLBL_1ExdAn2w7ihA6Mg?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"78\" height=\"78\"></strong></p>", "<p><strong id=\"docs-internal-guid-95a1d8d2-7fff-13b2-5790-b8d41d905ec7\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdx77k15QAeh-UX1MTJp-kZHkSEaEny203avkVPuJua4-rv29wNyRcejRR7ns10TTzH9ZlOOLsUtzRGOFSWeSiMqdhAI7mNE1Dpb7NcWC2qA9ENNI0YTOOmlvg315RVFBV4-BcVMQ?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"130\" height=\"55\"></strong></p>"],
+                    options_hi: ["<p><strong id=\"docs-internal-guid-e4078492-7fff-524b-1ccf-2220dc2617c2\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfr2kpl2709AbdQsfWI0b1S782Or9trbu1no_temdBkXSLP-7XvbSba23VOd4Cg5VgDyDjaf6uCqvsHyxev0UCkvPGrbMV9jKyfqDRcI1fJ3ZEaTVp2gjIvqTsG13kfnsVdOr65Qw?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"172\" height=\"54\"></strong></p>", "<p><strong id=\"docs-internal-guid-33bda68c-7fff-65d1-83af-54d498b79d99\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXchX20yOxRJk4gBx7uWfGHO5KHUCRC9ukZSwtfFdpMBOYy7G_q-h6ZtBUlwNHU1hXKhP65P9tqBSjdiPha8v4tGkfO_hsKc6E1FepLKm9RXpmNHujclUIRJB-Wij_vGvtB5AeAUQA?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"76\" height=\"76\"></strong></p>",
+                                "<p><strong id=\"docs-internal-guid-2d5f370c-7fff-8469-5ae2-a14df887d00b\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXf9BOUlMNOGdBZRrrtdLdsCxFgFsd5ZilIooV_784mLMsAW3fW-RrZGMGRXoRpiiVXWJMikrfn0lufVVFm1zMhJImbPR7wdayTad1rjYCXbEymqdSBJUcqLBL_1ExdAn2w7ihA6Mg?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"78\" height=\"78\"></strong></p>", "<p><strong id=\"docs-internal-guid-7a66bf84-7fff-9fcc-a34f-85763d430705\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdx77k15QAeh-UX1MTJp-kZHkSEaEny203avkVPuJua4-rv29wNyRcejRR7ns10TTzH9ZlOOLsUtzRGOFSWeSiMqdhAI7mNE1Dpb7NcWC2qA9ENNI0YTOOmlvg315RVFBV4-BcVMQ?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"130\" height=\"55\"></strong></p>"],
+                    solution_en: "<p>4.(b)</p>\n<p><strong id=\"docs-internal-guid-879a904d-7fff-f4f1-1721-7bcf80cf5e97\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcSEz19mpguebsJr5KM67ub4FkseX8DGtGWIqzvrYwLZZkr_8ZNOIoFGExFAVcftE7D5MeZAO6tX-xu1Z0aGc5WNY9O0HV5s-DnessorcPfRu9yBEkur4brJqTmXVaLQDzYnI7-rA?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"151\" height=\"79\"></strong></p>",
+                    solution_hi: "<p>4.(b)</p>\n<p><strong id=\"docs-internal-guid-69b1aa3d-7fff-11d9-f501-830fa26793ea\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXePFZxpFgai47dpRitcvwEe-1dHPZXcl6B2Z4lYNgtTW0kcW-q1lhHi7LhHPDstyYDRq6VsYwEzIqFo6sIRrE6MHXuJJ4uQIGzXJVq9sKAW2CVtbfYi7C9Zal-POE78Ws-todHU?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"143\" height=\"75\"></strong></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "5",
+                    section: "6",
+                    question_en: "<p>5. <span style=\"font-family: Palanquin Dark;\"> Select the set of classes the relationship among which is best illustrated by the given venn diagram.</span></p>\n<p><strong id=\"docs-internal-guid-da103cde-7fff-430c-e6c8-009012917be5\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXchX20yOxRJk4gBx7uWfGHO5KHUCRC9ukZSwtfFdpMBOYy7G_q-h6ZtBUlwNHU1hXKhP65P9tqBSjdiPha8v4tGkfO_hsKc6E1FepLKm9RXpmNHujclUIRJB-Wij_vGvtB5AeAUQA?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"76\" height=\"76\"></strong></p>",
+                    question_hi: "<p>5. <span style=\"font-family: Palanquin Dark;\">वर्गों के उस समुच्चय का चयन करें जिसके बीच संबंध दिए गए वेन आरेख द्वारा सर्वोत्तम रूप से चित्रित किया गया है।</span></p>\n<p><strong id=\"docs-internal-guid-da103cde-7fff-430c-e6c8-009012917be5\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXchX20yOxRJk4gBx7uWfGHO5KHUCRC9ukZSwtfFdpMBOYy7G_q-h6ZtBUlwNHU1hXKhP65P9tqBSjdiPha8v4tGkfO_hsKc6E1FepLKm9RXpmNHujclUIRJB-Wij_vGvtB5AeAUQA?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"76\" height=\"76\"></strong></p>",
+                    options_en: ["<p>Potato, Peach,Vegetables</p>", "<p>Natural numbers,Integers,Real numbers</p>", 
+                                "<p>Doctors,Singers,Extroverts</p>", "<p>Peso,Currency,Taka</p>"],
+                    options_hi: ["<p>आलू, आड़ू, सब्जियां</p>", "<p>प्राकृतिक संख्याएं, पूर्णांक, वास्तविक संख्याएं</p>",
+                                "<p>डॉक्टर, गायक, बहिर्मुखी</p>", "<p>पेसो, मुद्रा, टका</p>"],
+                    solution_en: "<p>5.(d)</p>\n<p><strong id=\"docs-internal-guid-98c636ff-7fff-a88d-21b9-86ab102c96b3\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXckDxRDKE8msGbx6Z48s4qIn1COaoocQEctfV8LAklMORAr7fKrkDtltLY8Ip1Kk0UozFsLGRUtj6knbNQ4STyTnu7ebMbY6BYOo8XLLYFuezpXTANm6USLwqG44n3JoNXt_bQVFQ?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"148\" height=\"77\"></strong></p>",
+                    solution_hi: "<p>5.(d)</p>\n<p><strong id=\"docs-internal-guid-45b1b8b8-7fff-d24c-46f0-53d88d09e88a\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXc4meivIV0VAGu-MDhYz9Gp7Xou6UtpLglTn7wdbONx_f0XvGDMHz3eb5pxcQK42yo4YV7n0_NDBPol0zKhjVbmqaPsfsTOalZuw3RCo-xwXIAFG8t4pkfwHq2mp7S8zA5Wl3NR?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"127\" height=\"67\"></strong></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "6",
+                    section: "6",
+                    question_en: "<p>6.<span style=\"font-family: Palanquin Dark;\"> Select the venn diagram that best represents the relationship between the following.</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">Furniture, Bed, Chair, Dining table</span></p>",
+                    question_hi: "<p>6.<span style=\"font-family: Palanquin Dark;\"> वेन आरेख का चयन करें जो निम्नलिखित के बीच के संबंध को सर्वोत्तम रूप से दर्शाता है।</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">फर्नीचर, बिस्तर, कुर्सी, खाने की मेज</span></p>",
+                    options_en: ["<p><strong id=\"docs-internal-guid-3e45d120-7fff-25a6-4c36-cd02ca589c82\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdRNonH-vyCpIAoDpGM2MoMErb0_opjpaTFWf9tyVGjwK4qiDy1hYMYCthnlbwpqbULxjEjAAQvJ_hKy5hmiYNiTpTilEv_pHOnt94LvXeaTV8KhvlOz_mqxqqCoDKjoxcHUZnb?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"135\" height=\"87\"></strong></p>", "<p><strong id=\"docs-internal-guid-aedae75a-7fff-613d-4e9a-52f9b99df021\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcmWzllQKeDlnRTcLHnJQKTj15ECmrgaozO3R6zhbZP-dWKt-5svaBFr7pi9sub_ZDxFsuLR-YP1dfIdokCkQLU-Tb_BrhKh8ktf8tDgKSgzQuAe1D1zYN0WRrQRkITchTR0WmE?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"121\" height=\"71\"></strong></p>", 
+                                "<p><strong id=\"docs-internal-guid-89b06bd8-7fff-7938-ad4d-e598f4d0bf93\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXc7IkKZFdawE-TzzOIgCj-8v0ktrMaBTBeDhnK6Wc7DKOYuZZj5MwtuUhQMj46ui_eg1HxDuf2xeBxJhIdJAOcfWDuzVuN32juqOTSXCojAfbP_lq6kGmMJkwWOjI0X8sT4aD3AoA?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"68\" height=\"61\"></strong></p>", "<p><strong id=\"docs-internal-guid-601271f0-7fff-8ec8-5291-e3ec10878e46\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdNgSZu7QteH_ZyH7WgOxu_ga0U8bZIdJsbsLB1tpN2d6YsDSrqUu1WVG__vc3evEVm1-89o75RMjPixPNdkpCgMlH7A2yoLt1dWU3S7hrHuzqWfx-BjN4zUouNC79-5g1p0F8UxA?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"144\" height=\"64\"></strong></p>"],
+                    options_hi: ["<p><strong id=\"docs-internal-guid-2cf211b0-7fff-b4f3-5abc-abc2c6415d05\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdRNonH-vyCpIAoDpGM2MoMErb0_opjpaTFWf9tyVGjwK4qiDy1hYMYCthnlbwpqbULxjEjAAQvJ_hKy5hmiYNiTpTilEv_pHOnt94LvXeaTV8KhvlOz_mqxqqCoDKjoxcHUZnb?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"135\" height=\"87\"></strong></p>", "<p><strong id=\"docs-internal-guid-e5267595-7fff-c940-6c56-76de76c3095a\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcmWzllQKeDlnRTcLHnJQKTj15ECmrgaozO3R6zhbZP-dWKt-5svaBFr7pi9sub_ZDxFsuLR-YP1dfIdokCkQLU-Tb_BrhKh8ktf8tDgKSgzQuAe1D1zYN0WRrQRkITchTR0WmE?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"121\" height=\"71\"></strong></p>",
+                                "<p><strong id=\"docs-internal-guid-96869d03-7fff-df46-5c35-b2032d26489e\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXc7IkKZFdawE-TzzOIgCj-8v0ktrMaBTBeDhnK6Wc7DKOYuZZj5MwtuUhQMj46ui_eg1HxDuf2xeBxJhIdJAOcfWDuzVuN32juqOTSXCojAfbP_lq6kGmMJkwWOjI0X8sT4aD3AoA?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"68\" height=\"61\"></strong></p>", "<p><strong id=\"docs-internal-guid-dce48fd9-7fff-f2ff-6024-39b90967258a\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdNgSZu7QteH_ZyH7WgOxu_ga0U8bZIdJsbsLB1tpN2d6YsDSrqUu1WVG__vc3evEVm1-89o75RMjPixPNdkpCgMlH7A2yoLt1dWU3S7hrHuzqWfx-BjN4zUouNC79-5g1p0F8UxA?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"144\" height=\"64\"></strong></p>"],
+                    solution_en: "<p>6.(c)</p>\n<p><strong id=\"docs-internal-guid-5c9be3bd-7fff-48c8-a909-8c9e5d1fb26a\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdRld_tKJidxf53p475jMZl8u3W0zfwmCj6_tbXv3tSisdQuB2hbK_rbzHwYT0PP5oNWkT4-Tj1vV7ZvFhdIHB6KedseKxXVzpTxZU-mjFVB4jlNbqu8W3infF9hY0TQtMpWWEb?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"154\" height=\"103\"></strong></p>\n<p><span style=\"font-family: Palanquin Dark;\">Bed, Chair and Dining table are furniture.</span></p>",
+                    solution_hi: "<p>6.(c)</p>\n<p><strong id=\"docs-internal-guid-1a653186-7fff-5f81-b5bb-82f8d26f83d9\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdj6G3KRHDW7S0Fd2IJZW7niX2o4z0donYyT3U-E2yotZN2U7dYH6i0Y3YopDa-LKCC4qvvKJgQgbXepcW0RThtdNP2bgWjwetdWoyT-W_gPHZBMvWC1HP0kVbs55mKawPfKlA4Yg?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"157\" height=\"105\"></strong></p>\n<p><span style=\"font-family: Palanquin Dark;\">बिस्तर, कुर्सी और खाने की मेज फर्नीचर हैं।</span></p>\n<p>&nbsp;</p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "7",
+                    section: "6",
+                    question_en: "<p>7. <span style=\"font-family: Palanquin Dark;\">In a class of 98 students, all play at least one of the three games &mdash; snooker, chess and tennis. 42 students play snooker, 49 play tennis, and 43 play chess. The total number of students who play any and only two games is 29. 5 students play all the three games. The number of students who play only snooker and only chess is equal. 11 students play only snooker and tennis. 6 students play only snooker and chess. How many students play only tennis?&nbsp;</span></p>",
+                    question_hi: "<p>7. <span style=\"font-family: Palanquin Dark;\">98 छात्रों की एक कक्षा में, सभी तीन खेलों में से कम से कम एक खेलते हैं - स्नूकर, शतरंज और टेनिस। 42 छात्र स्नूकर खेलते हैं, 49 टेनिस खेलते हैं, और 43 शतरंज खेलते हैं। किसी भी और केवल दो गेम खेलने वाले छात्रों की कुल संख्या 29 है। 5 छात्र सभी तीन खेल खेलते हैं। केवल स्नूकर और केवल शतरंज खेलने वाले छात्रों की संख्या बराबर है। 11 छात्र केवल स्नूकर और टेनिस खेलते हैं। 6 छात्र केवल स्नूकर और शतरंज खेलते हैं। कितने छात्र केवल टेनिस खेलते हैं?&nbsp;</span></p>",
+                    options_en: ["<p>21</p>", "<p>23</p>", 
+                                "<p>20</p>", "<p>22</p>"],
+                    options_hi: ["<p>21</p>", "<p>23</p>",
+                                "<p>20</p>", "<p>22</p>"],
+                    solution_en: "<p>7.(a)</p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image60.png\" width=\"175\" height=\"183\"></p>\n<p><span style=\"font-family: Palanquin Dark;\">According to the venn diagram, </span></p>\n<p><span style=\"font-family: Palanquin Dark;\">Number of students who play tennis only = 49 - (11+5+12) = 21</span></p>",
+                    solution_hi: "<p>7.(a)</p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image60.png\" width=\"157\" height=\"164\"></p>\n<p><span style=\"font-family: Palanquin Dark;\">According to the venn diagram, </span></p>\n<p><span style=\"font-family: Palanquin Dark;\">Number of students who play tennis only = 49 - (11+5+12) = 21</span></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "8",
+                    section: "6",
+                    question_en: "<p>8.<span style=\"font-family: Palanquin Dark;\"> Select the Venn Diagram that best illustrates the relationship between the following classes.</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">Athletes,Boys, Students</span></p>",
+                    question_hi: "<p>8.<span style=\"font-family: Palanquin Dark;\"> वेन आरेख का चयन करें जो निम्नलिखित वर्गों के बीच के संबंध को सर्वोत्तम रूप से दर्शाता है।</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">एथलीट, लड़के, छात्र</span></p>",
+                    options_en: ["<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image17.png\" width=\"155\" height=\"68\"></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image37.png\" width=\"120\" height=\"105\"></p>", 
+                                "<p>.<img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image11.png\" width=\"93\" height=\"86\"></p>\n<p><span style=\"font-family: Palanquin Dark;\">.</span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image74.png\" width=\"160\" height=\"64\"></p>"],
+                    options_hi: ["<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image17.png\" width=\"148\" height=\"65\"></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image37.png\" width=\"99\" height=\"87\"></p>",
+                                "<p>.<img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image11.png\" width=\"93\" height=\"86\"></p>\n<p><span style=\"font-family: Palanquin Dark;\">.</span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image74.png\" width=\"143\" height=\"57\"></p>"],
+                    solution_en: "<p>8.(b)</p>\n<p><strong id=\"docs-internal-guid-4fb14ff4-7fff-e934-2166-e9aab366abc1\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdfJrOMX4ocJ6X6Kz9ai71ygA6f7rgZS3T7UKKX54F0RPLl64MGKxODRjujNl_sr1aapEOFA-ECY0InpE1wek13lV2y_m3OC5mwOOqiRiDYBbSD9RlMgQrNI1P6zlkpFyDCfF06?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"168\" height=\"102\"></strong></p>\n<p><span style=\"font-family: Palanquin Dark;\">Single person can be a boy who is both a student and an athlete.</span></p>",
+                    solution_hi: "<p>8.(b)</p>\n<p><strong id=\"docs-internal-guid-6f1e0765-7fff-fdb8-c3f9-f87d3166b9c3\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXel4HKlHZahXFr1WPM-8DJpW088K9cM-ALC-6enljOo6uzyzz-5euRHkbI-9jN9Ya8QgUsnvO-rzvyqOzM0h-VjlAko1nylAIto7FQ6ozUEhT5K7Wdmh8R0YZBg95CwAgddYRqN1w?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"163\" height=\"109\"></strong></p>\n<p><span style=\"font-family: Palanquin Dark;\">एकल व्यक्ति एक लड़का हो सकता है जो एक छात्र और एक एथलीट दोनों है।</span></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "9",
+                    section: "6",
+                    question_en: "<p>9. <span style=\"font-family: Palanquin Dark;\">Select the venn diagram that best represents the relationship between the following. </span></p>\n<p><span style=\"font-family: Palanquin Dark;\">Noncommunicable diseases, Cataract, Diabetes, Measles</span></p>",
+                    question_hi: "<p>9. <span style=\"font-family: Palanquin Dark;\">उस वेन आरेख का चयन करें जो निम्न के बीच के संबंध को सबसे अच्छा दर्शाता है. </span><span style=\"font-family: Palanquin Dark;\">गैर संचारी रोग, मोतियाबिंद, मधुमेह, खसरा</span></p>",
+                    options_en: ["<p><span style=\"font-family: Palanquin Dark;\"> </span><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image81.png\"></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image29.png\"></p>", 
+                                "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image46.png\"></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image45.png\"></p>\n<p><span style=\"font-family: Palanquin Dark;\"> </span></p>"],
+                    options_hi: ["<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image81.png\"></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image29.png\"></p>",
+                                "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image46.png\"></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image45.png\"></p>\n<p><span style=\"font-family: Palanquin Dark;\"> </span></p>\n<p><span style=\"font-family: Palanquin Dark;\"> </span></p>"],
+                    solution_en: "<p>9.(b)</p>\n<p><strong id=\"docs-internal-guid-3450910b-7fff-82dd-98b9-de347734406f\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeNv-4oBS1br81adHaiyJ6M5RTAXJyx_USFlvvEOWu8Qxc6QBygdnLahyxEIkaAINCJU8g1FhFl-aDzxm_zEoQIpaAxO4YajKvWKxI9yEY9xAyIdNCwqxT99YgSOWW-P3uxIkUq?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"220\" height=\"82\"></strong></p>\n<p><span style=\"font-family: Palanquin Dark;\">Measles is a communicable disease.</span></p>",
+                    solution_hi: "<p>9.(b)</p>\n<p><strong id=\"docs-internal-guid-2610c27b-7fff-979d-af07-f80d75595a42\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXc7iN21bcPMrFBvHyBuFg2lFLzGzMNFW8dWh_XybVOe5GMxrwbT9bTwVKus6gt2FuhMILAy882asFI66iLCReVWmiSWzRI34n1DAtRg2gtPAkLf5vD8NvdT6D6AymLq27awJejZAw?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"198\" height=\"83\"></strong></p>\n<p><span style=\"font-family: Palanquin Dark;\">खसरा एक संचारी रोग है।</span></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "10",
+                    section: "6",
+                    question_en: "<p>10. <span style=\"font-family: Palanquin Dark;\">Select the venn diagram that best represents the relationship between the following.</span></p>\n<p><span style=\"font-family: Palanquin Dark;\"> </span><span style=\"font-family: Palanquin Dark;\">Human , Teacher, Clerk, Peon</span></p>",
+                    question_hi: "<p>10. <span style=\"font-family: Palanquin Dark;\">वेन आरेख का चयन करें जो निम्नलिखित के बीच के संबंध को सर्वोत्तम रूप से दर्शाता है।</span></p>\n<p><span style=\"font-family: Palanquin Dark;\"> </span><span style=\"font-family: Palanquin Dark;\">मानव, शिक्षक, क्लर्क, चपरासी</span></p>",
+                    options_en: ["<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image4.png\"></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image80.png\"></p>", 
+                                "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image3.png\"></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image82.png\"></p>\n<p><span style=\"font-family: Palanquin Dark;\"> </span></p>"],
+                    options_hi: ["<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image4.png\"></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image80.png\"></p>",
+                                "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image3.png\"></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image82.png\"></p>"],
+                    solution_en: "<p>10.(c)</p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image24.png\"></p>",
+                    solution_hi: "<p>10.(c)</p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image84.png\"></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "11",
+                    section: "6",
+                    question_en: "<p>11. <span style=\"font-family: Palanquin Dark;\">Select the set of classes the relationship among which is being illustrated by the given Venn diagram.</span></p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image90.png\"></p>",
+                    question_hi: "<p>11. <span style=\"font-family: Palanquin Dark;\">वर्गों के उस समुच्चय का चयन करें जिसके बीच संबंध दिए गए वेन आरेख द्वारा दर्शाया जा रहा है।</span></p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image28.png\"></p>",
+                    options_en: ["<p>Women, <span style=\"font-family: Palanquin Dark;\">Gynaecologists</span><span style=\"font-family: Palanquin Dark;\">, Doctors</span></p>", "<p>Males, Females, Daughters</p>", 
+                                "<p>Entrepreneurs, Women, Philanthropists</p>", "<p>Eatables, Plums, Fruits</p>"],
+                    options_hi: ["<p>महिला, स्त्री रोग विशेषज्ञ, डॉक्टर</p>", "<p>पुरुष, महिलाये, बेटिया</p>",
+                                "<p>उद्यमी, महिला, परोपकारी</p>", "<p>खाने योग्य, आलूभुखारे , फल</p>"],
+                    solution_en: "<p>11.(c) <span style=\"font-family: Palanquin Dark;\">Entrepreneurs can </span><span style=\"font-family: Palanquin Dark;\">be a women</span><span style=\"font-family: Palanquin Dark;\"> . A woman can be an entrepreneur. A philanthropist can be a woman. Or a women can bea philanthropists </span></p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image14.png\"></p>",
+                    solution_hi: "<p>11.(c) <span style=\"font-family: Palanquin Dark;\">उद्यमी, महिलाएं हो सकती हैं। एक महिला, उद्यमी हो सकती है। एक परोपकारी, महिला हो सकती है या एक महिला, परोपकारी हो सकती है</span></p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image14.png\"></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "12",
+                    section: "6",
+                    question_en: "<p>12.<span style=\"font-family: Palanquin Dark;\"> Select the Venn diagram that best represents the relationship between the following</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">Brother,Nephew,Uncle</span></p>",
+                    question_hi: "<p>12. <span style=\"font-family: Palanquin Dark;\">वेन आरेख का चयन करें जो निम्नलिखित के बीच के संबंध को सर्वोत्तम रूप से दर्शाता है</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">भाई, भतीजा, चाचा</span></p>",
+                    options_en: ["<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image93.png\" width=\"155\" height=\"62\"></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image19.png\" width=\"97\" height=\"85\"></p>", 
+                                "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image57.png\" width=\"148\" height=\"65\"></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image87.png\" width=\"115\" height=\"78\"></p>"],
+                    options_hi: ["<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image93.png\" width=\"165\" height=\"66\"></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image19.png\" width=\"110\" height=\"96\"></p>",
+                                "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image57.png\" width=\"161\" height=\"71\"></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image87.png\" width=\"120\" height=\"81\"></p>"],
+                    solution_en: "<p>12.(b) <span style=\"font-family: Palanquin Dark;\">Uncle can be a brother </span><span style=\"font-family: Palanquin Dark;\">of someone</span><span style=\"font-family: Palanquin Dark;\">. </span></p>\n<p><span style=\"font-family: Palanquin Dark;\">Brother can be an uncle of some one Similarly a nephew can be a brother of somebody. </span></p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image73.png\" width=\"104\" height=\"91\"></p>",
+                    solution_hi: "<p>12.(b) <span style=\"font-family: Palanquin Dark;\">चाचा किसी का भाई हो सकता है।</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">भाई किसी का चाचा हो सकता है उसी तरह भतीजा किसी का भाई हो सकता है।</span></p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image48.png\" width=\"101\" height=\"88\"></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "13",
+                    section: "6",
+                    question_en: "<p>13.<span style=\"font-family: Palanquin Dark;\"> In the following Venn diagram , the hexagon stands for &lsquo;captains&rsquo; the triangle stand for &lsquo;girls&rsquo; the rectangle stand for &lsquo;toppers&rsquo; and the circle stands for &lsquo;social activist&rsquo; The given number represents the number of persons in that Particular category </span></p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image16.png\" width=\"177\" height=\"179\"></p>\n<p><span style=\"font-family: Palanquin Dark;\">How many girls are toppers and captains also&nbsp;</span></p>",
+                    question_hi: "<p>13.<span style=\"font-family: Palanquin Dark;\"> निम्नलिखित वेन आरेख में, षट्भुज \'कप्तानों\' को दर्शाता है, त्रिकोण \'लड़कियों\' को दर्शाता है, आयताकार \'टॉपर\' को दर्शाता है और वृत्त \'सामाजिक कार्यकर्ता\' को दर्शाता है। दी गई संख्या उस विशेष श्रेणी में व्यक्तियों की संख्या का प्रतिनिधित्व करती है।</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">कितनी लड़कियां टॉपर और कप्तान भी हैं</span></p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image16.png\" width=\"165\" height=\"167\"></p>",
+                    options_en: ["<p>13</p>", "<p>15</p>", 
+                                "<p>16</p>", "<p>17</p>"],
+                    options_hi: ["<p>13</p>", "<p>15</p>",
+                                "<p>16</p>", "<p>17</p>"],
+                    solution_en: "<p>13.(a) <span style=\"font-family: Palanquin Dark;\">By venn diagram here we can see that &lsquo;hexagon stands for &lsquo;captains&rsquo; and triangle stands for &lsquo;girls&rsquo; and the rectangle stands for &lsquo;toppers&rsquo; and the circle stands for &lsquo;social activist.&rsquo;</span></p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image43.png\" width=\"173\" height=\"175\"></p>\n<p><span style=\"font-family: Palanquin Dark;\">So girls who are captains also =13 </span></p>",
+                    solution_hi: "<p>13.(a) <span style=\"font-family: Palanquin Dark;\">वेन आरेख के द्वारा यहाँ हम देख सकते हैं कि \'षट्भुज\' का अर्थ \'कप्तान\' और त्रिभुज का अर्थ \'लड़कियों\' और आयत का अर्थ \'टॉपर\' और वृत्त का अर्थ \'सामाजिक कार्यकर्ता\' है।</span></p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654760699/word/media/image43.png\" width=\"167\" height=\"169\"></p>\n<p><span style=\"font-family: Palanquin Dark;\">तो जो लड़कियां कप्तान भी होती हैं =13 </span></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "14",
+                    section: "6",
+                    question_en: "<p>14.<span style=\"font-family: Palanquin Dark;\"> In the following Venn diagram, the triangle stands for the &lsquo;fathers&rsquo;, </span><span style=\"font-family: Palanquin Dark;\">circle</span><span style=\"font-family: Palanquin Dark;\"> stands for the &lsquo;engineers&rsquo;, </span><span style=\"font-family: Palanquin Dark;\">hexagon</span><span style=\"font-family: Palanquin Dark;\"> stands for the &lsquo;tax-payers&rsquo;, and the rectangle stands for the &lsquo;blood donors&rsquo;. The given number represents the number of persons in that particular category</span></p>\n<p><strong id=\"docs-internal-guid-9293279f-7fff-d09b-4382-66e43707b6b0\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcQ6fnCg-3ee8ImQ9qehWGbM41IJ66PQFdyCTvoIwI1fa9tU1uhBh8QgAENfc0u_uChF1jQHZWEXSQN9WkW-MDr97L6xox6Q0u2jxkoRns1T404qOsFHk1W9oz7xH7RFeFthWTwYR-db-NxCXLSfpeuzw4?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"242\" height=\"152\"></strong></p>\n<p><span style=\"font-family: Palanquin Dark;\">How many tax-payers are also blood donors</span></p>",
+                    question_hi: "<p>14.<span style=\"font-family: Palanquin Dark;\"> निम्नलिखित वेन आरेख में, त्रिभुज &ldquo;पिता&rdquo; को दर्शता है, वृत्त &ldquo;इंजीनियर&rdquo; को दर्शता है, षट्भुज &ldquo;करदाता&rdquo; को दर्शता है, और आयत &ldquo;रक्त दाता&rdquo; को दर्शता है। दी गई संख्या उस विशेष श्रेणी में व्यक्तियों की संख्या दर्शाती है </span></p>\n<p><span style=\"font-family: Palanquin Dark;\">कितने करदाता ऐसे है जो रक्तदाता भी हैं</span></p>\n<p><strong id=\"docs-internal-guid-9293279f-7fff-d09b-4382-66e43707b6b0\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcQ6fnCg-3ee8ImQ9qehWGbM41IJ66PQFdyCTvoIwI1fa9tU1uhBh8QgAENfc0u_uChF1jQHZWEXSQN9WkW-MDr97L6xox6Q0u2jxkoRns1T404qOsFHk1W9oz7xH7RFeFthWTwYR-db-NxCXLSfpeuzw4?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"242\" height=\"152\"></strong></p>",
+                    options_en: ["<p>63</p>", "<p>38</p>", 
+                                "<p>61</p>", "<p>55</p>"],
+                    options_hi: ["<p>63</p>", "<p>38</p>",
+                                "<p>61</p>", "<p>55</p>"],
+                    solution_en: "<p>14.(a) <span style=\"font-family: Palanquin Dark;\">According to question given that <strong id=\"docs-internal-guid-57711910-7fff-5bd2-534e-42c591b4e487\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXefVpQEiBDkAN9jEHJOl6uU5c2TPoD5y39U9jPnJ5qUCWysAFb8CL-xQHTUAimtBEa0z-pOrJRjxv0Tqakf25ldYIq4vhOP4rAnfRrCxkOoFdUyEaoCuNiB5mAxkBSVlF9myJzkYw?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"31\" height=\"44\"></strong></span><span style=\"font-family: Palanquin Dark;\"> stands for &lsquo;father &lsquo; and <strong id=\"docs-internal-guid-ea908e5c-7fff-aa0a-4d27-abfb9c327236\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXee4PWgnGsCQcNzqZpfh2QwXFJWyAm-VcwMPpzwazglJc88sbuOGqo-EgUm7v3PEm2ziaW20ugQXlXEh9B2a33NBEdIQ7v7bUuLSOi7eaO0yKxUKu3IhHlXy1A4it4f0wMNuTssAA?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"32\" height=\"45\"></strong></span><span style=\"font-family: Palanquin Dark;\"> stands for engineer and <strong id=\"docs-internal-guid-6f4b7c8c-7fff-e149-48dd-cac3ce299377\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeDUrEleVum3kOsGM3rcvhnK9DLdzG0Kk4FbLmKBvm-9yJ5ijdXcze-g2h0v8IoIPcoruehQj78-M7zSnp45fI55cQzaUCbPldcKyzoTvHIcz7rlD7phobrrDPpoTzUPktisr-3?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"44\" height=\"40\"></strong></span><span style=\"font-family: Palanquin Dark;\"> stands for &lsquo; taxpayers&rsquo; and <strong id=\"docs-internal-guid-46af0efc-7fff-2188-841b-d1fa9836d0a3\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcbmxrou6eTBv8hQj_AHdUUO65-FpU6WgEAM-u1h7jVlKMe6cuzDZ3DPBO_MsSvQPFUSK0h64zTBEdQelA2DqamPagkb45kxX2Qzzya1ikneF16GDZng30PPpw2q9Ko4vgQeo33?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"46\" height=\"40\"></strong></span><span style=\"font-family: Palanquin Dark;\">&nbsp;stands for &lsquo;blood donors&rsquo; By venn diagram. Number of taxpayers is &lsquo; 63&rsquo;</span></p>\n<p><strong id=\"docs-internal-guid-1725b95d-7fff-5607-aec4-bcd0e29ec0df\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfa3iGP6Z590i1wMtVFkVXw8P4eVxyM3vxORkBfm67ihr8eq0R-5JzelUlN5hCWleWXuHkbpKSPJ5E9yL25rtUc5M4JrcTBtSZyfKrizAG3O0VGDja7u7F0-JStOHU3NpRVepWaiEZOmG_QP78La6ZzLFw?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"252\" height=\"158\"></strong></p>",
+                    solution_hi: "<p>14.(a)</p>\n<p><span style=\"font-family: Palanquin Dark;\">दिए गए प्रश्न के अनुसार<strong id=\"docs-internal-guid-cb0a372e-7fff-e2f7-0dad-b76155e96e35\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXefVpQEiBDkAN9jEHJOl6uU5c2TPoD5y39U9jPnJ5qUCWysAFb8CL-xQHTUAimtBEa0z-pOrJRjxv0Tqakf25ldYIq4vhOP4rAnfRrCxkOoFdUyEaoCuNiB5mAxkBSVlF9myJzkYw?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"41\" height=\"59\"></strong></span><span style=\"font-family: Palanquin Dark;\"> जो \'पिता\' के लिए खड़ा है और<strong id=\"docs-internal-guid-1ee9c587-7fff-f953-b0e1-d8da47a60352\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXee4PWgnGsCQcNzqZpfh2QwXFJWyAm-VcwMPpzwazglJc88sbuOGqo-EgUm7v3PEm2ziaW20ugQXlXEh9B2a33NBEdIQ7v7bUuLSOi7eaO0yKxUKu3IhHlXy1A4it4f0wMNuTssAA?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"45\" height=\"63\"></strong></span><span style=\"font-family: Palanquin Dark;\"> इंजीनियर के लिए खड़ा है और <strong id=\"docs-internal-guid-e3c7c3da-7fff-1043-7ac5-15f149d85081\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeDUrEleVum3kOsGM3rcvhnK9DLdzG0Kk4FbLmKBvm-9yJ5ijdXcze-g2h0v8IoIPcoruehQj78-M7zSnp45fI55cQzaUCbPldcKyzoTvHIcz7rlD7phobrrDPpoTzUPktisr-3?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"62\" height=\"56\"></strong></span><span style=\"font-family: Palanquin Dark;\"> \'करदाताओं\' के लिए खड़ा है और<strong id=\"docs-internal-guid-4b98e86e-7fff-28d8-b11a-f4ec2ac67503\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcbmxrou6eTBv8hQj_AHdUUO65-FpU6WgEAM-u1h7jVlKMe6cuzDZ3DPBO_MsSvQPFUSK0h64zTBEdQelA2DqamPagkb45kxX2Qzzya1ikneF16GDZng30PPpw2q9Ko4vgQeo33?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"56\" height=\"49\"></strong></span><span style=\"font-family: Palanquin Dark;\">&nbsp;वेन आरेख द्वारा \'रक्त दाताओं\' के लिए खड़ा है। करदाताओं की संख्या \'63\' है</span></p>\n<p><strong id=\"docs-internal-guid-1725b95d-7fff-5607-aec4-bcd0e29ec0df\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfa3iGP6Z590i1wMtVFkVXw8P4eVxyM3vxORkBfm67ihr8eq0R-5JzelUlN5hCWleWXuHkbpKSPJ5E9yL25rtUc5M4JrcTBtSZyfKrizAG3O0VGDja7u7F0-JStOHU3NpRVepWaiEZOmG_QP78La6ZzLFw?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"252\" height=\"158\"></strong></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "15",
+                    section: "6",
+                    question_en: "<p>15.<span style=\"font-family: Palanquin Dark;\"> In the following Venn diagram, the </span><span style=\"font-family: Palanquin Dark;\">pentagon</span><span style=\"font-family: Palanquin Dark;\"> stands for </span><span style=\"font-family: Palanquin Dark;\">&lsquo;clerks&rsquo;</span><span style=\"font-family: Palanquin Dark;\"> , the </span><span style=\"font-family: Palanquin Dark;\">triangle</span><span style=\"font-family: Palanquin Dark;\"> stands for </span><span style=\"font-family: Palanquin Dark;\">&lsquo;&rsquo;coffee lovers</span><span style=\"font-family: Palanquin Dark;\">&rsquo; , the </span><span style=\"font-family: Palanquin Dark;\">square</span><span style=\"font-family: Palanquin Dark;\"> stands for &lsquo;</span><span style=\"font-family: Palanquin Dark;\">car - lovers&rsquo;</span><span style=\"font-family: Palanquin Dark;\">, the</span><span style=\"font-family: Palanquin Dark;\"> circle</span><span style=\"font-family: Palanquin Dark;\"> stands for </span><span style=\"font-family: Palanquin Dark;\">&lsquo;social workers&rsquo; </span><span style=\"font-family: Palanquin Dark;\">. The given letters </span><span style=\"font-family: Palanquin Dark;\">represents</span><span style=\"font-family: Palanquin Dark;\"> the person in that particular category.</span></p>\n<p><strong id=\"docs-internal-guid-df0b560e-7fff-261c-b99d-4e5f14bd3d37\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcuznxMO0Zv3mh3p43BjeLzZMryhKZxRs3Za7vMHX6zID92StrzxAc8HX1M7COQS7TIGHgoUdTxK7xC3TW8YZOZDSq2QRTSiLLoJLfgP8TWefvz4dsin5DNBW8SGhGgppvzaArDqLUc5WpHKZZokNMKGek?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"161\" height=\"122\"></strong></p>\n<p><span style=\"font-family: Palanquin Dark;\">Which of the following categories of the person is represented by the letter D?</span></p>",
+                    question_hi: "<p>15. <span style=\"font-family: Palanquin Dark;\">निम्नलिखित वेन आरेख में, पंचकोण \'क्लर्क\' को दर्शाता है, त्रिभुज \'कॉफी प्रेमी\' को दर्शाता है, वर्ग \'कार प्रेमी\' को दर्शाता है, वृत \'सामाजिक कार्यकर्ता\' को दर्शाता है। दिए गए अक्षर उस विशेष श्रेणी के व्यक्ति का प्रतिनिधित्व करते हैं।</span></p>\n<p><strong id=\"docs-internal-guid-df0b560e-7fff-261c-b99d-4e5f14bd3d37\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcuznxMO0Zv3mh3p43BjeLzZMryhKZxRs3Za7vMHX6zID92StrzxAc8HX1M7COQS7TIGHgoUdTxK7xC3TW8YZOZDSq2QRTSiLLoJLfgP8TWefvz4dsin5DNBW8SGhGgppvzaArDqLUc5WpHKZZokNMKGek?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"163\" height=\"124\"></strong></p>\n<p><span style=\"font-family: Palanquin Dark;\">&nbsp;निम्नलिखित में से किस श्रेणी के व्यक्ति को अक्षर D द्वारा दर्शाया गया है?</span></p>",
+                    options_en: ["<p>Coffee lovers who are either car owners or social workers.</p>", "<p>Coffee lovers who are car owners and social workers also</p>", 
+                                "<p>Car owners who are coffee lovers but not social workers</p>", "<p>Coffee lovers who are car owners, social workers and clerks also</p>"],
+                    options_hi: ["<p>कॉफी प्रेमी जो या तो कार के मालिक हैं या सामाजिक कार्यकर्ता।</p>", "<p>कॉफी प्रेमी जो कार मालिक और सामाजिक कार्यकर्ता भी हैं।</p>",
+                                "<p>कार मालिक जो कॉफी प्रेमी हैं लेकिन सामाजिक कार्यकर्ता नहीं हैं</p>", "<p>कॉफी प्रेमी जो कार मालिक, सामाजिक कार्यकर्ता और क्लर्क भी हैं</p>"],
+                    solution_en: "<p>15.(b)</p>\n<p><strong id=\"docs-internal-guid-f72dce1d-7fff-6d36-bfc8-895b3e23e45e\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXf9gNlvck9Zfrbp4xqZIDdArlzP4KepKrxZ6JVbFPY19mOR-ryCXCoTk8UVW_7J1mMAlMZs77CtzCS0E4nUwM7sXJoHcog4w3_d2d_2yts52tz76cDBAiorRIoSkva9bWa-SXQJ21r8GcQ9mBZh2O0spq0?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"149\" height=\"113\"></strong></p>\n<p><span style=\"font-family: Palanquin Dark;\">During observation we can see that D is coffee-lovers who are car-owners and social workers also .</span></p>",
+                    solution_hi: "<p>15.(b)</p>\n<p><strong id=\"docs-internal-guid-f72dce1d-7fff-6d36-bfc8-895b3e23e45e\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXf9gNlvck9Zfrbp4xqZIDdArlzP4KepKrxZ6JVbFPY19mOR-ryCXCoTk8UVW_7J1mMAlMZs77CtzCS0E4nUwM7sXJoHcog4w3_d2d_2yts52tz76cDBAiorRIoSkva9bWa-SXQJ21r8GcQ9mBZh2O0spq0?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"149\" height=\"113\"></strong></p>\n<p><span style=\"font-family: Palanquin Dark;\">अवलोकन के दौरान हम देख सकते हैं कि D कॉफी-प्रेमी है जो कार-मालिक और सामाजिक कार्यकर्ता भी हैं।</span></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "16",
+                    section: "6",
+                    question_en: "<p>16.<span style=\"font-family: Palanquin Dark;\"> Select the Venn diagram that best represents the relationship between the following</span></p>\n<p><span style=\"font-family: Palanquin Dark;\"> </span><span style=\"font-family: Palanquin Dark;\">&nbsp;Living organisms, omnivores, Deer , planet </span></p>",
+                    question_hi: "<p>16.<span style=\"font-family: Palanquin Dark;\"> वेन आरेख का चयन करें जो निम्नलिखित के बीच के संबंध को सर्वोत्तम रूप से दर्शाता है</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">&nbsp;जीवित जीव, सर्वाहारी, हिरण, ग्रह</span></p>",
+                    options_en: ["<p><strong id=\"docs-internal-guid-75a4aa68-7fff-1dd1-bbd5-6b406d9dd5c3\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeqwxATe5e7khI-UuWzatlbKM_LN4hvJl1AcfMtd1PT-mNiK9DRV-v4rFSS1JjrVfBN6FtLqrp0AFyFjLn-qOfbTeiRkl7r-TjfVoZgEyPk1B4-ZuOMEAXHuYKguAUeh8V4eEqNfbQHbu2lAnaK2ntRvd8?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"88\" height=\"95\"></strong></p>", "<p><strong id=\"docs-internal-guid-432838cf-7fff-4ff2-5501-7a5bedff70b0\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXf1xM2HnP9Q2P-VyAq_4B-iQbKB3Czd0OCG_Z4wx6ZTlz0VWUQhcc_1ddZ_SminwDpEJtQv8XkeVRHn19L9FEhuii3nD6V6VTeHZ2J3U-C65gNjVYYW7QfJsWRDB0lE8qGk1kcgk9NyxiEOKGpGpzQ9ZvY?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"155\" height=\"77\"></strong></p>", 
+                                "<p><strong id=\"docs-internal-guid-8b930f0c-7fff-bec9-2755-cb47afcdbe72\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdlE42ERoIU_UPmqPErAuWKfb0ulOdLEJ7Ks6POKjvs47Zpfi0QE6WRsy9clOTrIRNXCIYK0JN9w3EJdUouKkWJDmt1KSzEqyGzcmcxfz3w7IVGxetgiLt-ikPEYB8km3_C1PhmkUjrbMOVASMzwmkJvnw?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"145\" height=\"88\"></strong></p>", "<p><strong id=\"docs-internal-guid-5dcf2b56-7fff-f2b4-6ba8-5951fb6d144d\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXekZ8q8yCS91ovvCErrpG0NEAqltCUZYs_NUiSlfTyw-oqTmWVy3-_rdqflOKEWfXAhHXAGNvET1LdkMp71yTHhFZSmf9Xo-7LT81p_u1cRqyottAvF2-z3yrcGNH0g1KQ-N5_IAxvqx67MEUq42WLCHQ?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"153\" height=\"93\"></strong></p>"],
+                    options_hi: ["<p><strong id=\"docs-internal-guid-f796077c-7fff-4b0b-77a5-dcd4975f7682\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeqwxATe5e7khI-UuWzatlbKM_LN4hvJl1AcfMtd1PT-mNiK9DRV-v4rFSS1JjrVfBN6FtLqrp0AFyFjLn-qOfbTeiRkl7r-TjfVoZgEyPk1B4-ZuOMEAXHuYKguAUeh8V4eEqNfbQHbu2lAnaK2ntRvd8?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"86\" height=\"93\"></strong></p>", "<p><strong id=\"docs-internal-guid-e12ceb1c-7fff-6ed9-93a2-2abc11029e85\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXf1xM2HnP9Q2P-VyAq_4B-iQbKB3Czd0OCG_Z4wx6ZTlz0VWUQhcc_1ddZ_SminwDpEJtQv8XkeVRHn19L9FEhuii3nD6V6VTeHZ2J3U-C65gNjVYYW7QfJsWRDB0lE8qGk1kcgk9NyxiEOKGpGpzQ9ZvY?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"151\" height=\"75\"></strong></p>",
+                                "<p><strong id=\"docs-internal-guid-073d58b2-7fff-974d-bfec-b309049edf2b\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdlE42ERoIU_UPmqPErAuWKfb0ulOdLEJ7Ks6POKjvs47Zpfi0QE6WRsy9clOTrIRNXCIYK0JN9w3EJdUouKkWJDmt1KSzEqyGzcmcxfz3w7IVGxetgiLt-ikPEYB8km3_C1PhmkUjrbMOVASMzwmkJvnw?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"143\" height=\"86\"></strong></p>", "<p><strong id=\"docs-internal-guid-3ccad9c1-7fff-be30-82eb-c667d91381f3\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXekZ8q8yCS91ovvCErrpG0NEAqltCUZYs_NUiSlfTyw-oqTmWVy3-_rdqflOKEWfXAhHXAGNvET1LdkMp71yTHhFZSmf9Xo-7LT81p_u1cRqyottAvF2-z3yrcGNH0g1KQ-N5_IAxvqx67MEUq42WLCHQ?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"173\" height=\"105\"></strong></p>"],
+                    solution_en: "<p>16.(c) <span style=\"font-family: Palanquin Dark;\">Omnivores, and deer are living organisms but the planet is a non living body. </span></p>\n<p><strong id=\"docs-internal-guid-e23d54e1-7fff-3b52-59cf-5cdc98ef8e5e\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcrmc31fIq9IZfCzWkhvixYzo7aKhiQaPTZyILA3EJjt9ZaCqVv12yaxKO00b9Z5R2mkyRhmkMJ-wwjcQFG1WdZHV3Ek-fMB1rVE4u4vsIVHB_kRSCadg0-HPzf5ZJEvZYfY2uKSw?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"146\" height=\"85\"></strong></p>",
+                    solution_hi: "<p>16.(c) <span style=\"font-family: Palanquin Dark;\">सर्वाहारी, और हिरण जीवित जीव हैं लेकिन ग्रह एक निर्जीव शरीर है।</span></p>\n<p><strong id=\"docs-internal-guid-e23d54e1-7fff-3b52-59cf-5cdc98ef8e5e\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcrmc31fIq9IZfCzWkhvixYzo7aKhiQaPTZyILA3EJjt9ZaCqVv12yaxKO00b9Z5R2mkyRhmkMJ-wwjcQFG1WdZHV3Ek-fMB1rVE4u4vsIVHB_kRSCadg0-HPzf5ZJEvZYfY2uKSw?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"146\" height=\"85\"></strong></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "17",
+                    section: "6",
+                    question_en: "<p>17.<span style=\"font-family: Palanquin Dark;\"> Select the venn diagram that best illustrates the relationship between the following classes. </span></p>\n<p><span style=\"font-family: Palanquin Dark;\">Plastic Items, Buckets, Photo frames</span><span style=\"font-family: Palanquin Dark;\">&nbsp;</span></p>",
+                    question_hi: "<p>17.<span style=\"font-family: Palanquin Dark;\"> वेन आरेख का चयन करें जो निम्नलिखित वर्गों के बीच के संबंध को सर्वोत्तम रूप से दर्शाता है।</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">प्लास्टिक आइटम, बाल्टी, फोटो फ्रेम</span></p>",
+                    options_en: ["<p><strong id=\"docs-internal-guid-a172ee42-7fff-2053-29ee-fb2b159121af\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXd0MDteonGH8xKEmMsBg6HrQKBc5Uq0PRfx8zPHigNV6w0d_h7X3fqxH-D8FQmOmOR6WMbf3q6MnMl818oNJB_JZnzLoPlqSqRgV-3rzE7u4yB8vsCDAZuJ3a5E6JjiS4H0HFsG3NXxOq2qpdXrcVwmmhE?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"108\" height=\"104\"></strong></p>", "<p><strong id=\"docs-internal-guid-693138bb-7fff-440c-d027-63783e146c81\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXePaJlM1I7ZkMhTId2yNVM7SltY_YvMNTiXBWXuY7QNosfCInMkFMRqtyqmCMd0iXYJLb3XKfHubjZU223ig9Uw1DbAYWE79SoA4IsOpJvV4K79KOfpQEGdshH3v96eCN7KnSYqkzZiFkd4cIRFxq7tMQo?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"142\" height=\"55\"></strong></p>", 
+                                "<p><strong id=\"docs-internal-guid-de980433-7fff-6b83-a735-13a58b487036\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXf3D2pNGwjcDYP875PwI4Z19Q3OsMmKGhtzEeNvgacQrRKFs4IdZchInqOeLnji59Sq1UyvP2FOXQk1f4NYS2554XJ7mA1FaFwjF0rTOPzl8eAdX_Ql4nHZb1V6qXprVCxtsulMALpF6XMhlPhWaZGkrJA?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"136\" height=\"78\"></strong></p>", "<p><strong id=\"docs-internal-guid-b4fe18b0-7fff-95d7-1782-7eaaa4130a57\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcRq8PRPum_Qv-F7o80o-dKep8oKnslvUUwdSb1K4xfTL7C0Hv90LJBEZnSFUIjncdB6o9uPLc-Jq-eTlzPm4YaUnAPPKGzQb8jsvicUECoVjY1zp6QLxCts9nUyPM_k8u4Jc0hv8PTO7Uu0Nx4-IO1_LM?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"146\" height=\"68\"></strong></p>"],
+                    options_hi: ["<p><strong id=\"docs-internal-guid-b53010a6-7fff-e212-6f69-1569bc9c738e\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXd0MDteonGH8xKEmMsBg6HrQKBc5Uq0PRfx8zPHigNV6w0d_h7X3fqxH-D8FQmOmOR6WMbf3q6MnMl818oNJB_JZnzLoPlqSqRgV-3rzE7u4yB8vsCDAZuJ3a5E6JjiS4H0HFsG3NXxOq2qpdXrcVwmmhE?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"117\" height=\"112\"></strong></p>", "<p><strong id=\"docs-internal-guid-832097a7-7fff-010b-30cf-4757ec065fff\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXePaJlM1I7ZkMhTId2yNVM7SltY_YvMNTiXBWXuY7QNosfCInMkFMRqtyqmCMd0iXYJLb3XKfHubjZU223ig9Uw1DbAYWE79SoA4IsOpJvV4K79KOfpQEGdshH3v96eCN7KnSYqkzZiFkd4cIRFxq7tMQo?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"142\" height=\"55\"></strong></p>",
+                                "<p><strong id=\"docs-internal-guid-32c67059-7fff-2eae-1cff-063756436a4d\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXf3D2pNGwjcDYP875PwI4Z19Q3OsMmKGhtzEeNvgacQrRKFs4IdZchInqOeLnji59Sq1UyvP2FOXQk1f4NYS2554XJ7mA1FaFwjF0rTOPzl8eAdX_Ql4nHZb1V6qXprVCxtsulMALpF6XMhlPhWaZGkrJA?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"137\" height=\"79\"></strong></p>", "<p><strong id=\"docs-internal-guid-198a2db0-7fff-77c3-8464-15dba10a6dad\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcRq8PRPum_Qv-F7o80o-dKep8oKnslvUUwdSb1K4xfTL7C0Hv90LJBEZnSFUIjncdB6o9uPLc-Jq-eTlzPm4YaUnAPPKGzQb8jsvicUECoVjY1zp6QLxCts9nUyPM_k8u4Jc0hv8PTO7Uu0Nx4-IO1_LM?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"137\" height=\"64\"></strong></p>"],
+                    solution_en: "<p>17.(d)</p>\n<p><strong id=\"docs-internal-guid-7d733277-7fff-e5cb-4680-f16d920c0411\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeYN7gg6Jl1YbxnM6QDzeMvUdXwRltlCkvUTye3A-IAVtbzP5a4yzYie4u_-Idghzi9YpIIdveT8OV04h7WMHFgco5mw0GeG2NGux4tCHulZ70n9nSicNJ8VdbEleJJtOuc1exmsXyobgXow1inrnL26OE?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"142\" height=\"66\"></strong></p>",
+                    solution_hi: "<p>17.(d)</p>\n<p><strong id=\"docs-internal-guid-7d733277-7fff-e5cb-4680-f16d920c0411\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeYN7gg6Jl1YbxnM6QDzeMvUdXwRltlCkvUTye3A-IAVtbzP5a4yzYie4u_-Idghzi9YpIIdveT8OV04h7WMHFgco5mw0GeG2NGux4tCHulZ70n9nSicNJ8VdbEleJJtOuc1exmsXyobgXow1inrnL26OE?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"142\" height=\"66\"></strong></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "18",
+                    section: "6",
+                    question_en: "<p>18.<span style=\"font-family: Times New Roman;\"> select the Venn diagram that best represents the relationship between the following </span></p>\n<p><span style=\"font-family: Times New Roman;\">Planet, sun, moon</span></p>",
+                    question_hi: "<p>18.<span style=\"font-family: Baloo;\"> वेन आरेख का चयन करें जो निम्नलिखित के बीच के संबंध का सबसे अच्छा प्रतिनिधित्व करता है</span></p>\n<p><span style=\"font-family: Baloo;\">ग्रह, सूर्य, चंद्रमा</span></p>",
+                    options_en: ["<p><strong id=\"docs-internal-guid-06779719-7fff-6096-4ff3-c0b99f111f49\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcaUjxuwyrLGok2HEe37eSvmsAxeR-rncaepLmoo-ur1XtcAv-p-UjS1FkSzBaIHgdFUIfv8ovb62b-pqiy3oEq0gEHPtknQUcIvwfk6d6hWKHufWnbyyI1dl0C-T4kQYMo1Tp4vu19uyb67srbt_wbCYk?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"126\" height=\"84\"></strong></p>", "<p><strong id=\"docs-internal-guid-8761b57a-7fff-81a6-75fc-2d3b5c9a3360\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcpPQBiz4-0cPmv6as0kJpZLF-XjaQOtbAMwuJGlEicchTptK-yxDu_Di0uQISTL4QcjYe5tqVq4NPqjj6faGqprPIKSt0-uXUZIa4Kw8Mrv5caSNU5Fk5UUQxgQpPDCp5iXipi0CTqtgPMJp8FAwL-Bdc?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"117\" height=\"102\"></strong></p>", 
+                                "<p><strong id=\"docs-internal-guid-96da3bec-7fff-a696-47fc-5cc90d1a9e98\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXekDwyyRQY0n_JDZDI5LY8w-t6E2RCJ_x9YnYHh5ClB6c-dlpJfto_Sxwe0CRPAKKh1d84Ph5gS9TBO6EaccWZSoMgflC90yMQTuOHa2ys92pWB5jNhZzxt_ofWiJ8Mhq8biZtVmd539MLpMJIrWmsO2yo?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"100\" height=\"94\"></strong></p>", "<p><strong id=\"docs-internal-guid-1410428f-7fff-c880-256c-dc0ad6f42e78\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXerkQGfj4TgcQvTkWhemv1WjTN7cJtDoHhjs1K5ziybb1rvhYYzxTGbBE6lZFJFlITtwLGOIUSesqXsizpFAao3hQ3oS-bAcpr9RkESCOdGDOI5UjBEqfGgpp8XH-3ATuWiQcuWUoQYyplpeiPgyIh7yZ4?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"138\" height=\"80\"></strong></p>"],
+                    options_hi: ["<p><strong id=\"docs-internal-guid-848fa76e-7fff-184e-0aa6-eb0a8be64374\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcaUjxuwyrLGok2HEe37eSvmsAxeR-rncaepLmoo-ur1XtcAv-p-UjS1FkSzBaIHgdFUIfv8ovb62b-pqiy3oEq0gEHPtknQUcIvwfk6d6hWKHufWnbyyI1dl0C-T4kQYMo1Tp4vu19uyb67srbt_wbCYk?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"129\" height=\"86\"></strong></p>", "<p><strong id=\"docs-internal-guid-ee4f2e10-7fff-4c98-6473-ca6ff30008ff\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcpPQBiz4-0cPmv6as0kJpZLF-XjaQOtbAMwuJGlEicchTptK-yxDu_Di0uQISTL4QcjYe5tqVq4NPqjj6faGqprPIKSt0-uXUZIa4Kw8Mrv5caSNU5Fk5UUQxgQpPDCp5iXipi0CTqtgPMJp8FAwL-Bdc?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"126\" height=\"110\"></strong></p>",
+                                "<p><strong id=\"docs-internal-guid-7afade8a-7fff-7f8e-ca8f-3b9913e43496\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXekDwyyRQY0n_JDZDI5LY8w-t6E2RCJ_x9YnYHh5ClB6c-dlpJfto_Sxwe0CRPAKKh1d84Ph5gS9TBO6EaccWZSoMgflC90yMQTuOHa2ys92pWB5jNhZzxt_ofWiJ8Mhq8biZtVmd539MLpMJIrWmsO2yo?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"96\" height=\"90\"></strong></p>", "<p><strong id=\"docs-internal-guid-c3479512-7fff-a2bc-c5f0-bd5e85a350d4\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXerkQGfj4TgcQvTkWhemv1WjTN7cJtDoHhjs1K5ziybb1rvhYYzxTGbBE6lZFJFlITtwLGOIUSesqXsizpFAao3hQ3oS-bAcpr9RkESCOdGDOI5UjBEqfGgpp8XH-3ATuWiQcuWUoQYyplpeiPgyIh7yZ4?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"135\" height=\"78\"></strong></p>"],
+                    solution_en: "<p>18.(b)</p>\n<p><strong id=\"docs-internal-guid-cda21aa0-7fff-0205-1216-c404c68e8229\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcfpU0SD_-j0IV4pHYPjWtxtto1Jk4OOtnHI1BskFqLlYr0CjsOPN9q5Crwn41o7gtVI06x9GQ7DWtnPKthD9tg2yq4ZXqX6HSksljgLssgefUMwLgPGCygIqKDE41Ba0zv0FOJpisEQiHNVPr1EvOFLA?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"120\" height=\"104\"></strong></p>",
+                    solution_hi: "<p>18.(b)</p>\n<p><strong id=\"docs-internal-guid-cda21aa0-7fff-0205-1216-c404c68e8229\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcfpU0SD_-j0IV4pHYPjWtxtto1Jk4OOtnHI1BskFqLlYr0CjsOPN9q5Crwn41o7gtVI06x9GQ7DWtnPKthD9tg2yq4ZXqX6HSksljgLssgefUMwLgPGCygIqKDE41Ba0zv0FOJpisEQiHNVPr1EvOFLA?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"120\" height=\"104\"></strong></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "19",
+                    section: "6",
+                    question_en: "<p><span style=\"font-family: Times New Roman;\">19.</span><span style=\"font-family: Times New Roman;\"> Select the Venn diagram that best represents the relationship among the following classes. </span></p>\n<p><span style=\"font-family: Times New Roman;\">Electronic gadgets, Mobile phones , Table, Laptops&nbsp;</span></p>",
+                    question_hi: "<p>19.<span style=\"font-family: Palanquin Dark;\"> वेन आरेख का चयन करें जो निम्नलिखित वर्गों के बीच संबंध को सर्वोत्तम रूप को दर्शाता है।</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">विद्युत उपकरण , मोबाइल फोन, टेबल, लैपटॉप</span></p>",
+                    options_en: ["<p><strong id=\"docs-internal-guid-a544545e-7fff-c904-df53-dfbf61e007e4\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdIh-UXGHvQ52yTNVC0lDqHJ40tIURx1bioczh8tQsp62OPBak2iR3DNsOIjbZ0dJOwDTiZqHpFpxyW7phYooi0ofVD0cLVrFzLgA93r5nwtOr9QXjv1LpO92MQnE3Q6kJJpYYAMfrnO4OzgUpINFgtJYY?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"131\" height=\"89\"></strong></p>", "<p><strong id=\"docs-internal-guid-1c2a2a39-7fff-e25c-4ff7-2dc76118e019\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXffS7qxLOCTpbi4nRctvKp7vHGJ2EImqbbkDEAK-WdXvywgu71CsOSdhyIhBthQHb2VwjDbIPdYQXK221-syYxpvrtqmGYBuDe--qbMvq7sgPDQLadX4H2OMDPimnoEKArXHx-lcoR3XKP2lTi-Xut6ww?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"110\" height=\"88\"></strong></p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>", 
+                                "<p><strong id=\"docs-internal-guid-2cfe34eb-7fff-f9aa-602c-4609105059bf\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfqJfapz1TZHRwe1iFvqq3FXfP_J-2_WR2mwXDbTHscRdxgfnQttxKDJV_sbDLq3HlWtDthY3ZqnOA6xuTG6genrC4n8Q_K2nGxOJiCBILVNJQ8YiRBD2W6ykCeQde0GEngly2SiseE7bTwK5NV0R7xwWE?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"100\" height=\"108\"></strong></p>", "<p><strong id=\"docs-internal-guid-a3e5361c-7fff-1080-ea9b-408f42e94595\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXd_pO4lP2KrFv2MJ-LEUFEpYLt8rwHsErK7BsBMuZnS0-WpGdk1kJy6Q5Z0UzLloscHcAgbxsAC5Ac8kNjwNxNnsm1Mc6mo8dbyrTl1slSldhMWlJ7YaXHXvmGbLuiSKaw_wdpg3QndEsrtrN0zObaDug?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"162\" height=\"78\"></strong></p>"],
+                    options_hi: ["<p><strong id=\"docs-internal-guid-6b4d3c1c-7fff-63ea-19c1-e1fe535fc233\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdIh-UXGHvQ52yTNVC0lDqHJ40tIURx1bioczh8tQsp62OPBak2iR3DNsOIjbZ0dJOwDTiZqHpFpxyW7phYooi0ofVD0cLVrFzLgA93r5nwtOr9QXjv1LpO92MQnE3Q6kJJpYYAMfrnO4OzgUpINFgtJYY?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"131\" height=\"89\"></strong></p>", "<p><strong id=\"docs-internal-guid-dea5f045-7fff-77e5-8f01-303935081e67\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXffS7qxLOCTpbi4nRctvKp7vHGJ2EImqbbkDEAK-WdXvywgu71CsOSdhyIhBthQHb2VwjDbIPdYQXK221-syYxpvrtqmGYBuDe--qbMvq7sgPDQLadX4H2OMDPimnoEKArXHx-lcoR3XKP2lTi-Xut6ww?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"121\" height=\"97\"></strong></p>\n<p><span style=\"font-family: Palanquin Dark;\"> </span></p>",
+                                "<p><strong id=\"docs-internal-guid-e27dd3cc-7fff-90d8-60f7-d9d6f367626c\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfqJfapz1TZHRwe1iFvqq3FXfP_J-2_WR2mwXDbTHscRdxgfnQttxKDJV_sbDLq3HlWtDthY3ZqnOA6xuTG6genrC4n8Q_K2nGxOJiCBILVNJQ8YiRBD2W6ykCeQde0GEngly2SiseE7bTwK5NV0R7xwWE?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"98\" height=\"106\"></strong></p>", "<p><strong id=\"docs-internal-guid-25c0737b-7fff-a42e-7515-b7eb5aec930c\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXd_pO4lP2KrFv2MJ-LEUFEpYLt8rwHsErK7BsBMuZnS0-WpGdk1kJy6Q5Z0UzLloscHcAgbxsAC5Ac8kNjwNxNnsm1Mc6mo8dbyrTl1slSldhMWlJ7YaXHXvmGbLuiSKaw_wdpg3QndEsrtrN0zObaDug?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"149\" height=\"72\"></strong></p>"],
+                    solution_en: "<p>19.(a) <span style=\"font-family: Times New Roman;\">Laptops and mobile phones are electronic gadgets and </span><span style=\"font-family: Times New Roman;\">table is</span><span style=\"font-family: Times New Roman;\"> different. </span></p>\n<p><strong id=\"docs-internal-guid-e2530fed-7fff-dada-e4e4-e117ea6dfcdf\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcrmc31fIq9IZfCzWkhvixYzo7aKhiQaPTZyILA3EJjt9ZaCqVv12yaxKO00b9Z5R2mkyRhmkMJ-wwjcQFG1WdZHV3Ek-fMB1rVE4u4vsIVHB_kRSCadg0-HPzf5ZJEvZYfY2uKSw?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"146\" height=\"85\"></strong></p>",
+                    solution_hi: "<p>19.(a) <span style=\"font-family: Baloo;\">लैपटॉप और मोबाइल फोन इलेक्ट्रॉनिक गैजेट (विद्युत उपकरण) हैं, और टेबल अलग है।</span></p>\n<p><strong id=\"docs-internal-guid-e2530fed-7fff-dada-e4e4-e117ea6dfcdf\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcrmc31fIq9IZfCzWkhvixYzo7aKhiQaPTZyILA3EJjt9ZaCqVv12yaxKO00b9Z5R2mkyRhmkMJ-wwjcQFG1WdZHV3Ek-fMB1rVE4u4vsIVHB_kRSCadg0-HPzf5ZJEvZYfY2uKSw?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"146\" height=\"85\"></strong></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "20",
+                    section: "6",
+                    question_en: "<p>20. <span style=\"font-family: Times New Roman;\">Select the Venn diagram that best represents the relationship between the following.</span></p>\n<p><span style=\"font-family: Times New Roman;\">India. Delhi, Assam, Guwahati</span></p>",
+                    question_hi: "<p>20. <span style=\"font-family: Palanquin Dark;\">उस</span><span style=\"font-family: Palanquin Dark;\"> </span><span style=\"font-family: Palanquin Dark;\">वेन आरेख का चयन करें जो निम्नलिखित के बीच संबंध को सर्वोत्तम रूप से दर्शाता है।</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">भारत, दिल्ली, असम, गुवाहाटी</span></p>",
+                    options_en: ["<p><strong id=\"docs-internal-guid-06400571-7fff-ea67-30eb-af490734db51\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfycrnvONN1DDctp03576PfjS_eJv7faqsxP9mxC5aBLWXKfSnXa92NOFKprFU9p5deI_SHScOsuI6792xyKBJ3Ab1hxxP-7Ff9y9SVdV_RR6ToX_A9Nq_vJfFlU0xAdsbIu1Xv16i3XKA3LZ9RIV-J5n4?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"96\" height=\"89\"></strong></p>", "<p><strong id=\"docs-internal-guid-9eb20aa8-7fff-0780-f470-d2234d0d22aa\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfZG74S1EQpRN9ZqKsyMd52PmUTs-trvgBGVA_S3Wwqvzx7ma6X5Ulm2_YPq6jiH3UZ3xrtyIkbzqspFnYbUIbgY_Y3oXaP_F-51JyuMHkbvxYfx74EEUCUONVuY5j9c_8styo3HGj-MzZA1MTBeZWqUQU?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"106\" height=\"99\"></strong></p>", 
+                                "<p><strong id=\"docs-internal-guid-9abf9654-7fff-2502-7c9f-6d26254a0725\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeqJtQl0Ac_VN7k5hbN0L7UnVRDL2ko8HIYnKqKEnMbWaxw0ZOFpF5eFKZipVUUrY61enPj1GzwOcFcim0G57PmMlFb2fjzKCh8LDpEe-TeMphTH-j5X1_KZzLfsxtoO8mjV4ZeNQc0SxPRimYeYxwQp6A?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"163\" height=\"79\"></strong></p>", "<p><strong id=\"docs-internal-guid-f7e74809-7fff-3c7a-60c5-c7dac3540c16\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcioGKGaCUIsahKYhCGfUj0E9p9gMsPvZ5m2QEn_XCc892vFlcqi7xcdJoCFxFCbSRU0wFpH5Yi_SchOzVrfph9uNtX4vrEq-tqTk1TsMLK5S6NpMi8Qdc2uv4pB3KUeEu05pm0lVlUV4xRQqqOSdmzqEc?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"120\" height=\"114\"></strong></p>"],
+                    options_hi: ["<p><strong id=\"docs-internal-guid-56c86e62-7fff-6f76-af3e-6bc45f434d33\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfycrnvONN1DDctp03576PfjS_eJv7faqsxP9mxC5aBLWXKfSnXa92NOFKprFU9p5deI_SHScOsuI6792xyKBJ3Ab1hxxP-7Ff9y9SVdV_RR6ToX_A9Nq_vJfFlU0xAdsbIu1Xv16i3XKA3LZ9RIV-J5n4?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"107\" height=\"99\"></strong></p>", "<p><strong id=\"docs-internal-guid-dda4a828-7fff-8764-048d-de46f840bb8d\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfZG74S1EQpRN9ZqKsyMd52PmUTs-trvgBGVA_S3Wwqvzx7ma6X5Ulm2_YPq6jiH3UZ3xrtyIkbzqspFnYbUIbgY_Y3oXaP_F-51JyuMHkbvxYfx74EEUCUONVuY5j9c_8styo3HGj-MzZA1MTBeZWqUQU?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"104\" height=\"97\"></strong></p>",
+                                "<p><strong id=\"docs-internal-guid-9ccbe7e3-7fff-9c0f-71d8-1f3b6c98fab2\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeqJtQl0Ac_VN7k5hbN0L7UnVRDL2ko8HIYnKqKEnMbWaxw0ZOFpF5eFKZipVUUrY61enPj1GzwOcFcim0G57PmMlFb2fjzKCh8LDpEe-TeMphTH-j5X1_KZzLfsxtoO8mjV4ZeNQc0SxPRimYeYxwQp6A?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"163\" height=\"79\"></strong></p>", "<p><strong id=\"docs-internal-guid-9a925375-7fff-b089-6d44-8c96033f5c12\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcioGKGaCUIsahKYhCGfUj0E9p9gMsPvZ5m2QEn_XCc892vFlcqi7xcdJoCFxFCbSRU0wFpH5Yi_SchOzVrfph9uNtX4vrEq-tqTk1TsMLK5S6NpMi8Qdc2uv4pB3KUeEu05pm0lVlUV4xRQqqOSdmzqEc?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"103\" height=\"98\"></strong></p>"],
+                    solution_en: "<p>20.(b) <span style=\"font-family: \'Times New Roman\';\">India is a country and delhi is a union territory and assam is a state of india and guwahati is the capital of assam. So only option (b) satisfy this condition</span></p>\n<p><strong id=\"docs-internal-guid-e3dbeea1-7fff-03b9-a28f-69fbc4e07182\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXceoJ0SXWMYT0hFLImCd6AMPyFeLmMj_jrFZnW92vF6VJGPBHYtU6vCMPMcUPYUvPKvtqHF2yNtqIdVuU8OdFbVV3dv8lVtTD9wyWMkTBApsQMY-hGB6oyaRtf4RVNLJeU8SkZEmn_hmKfPlx4vVqM5xRc?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"119\" height=\"110\"></strong></p>",
+                    solution_hi: "<p>20.(b) <span style=\"font-family: Baloo;\">भारत एक देश है और दिल्ली एक केंद्र शासित प्रदेश है और असम भारत का एक राज्य है और गुवाहाटी असम की राजधानी है। तो केवल विकल्प (b) इस शर्त को पूरा करता है।</span></p>\n<p><strong id=\"docs-internal-guid-e3dbeea1-7fff-03b9-a28f-69fbc4e07182\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXceoJ0SXWMYT0hFLImCd6AMPyFeLmMj_jrFZnW92vF6VJGPBHYtU6vCMPMcUPYUvPKvtqHF2yNtqIdVuU8OdFbVV3dv8lVtTD9wyWMkTBApsQMY-hGB6oyaRtf4RVNLJeU8SkZEmn_hmKfPlx4vVqM5xRc?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"114\" height=\"106\"></strong></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "21",
+                    section: "6",
+                    question_en: "<p>21. <span style=\"font-family: Times New Roman;\">Select the venn diagram that best represents the relationship between the following </span></p>\n<p><span style=\"font-family: Times New Roman;\">Infectious diseases ,Deficiency diseases, Goitre, Rickets, Chickenpox</span></p>",
+                    question_hi: "<p>21. <span style=\"font-family: Baloo;\">वेन आरेख का चयन करें जो निम्नलिखित के बीच के संबंध को सर्वोत्तम रूप से दर्शाता है</span></p>\n<p><span style=\"font-family: Baloo;\">&nbsp;संक्रामक, रोग, कमी से होने वाले रोग, घेंघा, रिकेट्स, चेचक</span></p>",
+                    options_en: ["<p><strong id=\"docs-internal-guid-657115e3-7fff-84a9-5b32-8edcdd4ec47f\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcmIjaz3zFFORJ4AzEiY2NWT2FBA1sSJycdUlVHh3uxsM8yOn6Wu5cEGDbI0w52KBwUzPS-xexXYllrqSoTfZcHUA8EpAT7F8yd2V7CHiosmrzzNoQH4rOgoG1suXnlD33QFlErt4LueM76YyL04gOO4o4?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"102\" height=\"92\"></strong></p>", "<p><strong id=\"docs-internal-guid-744c135d-7fff-a0b3-c560-b29110b74330\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXf9_e28bcX4XfnU1oBxGT7eIY-I67kbMM2gojWmbThVwrAVI5BeSZiI3PDBo3tqdmHTwfENr0cN9E9xUNq_50_5QCB7Brh_hY0EN3Gq2DKByb3hKwmymrDKXEUVAYIlJA_zVjxBQqKQ-DIL4q3kWu1AQSk?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"183\" height=\"121\"></strong></p>", 
+                                "<p><strong id=\"docs-internal-guid-2ef53df9-7fff-b684-a542-c63c2b8f208a\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXf2U_9cd4EGs4w_yWSehvWKS-13BpNcB5Dc1f7MFIygObpa9LC5g40hFgSIWQIXXv5OPsbz0kMQHHYqVzI-XSC8JuLV8Xq55XJWfUjOgIt_2DZKiWhVpXPFHq5v_sTzfZI6yK2xypJxaU_sseESy2DFKNI?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"136\" height=\"128\"></strong></p>", "<p><strong id=\"docs-internal-guid-b53f3290-7fff-cc53-88a5-bd18614bbdb1\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcb4j3vDPXyDfdSlmzHyj1vksk2qkyimYfl9cc_J-faYNjRbc9jw329_yDWiN9PIxsiUwKas2CsSWST-Vjwj6cxCDeZKBrzqLxwboOuEvAl5L8cN14DVai3NhtLw2ZVsMb26Oh-YD9SY8RRVF1-3trMvQE?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"199\" height=\"96\"></strong></p>"],
+                    options_hi: ["<p><strong id=\"docs-internal-guid-f4a9ee73-7fff-0f17-dd52-9364abd925a3\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcmIjaz3zFFORJ4AzEiY2NWT2FBA1sSJycdUlVHh3uxsM8yOn6Wu5cEGDbI0w52KBwUzPS-xexXYllrqSoTfZcHUA8EpAT7F8yd2V7CHiosmrzzNoQH4rOgoG1suXnlD33QFlErt4LueM76YyL04gOO4o4?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"83\" height=\"75\"></strong></p>", "<p><strong id=\"docs-internal-guid-c446d7f8-7fff-24ab-a442-096d5bbe68b6\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXf9_e28bcX4XfnU1oBxGT7eIY-I67kbMM2gojWmbThVwrAVI5BeSZiI3PDBo3tqdmHTwfENr0cN9E9xUNq_50_5QCB7Brh_hY0EN3Gq2DKByb3hKwmymrDKXEUVAYIlJA_zVjxBQqKQ-DIL4q3kWu1AQSk?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"126\" height=\"83\"></strong></p>",
+                                "<p><strong id=\"docs-internal-guid-7f47d9a8-7fff-3754-85e6-2b7362bdf3ba\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXf2U_9cd4EGs4w_yWSehvWKS-13BpNcB5Dc1f7MFIygObpa9LC5g40hFgSIWQIXXv5OPsbz0kMQHHYqVzI-XSC8JuLV8Xq55XJWfUjOgIt_2DZKiWhVpXPFHq5v_sTzfZI6yK2xypJxaU_sseESy2DFKNI?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"98\" height=\"92\"></strong></p>", "<p><strong id=\"docs-internal-guid-d97c1f71-7fff-4bd7-9fe1-97a40641f147\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcb4j3vDPXyDfdSlmzHyj1vksk2qkyimYfl9cc_J-faYNjRbc9jw329_yDWiN9PIxsiUwKas2CsSWST-Vjwj6cxCDeZKBrzqLxwboOuEvAl5L8cN14DVai3NhtLw2ZVsMb26Oh-YD9SY8RRVF1-3trMvQE?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"160\" height=\"77\"></strong></p>"],
+                    solution_en: "<p>21. (d) <span style=\"font-family: Times New Roman;\">In infectious diseases we can consider chickenpox. But goitre and rickets due to lack of vitamin. So option (d) is right answer.</span></p>\n<p><strong id=\"docs-internal-guid-983da65d-7fff-7d21-d80a-1c32a5922ba9\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdZBuCgci7iMH2no5N30wjq1PKyafSBwtwfRYpGD5RRFtjB_SxcZ_4xNqWoBAFuU7YH2LKz-s60yOAl-aNlG-d3yo3zju4aJXQptXzE2jmfBCJoDc3l9FE7DNcevgTH_4SncMaK7Amrq36ir8-hpuPm7fo?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"162\" height=\"78\"></strong></p>",
+                    solution_hi: "<p>21. (d) <span style=\"font-family: Baloo;\">संक्रामक रोगों में हम चेचक पर विचार कर सकते हैं। लेकिन घेंघा और रिकेट्स विटामिन की कमी के कारण होता है। तो विकल्प (d) सही उत्तर है।</span></p>\n<p><strong id=\"docs-internal-guid-983da65d-7fff-7d21-d80a-1c32a5922ba9\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdZBuCgci7iMH2no5N30wjq1PKyafSBwtwfRYpGD5RRFtjB_SxcZ_4xNqWoBAFuU7YH2LKz-s60yOAl-aNlG-d3yo3zju4aJXQptXzE2jmfBCJoDc3l9FE7DNcevgTH_4SncMaK7Amrq36ir8-hpuPm7fo?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"174\" height=\"84\"></strong></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "22",
+                    section: "6",
+                    question_en: "<p>22.<span style=\"font-family: Times New Roman;\"> In the following Venn diagram, the oval stands for &lsquo;chartered accountants&rsquo;, the pentagon stands for &lsquo;males&rsquo;, the triangle stands for &lsquo;full time employees&rsquo;, and the square stands for &lsquo;</span><span style=\"font-family: Times New Roman;\">tax payers</span><span style=\"font-family: Times New Roman;\">&rsquo;. The given number </span><span style=\"font-family: Times New Roman;\">represent</span><span style=\"font-family: Times New Roman;\"> the number of persons in that particular category.</span></p>\n<p><strong id=\"docs-internal-guid-081340fb-7fff-05f2-90fe-587eb6c59054\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdpf7Kfpydw51YOcF0D5h45JE9PgQJYQFAO3MMNngD5tIaLlsYhT9tSlgLbZwY6HuGUzIx5bybfwlP4LBOTq0jd3Wt5nP-mwdwlfuCS-iruxp9u-xVnX7xA0KHLDkTM8CB9HG2hq4fwtxaxA8DjpsVlk6Y?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"166\" height=\"126\"></strong></p>\n<p><span style=\"font-family: Times New Roman;\">How many male </span><span style=\"font-family: Times New Roman;\">charted</span><span style=\"font-family: Times New Roman;\"> accountants are NEITHER tax-payers NOR full-time employees?</span></p>",
+                    question_hi: "<p>22.<span style=\"font-family: Palanquin Dark;\"> निम्नलिखित वेन आरेख में, अंडाकार \'चार्टर्ड एकाउंटेंट\' को दर्शाता है , पेंटागन \'पुरुषों\' को दर्शाता है , त्रिकोण \'पूर्णकालिक कर्मचारियों\' को दर्शाता है , और वर्ग \'करदाताओं\' को दर्शाता है । दी गई संख्या उस विशेष श्रेणी में व्यक्तियों की संख्या को दर्शाती है।</span></p>\n<p><span style=\"font-family: Palanquin Dark;\"> </span></p>\n<p><strong id=\"docs-internal-guid-081340fb-7fff-05f2-90fe-587eb6c59054\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdpf7Kfpydw51YOcF0D5h45JE9PgQJYQFAO3MMNngD5tIaLlsYhT9tSlgLbZwY6HuGUzIx5bybfwlP4LBOTq0jd3Wt5nP-mwdwlfuCS-iruxp9u-xVnX7xA0KHLDkTM8CB9HG2hq4fwtxaxA8DjpsVlk6Y?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"166\" height=\"126\"></strong></p>\n<p><span style=\"font-family: Palanquin Dark;\">कितने पुरुष चार्टर्ड एकाउंटेंट न तो करदाता हैं और न ही पूर्णकालिक कर्मचारी हैं?</span></p>",
+                    options_en: ["<p>17</p>", "<p>14</p>", 
+                                "<p>22</p>", "<p>8</p>"],
+                    options_hi: ["<p>17</p>", "<p>14</p>",
+                                "<p>22</p>", "<p>8</p>"],
+                    solution_en: "<p>22.(c)</p>\n<p><strong id=\"docs-internal-guid-100812ec-7fff-7356-b393-dec6f77f5032\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdDLZ5hw-fCbLYc1krTK5fZ18Z_FoKOpfyYvJ1PaHWjLgJ4gzim8bxqm8OFIbzTfLt9hukgnZYYgH-hINYlyLQhwwj1JyS4N2ywZ7ZV1pOyH1eg34OGllHs0Ihs02Hk5DocsFcRl8djlnRa6HUXKkB8p2Y?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"147\" height=\"113\"></strong></p>\n<p><span style=\"font-family: Palanquin Dark;\"> According to question the oval stands for charted accountants, the pentagon stands for male, the triangle stands for full time employees,and the square stands for the tax payers, and asked for male chartered accountants are neither tax payers nore full time employees so the correct answer is 22.</span></p>",
+                    solution_hi: "<p>22.(c)</p>\n<p><strong id=\"docs-internal-guid-100812ec-7fff-7356-b393-dec6f77f5032\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdDLZ5hw-fCbLYc1krTK5fZ18Z_FoKOpfyYvJ1PaHWjLgJ4gzim8bxqm8OFIbzTfLt9hukgnZYYgH-hINYlyLQhwwj1JyS4N2ywZ7ZV1pOyH1eg34OGllHs0Ihs02Hk5DocsFcRl8djlnRa6HUXKkB8p2Y?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"147\" height=\"113\"></strong></p>\n<p><span style=\"font-family: Palanquin Dark;\">प्रश्न के अनुसार, अंडाकार चार्टर्ड एकाउंटेंट के लिए है, पेंटागन पुरुष के लिए है, त्रिकोण पूर्णकालिक कर्मचारियों के लिए है, और वर्ग करदाताओं के लिए है, और हमें पुरुष चार्टर्ड एकाउंटेंट के लिए पूछा गया है जो न तो करदाता हैं और न ही पूर्णकालिक कर्मचारी हैं इसलिए सही है। उत्तर 22 है।</span></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "23",
+                    section: "misc",
+                    question_en: "<p>23. <span style=\"font-family: Palanquin Dark;\">In a group of 110 students, 23 students did not participate in any of the two games: Badminton and Chess. 45 students participated in Badminton and 61 students participated in Chess. How many students participated in Badminton only?</span><span style=\"font-family: Palanquin Dark;\">&nbsp;</span></p>",
+                    question_hi: "<p>23.<span style=\"font-family: Palanquin Dark;\"> 110 छात्रों के एक समूह में, 23 छात्रों ने दो खेलों में से किसी में भी भाग नहीं लिया: बैडमिंटन और शतरंज। बैडमिंटन में 45 और शतरंज में 61 विद्यार्थियों ने भाग लिया। केवल बैडमिंटन में कितने विद्यार्थियों ने भाग लिया?</span></p>",
+                    options_en: ["<p>26</p>", "<p>18</p>", 
+                                "<p>42</p>", "<p>28</p>"],
+                    options_hi: ["<p>26</p>", "<p>18</p>",
+                                "<p>42</p>", "<p>28</p>"],
+                    solution_en: "<p>23.(a) <span style=\"font-family: Times New Roman;\">Given , that total number of students were 110. And 23 students did not participate in any game. So, remaining students. (110-23) =87</span></p>\n<p><span style=\"font-family: Times New Roman;\">In badminton playing students is </span></p>\n<p><span style=\"font-family: Times New Roman;\"> p(B)= 45</span></p>\n<p><span style=\"font-family: Times New Roman;\">In chess playing students is </span></p>\n<p><span style=\"font-family: Times New Roman;\">p(A) = 61 </span></p>\n<p><span style=\"font-family: Times New Roman;\">We know that , </span></p>\n<p><span style=\"font-family: Gungsuh;\">p(a ⋃ b)= p(a) + p(b) - p(a ⋂ b) </span></p>\n<p><span style=\"font-family: Gungsuh;\">87 = 45 + 61 - p( a ⋂ b) </span></p>\n<p><span style=\"font-family: Gungsuh;\"> p( a ⋂ b) = 19</span></p>\n<p><span style=\"font-family: Times New Roman;\">So student playing both the games are 19. </span></p>\n<p><span style=\"font-family: Times New Roman;\">Therefore we can say that the students playing only badminton are = 45 - 19 = 26</span></p>\n<p><strong id=\"docs-internal-guid-39196c96-7fff-67c8-7696-8f695e58e45f\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcPa_YgmrDMs1AG_kGvLinP1ug7RP-yWnvjCjPR1kVaSC9l0XjLF6bNSu2lsStm8Apfp6D1tjWHpIsv5eAEqFESBjZOlgLhj2TSfcDh6UF6PYPQMy5fefYOQ0Q5l-s9im_GqfObrjlILDW4IXcqPadVKiE?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"146\" height=\"93\"></strong></p>",
+                    solution_hi: "<p>23.(b) <span style=\"font-family: Palanquin Dark;\">दिया गया है, कि छात्रों की कुल संख्या 110 थी। और 23 छात्रों ने किसी भी खेल में भाग नहीं लिया। इसलिए बचे हुए छात्र, (110-23) =87</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">बैडमिंटन खेलने वाले छात्रों के लिए p(B)= 45 </span></p>\n<p><span style=\"font-family: Palanquin Dark;\">शतरंज खेलने वाले छात्रों के लिए p(A) = 61 </span></p>\n<p><span style=\"font-family: Palanquin Dark;\">हम जानते हैं कि, p(aUb)= p(a)+ p(b)-p(a n b) </span></p>\n<p><span style=\"font-family: Palanquin Dark;\"> 87 = 45+61 -p( a n b) </span></p>\n<p><span style=\"font-family: Palanquin Dark;\"> = 19</span></p>\n<p><span style=\"font-family: Palanquin Dark;\"> </span></p>\n<p><strong id=\"docs-internal-guid-39196c96-7fff-67c8-7696-8f695e58e45f\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcPa_YgmrDMs1AG_kGvLinP1ug7RP-yWnvjCjPR1kVaSC9l0XjLF6bNSu2lsStm8Apfp6D1tjWHpIsv5eAEqFESBjZOlgLhj2TSfcDh6UF6PYPQMy5fefYOQ0Q5l-s9im_GqfObrjlILDW4IXcqPadVKiE?key=DOs9-ow6HvTQ8U4-vDiT4o0S\" width=\"146\" height=\"93\"></strong></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+            
+            // Generate question boxes
+            const boxesContainer = document.getElementById('question-boxes');
+            questions.forEach((q, index) => {
+                const box = document.createElement('div');
+                box.className = 'q-box';
+                box.textContent = index + 1;
+                box.onclick = () => showQuestion(index);
+                box.id = `box-${index}`;
+                boxesContainer.appendChild(box);
+            });
+            
+            // Show first question
+            showQuestion(0);
+            updateProgress();
+        }
+        
+        // Show a specific question
+        
+        function formatContent(text) {
+            if (!text) return '';
+            return text.replace(/<img/g, '<img style="max-width:100%;height:auto;"');
+        }
+        
+        function showQuestion(index) {
+            if (index < 0 || index >= questions.length) return;
+            
+            currentQuestion = index;
+            const question = questions[index];
+            
+            // Update question counter
+            document.getElementById('question-counter').textContent = `Question ${index + 1} of ${questions.length}`;
+            
+            // Update question boxes
+            document.querySelectorAll('.q-box').forEach(box => box.classList.remove('current'));
+            document.getElementById(`box-${index}`).classList.add('current');
+            
+            // Generate question HTML
+            let html = `
+                <div class="question-card">
+                    <div class="question-text">
+                        <div class="en">${formatContent(question.question_en)}</div>
+                        <div class="hi" style="display:none">${formatContent(question.question_hi)} </div>
+                    </div>
+                    <div class="options" id="options-container">`;
+            
+            // Add options
+            ['a', 'b', 'c', 'd'].forEach((opt, i) => {
+                let optionClass = '';
+                let isCorrectAnswer = opt === question.correct;
+                let isUserAnswer = answers[question.id] === opt;
+                
+                // When reviewing, add appropriate classes
+                if (submitted) {
+                    if (isCorrectAnswer) {
+                        optionClass += ' correct-answer';
+                    } else if (isUserAnswer && !isCorrectAnswer) {
+                        optionClass += ' incorrect';
+                    }
+                }
+                
+                html += `
+                    <div class="option-item">
+                        <input class="option-input" type="radio" name="q${index}" 
+                            id="opt-${index}-${opt}" value="${opt}" 
+                            ${isUserAnswer ? 'checked' : ''}
+                            onclick="selectAnswer('${question.id}', '${opt}')">
+                       <label class="option-label${optionClass}" for="opt-${index}-${opt}">
+                            <div class="en">${question.options_en[i]}</div>
+                            <div class="hi" style="display:none">${question.options_hi[i]}</div>
+                        </label>
+                    </div>`;
+            });
+            
+            // Add solution if submitted
+            if (submitted) {
+                const isCorrect = answers[question.id] === question.correct;
+                const resultText = answers[question.id] ? (isCorrect ? 'Correct!' : 'Incorrect!') : 'Not attempted';
+                
+                html += `
+                    <div class="solution-container">
+                        <div class="solution-title">${resultText}</div>
+                        <div class="solution-text">
+                            <div class="en">${question.solution_en}</div>
+                            <div class="hi" style="display:none">${question.solution_hi}</div>
+                        </div>
+                    </div>`;
+            }
+            
+            html += `</div></div>`;
+            
+            document.getElementById('questions-container').innerHTML = html;
+            
+            // Apply language settings
+            applyLanguage();
+            
+            // If in mobile view, close the menu
+            if (window.innerWidth < 992) {
+                toggleNav(false);
+            }
+            
+            // Add review mode class if submitted
+            if (submitted) {
+                document.getElementById('options-container').classList.add('review-mode');
+            }
+        }
+        
+        // Apply current language
+        function applyLanguage() {
+            document.querySelectorAll(`.${currentLang}`).forEach(el => el.style.display = 'block');
+            document.querySelectorAll(`.${currentLang === 'en' ? 'hi' : 'en'}`).forEach(el => el.style.display = 'none');
+            
+            // Update language button text
+            document.getElementById('lang-text').textContent = currentLang === 'en' ? 'Hi' : 'En';
+        }
+        
+        // Select an answer
+        function selectAnswer(qId, option) {
+            if (submitted) return;
+            
+            answers[qId] = option;
+            updateProgress();
+            
+            // Mark question as attempted in the navigation
+            const index = questions.findIndex(q => q.id === qId);
+            if (index >= 0) {
+                const box = document.getElementById(`box-${index}`);
+                box.classList.add('attempted');
+                box.classList.remove('unattempted');
+            }
+        }
+        
+        // Navigate to previous/next question
+        function prevQuestion() { 
+            if (currentQuestion > 0) showQuestion(currentQuestion - 1); 
+        }
+        
+        function nextQuestion() { 
+            if (currentQuestion < questions.length - 1) showQuestion(currentQuestion + 1); 
+        }
+        
+        // Switch section
+        function switchSection(sectionId) {
+            if (sectionId === 'all') {
+                showQuestion(0);
+                return;
+            }
+            
+            const section = sections[sectionId];
+            if (section) showQuestion(section.start);
+        }
+        
+        // Toggle language
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'hi' : 'en';
+            applyLanguage();
+        }
+        
+        // Toggle navigation sidebar
+        function toggleNav(show) {
+            const nav = document.getElementById('question-nav');
+            const overlay = document.getElementById('nav-overlay');
+            
+            if (show === undefined) {
+                show = !nav.classList.contains('show');
+            }
+            
+            if (show) {
+                nav.classList.add('show');
+                overlay.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            } else {
+                nav.classList.remove('show');
+                overlay.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+        }
+        
+        // Update progress
+        function updateProgress() {
+            const attempted = Object.keys(answers).length;
+            document.getElementById('attempted-count').textContent = attempted;
+        }
+        
+        // Start timer
+        function startTimer() {
+            const timerDisplay = document.getElementById('timer-display');
+            let timeLeft = totalTime;
+            
+            const timerInterval = setInterval(() => {
+                if (timeLeft <= 0 || submitted) {
+                    clearInterval(timerInterval);
+                    if (!submitted) submitTest();
+                    return;
+                }
+                
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                timeLeft--;
+            }, 1000);
+        }
+        
+        // Confirm before submitting
+        function confirmSubmit() {
+            if (submitted) return;
+            
+            const attempted = Object.keys(answers).length;
+            const remaining = questions.length - attempted;
+            
+            // Create a more modern confirmation dialog
+            const confirmHtml = `
+                <div style="text-align: center; padding: 20px;">
+                    <h4 style="margin-bottom: 16px; color: var(--dark);">Confirm Submission</h4>
+                    <p style="margin-bottom: 24px; color: var(--gray);">
+                        You have attempted ${attempted} of ${questions.length} questions.<br>
+                        ${remaining} questions are unattempted.
+                    </p>
+                    <div style="display: flex; justify-content: center; gap: 12px;">
+                        <button onclick="this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; border: 1px solid var(--light-gray); background: white; border-radius: 8px; cursor: pointer;">
+                            Cancel
+                        </button>
+                        <button onclick="submitTest(); this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer;">
+                            Submit Test
+                        </button>
+                    </div>
+                </div>`;
+            
+            // Create modal element
+            const modal = document.createElement('div');
+            modal.className = 'results-modal show';
+            modal.innerHTML = `
+                <div class="results-card" style="max-width: 400px;">
+                    <button class="cancel-btn" style="position: absolute; top: 12px; right: 12px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--gray);" onclick="this.closest('.results-modal').remove()">
+                        ×
+                    </button>
+                    ${confirmHtml}
+                </div>`;
+            
+            document.body.appendChild(modal);
+        }
+        
+        // Submit test
+        function submitTest() {
+            if (submitted) return;
+            
+            submitted = true;
+            
+            let score = 0;
+            let correctCount = 0;
+            let incorrectCount = 0;
+            let unattemptedCount = 0;
+            
+            questions.forEach((q, index) => {
+                const userAns = answers[q.id];
+                const box = document.getElementById(`box-${index}`);
+                
+                box.classList.remove('attempted');
+                
+                if (!userAns) {
+                    unattemptedCount++;
+                    box.classList.add('unattempted');
+                } else if (userAns === q.correct) {
+                    correctCount++;
+                    score += q.pos_marks;
+                    box.classList.add('correct');
+                } else {
+                    incorrectCount++;
+                    score -= q.neg_marks;
+                    box.classList.add('incorrect');
+                }
+            });
+            
+            // Update result values
+            document.getElementById('score-value').textContent = score.toFixed(2);
+            document.getElementById('correct-value').textContent = correctCount;
+            document.getElementById('incorrect-value').textContent = incorrectCount;
+            document.getElementById('unattempted-value').textContent = unattemptedCount;
+            
+            // Show the results modal
+            document.getElementById('results-modal').classList.add('show');
+            
+            // Disable submit button
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-check"></i>';
+            submitBtn.style.backgroundColor = 'var(--success)';
+            
+            // Refresh current question view to show solution
+            showQuestion(currentQuestion);
+        }
+        
+        // Review test
+        function reviewTest() {
+            document.getElementById('results-modal').classList.remove('show');
+            showQuestion(0);
+        }
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target === document.getElementById('results-modal')) {
+                document.getElementById('results-modal').classList.remove('show');
+            }
+        });
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') prevQuestion();
+            if (e.key === 'ArrowRight') nextQuestion();
+        });
+    </script>
+</body>
+</html>
