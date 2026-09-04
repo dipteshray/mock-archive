@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mocks Wallah</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --primary-light: #a29bfe;
+            --primary-dark: #5649c0;
+            --secondary: #00cec9;
+            --accent: #fd79a8;
+            --success: #00b894;
+            --warning: #fdcb6e;
+            --danger: #d63031;
+            --light: #f8f9fa;
+            --dark: #2d3436;
+            --gray: #636e72;
+            --light-gray: #dfe6e9;
+            --card-bg: #ffffff;
+            --body-bg: #f5f6fa;
+            --header-bg: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            --footer-bg: #ffffff;
+            --box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            --box-shadow-sm: 0 2px 10px rgba(0,0,0,0.05);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background-color: var(--body-bg);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            color: var(--dark);
+            line-height: 1.6;
+            padding-bottom: 80px; /* Space for fixed navigation */
+            overflow-x: hidden;
+        }
+        
+        /* Header Styles */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: var(--header-bg);
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            z-index: 1000;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .header-brand {
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .header-brand i {
+            margin-right: 8px;
+            font-size: 1.2rem;
+        }
+        
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .control-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .control-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .control-btn.active {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .timer-display {
+            background: rgba(0,0,0,0.2);
+            border-radius: 18px;
+            padding: 4px 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+        
+        .timer-display i {
+            margin-right: 6px;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-top: 60px;
+            padding: 16px;
+            min-height: calc(100vh - 140px);
+        }
+        
+        .question-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--box-shadow-sm);
+            border: none;
+            transition: var(--transition);
+        }
+        
+        .question-counter {
+            font-size: 0.9rem;
+            color: var(--gray);
+            text-align: center;
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+        
+        .question-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+        
+        .option-item {
+            margin-bottom: 12px;
+            position: relative;
+        }
+        
+        .option-input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+            .question-text {
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        hyphens: auto;
+        max-width: 100%;
+    }
+
+    .question-text img,
+    .option-label img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 8px 0;
+        border-radius: 8px;
+    }
+
+    .option-label {
+        overflow: hidden;
+    }
+
+    .question-card {
+        overflow: hidden;
+    }
+        
+        .option-label {
+            display: block;
+            padding: 14px 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--light-gray);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .option-label:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .option-input:checked + .option-label {
+            border-color: var(--primary);
+            background: rgba(108, 92, 231, 0.05);
+            box-shadow: 0 0 0 1px var(--primary);
+        }
+        
+        .option-input:checked + .option-label::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--primary);
+        }
+        
+        /* When reviewing answers */
+        .review-mode .option-input:checked + .option-label.correct {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.correct::after {
+            background: var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.incorrect {
+            border-color: var(--danger);
+            background: rgba(214, 48, 49, 0.05);
+            box-shadow: 0 0 0 1px var(--danger);
+        }
+        
+        .MathJax, .mjx-chtml {
+            overflow-x: auto;
+            max-width: 100%;
+            display: inline-block;
+        }
+
+        
+        .review-mode .option-input:checked + .option-label.incorrect::after {
+            background: var(--danger);
+        }
+        
+        .review-mode .option-label.correct-answer {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-label.correct-answer::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--success);
+        }
+        
+        .solution-container {
+            margin-top: 20px;
+            padding: 16px;
+            background: rgba(108, 92, 231, 0.05);
+            border-radius: 12px;
+            border-left: 3px solid var(--primary);
+        }
+        
+        .solution-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+        
+        /* Question Navigation */
+        .question-nav {
+            position: fixed;
+            top: 60px;
+            right: 0;
+            bottom: 80px;
+            width: 100%;
+            max-width: 320px;
+            background: var(--card-bg);
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            transform: translateX(100%);
+            transition: var(--transition);
+            z-index: 900;
+            overflow-y: auto;
+            padding: 16px;
+        }
+        
+        .question-nav.show {
+            transform: translateX(0);
+        }
+        
+        .nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .nav-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+        
+        .question-stats {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .stat-badge {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        
+        .section-selector {
+            width: 100%;
+            margin-bottom: 16px;
+            border-radius: 12px;
+            padding: 10px 16px;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            font-size: 0.9rem;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 16px;
+        }
+        
+        .question-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+            gap: 8px;
+        }
+        
+        .q-box {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .q-box:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .q-box.attempted {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .q-box.correct {
+            background-color: var(--success);
+            color: white;
+            border-color: var(--success);
+        }
+        
+        .q-box.incorrect {
+            background-color: var(--danger);
+            color: white;
+            border-color: var(--danger);
+        }
+        
+        .q-box.current {
+            border: 2px solid var(--accent) !important;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .q-box.unattempted {
+            background-color: var(--gray);
+            color: white;
+            border-color: var(--gray);
+        }
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: var(--footer-bg);
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            z-index: 800;
+        }
+        
+        .nav-btn {
+            height: 48px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 20px;
+            transition: var(--transition);
+            gap: 8px;
+        }
+        
+        .nav-btn i {
+            font-size: 1rem;
+        }
+        
+        .nav-btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .nav-btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+        
+        .nav-btn-outline:hover {
+            background: rgba(108, 92, 231, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        /* Overlay when nav is open */
+        .nav-overlay {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            bottom: 80px;
+            background: rgba(0,0,0,0.5);
+            z-index: 800;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+        }
+        
+        .nav-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        /* Results Modal */
+        .results-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1100;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+            padding: 16px;
+        }
+        
+        .results-modal.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .results-card {
+            background: white;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+            transform: translateY(20px);
+            transition: var(--transition);
+        }
+        
+        .results-modal.show .results-card {
+            transform: translateY(0);
+        }
+        
+        .results-header {
+            background: var(--header-bg);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .results-title {
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .results-body {
+            padding: 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            color: white;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+        
+        .results-footer {
+            padding: 16px 20px;
+            display: flex;
+            justify-content: center;
+            border-top: 1px solid var(--light-gray);
+        }
+        
+        /* Responsive Adjustments */
+        @media (min-width: 992px) {
+            .question-nav {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-right: 320px;
+            }
+            
+            .nav-overlay {
+                display: none;
+            }
+            
+            .bottom-nav {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .question-grid {
+                grid-template-columns: repeat(auto-fill, minmax(36px, 1fr));
+                gap: 6px;
+            }
+            
+            .q-box {
+                width: 36px;
+                height: 36px;
+                font-size: 0.9rem;
+            }
+            
+            .option-label {
+                padding: 12px 14px;
+            }
+            
+            .question-text {
+                font-size: 1rem;
+            }
+            
+            .header-brand {
+                font-size: 1rem;
+            }
+            
+            .control-btn {
+                width: 32px;
+                height: 32px;
+            }
+            
+            .timer-display {
+                font-size: 0.8rem;
+                padding: 4px 10px;
+            }
+            
+            .nav-btn {
+                height: 44px;
+                padding: 0 16px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="#" class="header-brand">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Mocks Wallah</span>
+            </a>
+            
+            <div class="header-controls">
+                <!-- Timer -->
+                <div class="timer-display">
+                    <i class="far fa-clock"></i>
+                    <span id="timer-display">15:00</span>
+                </div>
+                
+                <!-- Language toggle -->
+                <button class="control-btn" id="lang-btn" onclick="toggleLanguage()">
+                    <span id="lang-text">En</span>
+                </button>
+                
+                <!-- Submit button -->
+                <button class="control-btn" id="submit-btn" onclick="confirmSubmit()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+                
+                <!-- Questions toggle for mobile -->
+                <button class="control-btn nav-toggle-btn" id="nav-toggle" onclick="toggleNav()">
+                    <i class="fas fa-th"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main content -->
+    <main class="main-content" id="main-content">
+        <div class="question-counter" id="question-counter">Question 1 of 20</div>
+        
+        <!-- Questions will be displayed here -->
+        <div id="questions-container"></div>
+    </main>
+    
+    <!-- Overlay for mobile nav -->
+    <div class="nav-overlay" id="nav-overlay" onclick="toggleNav(false)"></div>
+    
+    <!-- Question navigation sidebar -->
+    <aside class="question-nav" id="question-nav">
+        <div class="nav-header">
+            <h3 class="nav-title">Questions</h3>
+            <div class="question-stats">
+                <span class="stat-badge bg-primary" id="attempted-count">0</span>
+                <span class="stat-badge bg-gray" id="total-count">20</span>
+                <button class="control-btn d-lg-none" onclick="toggleNav(false)">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Section selector -->
+        <select class="section-selector" id="section-selector" onchange="switchSection(this.value)">
+            <option value="all">All Sections</option>
+        </select>
+        
+        <!-- Question grid -->
+        <div class="question-grid" id="question-boxes"></div>
+    </aside>
+    
+    <!-- Bottom navigation for mobile -->
+    <nav class="bottom-nav d-lg-none">
+        <button class="nav-btn nav-btn-outline" onclick="prevQuestion()">
+            <i class="fas fa-chevron-left"></i>
+            <span>Previous</span>
+        </button>
+        <button class="nav-btn nav-btn-outline" onclick="nextQuestion()">
+            <span>Next</span>
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </nav>
+    
+    <!-- Results modal -->
+    <div class="results-modal" id="results-modal">
+        <div class="results-card">
+            <div class="results-header">
+                <h3 class="results-title">Test Results</h3>
+            </div>
+            <div class="results-body">
+                <div class="stats-grid">
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark))">
+                        <div class="stat-value" id="score-value">0</div>
+                        <div class="stat-label">Score</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--success), #1b9aaa)">
+                        <div class="stat-value" id="correct-value">0</div>
+                        <div class="stat-label">Correct</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--danger), var(--accent))">
+                        <div class="stat-value" id="incorrect-value">0</div>
+                        <div class="stat-label">Incorrect</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--gray), var(--dark))">
+                        <div class="stat-value" id="unattempted-value">0</div>
+                        <div class="stat-label">Unattempted</div>
+                    </div>
+                </div>
+            </div>
+            <div class="results-footer">
+                <button class="nav-btn nav-btn-primary" onclick="reviewTest()">
+                    <i class="fas fa-search me-1"></i>
+                    <span>Review Test</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Questions data
+        const questions = [];
+        const sections = {};
+        let currentLang = "en";
+        let currentQuestion = 0;
+        let answers = {};
+        let submitted = false;
+        let totalTime = 15 * 60;
+        
+        // Initialize the test
+        window.onload = function() {
+            initializeTest();
+            startTimer();
+            
+            // If on desktop, show the question navigation by default
+            if (window.innerWidth >= 992) {
+                document.getElementById('question-nav').classList.add('show');
+                document.getElementById('main-content').classList.add('with-nav');
+            }
+        };
+        
+        // Initialize test data
+        function initializeTest() {
+            // Add sections and questions
+            
+            sections["31"] = {
+                name: "Computer Knowledge",
+                start: 0,
+                end: 18
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="31">Computer Knowledge</option>`;
+            
+            sections["misc"] = {
+                name: "Miscellaneous",
+                start: 19,
+                end: 19
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="misc">Miscellaneous</option>`;
+            
+            
+                questions.push({
+                    id: "1",
+                    section: "31",
+                    question_en: " <p>1. What can be contained in an email?</p>",
+                    question_hi: "<p>1<span style=\"font-family: Palanquin Dark;\">. एक ईमेल में क्या-क्या समाविष्ट ( <span style=\"font-weight: 400;\">&nbsp;contained )</span> हो सकता है?</span></p>",
+                    options_en: [" <p> text, images but not files</p>", " <p> text files but not images</p>", 
+                                " <p> text, files, images</p>", " <p> Images, videos, but not zipped files</p>"],
+                    options_hi: ["<p>टेक्स्ट, इमेज लेकिन फाइलें नही</p>", "<p>टेक्स्ट,फाइलें लेकिन इमेज नही</p>",
+                                "<p>टेक्स्ट,फाइलें, इमेज&nbsp;</p>", "<p>इमेज, विडियो, लेकिन ज़िप की गई फाइलें नही</p>"],
+                    solution_en: " <p>1.(c)</span><span style=\"font-family:Palanquin Dark\"> Text, files, images can be contained in email. Electronic mail (e-mail) is a computer-based application for the exchange of messages between users.Internet email messages consist of two sections, \'header\' and \'body\'. These are known as \'content\'. The header is structured into fields such as From, To, CC, Subject, Date, and other information about the email.</span></p>",
+                    solution_hi: "<p>1.(c)<span style=\"font-family: Palanquin Dark;\"> टेक्स्ट, फ़ाइलें, चित्र ( picture )&nbsp; ईमेल में समाहित ( contain ) किए जा सकते हैं। इलेक्ट्रॉनिक मेल (ई-मेल) उपयोगकर्ताओं के बीच संदेशों के आदान-प्रदान के लिए एक कंप्यूटर आधारित एप्लीकेशन है। इंटरनेट ईमेल संदेशों में दो खंड होते हैं, \'हेडर\' और \'बॉडी\'। इन्हें \'सामग्री (content)\' के रूप में जाना जाता है। हेडर को इस तरह के क्षेत्रों में संरचित ( structured ) किया गया है - From , to, सीसी (cc), विषय (Subject), दिनांक और ईमेल के बारे में अन्य जानकारी।</span></p>",
+                    correct: "c",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "2",
+                    section: "31",
+                    question_en: " <p>2</span><span style=\"font-family:Palanquin Dark\">. What will be the result of the following MS Excel formula?</span></p> <p><span style=\"font-family:Palanquin Dark\">=8/4/2-2/2</span></p>",
+                    question_hi: " <p>2</span><span style=\"font-family:Palanquin Dark\">. निम्नलिखित MS एक्सेल फार्मूला का परिणाम क्या होगा?</span></p> <p><span style=\"font-family:Palanquin Dark\">=8/4/2-2/2</span></p>",
+                    options_en: [" <p>  0</span></p>", " <p>  1</span></p>", 
+                                " <p> -0.5</span></p>", " <p> 3</span></p>"],
+                    options_hi: [" <p>  0</span></p>", " <p>  1</span></p>",
+                                " <p> -0.5</span></p>", " <p> 3</span></p>"],
+                    solution_en: " <p>2.(a) </span><span style=\"font-family:Palanquin Dark\">= 8/4/2-2/2 = 0</span></p>",
+                    solution_hi: " <p>2.(a) </span><span style=\"font-family:Palanquin Dark\">= 8/4/2-2/2 = 0</span></p>",
+                    correct: "a",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "3",
+                    section: "31",
+                    question_en: " <p>3. What happens by default when you enter a value in an Excel cell and press the Enter key?</span></p>",
+                    question_hi: " <p>3</span><span style=\"font-family:Palanquin Dark\">. जब आप एक्सेल सेल में कोई वैल्यू दर्ज करते हैं और एंटर कुंजी दबाते हैं तो डिफ़ॉल्ट रूप से क्या होता है? </span></p>",
+                    options_en: [" <p> Cursor (selection box) will move to the top (upper) cell</span></p>", " <p> The cursor (selection box) will move to the bottom (upper) cell</span></p>", 
+                                " <p> Cursor (selection box) will move to the left cell</span></p>", " <p> cursor (selection box) will move to the right cell</span></p>"],
+                    options_hi: [" <p> कर्सर (सिलेक्शन बॉक्स ), ऊपर की (upper) सेल में चला जाएगा </span></p>", " <p> कर्सर (सिलेक्शन बॉक्स ), नीचे की (upper) सेल में चला जाएगा </span></p>",
+                                " <p> कर्सर (सिलेक्शन बॉक्स ), बाईं (लेफ्ट) सेल में चला जाएगा </span></p>", " <p> कर्सर (सिलेक्शन बॉक्स ), दाईं (राईट) सेल में चला जाएगा </span></p>"],
+                    solution_en: " <p>3.(b) </span><span style=\"font-family:Palanquin Dark\">When we enter a value in an Excel cell and press the Enter key then The cursor (selection box) will move to the bottom (upper) cell.</span></p>",
+                    solution_hi: " <p>3.(b) </span><span style=\"font-family:Palanquin Dark\">जब हम एक्सेल सेल में एक वैल्यू एंटर करते हैं और एंटर कुंजी  दबाते हैं तो कर्सर (सिलेक्शन बॉक्स) नीचे (ऊपरी) सेल में चला जाएगा।</span></p>",
+                    correct: "b",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "4",
+                    section: "31",
+                    question_en: " <p>4. An IP version 4 address is _________ long.</span></p>",
+                    question_hi: " <p>4</span><span style=\"font-family:Palanquin Dark\">. एक IP वर्जन 4 एड्रेस________ लंबा होता है।</span></p>",
+                    options_en: [" <p> 16 bytes</span></p>", " <p> 32 bytes</span></p>", 
+                                " <p> 64 bits</span></p>", " <p> 32 bits</span></p>"],
+                    options_hi: [" <p> 16 बाइट्स </span></p>", " <p> 32 बाइट्स </span></p>",
+                                " <p> 64 बिट्स </span></p>", " <p> 32 बिट्स </span></p>"],
+                    solution_en: " <p>4.(d)</span><span style=\"font-family:Palanquin Dark\"> An IP version 4 address is 32 bits long. A 32-bit address contains two primary parts: the network prefix and the host number. All hosts within a single network share the same network address. An IP version 6 address is 128 bits long.</span></p>",
+                    solution_hi: " <p>4.(d)</span><span style=\"font-family:Palanquin Dark\"> एक IP वर्शन 4 एड्रेस  32 बिट लंबा है। एक 32-बिट एड्रेस में दो प्राथमिक भाग ( primary part )  होते हैं: नेटवर्क प्रीफिक्स और होस्ट संख्या। एक ही नेटवर्क के भीतर सभी होस्ट समान नेटवर्क एड्रेस साझा करते हैं। एक IP वर्शन 6 एड्रेस 128 बिट लंबा है।</span></p>",
+                    correct: "d",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "5",
+                    section: "31",
+                    question_en: "<p><span style=\"font-family: Palanquin Dark;\">5.</span><span style=\"font-family: Palanquin Dark;\"> Which of the following statements is correct?</span></p>\r\n<p><span style=\"font-weight: 400;\">(i) A word in MS-Word can have both lowercase and uppercase letters.</span></p>\r\n<p><span style=\"font-weight: 400;\">(ii) The first word of the paragraph cannot be bolded in MS-Word.</span></p>",
+                    question_hi: "<p>5<span style=\"font-family: Palanquin Dark;\">. निम्नलिखित में से कौन सा कथन सही है?</span></p>\r\n<p><span style=\"font-weight: 400;\">(i) MS-Word में एक शब्द लोअर केस ( lower case ) और अप्पर केस ( uppper case )&nbsp; दोनों प्रकार के अक्षर ( word ) हो सकते है।&nbsp;&nbsp;</span></p>\r\n<p><span style=\"font-weight: 400;\">(ii) MS-Word में पेराग्राफ के पहले शब्द को बोल्ड नही किया जा सकता है </span></p>",
+                    options_en: ["<p>neither i nor ii</p>", "<p>only ii</p>", 
+                                "<p>i only</p>", "<p>both i and ii</p>"],
+                    options_hi: ["<p>न तो i और न ही ii</p>", "<p>केवल ii</p>",
+                                "<p>केवल i</p>", "<p>i और ii दोनों</p>"],
+                    solution_en: "<p>5.(c)<span style=\"font-family: Palanquin Dark;\"> A word in MS-Word can have both lowercase and uppercase letters.The first word of the paragraph can be bolded in MS-Word. Ctrl + B is the shortcut key to bold the text.</span></p>",
+                    solution_hi: "<p>5.(c)<span style=\"font-family: Palanquin Dark;\"> MS-वर्ड में एक शब्द में लोअरकेस और अपरकेस दोनों अक्षर हो सकते हैं। पैराग्राफ के पहले शब्द को MS-वर्ड में बोल्ड किया जा सकता है। टेक्स्ट को बोल्ड करने के लिए Ctrl + B शॉर्टकट कुंजी है।</span></p>",
+                    correct: "c",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "6",
+                    section: "31",
+                    question_en: " <p>6. Which of the following components of a worksheet represents the address of the selected cell?</span></p>",
+                    question_hi: " <p>6</span><span style=\"font-family:Palanquin Dark\">. वर्कशीट के निम्नलिखित घटकों ( components )  में से कौन सा घटक ( component )  चयनित सेल का एड्रेस प्रदर्शित करता है</span></p>",
+                    options_en: [" <p> Status Bar</span></p>", " <p> name box</span></p>", 
+                                " <p> Title Bar</span></p>", " <p> Formula Bar</span></p>"],
+                    options_hi: [" <p> स्टेट्स बार </span></p>", " <p> नेम बॉक्स </span></p>",
+                                " <p> टाईटल बार</span></p>", " <p> फार्मूला बार</span></p>"],
+                    solution_en: " <p>6.(b) Name box</span><span style=\"font-family:Palanquin Dark\"> components of a worksheet represents the address of the selected cell.</span></p> <p><span style=\"font-family:Palanquin Dark\">The</span><span style=\"font-family:Palanquin Dark\"> status bar</span><span style=\"font-family:Palanquin Dark\"> is a name for the lower edge of the worksheet window, which displays various information about an Excel worksheet. </span></p> <p><span style=\"font-family:Palanquin Dark\">Title Bar</span><span style=\"font-family:Palanquin Dark\"> is the bar holding title of the excel file. </span></p> <p><span style=\"font-family:Palanquin Dark\">The </span><span style=\"font-family:Palanquin Dark\">Formula Bar</span><span style=\"font-family:Palanquin Dark\"> is where data or formulas you enter into a worksheet appear for the active cell.</span></p>",
+                    solution_hi: " <p><span style=\"font-family:Palanquin Dark\">6.(b) </span><span style=\"font-family:Palanquin Dark\">वर्कशीट के</span><span style=\"font-family:Palanquin Dark\"> नेम बॉक्स</span><span style=\"font-family:Palanquin Dark\"> घटक ( component ) चयनित सेल के एड्रेस का प्रतिनिधित्व करते हैं। </span></p> <p><span style=\"font-family:Palanquin Dark\">स्टेटस बार</span><span style=\"font-family:Palanquin Dark\"> वर्कशीट विंडो के निचले किनारे का एक नाम है, जो एक्सेल वर्कशीट के बारे में विभिन्न जानकारी प्रदर्शित करता है।</span></p> <p><span style=\"font-family:Palanquin Dark\"> </span><span style=\"font-family:Palanquin Dark\">टाइटल बार</span><span style=\"font-family:Palanquin Dark\"> एक्सेल फाइल का बार होल्डिंग टाइटल है। </span></p> <p><span style=\"font-family:Palanquin Dark\">फ़ॉर्मूला बार</span><span style=\"font-family:Palanquin Dark\"> वह जगह है जहाँ डेटा या फ़ॉर्मूला जो आप किसी वर्कशीट में दर्ज करते हैं, एक्टिव सेल में प्रकट होता हैं।</span></p>",
+                    correct: "b",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "7",
+                    section: "31",
+                    question_en: " <p>7. Which of the following mouse clicks can be used to select a paragraph in MS Word?</span></p>",
+                    question_hi: " <p>7</span><span style=\"font-family:Palanquin Dark\">. MS वर्ड में किसी पैराग्राफ का चयन करने के लिए निम्नलिखित में से किस माउस क्लिक का उपयोग किया जा सकता है?</span></p>",
+                    options_en: [" <p> Single right click</span></p>", " <p> Double Left Click</span></p>", 
+                                " <p> Single Left Click</span></p>", " <p> Triple Left Click</span></p>"],
+                    options_hi: [" <p> सिंगल राईट क्लिक </span></p>", " <p> डबल लेफ्ट क्लिक </span></p>",
+                                " <p> सिंगल लेफ्ट क्लिक</span></p>", " <p> ट्रिपल लेफ्ट क्लिक</span></p>"],
+                    solution_en: " <p>7.(d) Triple Left Click</span><span style=\"font-family:Palanquin Dark\"> mouse clicks can be used to select a paragraph in MS Word. </span></p> <p><span style=\"font-family:Palanquin Dark\">Right Click </span><span style=\"font-family:Palanquin Dark\">shows a list of commands in the monitor. </span></p> <p><span style=\"font-family:Palanquin Dark\">Left click</span><span style=\"font-family:Palanquin Dark\"> lets us select an icon on the monitor and gives command to the computer.</span></p> <p><span style=\"font-family:Palanquin Dark\"> </span><span style=\"font-family:Palanquin Dark\">Double clicking</span><span style=\"font-family:Palanquin Dark\"> is used to perform a variety of actions, such as opening a program, opening a folder, or selecting a word of text</span><span style=\"font-family:Palanquin Dark\">.</span></p>",
+                    solution_hi: " <p>7.(d) </span><span style=\"font-family:Palanquin Dark\">MS वर्ड में एक पैराग्राफ का चयन करने के लिए </span><span style=\"font-family:Palanquin Dark\">ट्रिपल लेफ्ट क्लिक, </span><span style=\"font-family:Palanquin Dark\">माउस क्लिक का उपयोग किया जा सकता है। </span></p> <p><span style=\"font-family:Palanquin Dark\">राइट क्लिक मॉनिटर में कमांड की एक सूची दर्शाता है। </span></p> <p><span style=\"font-family:Palanquin Dark\">लेफ्ट क्लिक</span><span style=\"font-family:Palanquin Dark\"> हमें मॉनिटर पर एक आइकन चुनने देता है और कंप्यूटर को कमांड देता है। </span></p> <p><span style=\"font-family:Palanquin Dark\">डबल क्लिक</span><span style=\"font-family:Palanquin Dark\"> का उपयोग विभिन्न प्रकार की एक्शन को करने के लिए किया जाता है, जैसे कि प्रोग्राम खोलना, फ़ोल्डर खोलना या टेक्स्ट का एक वर्ड चुनना।</span></p>",
+                    correct: "d",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "8",
+                    section: "31",
+                    question_en: " <p><span style=\"font-family:Palanquin Dark\">8</span><span style=\"font-family:Palanquin Dark\">. Which of the following keyboard shortcuts is used to perform paste operation in MS Word?</span></p>",
+                    question_hi: " <p>8</span><span style=\"font-family:Palanquin Dark\">. MS वर्ड में पेस्ट ऑपरेशन करने के लिए निम्नलिखित में से किस कीबोर्ड शॉर्टकट का उपयोग किया जाता है</span></p>",
+                    options_en: [" <p> CTRL + V</span></p>", " <p> CTRL + P</span></p>", 
+                                " <p> ALT + P</span></p>", " <p> CTRL + T</span></p>"],
+                    options_hi: [" <p> CTRL + V</span></p>", " <p> CTRL + P</span></p>",
+                                " <p> ALT + P</span></p>", " <p> CTRL + T</span></p>"],
+                    solution_en: " <p>8.(a) CTRL + V </span><span style=\"font-family:Palanquin Dark\">shortcuts are used to perform paste operations in MS Word. </span></p> <p><span style=\"font-family:Palanquin Dark\">CTRL + P</span><span style=\"font-family:Palanquin Dark\"> is used to print files.</span></p> <p><span style=\"font-family:Palanquin Dark\"> </span><span style=\"font-family:Palanquin Dark\">Alt + P</span><span style=\"font-family:Palanquin Dark\"> opens the Page Layout tab in the Ribbon. </span></p> <p><span style=\"font-family:Palanquin Dark\">Ctrl+T </span><span style=\"font-family:Palanquin Dark\">is a keyboard shortcut most often used to open a new tab in an Internet browser.</span></p>",
+                    solution_hi: " <p>8.(a) </span><span style=\"font-family:Palanquin Dark\">MS वर्ड में पेस्ट ऑपरेशन करने के लिए CTRL + V शॉर्टकट का उपयोग किया जाता है। CTRL+P का प्रयोग फाइलों को प्रिंट करने के लिए किया जाता है।</span></p> <p><span style=\"font-family:Palanquin Dark\"> Alt + P रिबन में पेज लेआउट टैब खोलता है। </span></p> <p><span style=\"font-family:Palanquin Dark\">Ctrl+T एक कीबोर्ड शॉर्टकट है जिसका उपयोग अक्सर इंटरनेट ब्राउज़र में एक नया टैब खोलने के लिए किया जाता है।</span></p>",
+                    correct: "a",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "9",
+                    section: "31",
+                    question_en: " <p><span style=\"font-family:Palanquin Dark\">9</span><span style=\"font-family:Palanquin Dark\">. What is the least number of rows that can be in a table in MS Word?</span></p>",
+                    question_hi: " <p>9</span><span style=\"font-family:Palanquin Dark\">. MS वर्ड में टेबल में पंक्तियों ( rows )  की कम से कम संख्या क्या हो सकती है</span></p>",
+                    options_en: [" <p> 4</span></p>", " <p> 8</span></p>", 
+                                " <p> 1</span></p>", " <p> 2</span></p>"],
+                    options_hi: [" <p> 4</span></p>", " <p> 8</span></p>",
+                                " <p> 1</span></p>", " <p> 2</span></p>"],
+                    solution_en: " <p>9.(c) </span><span style=\"font-family:Palanquin Dark\">The least number of rows and columns  that can be in a table in MS Word is 1. </span></p>",
+                    solution_hi: " <p>9.(c)</span><span style=\"font-family:Palanquin Dark\"> MS  वर्ड की तालिका में पंक्तियों ( rows )  और स्तंभों ( column )  की न्यूनतम संख्या 1 है।</span></p>",
+                    correct: "c",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "10",
+                    section: "31",
+                    question_en: "<p>10. Which of the following protocols is used to transfer files from one note to another over the Internet?</p>",
+                    question_hi: "<p>10<span style=\"font-family: Palanquin Dark;\">. इंटरनेट पर फाइलों को एक नोट से दूसरे नोट में ट्रांसफर&nbsp;करने के लिए निम्नलिखित में से किस प्रोटोकॉल का उपयोग किया जाता है?</span></p>",
+                    options_en: ["<p>FTP</p>", "<p>POP</p>", 
+                                "<p>HTTP</p>", "<p>HTTPS</p>"],
+                    options_hi: ["<p>FTP</p>", "<p>POP</p>",
+                                "<p>HTTP</p>", "<p>HTTPS</p>"],
+                    solution_en: "<p>10.(a) <span style=\"font-family: Palanquin Dark;\"> FTP (File Transfer Protocol)is used to transfer files from one note to another over the Internet.&nbsp;</span></p>",
+                    solution_hi: "<p>10.(a) <span style=\"font-family: Palanquin Dark;\"> FTP (File Transfer Protocol) का उपयोग इंटरनेट पर एक नोट से दूसरे नोट&nbsp; (&nbsp; one note to another ) में फाइल ट्रांसफर करने के लिए किया जाता है।&nbsp;</span></p>",
+                    correct: "a",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "11",
+                    section: "31",
+                    question_en: " <p>11. When you select a range of cells B3:G9, starting from B3, in an MS Excel worksheet, what will display in the name box?</span></p>",
+                    question_hi: " <p><span style=\"font-family:Palanquin Dark\">11. जब हम किसी MS Excel वर्कशीट में B3 से प्रारंभ होने वाले सेल B3:G9 की रेंज का चयन करते हैं, तो नेम बॉक्स में क्या प्रदर्शित होगा?</span></p>",
+                    options_en: [" <p> A1</span></p>", " <p> G9</span></p>", 
+                                " <p> B3</span></p>", " <p> G3</span></p>"],
+                    options_hi: [" <p> A1</span></p>", " <p> G9</span></p>",
+                                " <p> B3</span></p>", " <p> G3</span></p>"],
+                    solution_en: " <p>11.(c) </span><span style=\"font-family:Palanquin Dark\">When we select a range of cells B3:G9, starting from B3, in an MS Excel worksheet,  B3  will display in the name box.</span></p>",
+                    solution_hi: " <p>11.(c)</span><span style=\"font-family:Palanquin Dark\"> जब हम किसी MS एक्सेल वर्कशीट में B3 से प्रारंभ करके B3:G9 सेल की रेंज का चयन करते हैं, तो B3 नेम बॉक्स में प्रदर्शित होगा</span></p>",
+                    correct: "c",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "12",
+                    section: "31",
+                    question_en: " <p>12. Which of the following appears as a part of the \'Font\' command group within the Home menu in recent versions of MS Word, such as Word 2016?</span></p>",
+                    question_hi: "<p>1<span style=\"font-family: Palanquin Dark;\">2 निम्न में से कौन MS वर्ड के हाल के संस्करणों ( versions ) जैसे वर्ड 2016 में होम मेनू के भीतर \'फ़ॉन्ट\' कमांड समूह के एक भाग के रूप में दिखाई देता है?</span></p>",
+                    options_en: [" <p> Show/Hide</span></p>", " <p> Paste</span></p>", 
+                                " <p> Format Painter</span></p>", " <p> Change case</span></p>"],
+                    options_hi: ["<p>दिखाएँ / छिपाएँ</p>", "<p>पेस्ट</p>",
+                                "<p>फॉर्मेट पेंटर</p>", "<p>चेंज केस&nbsp;</p>"],
+                    solution_en: " <p>12.(d) </span><span style=\"font-family:Palanquin Dark\">Change case appears as a part of the \'Font\' command group within the Home menu in recent versions of MS Word, such as Word 2016. The Format Painter is a tool in Word and PowerPoint that lets you copy some formatting from one object and apply it to another one.</span></p>",
+                    solution_hi: "<p>12.(d) <span style=\"font-family: Palanquin Dark;\">चेंज केस MS वर्ड के हाल के वर्शन , जैसे वर्ड 2016 में होम मेनू में \'फ़ॉन्ट\' कमांड समूह के एक भाग के रूप में प्रकट( appear) होता है. फॉर्मेट पेंटर वर्ड और पावर प्वाइंट में एक उपकरण ( tool ) है जो आपको एक ऑब्जेक्ट से कुछ फोर्मेटिंग की कॉपी करके और उसे दूसरे पर लागू करने देता है.</span></p>",
+                    correct: "d",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "13",
+                    section: "31",
+                    question_en: " <p>13 IMAP is an email-related protocol. What is the full form of IMAP?</span></p>",
+                    question_hi: "<p>1<span style=\"font-family: Palanquin Dark;\">3 IMAP एक ईमेल-संबंधित प्रोटोकॉल है। IMAP का पूर्ण रूप क्या है?</span></p>",
+                    options_en: [" <p> Internet Media Access Protocol</span></p>", " <p> Intranet Message Access Protocol</span></p>", 
+                                " <p> Internet Message Access Protocol</span></p>", " <p> Intranet Media Access Protocol</span></p>"],
+                    options_hi: ["<p>इंटरनेट मीडिया एक्सेस प्रोटोकॉल</p>", "<p>इंट्रानेट <span style=\"font-family: Palanquin Dark;\">मैसेज </span>एक्सेस प्रोटोकॉल</p>",
+                                "<p>इंटरनेट <span style=\"font-family: Palanquin Dark;\">मैसेज </span>एक्सेस प्रोटोकॉल</p>", "<p>इंट्रानेट मीडिया एक्सेस प्रोटोकॉल</p>"],
+                    solution_en: " <p>13.(c) </span><span style=\"font-family:Palanquin Dark\">Internet Message Access Protocol (IMAP) is a protocol for accessing email or bulletin board messages from a (possibly shared) mail server or service. IMAP allows a client e-mail program to access remote message stores as if they were local.</span></p>",
+                    solution_hi: "<p>13.(c) <span style=\"font-family: Palanquin Dark;\">इंटरनेट मैसेज एक्सेस प्रोटोकॉल (IMAP) एक मेल सर्वर या सेवा से ईमेल या बुलेटिन बोर्ड संदेशों तक पहुंचने के लिए एक प्रोटोकॉल है। IMAP क्लाइंट ई-मेल प्रोग्राम को दूरस्थ ( remote ) संदेश स्टोर तक पहुंचने की अनुमति देता है जैसे कि वे स्थानिक ( local ) ही थे।</span></p>",
+                    correct: "c",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "14",
+                    section: "31",
+                    question_en: " <p>14 Which of the following statements about a table in MS Word is FALSE?</span></p>",
+                    question_hi: " <p>1</span><span style=\"font-family:Palanquin Dark\">4 MS वर्ड में टेबल के बारे में निम्नलिखित में से कौन सा कथन गलत है?</span></p>",
+                    options_en: [" <p> A table cannot have a prime number of columns.</span></p>", " <p> A table can have a single row only.</span></p>", 
+                                " <p> A table can have a single row and a single column only.</span></p>", " <p> A table can have a single column only.</span></p>"],
+                    options_hi: [" <p> एक टेबल में कॉलम की अभाज्य संख्या नहीं हो सकती है।</span></p>", " <p> एक टेबल में केवल एक रो  हो सकती है।</span></p>",
+                                " <p> एक टेबल में केवल एक रो  और एक कॉलम हो सकता है।</span></p>", " <p> एक टेबल में केवल एक कॉलम हो सकता है।</span></p>"],
+                    solution_en: " <p>14.(a) </span><span style=\"font-family:Palanquin Dark\">A table can have a prime number of columns in MS Word. A Word table can contain as many as 63 columns but the number of rows is unlimited.</span></p>",
+                    solution_hi: " <p>14.(a) </span><span style=\"font-family:Palanquin Dark\">MS वर्ड में एक टेबल में अभाज्य संख्या में कॉलम हो सकते हैं। एक वर्ड टेबल में 63 कॉलम हो सकते हैं लेकिन पंक्तियों (rows) की संख्या असीमित है।</span></p>",
+                    correct: "a",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "15",
+                    section: "31",
+                    question_en: " <p>15 What will be the result of the following MS Excel formula?</span></p> <p><span style=\"font-family:Palanquin Dark\">=FLOOR(3, 3) + CEILING(4, 4)</span></p>",
+                    question_hi: "<p>1<span style=\"font-family: Palanquin Dark;\">5 निम्नलिखित MS एक्सेल फार्मूला&nbsp;का परिणाम क्या होगा?</span></p>\r\n<p><span style=\"font-family: Palanquin Dark;\">=FLOOR(3, 3) + CEILING(4, 4)</span></p>",
+                    options_en: [" <p> 6</span></p>", " <p> 7</span></p>", 
+                                " <p> 4</span></p>", " <p> 5</span></p>"],
+                    options_hi: ["<p>6</p>", "<p>7</p>",
+                                "<p>4</p>", "<p>5</p>"],
+                    solution_en: " <p>15.(b) </span><span style=\"font-family:Palanquin Dark\">=FLOOR(3, 3) + CEILING(4, 4) = 7 . The Excel FLOOR function rounds a number down to a given multiple. The Excel CEILING function rounds a number up to a given multiple.</span></p>",
+                    solution_hi: "<p>15.(b) <span style=\"font-family: Palanquin Dark;\">=FLOOR(3, 3) + CEILING(4, 4) = 7 एक्सेल FLOOR फ़ंक्शन किसी संख्या को नीचे दिए गए गुणक ( multiple ) में पूर्णांकन ( round ) करता है। एक्सेल CEILING फंक्शन किसी संख्या को दिए गए गुणक तक round करता है।</span></p>",
+                    correct: "b",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "16",
+                    section: "31",
+                    question_en: "<p>16 Which of the following \'View\' options in MS Word shows how your document would look as a webpage?</p>",
+                    question_hi: " <p>1</span><span style=\"font-family:Palanquin Dark\">6 MS वर्ड में निम्नलिखित में से कौन सा \'व्यू\' विकल्प दिखाता है कि आपका दस्तावेज़ वेबपेज के रूप में कैसा दिखेगा?</span></p>",
+                    options_en: ["<p><span style=\"font-weight: 400;\">Outline</span></p>", "<p><span style=\"font-weight: 400;\">&nbsp;Read Mode</span></p>", 
+                                "<p><span style=\"font-weight: 400;\">&nbsp;Web Layout</span></p>", "<p><span style=\"font-weight: 400;\">&nbsp;Print Layout</span></p>"],
+                    options_hi: [" <p> Outline</span></p>", " <p> Read Mode</span></p>",
+                                " <p> Web Layout</span></p>", " <p> Print Layout</span></p>"],
+                    solution_en: "<p>16.(c) <span style=\"font-family: Palanquin Dark;\"> Web Layout \'View\' options in MS Word shows how our document would look as a web page. </span></p>",
+                    solution_hi: " <p>16.(c)  </span><span style=\"font-family:Palanquin Dark\">MS वर्ड में वेब लेआउट \'व्यू\' विकल्प दिखाता है कि हमारा डॉक्यूमेंट एक वेब पेज के रूप में कैसा दिखेगा।</span></p>",
+                    correct: "c",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "17",
+                    section: "31",
+                    question_en: "<p>17 State whether the following statements are true or false.</p>\r\n<p><span style=\"font-weight: 400;\">(i) In MS Word, \'Landscape\' is a valid page margins option.</span></p>\r\n<p><span style=\"font-weight: 400;\">(ii) In MS Word, \'Portrait\' is a valid page margins option.</span></p>",
+                    question_hi: "<p>1<span style=\"font-family: Palanquin Dark;\">7 बताएं कि निम्नलिखित कथन सही हैं या गलत।</span></p>\r\n<p><span style=\"font-weight: 400;\">(i) MS वर्ड में, \'लैंडस्केप\' एक वैलिड पेज मार्जिन विकल्प है।</span></p>\r\n<p><span style=\"font-weight: 400;\">(ii) MS वर्ड में, \'पोर्ट्रेट\' एक वैलिड पेज मार्जिन विकल्प है।</span></p>",
+                    options_en: ["<p>(i) False, (ii) False</p>", "<p>(i) False, (ii) True</p>", 
+                                "<p>(i) True, (ii) True</p>", "<p>(i) True, (ii) False</p>"],
+                    options_hi: ["<p>(i) गलत, (ii) गलत</p>", "<p>(i) गलत, (ii) सत्य</p>",
+                                "<p>(i) सत्य , (ii) सत्य</p>", "<p>(i) सत्य , (ii) गलत</p>"],
+                    solution_en: "<p>17.(a)<span style=\"font-family: Palanquin Dark;\"> Portrait (Vertical) and Landscape (Horizontal) are the examples of Page Orientation in MS -Word. A margin is a space between the text and edge of our document. There are four margins on a Microsoft word page - top , bottom , left , right.</span></p>",
+                    solution_hi: "<p>17.(a)<span style=\"font-family: Palanquin Dark;\"> पोर्ट्रेट (ऊर्ध्वाधर) और लैंडस्केप (क्षैतिज) MS-वर्ड में पेज ओरिएंटेशन के उदाहरण हैं। मार्जिन हमारे डॉक्यूमेंट के टेक्स्ट और फलक ( edge ) के बीच का स्थान है। माइक्रोसॉफ्ट वर्ड पेज पर चार मार्जिन होते हैं - top , बॉटम ( bottom ) , लेफ्ट ( left ) , राइट ( right ) ।</span></p>",
+                    correct: "a",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "18",
+                    section: "31",
+                    question_en: "<p>18 Which of the following is used to combine and centre the contents of the selected cells in a new larger cell in MS Excel?</p>",
+                    question_hi: "<p>1<span style=\"font-family: Palanquin Dark;\">8 MS एक्सेल में एक नए बड़े सेल में चयनित सेल की सामग्री ( content ) को संयोजित ( edit ) और केन्द्रित ( center ) करने के लिए निम्न में से किसका उपयोग किया जाता है?</span></p>",
+                    options_en: ["<p>Merge &amp; Center</p>", "<p>Justify</p>", 
+                                "<p>Wrap Text</p>", "<p>Strikethrough</p>"],
+                    options_hi: ["<p>मर्ज और सेंटर (Merge &amp; Center)</p>", "<p>जस्टिफाई ( justify )&nbsp;</p>",
+                                "<p><span style=\"font-weight: 400;\">टेक्स्ट रैप ( wrap text )</span></p>", "<p>स्ट्राइकथ्रू ( strikethrough )&nbsp;</p>"],
+                    solution_en: "<p>18.(a) Merge &amp; Center <span style=\"font-family: Palanquin Dark;\">is used to combine and centre the contents of the selected cells in a new larger cell in MS Excel. </span></p>\r\n<p><span style=\"font-family: Palanquin Dark;\">Justify</span><span style=\"font-family: Palanquin Dark;\"> function is often used to align the text to both left and right margin.</span></p>\r\n<p><span style=\"font-family: Palanquin Dark;\">Text wrapping </span><span style=\"font-family: Palanquin Dark;\">refers to how images are positioned in relation to text in a document, allowing you to control how pictures and charts are presented.</span></p>",
+                    solution_hi: "<p>18.(a)<span style=\"font-family: Palanquin Dark;\"> MS एक्सेल में एक नए बड़े सेल में चयनित सेल की सामग्री ( content ) को संयोजित ( edit ) और केंद्रित ( center ) करने के लिए</span><span style=\"font-family: Palanquin Dark;\"> मर्ज एंड सेंटर</span><span style=\"font-family: Palanquin Dark;\"> (Merge &amp; Center) का उपयोग किया जाता है।</span></p>\r\n<p><span style=\"font-family: Palanquin Dark;\"> </span><span style=\"font-family: Palanquin Dark;\">जस्टिफाई</span><span style=\"font-family: Palanquin Dark;\">&nbsp; ( justify ) फ़ंक्शन का उपयोग अक्सर टेक्स्ट को बाएँ और दाएँ मार्जिन पर संरेखित ( allign ) करने के लिए किया जाता है&nbsp;</span></p>\r\n<p><span style=\"font-family: Palanquin Dark;\"> </span><span style=\"font-family: Palanquin Dark;\">टेक्स्ट रैपिंग</span><span style=\"font-family: Palanquin Dark;\"> ( wraping ) से तात्पर्य किसी डॉक्यूमेंट में टेक्स्ट के संबंध में छवियों ( images ) को रखने ( place ) की स्थिति है, जिससे आप यह नियंत्रित कर सकते हैं कि चित्र ( pictures )और चार्ट ( charts ) कैसे प्रस्तुत ( present ) किए &nbsp;जा सकते हे |&nbsp;</span></p>",
+                    correct: "a",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "19",
+                    section: "31",
+                    question_en: " <p>19. Which of the following is not a part of the URL?</span></p>",
+                    question_hi: " <p>1</span><span style=\"font-family:Palanquin Dark\">9.  निम्नलिखित में से क्या URL का एक भाग नही है? </span></p>",
+                    options_en: [" <p> domain address</span></p>", " <p> Protocol</span></p>", 
+                                " <p> query string</span></p>", " <p> IP address</span></p>"],
+                    options_hi: [" <p> डोमेन एड्रेस </span></p>", " <p> प्रोटोकॉल </span></p>",
+                                " <p> क्वेरी स्ट्रिंग ( query string ) </span></p>", " <p> IP एड्रेस </span></p>"],
+                    solution_en: " <p>19.(d</span><span style=\"font-family:Palanquin Dark\">) Components of a URL  :- 1. Scheme (Protocol), 2. Subdomain, 3. Domain Name, </span></p> <p><span style=\"font-family:Palanquin Dark\">4. Top-level Domain,5. Port Number, 6. Path,7. Query String 8. Fragment. A URL (Uniform Resource Locator) is a unique identifier used to locate a resource on the Internet. It is also referred to as a web address.</span></p>",
+                    solution_hi: " <p>19.(d</span><span style=\"font-family:Palanquin Dark\">) URL के घटक ( components ) :- 1. स्कीम(प्रोटोकॉल), 2. सब-डोमेन, 3. डोमेन नेम, 4. टॉप-लेवल  डोमेन, 5. पोर्ट नंबर, 6. पाथ , 7. क्वेरी स्ट्रिंग 8. फ्रेगमेंट </span></p> <p><span style=\"font-family:Palanquin Dark\">एक URL (Uniform Resource Locator) एक विशिष्ट पहचानकर्ता ( unique identifier ) है जिसका उपयोग इंटरनेट पर किसी संसाधन (resource )का पता लगाने के लिए किया जाता है। इसे वेब एड्रेस भी कहा जाता है।</span></p>",
+                    correct: "d",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "20",
+                    section: "misc",
+                    question_en: "<p>20 Which of the following keyboard shortcuts is used to move through each of the open tabs <span style=\"font-family: Palanquin Dark;\">going to the left in a Chrome browser?</span></p>",
+                    question_hi: " <p><span style=\"font-family:Palanquin Dark\">2</span><span style=\"font-family:Palanquin Dark\">0 निम्नलिखित में से कौन सा कीबोर्ड शॉर्टकट क्रोम ब्राउज़र में बाईं ओर जाने वाले प्रत्येक खुले टैब में जाने के लिए उपयोग किया जाता है?</span></p>",
+                    options_en: ["<p>Alt + L</p>", "<p>Alt + Tab</p>", 
+                                "<p>Ctrl + L</p>", "<p>Ctrl + Shift + Tab</p>"],
+                    options_hi: [" <p> Alt + L</span></p>", " <p> Alt + Tab</span></p>",
+                                " <p> Ctrl + L</span></p>", " <p> Ctrl + Shift + Tab</span></p>"],
+                    solution_en: "<p>20.(d) Ctrl + Shift + Tab<span style=\"font-family: Palanquin Dark;\"> shortcuts is used to move through each of the open tabs</span></p>\r\n<p><span style=\"font-family: Palanquin Dark;\">going to the left in a Chrome browser.</span></p>\r\n<p><span style=\"font-family: Palanquin Dark;\"> Alt+L </span><span style=\"font-family: Palanquin Dark;\">is a keyboard shortcut most often used to open the Developer tab in the Ribbon. </span><span style=\"font-family: Palanquin Dark;\">Alt+Tab</span><span style=\"font-family: Palanquin Dark;\"> is a keyboard shortcut most often used to switch between open programs in Microsoft Windows and other operating systems.</span></p>\r\n<p><span style=\"font-family: Palanquin Dark;\"> </span><span style=\"font-family: Palanquin Dark;\">Ctrl+L</span><span style=\"font-family: Palanquin Dark;\"> - Aligns the line or selected text to the left of the screen.</span></p>",
+                    solution_hi: " <p>20.(d) </span><span style=\"font-family:Palanquin Dark\">क्रोम ब्राउज़र में बाईं ओर जाने वाले प्रत्येक खुले टैब के माध्यम से जाने के लिए </span><span style=\"font-family:Palanquin Dark\">Ctrl + Shift + Tab </span><span style=\"font-family:Palanquin Dark\">शॉर्टकट का उपयोग किया जाता है।</span></p> <p><span style=\"font-family:Palanquin Dark\"> </span><span style=\"font-family:Palanquin Dark\">Alt+L</span><span style=\"font-family:Palanquin Dark\"> एक कीबोर्ड शॉर्टकट है जिसका उपयोग अक्सर रिबन में डेवलपर टैब खोलने के लिए किया जाता है। </span><span style=\"font-family:Palanquin Dark\">Alt+Tab</span><span style=\"font-family:Palanquin Dark\"> एक कीबोर्ड शॉर्टकट है जिसका उपयोग अक्सर माइक्रोसॉफ़्ट विंडोज़ और अन्य ऑपरेटिंग सिस्टम में खुले प्रोग्राम के बीच स्विच करने के लिए किया जाता है। </span></p> <p><span style=\"font-family:Palanquin Dark\">Ctrl+L </span><span style=\"font-family:Palanquin Dark\">- स्क्रीन के बाईं ओर लाइन या चयनित टेक्स्ट को अलाइन करता है।</span></p>",
+                    correct: "d",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+            
+            // Generate question boxes
+            const boxesContainer = document.getElementById('question-boxes');
+            questions.forEach((q, index) => {
+                const box = document.createElement('div');
+                box.className = 'q-box';
+                box.textContent = index + 1;
+                box.onclick = () => showQuestion(index);
+                box.id = `box-${index}`;
+                boxesContainer.appendChild(box);
+            });
+            
+            // Show first question
+            showQuestion(0);
+            updateProgress();
+        }
+        
+        // Show a specific question
+        
+        function formatContent(text) {
+            if (!text) return '';
+            return text.replace(/<img/g, '<img style="max-width:100%;height:auto;"');
+        }
+        
+        function showQuestion(index) {
+            if (index < 0 || index >= questions.length) return;
+            
+            currentQuestion = index;
+            const question = questions[index];
+            
+            // Update question counter
+            document.getElementById('question-counter').textContent = `Question ${index + 1} of ${questions.length}`;
+            
+            // Update question boxes
+            document.querySelectorAll('.q-box').forEach(box => box.classList.remove('current'));
+            document.getElementById(`box-${index}`).classList.add('current');
+            
+            // Generate question HTML
+            let html = `
+                <div class="question-card">
+                    <div class="question-text">
+                        <div class="en">${formatContent(question.question_en)}</div>
+                        <div class="hi" style="display:none">${formatContent(question.question_hi)} </div>
+                    </div>
+                    <div class="options" id="options-container">`;
+            
+            // Add options
+            ['a', 'b', 'c', 'd'].forEach((opt, i) => {
+                let optionClass = '';
+                let isCorrectAnswer = opt === question.correct;
+                let isUserAnswer = answers[question.id] === opt;
+                
+                // When reviewing, add appropriate classes
+                if (submitted) {
+                    if (isCorrectAnswer) {
+                        optionClass += ' correct-answer';
+                    } else if (isUserAnswer && !isCorrectAnswer) {
+                        optionClass += ' incorrect';
+                    }
+                }
+                
+                html += `
+                    <div class="option-item">
+                        <input class="option-input" type="radio" name="q${index}" 
+                            id="opt-${index}-${opt}" value="${opt}" 
+                            ${isUserAnswer ? 'checked' : ''}
+                            onclick="selectAnswer('${question.id}', '${opt}')">
+                       <label class="option-label${optionClass}" for="opt-${index}-${opt}">
+                            <div class="en">${question.options_en[i]}</div>
+                            <div class="hi" style="display:none">${question.options_hi[i]}</div>
+                        </label>
+                    </div>`;
+            });
+            
+            // Add solution if submitted
+            if (submitted) {
+                const isCorrect = answers[question.id] === question.correct;
+                const resultText = answers[question.id] ? (isCorrect ? 'Correct!' : 'Incorrect!') : 'Not attempted';
+                
+                html += `
+                    <div class="solution-container">
+                        <div class="solution-title">${resultText}</div>
+                        <div class="solution-text">
+                            <div class="en">${question.solution_en}</div>
+                            <div class="hi" style="display:none">${question.solution_hi}</div>
+                        </div>
+                    </div>`;
+            }
+            
+            html += `</div></div>`;
+            
+            document.getElementById('questions-container').innerHTML = html;
+            
+            // Apply language settings
+            applyLanguage();
+            
+            // If in mobile view, close the menu
+            if (window.innerWidth < 992) {
+                toggleNav(false);
+            }
+            
+            // Add review mode class if submitted
+            if (submitted) {
+                document.getElementById('options-container').classList.add('review-mode');
+            }
+        }
+        
+        // Apply current language
+        function applyLanguage() {
+            document.querySelectorAll(`.${currentLang}`).forEach(el => el.style.display = 'block');
+            document.querySelectorAll(`.${currentLang === 'en' ? 'hi' : 'en'}`).forEach(el => el.style.display = 'none');
+            
+            // Update language button text
+            document.getElementById('lang-text').textContent = currentLang === 'en' ? 'Hi' : 'En';
+        }
+        
+        // Select an answer
+        function selectAnswer(qId, option) {
+            if (submitted) return;
+            
+            answers[qId] = option;
+            updateProgress();
+            
+            // Mark question as attempted in the navigation
+            const index = questions.findIndex(q => q.id === qId);
+            if (index >= 0) {
+                const box = document.getElementById(`box-${index}`);
+                box.classList.add('attempted');
+                box.classList.remove('unattempted');
+            }
+        }
+        
+        // Navigate to previous/next question
+        function prevQuestion() { 
+            if (currentQuestion > 0) showQuestion(currentQuestion - 1); 
+        }
+        
+        function nextQuestion() { 
+            if (currentQuestion < questions.length - 1) showQuestion(currentQuestion + 1); 
+        }
+        
+        // Switch section
+        function switchSection(sectionId) {
+            if (sectionId === 'all') {
+                showQuestion(0);
+                return;
+            }
+            
+            const section = sections[sectionId];
+            if (section) showQuestion(section.start);
+        }
+        
+        // Toggle language
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'hi' : 'en';
+            applyLanguage();
+        }
+        
+        // Toggle navigation sidebar
+        function toggleNav(show) {
+            const nav = document.getElementById('question-nav');
+            const overlay = document.getElementById('nav-overlay');
+            
+            if (show === undefined) {
+                show = !nav.classList.contains('show');
+            }
+            
+            if (show) {
+                nav.classList.add('show');
+                overlay.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            } else {
+                nav.classList.remove('show');
+                overlay.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+        }
+        
+        // Update progress
+        function updateProgress() {
+            const attempted = Object.keys(answers).length;
+            document.getElementById('attempted-count').textContent = attempted;
+        }
+        
+        // Start timer
+        function startTimer() {
+            const timerDisplay = document.getElementById('timer-display');
+            let timeLeft = totalTime;
+            
+            const timerInterval = setInterval(() => {
+                if (timeLeft <= 0 || submitted) {
+                    clearInterval(timerInterval);
+                    if (!submitted) submitTest();
+                    return;
+                }
+                
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                timeLeft--;
+            }, 1000);
+        }
+        
+        // Confirm before submitting
+        function confirmSubmit() {
+            if (submitted) return;
+            
+            const attempted = Object.keys(answers).length;
+            const remaining = questions.length - attempted;
+            
+            // Create a more modern confirmation dialog
+            const confirmHtml = `
+                <div style="text-align: center; padding: 20px;">
+                    <h4 style="margin-bottom: 16px; color: var(--dark);">Confirm Submission</h4>
+                    <p style="margin-bottom: 24px; color: var(--gray);">
+                        You have attempted ${attempted} of ${questions.length} questions.<br>
+                        ${remaining} questions are unattempted.
+                    </p>
+                    <div style="display: flex; justify-content: center; gap: 12px;">
+                        <button onclick="this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; border: 1px solid var(--light-gray); background: white; border-radius: 8px; cursor: pointer;">
+                            Cancel
+                        </button>
+                        <button onclick="submitTest(); this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer;">
+                            Submit Test
+                        </button>
+                    </div>
+                </div>`;
+            
+            // Create modal element
+            const modal = document.createElement('div');
+            modal.className = 'results-modal show';
+            modal.innerHTML = `
+                <div class="results-card" style="max-width: 400px;">
+                    <button class="cancel-btn" style="position: absolute; top: 12px; right: 12px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--gray);" onclick="this.closest('.results-modal').remove()">
+                        ×
+                    </button>
+                    ${confirmHtml}
+                </div>`;
+            
+            document.body.appendChild(modal);
+        }
+        
+        // Submit test
+        function submitTest() {
+            if (submitted) return;
+            
+            submitted = true;
+            
+            let score = 0;
+            let correctCount = 0;
+            let incorrectCount = 0;
+            let unattemptedCount = 0;
+            
+            questions.forEach((q, index) => {
+                const userAns = answers[q.id];
+                const box = document.getElementById(`box-${index}`);
+                
+                box.classList.remove('attempted');
+                
+                if (!userAns) {
+                    unattemptedCount++;
+                    box.classList.add('unattempted');
+                } else if (userAns === q.correct) {
+                    correctCount++;
+                    score += q.pos_marks;
+                    box.classList.add('correct');
+                } else {
+                    incorrectCount++;
+                    score -= q.neg_marks;
+                    box.classList.add('incorrect');
+                }
+            });
+            
+            // Update result values
+            document.getElementById('score-value').textContent = score.toFixed(2);
+            document.getElementById('correct-value').textContent = correctCount;
+            document.getElementById('incorrect-value').textContent = incorrectCount;
+            document.getElementById('unattempted-value').textContent = unattemptedCount;
+            
+            // Show the results modal
+            document.getElementById('results-modal').classList.add('show');
+            
+            // Disable submit button
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-check"></i>';
+            submitBtn.style.backgroundColor = 'var(--success)';
+            
+            // Refresh current question view to show solution
+            showQuestion(currentQuestion);
+        }
+        
+        // Review test
+        function reviewTest() {
+            document.getElementById('results-modal').classList.remove('show');
+            showQuestion(0);
+        }
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target === document.getElementById('results-modal')) {
+                document.getElementById('results-modal').classList.remove('show');
+            }
+        });
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') prevQuestion();
+            if (e.key === 'ArrowRight') nextQuestion();
+        });
+    </script>
+</body>
+</html>
