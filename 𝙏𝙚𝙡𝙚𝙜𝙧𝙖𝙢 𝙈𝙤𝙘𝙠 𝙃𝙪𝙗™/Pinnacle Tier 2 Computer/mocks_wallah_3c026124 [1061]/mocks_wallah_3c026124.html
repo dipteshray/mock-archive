@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mocks Wallah</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --primary-light: #a29bfe;
+            --primary-dark: #5649c0;
+            --secondary: #00cec9;
+            --accent: #fd79a8;
+            --success: #00b894;
+            --warning: #fdcb6e;
+            --danger: #d63031;
+            --light: #f8f9fa;
+            --dark: #2d3436;
+            --gray: #636e72;
+            --light-gray: #dfe6e9;
+            --card-bg: #ffffff;
+            --body-bg: #f5f6fa;
+            --header-bg: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            --footer-bg: #ffffff;
+            --box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            --box-shadow-sm: 0 2px 10px rgba(0,0,0,0.05);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background-color: var(--body-bg);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            color: var(--dark);
+            line-height: 1.6;
+            padding-bottom: 80px; /* Space for fixed navigation */
+            overflow-x: hidden;
+        }
+        
+        /* Header Styles */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: var(--header-bg);
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            z-index: 1000;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .header-brand {
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .header-brand i {
+            margin-right: 8px;
+            font-size: 1.2rem;
+        }
+        
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .control-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .control-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .control-btn.active {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .timer-display {
+            background: rgba(0,0,0,0.2);
+            border-radius: 18px;
+            padding: 4px 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+        
+        .timer-display i {
+            margin-right: 6px;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-top: 60px;
+            padding: 16px;
+            min-height: calc(100vh - 140px);
+        }
+        
+        .question-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--box-shadow-sm);
+            border: none;
+            transition: var(--transition);
+        }
+        
+        .question-counter {
+            font-size: 0.9rem;
+            color: var(--gray);
+            text-align: center;
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+        
+        .question-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+        
+        .option-item {
+            margin-bottom: 12px;
+            position: relative;
+        }
+        
+        .option-input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+            .question-text {
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        hyphens: auto;
+        max-width: 100%;
+    }
+
+    .question-text img,
+    .option-label img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 8px 0;
+        border-radius: 8px;
+    }
+
+    .option-label {
+        overflow: hidden;
+    }
+
+    .question-card {
+        overflow: hidden;
+    }
+        
+        .option-label {
+            display: block;
+            padding: 14px 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--light-gray);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .option-label:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .option-input:checked + .option-label {
+            border-color: var(--primary);
+            background: rgba(108, 92, 231, 0.05);
+            box-shadow: 0 0 0 1px var(--primary);
+        }
+        
+        .option-input:checked + .option-label::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--primary);
+        }
+        
+        /* When reviewing answers */
+        .review-mode .option-input:checked + .option-label.correct {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.correct::after {
+            background: var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.incorrect {
+            border-color: var(--danger);
+            background: rgba(214, 48, 49, 0.05);
+            box-shadow: 0 0 0 1px var(--danger);
+        }
+        
+        .MathJax, .mjx-chtml {
+            overflow-x: auto;
+            max-width: 100%;
+            display: inline-block;
+        }
+
+        
+        .review-mode .option-input:checked + .option-label.incorrect::after {
+            background: var(--danger);
+        }
+        
+        .review-mode .option-label.correct-answer {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-label.correct-answer::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--success);
+        }
+        
+        .solution-container {
+            margin-top: 20px;
+            padding: 16px;
+            background: rgba(108, 92, 231, 0.05);
+            border-radius: 12px;
+            border-left: 3px solid var(--primary);
+        }
+        
+        .solution-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+        
+        /* Question Navigation */
+        .question-nav {
+            position: fixed;
+            top: 60px;
+            right: 0;
+            bottom: 80px;
+            width: 100%;
+            max-width: 320px;
+            background: var(--card-bg);
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            transform: translateX(100%);
+            transition: var(--transition);
+            z-index: 900;
+            overflow-y: auto;
+            padding: 16px;
+        }
+        
+        .question-nav.show {
+            transform: translateX(0);
+        }
+        
+        .nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .nav-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+        
+        .question-stats {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .stat-badge {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        
+        .section-selector {
+            width: 100%;
+            margin-bottom: 16px;
+            border-radius: 12px;
+            padding: 10px 16px;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            font-size: 0.9rem;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 16px;
+        }
+        
+        .question-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+            gap: 8px;
+        }
+        
+        .q-box {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .q-box:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .q-box.attempted {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .q-box.correct {
+            background-color: var(--success);
+            color: white;
+            border-color: var(--success);
+        }
+        
+        .q-box.incorrect {
+            background-color: var(--danger);
+            color: white;
+            border-color: var(--danger);
+        }
+        
+        .q-box.current {
+            border: 2px solid var(--accent) !important;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .q-box.unattempted {
+            background-color: var(--gray);
+            color: white;
+            border-color: var(--gray);
+        }
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: var(--footer-bg);
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            z-index: 800;
+        }
+        
+        .nav-btn {
+            height: 48px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 20px;
+            transition: var(--transition);
+            gap: 8px;
+        }
+        
+        .nav-btn i {
+            font-size: 1rem;
+        }
+        
+        .nav-btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .nav-btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+        
+        .nav-btn-outline:hover {
+            background: rgba(108, 92, 231, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        /* Overlay when nav is open */
+        .nav-overlay {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            bottom: 80px;
+            background: rgba(0,0,0,0.5);
+            z-index: 800;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+        }
+        
+        .nav-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        /* Results Modal */
+        .results-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1100;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+            padding: 16px;
+        }
+        
+        .results-modal.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .results-card {
+            background: white;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+            transform: translateY(20px);
+            transition: var(--transition);
+        }
+        
+        .results-modal.show .results-card {
+            transform: translateY(0);
+        }
+        
+        .results-header {
+            background: var(--header-bg);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .results-title {
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .results-body {
+            padding: 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            color: white;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+        
+        .results-footer {
+            padding: 16px 20px;
+            display: flex;
+            justify-content: center;
+            border-top: 1px solid var(--light-gray);
+        }
+        
+        /* Responsive Adjustments */
+        @media (min-width: 992px) {
+            .question-nav {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-right: 320px;
+            }
+            
+            .nav-overlay {
+                display: none;
+            }
+            
+            .bottom-nav {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .question-grid {
+                grid-template-columns: repeat(auto-fill, minmax(36px, 1fr));
+                gap: 6px;
+            }
+            
+            .q-box {
+                width: 36px;
+                height: 36px;
+                font-size: 0.9rem;
+            }
+            
+            .option-label {
+                padding: 12px 14px;
+            }
+            
+            .question-text {
+                font-size: 1rem;
+            }
+            
+            .header-brand {
+                font-size: 1rem;
+            }
+            
+            .control-btn {
+                width: 32px;
+                height: 32px;
+            }
+            
+            .timer-display {
+                font-size: 0.8rem;
+                padding: 4px 10px;
+            }
+            
+            .nav-btn {
+                height: 44px;
+                padding: 0 16px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="#" class="header-brand">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Mocks Wallah</span>
+            </a>
+            
+            <div class="header-controls">
+                <!-- Timer -->
+                <div class="timer-display">
+                    <i class="far fa-clock"></i>
+                    <span id="timer-display">15:00</span>
+                </div>
+                
+                <!-- Language toggle -->
+                <button class="control-btn" id="lang-btn" onclick="toggleLanguage()">
+                    <span id="lang-text">En</span>
+                </button>
+                
+                <!-- Submit button -->
+                <button class="control-btn" id="submit-btn" onclick="confirmSubmit()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+                
+                <!-- Questions toggle for mobile -->
+                <button class="control-btn nav-toggle-btn" id="nav-toggle" onclick="toggleNav()">
+                    <i class="fas fa-th"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main content -->
+    <main class="main-content" id="main-content">
+        <div class="question-counter" id="question-counter">Question 1 of 20</div>
+        
+        <!-- Questions will be displayed here -->
+        <div id="questions-container"></div>
+    </main>
+    
+    <!-- Overlay for mobile nav -->
+    <div class="nav-overlay" id="nav-overlay" onclick="toggleNav(false)"></div>
+    
+    <!-- Question navigation sidebar -->
+    <aside class="question-nav" id="question-nav">
+        <div class="nav-header">
+            <h3 class="nav-title">Questions</h3>
+            <div class="question-stats">
+                <span class="stat-badge bg-primary" id="attempted-count">0</span>
+                <span class="stat-badge bg-gray" id="total-count">20</span>
+                <button class="control-btn d-lg-none" onclick="toggleNav(false)">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Section selector -->
+        <select class="section-selector" id="section-selector" onchange="switchSection(this.value)">
+            <option value="all">All Sections</option>
+        </select>
+        
+        <!-- Question grid -->
+        <div class="question-grid" id="question-boxes"></div>
+    </aside>
+    
+    <!-- Bottom navigation for mobile -->
+    <nav class="bottom-nav d-lg-none">
+        <button class="nav-btn nav-btn-outline" onclick="prevQuestion()">
+            <i class="fas fa-chevron-left"></i>
+            <span>Previous</span>
+        </button>
+        <button class="nav-btn nav-btn-outline" onclick="nextQuestion()">
+            <span>Next</span>
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </nav>
+    
+    <!-- Results modal -->
+    <div class="results-modal" id="results-modal">
+        <div class="results-card">
+            <div class="results-header">
+                <h3 class="results-title">Test Results</h3>
+            </div>
+            <div class="results-body">
+                <div class="stats-grid">
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark))">
+                        <div class="stat-value" id="score-value">0</div>
+                        <div class="stat-label">Score</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--success), #1b9aaa)">
+                        <div class="stat-value" id="correct-value">0</div>
+                        <div class="stat-label">Correct</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--danger), var(--accent))">
+                        <div class="stat-value" id="incorrect-value">0</div>
+                        <div class="stat-label">Incorrect</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--gray), var(--dark))">
+                        <div class="stat-value" id="unattempted-value">0</div>
+                        <div class="stat-label">Unattempted</div>
+                    </div>
+                </div>
+            </div>
+            <div class="results-footer">
+                <button class="nav-btn nav-btn-primary" onclick="reviewTest()">
+                    <i class="fas fa-search me-1"></i>
+                    <span>Review Test</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Questions data
+        const questions = [];
+        const sections = {};
+        let currentLang = "en";
+        let currentQuestion = 0;
+        let answers = {};
+        let submitted = false;
+        let totalTime = 15 * 60;
+        
+        // Initialize the test
+        window.onload = function() {
+            initializeTest();
+            startTimer();
+            
+            // If on desktop, show the question navigation by default
+            if (window.innerWidth >= 992) {
+                document.getElementById('question-nav').classList.add('show');
+                document.getElementById('main-content').classList.add('with-nav');
+            }
+        };
+        
+        // Initialize test data
+        function initializeTest() {
+            // Add sections and questions
+            
+            sections["31"] = {
+                name: "Computer Knowledge",
+                start: 0,
+                end: 18
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="31">Computer Knowledge</option>`;
+            
+            sections["misc"] = {
+                name: "Miscellaneous",
+                start: 19,
+                end: 19
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="misc">Miscellaneous</option>`;
+            
+            
+                questions.push({
+                    id: "1",
+                    section: "31",
+                    question_en: "<p>1. Some viruses have a delayed payload, which is sometimes called a_______.</p>\n",
+                    question_hi: "<p>1.<span style=\"font-family: Palanquin Dark;\"> &#2325;&#2369;&#2331; &#2357;&#2366;&#2351;&#2352;&#2360; &#2350;&#2375;&#2306; &#2357;&#2367;&#2354;&#2306;&#2348;&#2367;&#2340; &#2346;&#2375;&#2354;&#2379;&#2337; &#2361;&#2379;&#2340;&#2366; &#2361;&#2376;, &#2332;&#2367;&#2360;&#2375; &#2325;&#2349;&#2368;-&#2325;&#2349;&#2368; &#2325;&#2361;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;_______I</span></p>\n",
+                    options_en: ["<p>logic bomb</p>\n", "<p>time</p>\n", 
+                                "<p>antivirus</p>\n", "<p>All of these</p>\n"],
+                    options_hi: ["<p><span style=\"font-weight: 400;\">&nbsp;&#2354;&#2377;&#2332;&#2367;&#2325; &#2348;&#2350; (logic bomb)</span></p>\n", "<p><span style=\"font-weight: 400;\">&#2335;&#2366;&#2311;&#2350; (time)</span></p>\n",
+                                "<p><span style=\"font-weight: 400;\">&nbsp;&#2319;&#2306;&#2335;&#2368;&#2357;&#2366;&#2351;&#2352;&#2360; (antivirus)</span></p>\n", "<p>&#2351;&#2375; &#2360;&#2348;</p>\n"],
+                    solution_en: "<p>1.(a)<strong><span style=\"font-family: Palanquin Dark;\"> </span><span style=\"font-family: Palanquin Dark;\">A </span><span style=\"font-family: Palanquin Dark;\">logic bomb</span></strong><span style=\"font-family: Palanquin Dark;\"> is a piece of code inserted into an operating system or software application that implements a malicious function after a certain amount of time, or specific conditions are met.</span><span style=\"font-family: Palanquin Dark;\"> </span></p>\n",
+                    solution_hi: "<p>1.(a)<span style=\"font-family: Palanquin Dark;\"> &#2319;&#2325; </span><strong><span style=\"font-family: Palanquin Dark;\">&#2354;&#2377;&#2332;&#2367;&#2325; &#2348;&#2350;</span></strong><span style=\"font-family: Palanquin Dark;\"> &#2319;&#2325; &#2321;&#2346;&#2352;&#2375;&#2335;&#2367;&#2306;&#2327; &#2360;&#2367;&#2360;&#2381;&#2335;&#2350; &#2351;&#2366; &#2360;&#2377;&#2347;&#2364;&#2381;&#2335;&#2357;&#2375;&#2351;&#2352; &#2319;&#2346;&#2381;&#2354;&#2367;&#2325;&#2375;&#2358;&#2344; &#2350;&#2375;&#2306; &#2337;&#2366;&#2354;&#2366; &#2327;&#2351;&#2366; &#2325;&#2379;&#2337; &#2325;&#2366; &#2319;&#2325; &#2335;&#2369;&#2325;&#2337;&#2364;&#2366; &#2361;&#2376; &#2332;&#2379; &#2319;&#2325; &#2344;&#2367;&#2358;&#2381;&#2330;&#2367;&#2340; &#2360;&#2350;&#2351; &#2325;&#2375; &#2348;&#2366;&#2342; &#2319;&#2325; &#2342;&#2369;&#2352;&#2381;&#2349;&#2366;&#2357;&#2344;&#2366;&#2346;&#2370;&#2352;&#2381;&#2339; &#2325;&#2366;&#2352;&#2381;&#2351; &#2325;&#2379; &#2354;&#2366;&#2327;&#2370; &#2325;&#2352;&#2340;&#2366; &#2361;&#2376;, &#2351;&#2366; &#2357;&#2367;&#2358;&#2367;&#2359;&#2381;&#2335; &#2358;&#2352;&#2381;&#2340;&#2379;&#2306; &#2325;&#2379; &#2346;&#2370;&#2352;&#2366; &#2325;&#2352;&#2340;&#2366; &#2361;&#2376;&#2404;</span></p>\n",
+                    correct: "a",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "2",
+                    section: "31",
+                    question_en: "<p>2.<span style=\"font-family: Palanquin Dark;\"> An E-mail address typically consists of a user ID followed by the.........sign and the</span></p>\r\n<p><span style=\"font-family: Palanquin Dark;\">domain name that manages the user&rsquo;s electronic post office box.</span></p>\n",
+                    question_hi: " <p>2.</span><span style=\"font-family:Palanquin Dark\">एक ई-मेल पते में आमतौर पर एक उपयोगकर्ता आईडी होती है जिसके बाद ......... चिह्न और</span></p> <p><span style=\"font-family:Palanquin Dark\">डोमेन नाम जो उपयोगकर्ता के इलेक्ट्रॉनिक पोस्ट ऑफिस बॉक्स का प्रबंधन करता है।</span></p>",
+                    options_en: ["<p>#</p>\n", "<p>&amp;</p>\n", 
+                                "<p>$</p>\n", "<p>@</p>\n"],
+                    options_hi: [" <p> #</span></p>", " <p> &</span></p>",
+                                " <p> $</span></p>", " <p> @</span></p>"],
+                    solution_en: "<p>2.(d)<span style=\"font-family: Palanquin Dark;\"> </span><span style=\"font-family: Palanquin Dark;\">On the Internet, </span><span style=\"font-family: Palanquin Dark;\"><strong>@ (pronounced \"at\" or \"at sign\" or \"address sign</strong>\")</span><span style=\"font-family: Palanquin Dark;\"> is the symbol in an Email address that separates the name of the user from the user\'s Internet address, as in </span></p>\r\n<p><span style=\"font-family: Palanquin Dark;\">this hypothetical e-mail address example: msmuffet@tuffet.org.</span></p>\n",
+                    solution_hi: " <p>2.(d)</span><span style=\"font-family:Palanquin Dark\"> इंटरनेट पर, @ (उच्चारण \"एट\" या \"एट साइन\" या \"एड्रेस साइन\") एक ईमेल पते में प्रतीक(symbol) है जो उपयोगकर्ता के नाम को उपयोगकर्ता के इंटरनेट पते से अलग करता है, जैसा कि इस काल्पनिक ई-मेल पते के उदाहरण में है : </span></p>",
+                    correct: "d",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "3",
+                    section: "31",
+                    question_en: "<p>3.<span style=\"font-family: Palanquin Dark;\"> In the following list of devices which device is used in the network layer?</span></p>\n",
+                    question_hi: "<p>3.<span style=\"font-family: Palanquin Dark;\"> &#2344;&#2367;&#2350;&#2381;&#2344;&#2354;&#2367;&#2326;&#2367;&#2340; &#2313;&#2346;&#2325;&#2352;&#2339;&#2379;&#2306; &#2325;&#2368; &#2360;&#2370;&#2330;&#2368; &#2350;&#2375;&#2306; &#2344;&#2375;&#2335;&#2357;&#2352;&#2381;&#2325; &#2354;&#2375;&#2351;&#2352; &#2350;&#2375;&#2306; &#2325;&#2367;&#2360; &#2313;&#2346;&#2325;&#2352;&#2339; &#2325;&#2366; &#2313;&#2346;&#2351;&#2379;&#2327; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;? </span></p>\n",
+                    options_en: ["<p>Repeaters</p>\n", "<p>Router</p>\n", 
+                                "<p>Application Gateway</p>\n", "<p>Switch</p>\n"],
+                    options_hi: ["<p><span style=\"font-weight: 400;\">&#2352;&#2367;&#2346;&#2368;&#2335;&#2352;&#2381;&#2360;(Repeaters)</span></p>\n", "<p><span style=\"font-weight: 400;\">&nbsp;&#2352;&#2366;&#2313;&#2335;&#2352;(Router)</span></p>\n",
+                                "<p><span style=\"font-weight: 400;\">&#2319;&#2346;&#2381;&#2354;&#2368;&#2325;&#2375;&#2358;&#2344; &#2327;&#2375;&#2335;&#2357;&#2375;(Application Gateway)</span></p>\n", "<p>&#2360;&#2381;&#2357;&#2367;&#2330;(Switch)</p>\n"],
+                    solution_en: "<p>3.(b)<span style=\"font-family: Palanquin Dark;\"> Router is used in the network layer.</span><span style=\"font-family: Palanquin Dark;\">A</span><strong><span style=\"font-family: Palanquin Dark;\"> switch</span></strong><span style=\"font-family: Palanquin Dark;\"><strong> </strong>is a device in a computer network that connects other devices together.The </span><strong><span style=\"font-family: Palanquin Dark;\">gateway</span></strong><span style=\"font-family: Palanquin Dark;\"> converts information, data or other communications from one protocol or format to another.A </span><strong><span style=\"font-family: Palanquin Dark;\">repeater</span></strong><span style=\"font-family: Palanquin Dark;\"><strong> </strong>is used to operate the device at the physical layer.It is used to re-transmit the digital or analog signal by the transmission loss. </span></p>\n",
+                    solution_hi: "<p>3.(b)<span style=\"font-family: Palanquin Dark;\"> &#2352;&#2366;&#2313;&#2335;&#2352;(router) &#2325;&#2366; &#2313;&#2346;&#2351;&#2379;&#2327; &#2344;&#2375;&#2335;&#2357;&#2352;&#2381;&#2325; &#2354;&#2375;&#2351;&#2352;(network layer) &#2350;&#2375;&#2306; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404; &#2319;&#2325; &#2360;&#2381;&#2357;&#2367;&#2330; &#2319;&#2325; &#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352; &#2344;&#2375;&#2335;&#2357;&#2352;&#2381;&#2325; &#2350;&#2375;&#2306; &#2319;&#2325; &#2313;&#2346;&#2325;&#2352;&#2339; &#2361;&#2376; &#2332;&#2379; &#2309;&#2344;&#2381;&#2351; &#2313;&#2346;&#2325;&#2352;&#2339;&#2379;&#2306; &#2325;&#2379; &#2319;&#2325; &#2360;&#2366;&#2341; &#2332;&#2379;&#2337;&#2364;&#2340;&#2366; &#2361;&#2376;&#2404; &#2327;&#2375;&#2335;&#2357;&#2375; &#2360;&#2370;&#2330;&#2344;&#2366;, &#2337;&#2375;&#2335;&#2366; &#2351;&#2366; &#2309;&#2344;&#2381;&#2351; &#2360;&#2306;&#2330;&#2366;&#2352; &#2325;&#2379; &#2319;&#2325; &#2346;&#2381;&#2352;&#2379;&#2335;&#2379;&#2325;&#2377;&#2354; &#2351;&#2366; &#2346;&#2381;&#2352;&#2366;&#2352;&#2370;&#2346; &#2360;&#2375; &#2342;&#2370;&#2360;&#2352;&#2375; &#2350;&#2375;&#2306; &#2346;&#2352;&#2367;&#2357;&#2352;&#2381;&#2340;&#2367;&#2340; &#2325;&#2352;&#2340;&#2366; &#2361;&#2376;&#2404; &#2337;&#2367;&#2357;&#2366;&#2311;&#2360; &#2325;&#2379; &#2360;&#2306;&#2330;&#2366;&#2354;&#2367;&#2340; &#2325;&#2352;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2347;&#2367;&#2332;&#2367;&#2325;&#2354; &#2354;&#2375;&#2351;&#2352; &#2346;&#2352; &#2319;&#2325; &#2346;&#2369;&#2344;&#2352;&#2366;&#2357;&#2352;&#2381;&#2340;&#2325; &#2325;&#2366; &#2313;&#2346;&#2351;&#2379;&#2327; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404; &#2311;&#2360;&#2325;&#2366; &#2313;&#2346;&#2351;&#2379;&#2327; &#2335;&#2381;&#2352;&#2366;&#2306;&#2360;&#2350;&#2367;&#2358;&#2344; &#2354;&#2377;&#2360; &#2342;&#2381;&#2357;&#2366;&#2352;&#2366; &#2337;&#2367;&#2332;&#2367;&#2335;&#2354; &#2351;&#2366; &#2319;&#2344;&#2366;&#2354;&#2377;&#2327; &#2360;&#2367;&#2327;&#2381;&#2344;&#2354; &#2325;&#2379; &#2347;&#2367;&#2352; &#2360;&#2375; &#2346;&#2381;&#2352;&#2360;&#2366;&#2352;&#2367;&#2340; &#2325;&#2352;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404;</span></p>\n",
+                    correct: "b",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "4",
+                    section: "31",
+                    question_en: "<p>4.<span style=\"font-family: Palanquin Dark;\"> Which database language is used to access data in an existing database?</span></p>\n",
+                    question_hi: "<p>4. <span style=\"font-family: Palanquin Dark;\">&#2350;&#2380;&#2332;&#2370;&#2342;&#2366; &#2337;&#2375;&#2335;&#2366;&#2348;&#2375;&#2360; &#2350;&#2375;&#2306; &#2337;&#2375;&#2335;&#2366; &#2340;&#2325; &#2346;&#2361;&#2369;&#2305;&#2330;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2325;&#2367;&#2360; &#2337;&#2375;&#2335;&#2366;&#2348;&#2375;&#2360; &#2349;&#2366;&#2359;&#2366; &#2325;&#2366; &#2313;&#2346;&#2351;&#2379;&#2327; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;?</span></p>\n",
+                    options_en: ["<p>DML</p>\n", "<p>DDL</p>\n", 
+                                "<p>DCL</p>\n", "<p>None of these</p>\n"],
+                    options_hi: ["<p>DML</p>\n", "<p>DDL</p>\n",
+                                "<p>DCL</p>\n", "<p>None of these</p>\n"],
+                    solution_en: "<p>4.(a)<span style=\"font-family: Palanquin Dark;\"> </span><span style=\"font-family: Palanquin Dark;\">A<strong> </strong></span><span style=\"font-family: Palanquin Dark;\"><strong>DML</strong> </span><span style=\"font-family: Palanquin Dark;\">(data manipulation language) refers to a computer programming language that allows you to add, delete,and alter data in a database.</span></p>\n",
+                    solution_hi: "<p>4.(a) <span style=\"font-family: Palanquin Dark;\">&#2319;&#2325; </span><strong><span style=\"font-family: Palanquin Dark;\">&#2337;&#2368;&#2319;&#2350;&#2319;&#2354;</span></strong><span style=\"font-family: Palanquin Dark;\">(DML) (&#2337;&#2375;&#2335;&#2366; &#2350;&#2376;&#2344;&#2368;&#2346;&#2369;&#2354;&#2375;&#2358;&#2344; &#2354;&#2376;&#2306;&#2327;&#2381;&#2357;&#2375;&#2332; ) &#2319;&#2325; &#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352; &#2346;&#2381;&#2352;&#2379;&#2327;&#2381;&#2352;&#2366;&#2350;&#2367;&#2306;&#2327; &#2349;&#2366;&#2359;&#2366; &#2325;&#2379; &#2360;&#2306;&#2342;&#2352;&#2381;&#2349;&#2367;&#2340; &#2325;&#2352;&#2340;&#2366; &#2361;&#2376; &#2332;&#2379; &#2310;&#2346;&#2325;&#2379; &#2337;&#2375;&#2335;&#2366;&#2348;&#2375;&#2360; &#2350;&#2375;&#2306; &#2337;&#2375;&#2335;&#2366; &#2332;&#2379;&#2337;&#2364;&#2344;&#2375;, &#2361;&#2335;&#2366;&#2344;&#2375; &#2324;&#2352; &#2348;&#2342;&#2354;&#2344;&#2375; &#2325;&#2368; &#2309;&#2344;&#2369;&#2350;&#2340;&#2367; &#2342;&#2375;&#2340;&#2366; &#2361;&#2376;&#2404;</span></p>\n",
+                    correct: "a",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "5",
+                    section: "31",
+                    question_en: " <p>5.</span><span style=\"font-family:Palanquin Dark\">The maximum zoom percentage in MS-PowerPoint is______ </span></p>",
+                    question_hi: " <p>5.</span><span style=\"font-family:Palanquin Dark\"> MS-PowerPoint में अधिकतम ज़ूम प्रतिशत है______</span></p>",
+                    options_en: [" <p> 100% </span></p>", " <p> 200% </span></p>", 
+                                " <p> 400% </span></p>", " <p> 500%</span></p>"],
+                    options_hi: [" <p> 100%</span></p>", " <p> 200%</span></p>",
+                                " <p> 400%</span></p>", " <p> 500%</span></p>"],
+                    solution_en: " <p>5.(c)</span><span style=\"font-family:Palanquin Dark\"> </span><span style=\"font-family:Palanquin Dark\">The maximum zoom supported by Powerpoint is 400%.It also allows looking at the entire slide as a whole.</span></p>",
+                    solution_hi: " <p>5.(c)</span><span style=\"font-family:Palanquin Dark\"> पावरपॉइंट(powerpoint) द्वारा समर्थित(supported) अधिकतम ज़ूम 400% है। यह संपूर्ण स्लाइड को समग्र(whole) रूप से देखने की भी अनुमति देता है।</span></p>",
+                    correct: "c",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "6",
+                    section: "31",
+                    question_en: "<p>6.<span style=\"font-family: Palanquin Dark;\"> External devices such as printers, keyboards and modems are known as</span></p>\n",
+                    question_hi: "<p>6.<span style=\"font-family: Palanquin Dark;\"> &#2346;&#2381;&#2352;&#2367;&#2306;&#2335;&#2352;, &#2325;&#2368;&#2348;&#2379;&#2352;&#2381;&#2337; &#2324;&#2352; &#2350;&#2379;&#2337;&#2375;&#2350; &#2332;&#2376;&#2360;&#2375; &#2319;&#2325;&#2381;&#2360;&#2335;&#2352;&#2381;&#2344;&#2354; &#2337;&#2367;&#2357;&#2366;&#2311;&#2360; &#2325;&#2379; &#2325;&#2381;&#2351;&#2366; &#2325;&#2361;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;?</span></p>\n",
+                    options_en: ["<p>add-on devices</p>\n", "<p>peripherals</p>\n", 
+                                "<p>extra software devices</p>\n", "<p>PC expansion slot add-ons</p>\n"],
+                    options_hi: ["<p><span style=\"font-weight: 400;\">&#2320;&#2337;-&#2321;&#2344; &#2337;&#2367;&#2357;&#2366;&#2311;&#2360; (add-on devices)</span></p>\n", "<p><span style=\"font-weight: 400;\">&#2346;&#2375;&#2352;&#2367;&#2347;&#2375;&#2352;&#2354;&#2381;&#2360; (peripherals)</span></p>\n",
+                                "<p><span style=\"font-weight: 400;\">&#2319;&#2325;&#2381;&#2360;&#2381;&#2335;&#2381;&#2352;&#2366; &#2360;&#2377;&#2347;&#2381;&#2335;&#2357;&#2375;&#2351;&#2352; &#2337;&#2367;&#2357;&#2366;&#2311;&#2360; (extra software devices)</span></p>\n", "<p><span style=\"font-weight: 400;\">PC &#2319;&#2325;&#2381;&#2360;&#2346;&#2375;&#2306;&#2358;&#2344; &#2360;&#2381;&#2354;&#2377;&#2335; &#2320;&#2337;-&#2321;&#2344; (PC expansion slot add-ons)</span></p>\n"],
+                    solution_en: "<p>6.(b)<span style=\"font-family: Palanquin Dark;\"> </span><span style=\"font-family: Palanquin Dark;\">External devices such as printers, keyboards and modems are known as </span><strong><span style=\"font-family: Palanquin Dark;\">peripherals or external devices</span><span style=\"font-family: Palanquin Dark;\">.</span></strong></p>\n",
+                    solution_hi: "<p><span style=\"font-family: Palanquin Dark;\">6.(b)</span><span style=\"font-family: Palanquin Dark;\"> </span><span style=\"font-family: Palanquin Dark;\">&#2319;&#2325;&#2381;&#2360;&#2335;&#2352;&#2381;&#2344;&#2354; &#2337;&#2367;&#2357;&#2366;&#2311;&#2360; &#2332;&#2376;&#2360;&#2375; &#2346;&#2381;&#2352;&#2367;&#2306;&#2335;&#2352;, &#2325;&#2368;&#2348;&#2379;&#2352;&#2381;&#2337; &#2324;&#2352; &#2350;&#2379;&#2337;&#2375;&#2350; &#2325;&#2379;<strong> </strong></span><strong><span style=\"font-family: Palanquin Dark;\">&#2346;&#2375;&#2352;&#2367;&#2347;&#2375;&#2352;&#2354; &#2351;&#2366; &#2319;&#2325;&#2381;&#2360;&#2335;&#2352;&#2381;&#2344;&#2354; &#2337;&#2367;&#2357;&#2366;&#2311;&#2360;</span><span style=\"font-family: Palanquin Dark;\"> &#2325;&#2375; &#2352;&#2370;&#2346; &#2350;&#2375;&#2306; &#2332;&#2366;&#2344;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404;</span></strong></p>\n",
+                    correct: "b",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "7",
+                    section: "31",
+                    question_en: "<p><span style=\"font-family: Palanquin Dark;\">7.</span><span style=\"font-family: Palanquin Dark;\"> The read/write line belongs to_______</span></p>\n",
+                    question_hi: "<p>7.<span style=\"font-family: Palanquin Dark;\"> &#2352;&#2368;&#2337;/&#2352;&#2366;&#2311;&#2335; &#2354;&#2366;&#2311;&#2344; (read/write line) _____ &#2360;&#2375; &#2360;&#2306;&#2348;&#2306;&#2343;&#2367;&#2340; &#2361;&#2376;&#2404;</span></p>\n",
+                    options_en: ["<p>the control bus</p>\n", "<p>the data bus</p>\n", 
+                                "<p>CPU bus</p>\n", "<p>the address bus</p>\n"],
+                    options_hi: ["<p><span style=\"font-weight: 400;\">the control bus</span></p>\n", "<p><span style=\"font-weight: 400;\">the data bus</span></p>\n",
+                                "<p><span style=\"font-weight: 400;\">CPU bus</span></p>\n", "<p><span style=\"font-weight: 400;\">the address bus</span></p>\n"],
+                    solution_en: "<p>7.(a) <span style=\"font-family: Palanquin Dark;\">The read/write line belongs to the </span><strong><span style=\"font-family: Palanquin Dark;\">control bus.</span></strong><span style=\"font-family: Palanquin Dark;\">The command to access the memory or the I/O devices is carried by the control bus.</span></p>\r\n<p><span style=\"font-family: Palanquin Dark;\">An<strong> </strong></span><strong><span style=\"font-family: Palanquin Dark;\">address bus</span></strong><span style=\"font-family: Palanquin Dark;\"> consists of the lines that connect between the microprocessor address pins and the address pins of each of the memory chips in the microprocessor system.</span></p>\n",
+                    solution_hi: "<p>7.(a) <span style=\"font-family: Palanquin Dark;\">&#2352;&#2368;&#2337;/&#2352;&#2366;&#2311;&#2335; <strong>&#2354;&#2366;&#2311;&#2344;</strong></span><strong><span style=\"font-family: Palanquin Dark;\"> &#2325;&#2306;&#2335;&#2381;&#2352;&#2379;&#2354; &#2348;&#2360; </span></strong><span style=\"font-family: Palanquin Dark;\">&#2360;&#2375; &#2360;&#2306;&#2348;&#2306;&#2343;&#2367;&#2340; &#2361;&#2376;&#2404; &#2350;&#2375;&#2350;&#2379;&#2352;&#2368; &#2351;&#2366; I/O &#2337;&#2367;&#2357;&#2366;&#2311;&#2360; &#2325;&#2379; &#2319;&#2325;&#2381;&#2360;&#2375;&#2360; &#2325;&#2352;&#2344;&#2375; &#2325;&#2366; &#2325;&#2350;&#2366;&#2306;&#2337; &#2325;&#2306;&#2335;&#2381;&#2352;&#2379;&#2354; &#2348;&#2360; &#2342;&#2381;&#2357;&#2366;&#2352;&#2366; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404;</span></p>\r\n<p><span style=\"font-family: Palanquin Dark;\">&#2319;&#2325; &#2319;&#2337;&#2381;&#2352;&#2375;&#2360; &#2348;&#2360; &#2350;&#2375;&#2306; &#2357;&#2375; &#2354;&#2366;&#2311;&#2344;&#2375;&#2306; &#2361;&#2379;&#2340;&#2368; &#2361;&#2376;&#2306; &#2332;&#2379; &#2350;&#2366;&#2311;&#2325;&#2381;&#2352;&#2379;&#2346;&#2381;&#2352;&#2379;&#2360;&#2375;&#2360;&#2352; &#2319;&#2337;&#2381;&#2352;&#2375;&#2360; &#2346;&#2367;&#2344; &#2324;&#2352; &#2350;&#2366;&#2311;&#2325;&#2381;&#2352;&#2379;&#2346;&#2381;&#2352;&#2379;&#2360;&#2375;&#2360;&#2352; &#2360;&#2367;&#2360;&#2381;&#2335;&#2350; &#2350;&#2375;&#2306; &#2346;&#2381;&#2352;&#2340;&#2381;&#2351;&#2375;&#2325; &#2350;&#2375;&#2350;&#2379;&#2352;&#2368; &#2330;&#2367;&#2346;&#2381;&#2360; &#2325;&#2375; &#2319;&#2337;&#2381;&#2352;&#2375;&#2360; &#2346;&#2367;&#2344; &#2325;&#2375; &#2348;&#2368;&#2330; &#2332;&#2369;&#2337;&#2364;&#2340;&#2368; &#2361;&#2376;&#2306;&#2404;</span></p>\n",
+                    correct: "a",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "8",
+                    section: "31",
+                    question_en: "<p><span style=\"font-family: Palanquin Dark;\">8.</span><span style=\"font-family: Palanquin Dark;\"> The unauthorized real-time interception of a private communication such as a phone call, instant message known as</span></p>\n",
+                    question_hi: "<p>8.<span style=\"font-family: Palanquin Dark;\"> &#2319;&#2325; &#2344;&#2367;&#2332;&#2368; &#2360;&#2306;&#2330;&#2366;&#2352; &#2332;&#2376;&#2360;&#2375; &#2347;&#2379;&#2344; &#2325;&#2377;&#2354;, &#2340;&#2340;&#2381;&#2325;&#2366;&#2354; &#2360;&#2306;&#2342;&#2375;&#2358; &#2325;&#2375; &#2352;&#2370;&#2346; &#2350;&#2375;&#2306; &#2332;&#2366;&#2344;&#2366; &#2332;&#2366;&#2344;&#2375; &#2357;&#2366;&#2354;&#2366; &#2309;&#2344;&#2343;&#2367;&#2325;&#2371;&#2340; &#2352;&#2368;&#2351;&#2354;-&#2335;&#2366;&#2311;&#2350; &#2311;&#2306;&#2335;&#2352;&#2360;&#2375;&#2346;&#2381;&#2358;&#2344;</span></p>\n",
+                    options_en: ["<p>replay</p>\n", "<p>patches</p>\n", 
+                                "<p>payloads</p>\n", "<p>eavesdropping</p>\n"],
+                    options_hi: ["<p><span style=\"font-weight: 400;\">&#2352;&#2368;&#2346;&#2381;&#2354;&#2375; (replay)</span></p>\n", "<p><span style=\"font-weight: 400;\">&#2346;&#2376;&#2330;&#2375;&#2332; (patches)</span></p>\n",
+                                "<p><span style=\"font-weight: 400;\">&#2346;&#2375;&#2354;&#2379;&#2337;&#2381;&#2360; (payloads)</span></p>\n", "<p><span style=\"font-weight: 400;\">&nbsp;&#2312;&#2357;&#2375;&#2360;&#2381;&#2337;&#2381;&#2352;&#2379;&#2346;&#2381;&#2346;&#2367;&#2306;&#2327; (eavesdropping)</span></p>\n"],
+                    solution_en: "<p>8.(d)<span style=\"font-family: Palanquin Dark;\"> </span><span style=\"font-family: Palanquin Dark;\">An</span><span style=\"font-family: Palanquin Dark;\"> <strong>eavesdropping</strong></span><span style=\"font-family: Palanquin Dark;\"><strong> </strong>attack, also known as a sniffing or snooping attack, is a theft of information as it is transmitted over a network by a computer, smartphone, or another connected device.</span><span style=\"font-family: Arial Unicode MS;\">Patches&rarr;</span><span style=\"font-family: Arial Unicode MS;\">Patches are software and operating system (OS) updates that address security vulnerabilities within a program or product. </span><span style=\"font-family: Arial Unicode MS;\">Payloads&rarr;</span><span style=\"font-family: Arial Unicode MS;\"> </span><span style=\"font-family: Arial Unicode MS;\">A payload is the carrying capacity of a packet or other transmission data unit.</span></p>\n",
+                    solution_hi: "<p><span style=\"font-family: Arial Unicode MS;\">8.(d)</span><span style=\"font-family: Palanquin Dark;\"> &#2312;vesdr</span><span style=\"font-family: \'Palanquin Dark\';\">&#2357;&#2375;&#2360;&#2381;&#2337;&#2381;&#2352;&#2379;&#2346;&#2381;&#2346;&#2367;&#2306;&#2327;(ea</span><span style=\"font-family: Palanquin Dark;\">opping) &#2361;&#2350;&#2354;&#2366;, &#2332;&#2367;&#2360;&#2375; &#2360;&#2381;&#2344;&#2368;&#2347;&#2367;&#2306;&#2327; &#2351;&#2366; &#2360;&#2381;&#2344;&#2370;&#2346;&#2367;&#2306;&#2327; &#2309;&#2335;&#2376;&#2325; &#2325;&#2375; &#2352;&#2370;&#2346; &#2350;&#2375;&#2306; &#2349;&#2368; &#2332;&#2366;&#2344;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;, &#2360;&#2370;&#2330;&#2344;&#2366; &#2325;&#2368; &#2330;&#2379;&#2352;&#2368; &#2361;&#2376; &#2325;&#2381;&#2351;&#2379;&#2306;&#2325;&#2367; &#2351;&#2361; &#2319;&#2325; &#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352;, &#2360;&#2381;&#2350;&#2366;&#2352;&#2381;&#2335;&#2347;&#2379;&#2344; &#2351;&#2366; &#2309;&#2344;&#2381;&#2351; &#2325;&#2344;&#2375;&#2325;&#2381;&#2335;&#2375;&#2337; &#2337;&#2367;&#2357;&#2366;&#2311;&#2360; &#2342;&#2381;&#2357;&#2366;&#2352;&#2366; &#2344;&#2375;&#2335;&#2357;&#2352;&#2381;&#2325; &#2346;&#2352; &#2346;&#2381;&#2352;&#2360;&#2366;&#2352;&#2367;&#2340; &#2361;&#2379;&#2340;&#2366; &#2361;&#2376;&#2404; </span><strong><span style=\"font-family: Palanquin Dark;\">&#2346;&#2376;&#2330;&#2375;&#2332;(Patches)</span></strong><span style=\"font-family: Arial Unicode MS;\"> &rarr; &#2346;&#2376;&#2330; &#2360;&#2377;&#2347;&#2381;&#2335;&#2357;&#2375;&#2351;&#2352; &#2324;&#2352; &#2321;&#2346;&#2352;&#2375;&#2335;&#2367;&#2306;&#2327; &#2360;&#2367;&#2360;&#2381;&#2335;&#2350; (OS) &#2309;&#2346;&#2337;&#2375;&#2335; &#2361;&#2379;&#2340;&#2375; &#2361;&#2376;&#2306; &#2332;&#2379; &#2346;&#2340;&#2366; &#2325;&#2352;&#2340;&#2375; &#2361;&#2376;&#2306; &#2325;&#2367;&#2360;&#2368; &#2346;&#2381;&#2352;&#2379;&#2327;&#2381;&#2352;&#2366;&#2350; &#2351;&#2366; &#2313;&#2340;&#2381;&#2346;&#2366;&#2342; &#2325;&#2375; &#2349;&#2368;&#2340;&#2352; &#2360;&#2369;&#2352;&#2325;&#2381;&#2359;&#2366; &#2349;&#2375;&#2342;&#2381;&#2351;&#2340;&#2366;&#2319;&#2305;&#2404; </span><strong><span style=\"font-family: Palanquin Dark;\">&#2346;&#2375;&#2354;&#2379;&#2337;&#2381;&#2360;(payloads)</span></strong><span style=\"font-family: Arial Unicode MS;\"><strong> </strong>&rarr; &#2346;&#2375;&#2354;&#2379;&#2337; &#2319;&#2325; &#2346;&#2376;&#2325;&#2375;&#2335; &#2351;&#2366; &#2309;&#2344;&#2381;&#2351; &#2335;&#2381;&#2352;&#2366;&#2306;&#2360;&#2350;&#2367;&#2358;&#2344; &#2337;&#2375;&#2335;&#2366; &#2351;&#2370;&#2344;&#2367;&#2335; &#2325;&#2368; &#2357;&#2361;&#2344; &#2325;&#2381;&#2359;&#2350;&#2340;&#2366; &#2361;&#2376;&#2404;</span></p>\n",
+                    correct: "d",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "9",
+                    section: "31",
+                    question_en: "<p>9.<span style=\"font-family: Arial Unicode MS;\"> Junk e-mail is also called________ </span></p>\n",
+                    question_hi: "<p>9.<span style=\"font-family: Palanquin Dark;\"> &#2332;&#2306;&#2325; &#2312;-&#2350;&#2375;&#2354; &#2325;&#2379;________ &#2349;&#2368; &#2325;&#2361;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;I</span></p>\n",
+                    options_en: ["<p>crap</p>\n", "<p>spoof</p>\n", 
+                                "<p>sniffer script</p>\n", "<p>spam</p>\n"],
+                    options_hi: ["<p>&#2325;&#2381;&#2352;&#2376;&#2346;(crap)</p>\n", "<p>&#2360;&#2381;&#2346;&#2370;&#2347;(spoof)</p>\n",
+                                "<p><span style=\"font-weight: 400;\">&#2360;&#2381;&#2344;&#2367;&#2347;&#2352; &#2360;&#2381;&#2325;&#2381;&#2352;&#2367;&#2346;&#2381;&#2335;(sniffer script)</span></p>\n", "<p><span style=\"font-weight: 400;\">&#2360;&#2381;&#2346;&#2376;&#2350;(spam)</span></p>\n"],
+                    solution_en: "<p>9.(d)<strong><span style=\"font-family: Palanquin Dark;\"> </span><span style=\"font-family: Palanquin Dark;\">Email spam</span></strong><span style=\"font-family: Palanquin Dark;\">, also known as junk email, refers to unsolicited email messages, usually sent in bulk to a large list of recipients.</span><strong><span style=\"font-family: Palanquin Dark;\">Spoofing</span></strong><span style=\"font-family: Palanquin Dark;\"><strong> </strong>is the act of disguising a communication from an unknown source as being from a known, trusted source. </span><span style=\"font-family: Palanquin Dark;\">A Sniffer is </span><span style=\"font-family: Palanquin Dark;\">a<strong> program or tool that captures information over a network</strong></span><strong><span style=\"font-family: Palanquin Dark;\">. </span></strong></p>\n",
+                    solution_hi: "<p>9.(d)<span style=\"font-family: Palanquin Dark;\"> &#2312;&#2350;&#2375;&#2354; &#2360;&#2381;&#2346;&#2376;&#2350;, &#2332;&#2367;&#2360;&#2375; &#2332;&#2306;&#2325; &#2312;&#2350;&#2375;&#2354;(junk email) &#2325;&#2375; &#2352;&#2370;&#2346; &#2350;&#2375;&#2306; &#2349;&#2368; &#2332;&#2366;&#2344;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;, &#2309;&#2357;&#2366;&#2306;&#2331;&#2367;&#2340; &#2312;&#2350;&#2375;&#2354;(</span><span style=\"font-family: Palanquin Dark;\">unsolicited email</span><span style=\"font-family: Palanquin Dark;\">) &#2360;&#2306;&#2342;&#2375;&#2358;&#2379;&#2306; &#2325;&#2379; &#2360;&#2306;&#2342;&#2352;&#2381;&#2349;&#2367;&#2340; &#2325;&#2352;&#2340;&#2366; &#2361;&#2376;, &#2310;&#2350;&#2340;&#2380;&#2352; &#2346;&#2352; &#2346;&#2381;&#2352;&#2366;&#2346;&#2381;&#2340;&#2325;&#2352;&#2381;&#2340;&#2366;&#2323;&#2306; &#2325;&#2368; &#2319;&#2325; &#2348;&#2337;&#2364;&#2368; &#2360;&#2370;&#2330;&#2368; &#2350;&#2375;&#2306; &#2341;&#2379;&#2325; &#2350;&#2375;&#2306; &#2349;&#2375;&#2332;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404; </span><strong><span style=\"font-family: Palanquin Dark;\">&#2360;&#2381;&#2346;&#2370;&#2347;&#2367;&#2306;&#2327;(spoofing)</span></strong><span style=\"font-family: Palanquin Dark;\"> &#2319;&#2325; &#2332;&#2381;&#2334;&#2366;&#2340;, &#2357;&#2367;&#2358;&#2381;&#2357;&#2360;&#2344;&#2368;&#2351; &#2360;&#2381;&#2352;&#2379;&#2340; &#2360;&#2375; &#2361;&#2379;&#2344;&#2375; &#2325;&#2375; &#2344;&#2366;&#2340;&#2375; &#2309;&#2332;&#2381;&#2334;&#2366;&#2340; &#2360;&#2381;&#2352;&#2379;&#2340; &#2360;&#2375; &#2360;&#2306;&#2330;&#2366;&#2352; &#2325;&#2379; &#2331;&#2367;&#2346;&#2366;&#2344;&#2375; &#2325;&#2366; &#2325;&#2366;&#2352;&#2381;&#2351; &#2361;&#2376;&#2404; &#2319;&#2325; &#2360;&#2381;&#2344;&#2367;&#2347;&#2352; &#2319;&#2325; &#2346;&#2381;&#2352;&#2379;&#2327;&#2381;&#2352;&#2366;&#2350; &#2351;&#2366; &#2335;&#2370;&#2354; &#2361;&#2376; &#2332;&#2379; &#2344;&#2375;&#2335;&#2357;&#2352;&#2381;&#2325; &#2346;&#2352; &#2332;&#2366;&#2344;&#2325;&#2366;&#2352;&#2368; &#2325;&#2376;&#2346;&#2381;&#2330;&#2352; &#2325;&#2352;&#2340;&#2366; &#2361;&#2376;&#2404;</span></p>\n",
+                    correct: "d",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "10",
+                    section: "31",
+                    question_en: " <p>10.</span><span style=\"font-family:Palanquin Dark\"> Which of the following bypasses the Print dialog box when printing individual slides or an entire presentation?</span></p>",
+                    question_hi: "<p>10.<span style=\"font-family: Palanquin Dark;\"> &#2357;&#2381;&#2351;&#2325;&#2381;&#2340;&#2367;&#2327;&#2340;(individual) &#2360;&#2381;&#2354;&#2366;&#2311;&#2337; &#2351;&#2366; &#2360;&#2306;&#2346;&#2370;&#2352;&#2381;&#2339;(entire) &#2346;&#2381;&#2352;&#2375;&#2332;&#2375;&#2306;&#2335;&#2375;&#2358;&#2344; &#2325;&#2379; &#2346;&#2381;&#2352;&#2367;&#2306;&#2335; &#2325;&#2352;&#2340;&#2375; &#2360;&#2350;&#2351; &#2344;&#2367;&#2350;&#2381;&#2344; &#2350;&#2375;&#2306; &#2360;&#2375; &#2325;&#2380;&#2344; &#2346;&#2381;&#2352;&#2367;&#2306;&#2335; &#2337;&#2366;&#2351;&#2354;&#2377;&#2327; &#2348;&#2377;&#2325;&#2381;&#2360; &#2325;&#2379; &#2348;&#2366;&#2351;&#2346;&#2366;&#2360; &#2325;&#2352;&#2340;&#2366; &#2361;&#2376;?</span></p>\n",
+                    options_en: [" <p> File, Print preview </span></p>", " <p> Print button</span></p>", 
+                                " <p> File, Print </span></p>", " <p> Ctrl + P</span></p>"],
+                    options_hi: ["<p>Ctrl + P</p>\n", "<p><span style=\"font-weight: 400;\">&nbsp;&#2347;&#2364;&#2366;&#2311;&#2354;, &#2346;&#2381;&#2352;&#2367;&#2306;&#2335; &#2346;&#2381;&#2352;&#2368;&#2357;&#2381;&#2351;&#2370; (File, Print preview)</span></p>\n",
+                                "<p><span style=\"font-weight: 400;\">&nbsp;&#2346;&#2381;&#2352;&#2367;&#2306;&#2335; &#2348;&#2335;&#2344; (Print button)</span></p>\n", "<p><span style=\"font-weight: 400;\">&#2347;&#2364;&#2366;&#2311;&#2354;, &#2346;&#2381;&#2352;&#2367;&#2306;&#2335; (File, Print)</span></p>\n"],
+                    solution_en: " <p>10.(d) </span><span style=\"font-family:Palanquin Dark\">Ctrl + P is often used to bypass the print dialog box.</span></p>",
+                    solution_hi: "<p>10.(d)<span style=\"font-family: Palanquin Dark;\"> Ctrl + P &#2325;&#2366; &#2313;&#2346;&#2351;&#2379;&#2327; &#2309;&#2325;&#2381;&#2360;&#2352; &#2346;&#2381;&#2352;&#2367;&#2306;&#2335; &#2337;&#2366;&#2351;&#2354;&#2377;&#2327; &#2348;&#2377;&#2325;&#2381;&#2360;(print dialog box) &#2325;&#2379; &#2348;&#2366;&#2351;&#2346;&#2366;&#2360; &#2325;&#2352;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404;</span></p>\n",
+                    correct: "d",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "11",
+                    section: "31",
+                    question_en: "<p>11.<span style=\"font-family: Palanquin Dark;\"> Error in a program is called_________</span></p>\n",
+                    question_hi: "<p>11.<span style=\"font-family: Palanquin Dark;\"> &#2346;&#2381;&#2352;&#2379;&#2327;&#2381;&#2352;&#2366;&#2350; &#2350;&#2375;&#2306; &#2319;&#2352;&#2352; &#2325;&#2379; __________ &#2325;&#2361;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404;</span></p>\n",
+                    options_en: ["<p>debug</p>\n", "<p>bug</p>\n", 
+                                "<p>virus</p>\n", "<p>noise</p>\n"],
+                    options_hi: ["<p>&#2337;&#2367;&#2348;&#2327;(debug)</p>\n", "<p><span style=\"font-weight: 400;\">&nbsp;&#2348;&#2327;(bug)</span></p>\n",
+                                "<p><span style=\"font-weight: 400;\">&#2357;&#2366;&#2351;&#2352;&#2360;(virus)</span></p>\n", "<p><span style=\"font-weight: 400;\">&nbsp;&#2344;&#2377;&#2311;&#2395;(noise)</span></p>\n"],
+                    solution_en: "<p>11.(b)<span style=\"font-family: Palanquin Dark;\"> </span><span style=\"font-family: Palanquin Dark;\">In computer technology, a bug is<strong> </strong></span><span style=\"font-family: Palanquin Dark;\"><strong>a coding error in a computer</strong> <strong>program</strong></span><span style=\"font-family: Palanquin Dark;\">.The process of finding bugs -- before users do -- is called debugging.</span></p>\n",
+                    solution_hi: "<p>11.(b)<span style=\"font-family: Palanquin Dark;\"> &#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352; &#2335;&#2375;&#2325;&#2381;&#2344;&#2379;&#2354;&#2377;&#2332;&#2368;(computer </span><span style=\"font-family: Palanquin Dark;\">technology</span><span style=\"font-family: Palanquin Dark;\">) &#2350;&#2375;&#2306;, &#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352; &#2346;&#2381;&#2352;&#2379;&#2327;&#2381;&#2352;&#2366;&#2350; &#2350;&#2375;&#2306; &#2319;&#2325; &#2348;&#2327;(bug) &#2319;&#2325; &#2325;&#2379;&#2337;&#2367;&#2306;&#2327; &#2319;&#2352;&#2352; &#2361;&#2376;&#2404; &#2348;&#2327;(bug) &#2326;&#2379;&#2332;&#2344;&#2375; &#2325;&#2368; &#2346;&#2381;&#2352;&#2325;&#2381;&#2352;&#2367;&#2351;&#2366; - &#2351;&#2370;&#2395;&#2352;&#2381;&#2360; &#2325;&#2375; &#2325;&#2352;&#2344;&#2375; &#2360;&#2375; &#2346;&#2361;&#2354;&#2375; - &#2337;&#2368;&#2348;&#2327;&#2367;&#2306;&#2327;(debugging) &#2325;&#2361;&#2354;&#2366;&#2340;&#2368; &#2361;&#2376;&#2404;</span></p>\n",
+                    correct: "b",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "12",
+                    section: "31",
+                    question_en: "<p>12.<span style=\"font-family: Palanquin Dark;\"> In MS-DOS, which of the following commands is used to delete directory with </span><span style=\"font-family: Palanquin Dark;\">all sub-directories and files?</span></p>\n",
+                    question_hi: " <p>12.</span><span style=\"font-family:Palanquin Dark\"> MS-DOS में निम्न में से किस कमांड का प्रयोग डायरेक्टरी को डिलीट करने के लिए किया जाता है</span></p> <p><span style=\"font-family:Palanquin Dark\">सभी उप-निर्देशिकाएं और फाइलें?</span></p>",
+                    options_en: ["<p>Deltree</p>\n", "<p>Delete</p>\n", 
+                                "<p>Del</p>\n", "<p>Move</p>\n"],
+                    options_hi: [" <p> Deltree </span></p>", " <p> Delete </span></p>",
+                                " <p> Del</span></p>", " <p> Move</span></p>"],
+                    solution_en: "<p>12.(a)<span style=\"font-family: Palanquin Dark;\"> </span><span style=\"font-family: Palanquin Dark;\">DELTREE is a command in some Microsoft operating systems, SpartaDOS X and FreeDOS that </span><strong><span style=\"font-family: Palanquin Dark;\">recursively deletes an entire subdirectory of files</span><span style=\"font-family: Palanquin Dark;\">.</span></strong></p>\n",
+                    solution_hi: " <p><span style=\"font-family:Palanquin Dark\">12.(a)</span><span style=\"font-family:Palanquin Dark\"> DELTREE कुछ Microsoft ऑपरेटिंग सिस्टम, SpartaDOS X और FreeDOS में एक कमांड है जो फ़ाइलों की संपूर्ण सबडायरेक्ट्रीज(subdirectory) को पुन: हटा देता है।</span></p>",
+                    correct: "a",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "13",
+                    section: "31",
+                    question_en: "<p>13.<span style=\"font-family: Palanquin Dark;\"> Which of the following has the largest storage capacity for removable media?</span></p>\n",
+                    question_hi: "<p>13.<span style=\"font-family: Palanquin Dark;\"> &#2352;&#2367;&#2350;&#2370;&#2357;&#2375;&#2348;&#2354; &#2350;&#2368;&#2337;&#2367;&#2351;&#2366; (removable media) &#2325;&#2375; &#2354;&#2367;&#2319; &#2344;&#2367;&#2350;&#2381;&#2344; &#2350;&#2375;&#2306; &#2360;&#2375; &#2325;&#2367;&#2360;&#2325;&#2368; &#2360;&#2348;&#2360;&#2375; &#2348;&#2337;&#2364;&#2368; &#2360;&#2381;&#2335;&#2379;&#2352;&#2375;&#2332; &#2325;&#2381;&#2359;&#2350;&#2340;&#2366; &#2361;&#2376;?</span></p>\n",
+                    options_en: ["<p>DVD</p>\n", "<p>Floppy disk</p>\n", 
+                                "<p>CD-ROM</p>\n", "<p>Partitioned space</p>\n"],
+                    options_hi: ["<p>DVD</p>\n", "<p><span style=\"font-weight: 400;\">&#2347;&#2381;&#2354;&#2377;&#2346;&#2368; &#2337;&#2367;&#2360;&#2381;&#2325; (floppy disk)</span></p>\n",
+                                "<p>CD-ROM</p>\n", "<p><span style=\"font-weight: 400;\">&#2346;&#2366;&#2352;&#2381;&#2335;&#2368;&#2358;&#2344;&#2337; &#2360;&#2381;&#2346;&#2375;&#2360; (partitioned space)</span></p>\n"],
+                    solution_en: "<p>13.(a)<strong><span style=\"font-family: Palanquin Dark;\"> </span></strong><span style=\"font-family: Arial Unicode MS;\"><strong>DVD(Digital versatile disk) </strong>&rarr; </span><span style=\"font-family: Arial Unicode MS;\">A standard single-sided, one-layer DVD can hold 4.7 gigabytes of data and 8.5 GB if it\'s a double-layer disc.</span></p>\r\n<p><span style=\"font-family: Arial Unicode MS;\"><strong>Floppy disk</strong>&rarr;</span><span style=\"font-family: Arial Unicode MS;\">The smaller 3.5&Prime; Floppy Disks use 80 tracks per side, 18 sectors per track, and 512 bytes per sector, </span><span style=\"font-family: Arial Unicode MS;\">yielding a capacity of 1.44 MB.</span></p>\r\n<p><span style=\"font-family: Arial Unicode MS;\"><strong>CD-ROM(Compact disk read only memory)</strong>&rarr;</span><span style=\"font-family: Arial Unicode MS;\"> It can store </span><span style=\"font-family: Arial Unicode MS;\">upto</span><span style=\"font-family: Arial Unicode MS;\"> 650 megabytes (MB) to 700 MB of data.</span></p>\r\n<p><span style=\"font-family: Arial Unicode MS;\"><strong>Partitioned space</strong>&rarr;</span><span style=\"font-family: Arial Unicode MS;\"> </span><span style=\"font-family: Arial Unicode MS;\">A partition in personal computers is a logical division of a hard disk. This is typically created so that a user can have a different operating system on the same hard disk</span></p>\n",
+                    solution_hi: "<p>13.(a)<strong><span style=\"font-family: Arial Unicode MS;\"> </span><span style=\"font-family: Palanquin Dark;\">DVD (&#2337;&#2367;&#2332;&#2367;&#2335;&#2354; &#2357;&#2352;&#2381;&#2360;&#2375;&#2335;&#2366;&#2311;&#2354; &#2337;&#2367;&#2360;&#2381;&#2325;)</span></strong><span style=\"font-family: Arial Unicode MS;\"> &rarr; &#2319;&#2325; &#2360;&#2381;&#2335;&#2376;&#2306;&#2337;&#2352;&#2381;&#2337; &#2360;&#2367;&#2306;&#2327;&#2354;-&#2360;&#2366;&#2311;&#2337;, &#2319;&#2325;-&#2354;&#2375;&#2351;&#2352; DVD &#2350;&#2375;&#2306; 4.7 &#2327;&#2368;&#2327;&#2366;&#2348;&#2366;&#2311;&#2335; &#2337;&#2375;&#2335;&#2366; &#2324;&#2352; 8.5 GB &#2337;&#2375;&#2335;&#2366; &#2361;&#2379; &#2360;&#2325;&#2340;&#2366; &#2361;&#2376; &#2351;&#2342;&#2367; &#2351;&#2361; &#2319;&#2325; &#2337;&#2348;&#2354;-&#2354;&#2375;&#2351;&#2352; &#2337;&#2367;&#2360;&#2381;&#2325; (double-layer disc) &#2361;&#2376;&#2404; </span></p>\r\n<p><strong><span style=\"font-family: Palanquin Dark;\">&#2347;&#2381;&#2354;&#2377;&#2346;&#2368; &#2337;&#2367;&#2360;&#2381;&#2325;</span></strong><span style=\"font-family: Arial Unicode MS;\"><strong> &rarr;</strong> &#2331;&#2379;&#2335;&#2368; 3.5&Prime; &#2347;&#2381;&#2354;&#2377;&#2346;&#2368; &#2337;&#2367;&#2360;&#2381;&#2325; &#2346;&#2381;&#2352;&#2340;&#2367; &#2346;&#2325;&#2381;&#2359; 80 &#2335;&#2381;&#2352;&#2376;&#2325;, &#2346;&#2381;&#2352;&#2340;&#2367; &#2335;&#2381;&#2352;&#2376;&#2325; 18 &#2360;&#2375;&#2325;&#2381;&#2335;&#2352; &#2324;&#2352; &#2346;&#2381;&#2352;&#2340;&#2367; &#2360;&#2375;&#2325;&#2381;&#2335;&#2352; 512 &#2348;&#2366;&#2311;&#2335;&#2381;&#2360; &#2325;&#2366; &#2313;&#2346;&#2351;&#2379;&#2327; &#2325;&#2352;&#2340;&#2368; &#2361;&#2376;, &#2332;&#2367;&#2360;&#2325;&#2368; &#2325;&#2381;&#2359;&#2350;&#2340;&#2366; 1.44 mb &#2361;&#2376;&#2404;</span></p>\r\n<p><span style=\"font-family: Palanquin Dark;\"><strong>CD-ROM </strong>(&#2325;&#2377;&#2350;&#2381;&#2346;&#2376;&#2325;&#2381;&#2335; &#2337;&#2367;&#2360;&#2381;&#2325; &#2352;&#2368;&#2337; &#2323;&#2344;&#2354;&#2368; &#2350;&#2375;&#2350;&#2379;&#2352;&#2368;)</span><span style=\"font-family: Arial Unicode MS;\"> &rarr; &#2351;&#2361; 650 &#2350;&#2375;&#2327;&#2366;&#2348;&#2366;&#2311;&#2335; (MB) &#2360;&#2375; 700 MB &#2340;&#2325; &#2337;&#2375;&#2335;&#2366; &#2360;&#2381;&#2335;&#2379;&#2352; &#2325;&#2352; &#2360;&#2325;&#2340;&#2366; &#2361;&#2376;&#2404;</span></p>\r\n<p><strong><span style=\"font-family: Palanquin Dark;\">&#2346;&#2366;&#2352;&#2381;&#2335;&#2368;&#2358;&#2344;&#2337; &#2360;&#2381;&#2346;&#2375;&#2360; </span></strong><span style=\"font-family: Arial Unicode MS;\">&rarr; &#2357;&#2381;&#2351;&#2325;&#2381;&#2340;&#2367;&#2327;&#2340; &#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352;&#2379;&#2306; &#2350;&#2375;&#2306; &#2319;&#2325; &#2346;&#2366;&#2352;&#2381;&#2335;&#2368;&#2358;&#2344; &#2361;&#2366;&#2352;&#2381;&#2337; &#2337;&#2367;&#2360;&#2381;&#2325; &#2325;&#2366; &#2319;&#2325; &#2354;&#2377;&#2332;&#2367;&#2325;&#2354; &#2337;&#2367;&#2357;&#2368;&#2395;&#2344; &#2361;&#2376;&#2404; &#2351;&#2361; &#2310;&#2350;&#2340;&#2380;&#2352; &#2346;&#2352; &#2311;&#2360;&#2354;&#2367;&#2319; &#2348;&#2344;&#2366;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376; &#2340;&#2366;&#2325;&#2367; &#2319;&#2325; &#2313;&#2346;&#2351;&#2379;&#2327;&#2325;&#2352;&#2381;&#2340;&#2366; &#2325;&#2375; &#2346;&#2366;&#2360; &#2319;&#2325; &#2361;&#2368; &#2361;&#2366;&#2352;&#2381;&#2337; &#2337;&#2367;&#2360;&#2381;&#2325; &#2346;&#2352; &#2319;&#2325; &#2309;&#2354;&#2327; &#2321;&#2346;&#2352;&#2375;&#2335;&#2367;&#2306;&#2327; &#2360;&#2367;&#2360;&#2381;&#2335;&#2350; &#2361;&#2379; &#2360;&#2325;&#2375;&#2404;</span></p>\n",
+                    correct: "a",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "14",
+                    section: "31",
+                    question_en: "<p>14.<span style=\"font-family: Arial Unicode MS;\"> The main circuit board in the computer that connects the parts of the computer is the</span></p>\n",
+                    question_hi: "<p>14.<span style=\"font-family: Palanquin Dark;\"> &#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352; &#2350;&#2375;&#2306; &#2350;&#2369;&#2326;&#2381;&#2351; &#2360;&#2352;&#2381;&#2325;&#2367;&#2335; &#2348;&#2379;&#2352;&#2381;&#2337; (circuit board) &#2332;&#2379; &#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352; &#2325;&#2375; &#2349;&#2366;&#2327;&#2379;&#2306; &#2325;&#2379; &#2332;&#2379;&#2337;&#2364;&#2340;&#2366; &#2361;&#2376;, _____ &#2361;&#2376;&#2404;</span></p>\n",
+                    options_en: ["<p>motherboard</p>\n", "<p>circuit board</p>\n", 
+                                "<p>match board</p>\n", "<p>hard drive</p>\n"],
+                    options_hi: ["<p><span style=\"font-weight: 400;\">&nbsp;&#2350;&#2342;&#2352;&#2348;&#2379;&#2352;&#2381;&#2337; (motherboard)</span></p>\n", "<p><span style=\"font-weight: 400;\">&nbsp;&#2360;&#2352;&#2381;&#2325;&#2367;&#2335; &#2348;&#2379;&#2352;&#2381;&#2337; (circuit board)</span></p>\n",
+                                "<p><span style=\"font-weight: 400;\">&#2350;&#2376;&#2330; &#2348;&#2379;&#2352;&#2381;&#2337; (match board)</span></p>\n", "<p><span style=\"font-weight: 400;\">&#2361;&#2366;&#2352;&#2381;&#2337; &#2337;&#2381;&#2352;&#2366;&#2311;&#2357; (hard drive)</span></p>\n"],
+                    solution_en: "<p>14.(a) <span style=\"font-family: Palanquin Dark;\">The main circuit board contained in any computer is called a </span><strong><span style=\"font-family: Palanquin Dark;\">motherboard</span></strong><span style=\"font-family: Palanquin Dark;\">. It is also known as the main board or logic board or system board or planar board. All the other electronic devices and circuits of computer systems are attached to this board like CPU, ROM , RAM, expansion slots, PCI slots and USB ports.</span></p>\n",
+                    solution_hi: "<p>14.(a) <span style=\"font-family: Palanquin Dark;\">&#2325;&#2367;&#2360;&#2368; &#2349;&#2368; &#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352; &#2350;&#2375;&#2306; &#2344;&#2367;&#2361;&#2367;&#2340; &#2350;&#2369;&#2326;&#2381;&#2351; &#2360;&#2352;&#2381;&#2325;&#2367;&#2335; &#2348;&#2379;&#2352;&#2381;&#2337; &#2325;&#2379;</span><span style=\"font-family: Palanquin Dark;\"> <strong>&#2350;&#2342;&#2352;&#2348;&#2379;&#2352;&#2381;&#2337;</strong> </span><span style=\"font-family: Palanquin Dark;\">&#2325;&#2361;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404; &#2311;&#2360;&#2375; &#2350;&#2369;&#2326;&#2381;&#2351; &#2348;&#2379;&#2352;&#2381;&#2337; &#2351;&#2366; &#2354;&#2377;&#2332;&#2367;&#2325; &#2348;&#2379;&#2352;&#2381;&#2337; &#2351;&#2366; &#2360;&#2367;&#2360;&#2381;&#2335;&#2350; &#2348;&#2379;&#2352;&#2381;&#2337; &#2351;&#2366; &#2346;&#2381;&#2354;&#2366;&#2344;&#2352; &#2348;&#2379;&#2352;&#2381;&#2337; &#2325;&#2375; &#2352;&#2370;&#2346; &#2350;&#2375;&#2306; &#2349;&#2368; &#2332;&#2366;&#2344;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404; &#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352; &#2360;&#2367;&#2360;&#2381;&#2335;&#2350; &#2325;&#2375; &#2309;&#2344;&#2381;&#2351; &#2360;&#2349;&#2368; &#2311;&#2354;&#2375;&#2325;&#2381;&#2335;&#2381;&#2352;&#2377;&#2344;&#2367;&#2325; &#2337;&#2367;&#2357;&#2366;&#2311;&#2360; &#2324;&#2352; &#2360;&#2352;&#2381;&#2325;&#2367;&#2335; &#2311;&#2360; &#2348;&#2379;&#2352;&#2381;&#2337; &#2360;&#2375; &#2332;&#2369;&#2337;&#2364;&#2375; &#2361;&#2379;&#2340;&#2375; &#2361;&#2376;&#2306; &#2332;&#2376;&#2360;&#2375; CPU, ROM, RAM, &#2319;&#2325;&#2381;&#2360;&#2346;&#2375;&#2306;&#2358;&#2344; &#2360;&#2381;&#2354;&#2377;&#2335; (expansion slot), PCI &#2360;&#2381;&#2354;&#2377;&#2335; &#2324;&#2352; USB &#2346;&#2379;&#2352;&#2381;&#2335;&#2404;</span></p>\n",
+                    correct: "a",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "15",
+                    section: "31",
+                    question_en: "<p>15.<span style=\"font-family: Palanquin Dark;\"> A ______ is a large and expensive computer capable of performing scientific and business applications.</span></p>\n",
+                    question_hi: "<p>15.<span style=\"font-family: Palanquin Dark;\"> ______ &#2357;&#2376;&#2332;&#2381;&#2334;&#2366;&#2344;&#2367;&#2325; &#2324;&#2352; &#2357;&#2381;&#2351;&#2366;&#2357;&#2360;&#2366;&#2351;&#2367;&#2325; &#2309;&#2344;&#2369;&#2346;&#2381;&#2352;&#2351;&#2379;&#2327;&#2379;&#2306; (scientific and business applications) &#2325;&#2379; &#2325;&#2352;&#2344;&#2375; &#2350;&#2375;&#2306; &#2360;&#2325;&#2381;&#2359;&#2350; &#2319;&#2325; &#2348;&#2337;&#2364;&#2366; &#2324;&#2352; &#2350;&#2361;&#2306;&#2327;&#2366; &#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352; &#2361;&#2376;&#2404;</span></p>\n",
+                    options_en: ["<p>mainframe computer</p>\n", "<p>supercomputer</p>\n", 
+                                "<p>minicomputer</p>\n", "<p>handheld computer</p>\n"],
+                    options_hi: ["<p><span style=\"font-weight: 400;\">&nbsp;&#2350;&#2375;&#2344;&#2347;&#2381;&#2352;&#2375;&#2350; &#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352; (mainframe computer)</span></p>\n", "<p><span style=\"font-weight: 400;\">&nbsp;&#2360;&#2369;&#2346;&#2352; &#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352; (supercomputer)</span></p>\n",
+                                "<p><span style=\"font-weight: 400;\">&nbsp;&#2350;&#2367;&#2344;&#2368; &#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352; (minicomputer)</span></p>\n", "<p><span style=\"font-weight: 400;\">&#2361;&#2376;&#2306;&#2337;&#2361;&#2375;&#2354;&#2381;&#2337; &#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352; (handheld computer)</span></p>\n"],
+                    solution_en: "<p>15<span style=\"font-family: Palanquin Dark;\">.</span><span style=\"font-family: Palanquin Dark;\">(a)</span><strong><span style=\"font-family: Palanquin Dark;\"> </span><span style=\"font-family: Palanquin Dark;\">Mainframe Computer</span></strong><span style=\"font-family: Palanquin Dark;\"> is a large and expensive computer and </span><span style=\"font-family: Palanquin Dark;\">are</span><span style=\"font-family: Palanquin Dark;\"> capable of performing </span><span style=\"font-family: Palanquin Dark;\"> scientific and business applications.</span><span style=\"font-family: Palanquin Dark;\"> </span></p>\r\n<p><strong><span style=\"font-family: Palanquin Dark;\">Supercomputers </span></strong><span style=\"font-family: Palanquin Dark;\">are used in weather forecasting,nuclear designing,cryptography etc</span><span style=\"font-family: Palanquin Dark;\">.</span></p>\r\n<p><strong><span style=\"font-family: Palanquin Dark;\">Minicomputers </span></strong><span style=\"font-family: Palanquin Dark;\">are used in </span><span style=\"font-family: Palanquin Dark;\">file handling, and database management.</span></p>\r\n<p><span style=\"font-family: Palanquin Dark;\"><strong>Handheld computers are used</strong> in </span><span style=\"font-family: Palanquin Dark;\"> </span><span style=\"font-family: Palanquin Dark;\">calendar software, task management software.</span></p>\n",
+                    solution_hi: "<p><span style=\"font-family: Palanquin Dark;\">15</span><span style=\"font-family: Palanquin Dark;\">.</span><span style=\"font-family: Palanquin Dark;\">(a)</span><span style=\"font-family: Palanquin Dark;\"> </span><strong><span style=\"font-family: Palanquin Dark;\">&#2350;&#2375;&#2344;&#2347;&#2381;&#2352;&#2375;&#2350; &#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352; </span></strong><span style=\"font-family: Palanquin Dark;\">&#2319;&#2325; &#2348;&#2337;&#2364;&#2366; &#2324;&#2352; &#2350;&#2361;&#2306;&#2327;&#2366; &#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352; &#2361;&#2376; &#2324;&#2352; &#2357;&#2376;&#2332;&#2381;&#2334;&#2366;&#2344;&#2367;&#2325; &#2324;&#2352; &#2357;&#2381;&#2351;&#2366;&#2357;&#2360;&#2366;&#2351;&#2367;&#2325; &#2309;&#2344;&#2369;&#2346;&#2381;&#2352;&#2351;&#2379;&#2327;&#2379;&#2306; &#2325;&#2379; &#2325;&#2352;&#2344;&#2375; &#2350;&#2375;&#2306; &#2360;&#2325;&#2381;&#2359;&#2350; &#2361;&#2376;&#2404;</span></p>\r\n<p><strong><span style=\"font-family: Palanquin Dark;\">&#2360;&#2369;&#2346;&#2352; &#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352;</span></strong><span style=\"font-family: Palanquin Dark;\"> &#2325;&#2366; &#2313;&#2346;&#2351;&#2379;&#2327; &#2350;&#2380;&#2360;&#2350; &#2325;&#2368; &#2349;&#2357;&#2367;&#2359;&#2381;&#2351;&#2357;&#2366;&#2339;&#2368; (weather forecast), &#2346;&#2352;&#2350;&#2366;&#2339;&#2369; &#2337;&#2367;&#2332;&#2366;&#2311;&#2344;&#2367;&#2306;&#2327; (</span><span style=\"font-family: Palanquin Dark;\">nuclear designing)</span><span style=\"font-family: Palanquin Dark;\">, &#2325;&#2381;&#2352;&#2367;&#2346;&#2381;&#2335;&#2379;&#2327;&#2381;&#2352;&#2366;&#2347;&#2368; (</span><span style=\"font-family: Palanquin Dark;\">cryptography) </span><span style=\"font-family: Palanquin Dark;\">&#2310;&#2342;&#2367; &#2350;&#2375;&#2306; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404;</span></p>\r\n<p><strong><span style=\"font-family: Palanquin Dark;\">&#2350;&#2367;&#2344;&#2368;&#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352;</span></strong><span style=\"font-family: Palanquin Dark;\"> &#2325;&#2366; &#2313;&#2346;&#2351;&#2379;&#2327; &#2347;&#2364;&#2366;&#2311;&#2354; &#2346;&#2381;&#2352;&#2348;&#2306;&#2343;&#2344; (file handling) &#2324;&#2352; &#2337;&#2375;&#2335;&#2366;&#2348;&#2375;&#2360; &#2350;&#2376;&#2344;&#2375;&#2332;&#2350;&#2375;&#2306;&#2335; (database management) &#2350;&#2375;&#2306; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404;</span></p>\r\n<p><span style=\"font-family: Palanquin Dark;\"><strong>&#2361;&#2376;&#2306;&#2337;&#2361;&#2375;&#2354;&#2381;&#2337; &#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352;</strong> </span><span style=\"font-family: Palanquin Dark;\">&#2325;&#2366; &#2313;&#2346;&#2351;&#2379;&#2327; &#2325;&#2376;&#2354;&#2375;&#2306;&#2337;&#2352; &#2360;&#2377;&#2347;&#2381;&#2335;&#2357;&#2375;&#2351;&#2352; (calendar software), &#2335;&#2366;&#2360;&#2381;&#2325; &#2350;&#2376;&#2344;&#2375;&#2332;&#2350;&#2375;&#2306;&#2335; &#2360;&#2377;&#2347;&#2381;&#2335;&#2357;&#2375;&#2351;&#2352; (task management software) &#2350;&#2375;&#2306; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404;</span></p>\n",
+                    correct: "a",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "16",
+                    section: "31",
+                    question_en: "<p>16.<span style=\"font-family: Palanquin Dark;\"> Encryption and decryption are the functions of</span></p>\n",
+                    question_hi: "<p>16.<span style=\"font-family: Palanquin Dark;\">&#2319;&#2344;&#2381;&#2325;&#2381;&#2352;&#2367;&#2346;&#2381;&#2358;&#2344; &#2324;&#2352; &#2337;&#2367;&#2325;&#2381;&#2352;&#2367;&#2346;&#2381;&#2358;&#2344; &#2325;&#2375; &#2325;&#2366;&#2352;&#2381;&#2351; &#2361;&#2376;&#2306;</span></p>\n",
+                    options_en: ["<p>presentation layer</p>\n", "<p>session layer</p>\n", 
+                                "<p>transport layer</p>\n", "<p>All of these</p>\n"],
+                    options_hi: ["<p>&#2346;&#2381;&#2352;&#2375;&#2332;&#2375;&#2306;&#2335;&#2375;&#2358;&#2344; &#2354;&#2375;&#2351;&#2352;(presentation layer)</p>\n", "<p>&#2360;&#2375;&#2358;&#2344; &#2354;&#2375;&#2351;&#2352;(session layer)</p>\n",
+                                "<p><span style=\"font-weight: 400;\">&#2335;&#2381;&#2352;&#2366;&#2306;&#2360;&#2346;&#2379;&#2352;&#2381;&#2335; &#2354;&#2375;&#2351;&#2352; &#2346;&#2352;&#2340;(transport layer)</span></p>\n", "<p>&#2351;&#2375; &#2360;&#2348;(All of these)</p>\n"],
+                    solution_en: "<p>16.(a)<span style=\"font-family: Palanquin Dark;\"> </span><span style=\"font-family: Palanquin Dark;\">Data encryption and decryption take place in the </span><strong><span style=\"font-family: Palanquin Dark;\">presentation layer</span><span style=\"font-family: Palanquin Dark;\"> as well.</span></strong></p>\r\n<p><strong><span style=\"font-family: Palanquin Dark;\">Transport Layer</span></strong><span style=\"font-family: Palanquin Dark;\"> provides transparent transfer of data between end users, providing reliable data transfer services to the upper layers.</span><strong><span style=\"font-family: Palanquin Dark;\">Session Layer</span></strong><span style=\"font-family: Palanquin Dark;\"><strong> </strong>is the layer of the ISO Open Systems Interconnection (OSI) model that controls the dialogues (connections) between computers. </span></p>\n",
+                    solution_hi: "<p>16.(a)<span style=\"font-family: Palanquin Dark;\"> </span><strong><span style=\"font-family: Palanquin Dark;\">&#2346;&#2381;&#2352;&#2375;&#2332;&#2375;&#2306;&#2335;&#2375;&#2358;&#2344; &#2354;&#2375;&#2351;&#2352;(presentation layer)</span></strong><span style=\"font-family: Palanquin Dark;\"><strong> </strong>&#2350;&#2375;&#2306; &#2337;&#2375;&#2335;&#2366; &#2319;&#2344;&#2381;&#2325;&#2381;&#2352;&#2367;&#2346;&#2381;&#2358;&#2344;(data encryption) &#2324;&#2352; &#2337;&#2367;&#2325;&#2381;&#2352;&#2367;&#2346;&#2381;&#2358;&#2344;(decryption) &#2349;&#2368; &#2361;&#2379;&#2340;&#2366; &#2361;&#2376;&#2404;</span></p>\r\n<p><span style=\"font-family: Palanquin Dark;\">&#2335;&#2381;&#2352;&#2366;&#2306;&#2360;&#2346;&#2379;&#2352;&#2381;&#2335; &#2354;&#2375;&#2351;&#2352;(transport layer)) &#2309;&#2306;&#2340;&#2367;&#2350; &#2313;&#2346;&#2351;&#2379;&#2327;&#2325;&#2352;&#2381;&#2340;&#2366;&#2323;&#2306; &#2325;&#2375; &#2348;&#2368;&#2330; &#2337;&#2375;&#2335;&#2366; &#2325;&#2366; &#2346;&#2366;&#2352;&#2342;&#2352;&#2381;&#2358;&#2368; &#2361;&#2360;&#2381;&#2340;&#2366;&#2306;&#2340;&#2352;&#2339; &#2346;&#2381;&#2352;&#2342;&#2366;&#2344; &#2325;&#2352;&#2340;&#2366; &#2361;&#2376;, &#2314;&#2346;&#2352;&#2368; &#2346;&#2352;&#2340;&#2379;&#2306; &#2325;&#2379; &#2357;&#2367;&#2358;&#2381;&#2357;&#2360;&#2344;&#2368;&#2351; &#2337;&#2375;&#2335;&#2366; &#2335;&#2381;&#2352;&#2366;&#2306;&#2360;&#2347;&#2352; &#2360;&#2375;&#2357;&#2366;&#2319;&#2306; &#2346;&#2381;&#2352;&#2342;&#2366;&#2344; &#2325;&#2352;&#2340;&#2366; &#2361;&#2376;&#2404; <strong>&#2360;&#2375;&#2358;&#2344; &#2354;&#2375;&#2351;&#2352;</strong>(session layer) &#2310;&#2312;&#2319;&#2360;&#2323; &#2323;&#2346;&#2344; &#2360;&#2367;&#2360;&#2381;&#2335;&#2350;&#2381;&#2360; &#2311;&#2306;&#2335;&#2352;&#2325;&#2344;&#2375;&#2325;&#2381;&#2358;&#2344;(Open Systems Interconnection) (&#2323;&#2319;&#2360;&#2310;&#2312;) &#2350;&#2377;&#2337;&#2354; &#2325;&#2368; &#2346;&#2352;&#2340; &#2361;&#2376; &#2332;&#2379; &#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352;&#2379;&#2306; &#2325;&#2375; &#2348;&#2368;&#2330; &#2360;&#2306;&#2357;&#2366;&#2342; (&#2325;&#2344;&#2375;&#2325;&#2381;&#2358;&#2344;) &#2325;&#2379; &#2344;&#2367;&#2351;&#2306;&#2340;&#2381;&#2352;&#2367;&#2340; &#2325;&#2352;&#2340;&#2368; &#2361;&#2376;&#2404;</span></p>\n",
+                    correct: "a",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "17",
+                    section: "31",
+                    question_en: " <p>17.</span><span style=\"font-family:Palanquin Dark\"> What type of software creates a smaller file that is faster to transfer over the Internet?</span></p>",
+                    question_hi: "<p>17.<span style=\"font-family: Palanquin Dark;\"> &#2325;&#2367;&#2360; &#2346;&#2381;&#2352;&#2325;&#2366;&#2352; &#2325;&#2366; &#2360;&#2377;&#2347;&#2364;&#2381;&#2335;&#2357;&#2375;&#2351;&#2352; &#2319;&#2325; &#2331;&#2379;&#2335;&#2368; &#2347;&#2364;&#2366;&#2311;&#2354; (small file) &#2348;&#2344;&#2366;&#2340;&#2366; &#2361;&#2376; &#2332;&#2379; &#2311;&#2306;&#2335;&#2352;&#2344;&#2375;&#2335; &#2346;&#2352; &#2340;&#2375;&#2332;&#2364;&#2368; &#2360;&#2375; &#2360;&#2381;&#2341;&#2366;&#2344;&#2366;&#2306;&#2340;&#2352;&#2367;&#2340; (transfer) </span></p>\n",
+                    options_en: [" <p> Compression </span></p>", " <p> Fragmentation</span></p>", 
+                                " <p> Unzipped </span></p>", " <p> Abstraction</span></p>"],
+                    options_hi: ["<p>&#2325;&#2350;&#2381;&#2346;&#2381;&#2352;&#2375;&#2358;&#2344; (Compression)</p>\n", "<p><span style=\"font-weight: 400;\">&nbsp;&#2347;&#2381;&#2352;&#2375;&#2327;&#2350;&#2375;&#2306;&#2335;&#2375;&#2358;&#2344; (Fragmentation)</span></p>\n",
+                                "<p>&#2309;&#2344;&#2395;&#2367;&#2346;&#2381;&#2346;&#2396; (Unzipped)</p>\n", "<p>&#2319;&#2348;&#2381;&#2360;&#2381;&#2335;&#2381;&#2352;&#2325;&#2381;&#2358;&#2344; (Abstraction)</p>\n"],
+                    solution_en: " <p>17.(a)</span><span style=\"font-family:Palanquin Dark\"> </span><span style=\"font-family:Palanquin Dark\">Data compression is a reduction in the number of bits needed to represent data. Compressing data can </span><span style=\"font-family:Palanquin Dark\">save storage capacity, speed up file transfer, and decrease costs .</span></p>",
+                    solution_hi: "<p>17.(a)<span style=\"font-family: Palanquin Dark;\"> &#2337;&#2375;&#2335;&#2366; &#2325;&#2350;&#2381;&#2346;&#2381;&#2352;&#2375;&#2358;&#2344; &#2337;&#2375;&#2335;&#2366; &#2325;&#2366; &#2346;&#2381;&#2352;&#2340;&#2367;&#2344;&#2367;&#2343;&#2367;&#2340;&#2381;&#2357; &#2325;&#2352;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2310;&#2357;&#2358;&#2381;&#2351;&#2325; &#2348;&#2367;&#2335;&#2381;&#2360; &#2325;&#2368; &#2360;&#2306;&#2326;&#2381;&#2351;&#2366; &#2350;&#2375;&#2306; &#2325;&#2350;&#2368; &#2361;&#2376;&#2404; &#2337;&#2375;&#2335;&#2366; &#2325;&#2379; &#2325;&#2306;&#2346;&#2381;&#2352;&#2375;&#2360; &#2325;&#2352;&#2344;&#2375; &#2360;&#2375; </span><span style=\"font-family: Palanquin Dark;\">&#2360;&#2381;&#2335;&#2379;&#2352;&#2375;&#2332; &#2325;&#2381;&#2359;&#2350;&#2340;&#2366; (storage capacity) &#2348;&#2330; &#2360;&#2325;&#2340;&#2368; &#2361;&#2376;, &#2347;&#2366;&#2311;&#2354; &#2335;&#2381;&#2352;&#2366;&#2306;&#2360;&#2347;&#2352; (file transfer) &#2350;&#2375;&#2306; &#2340;&#2375;&#2332;&#2368; &#2310; &#2360;&#2325;&#2340;&#2368; &#2361;&#2376; &#2324;&#2352; &#2354;&#2366;&#2327;&#2340; (coasts) &#2325;&#2350; &#2361;&#2379; &#2360;&#2325;&#2340;&#2368; &#2361;&#2376;&#2404;</span></p>\n",
+                    correct: "a",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "18",
+                    section: "31",
+                    question_en: " <p>18.</span><span style=\"font-family:Palanquin Dark\"> What is the function of Ctrl + Shift + _ in ms excel ?</span></p>",
+                    question_hi: " <p>18.</span><span style=\"font-family:Palanquin Dark\"> एमएस एक्सेल में Ctrl+Shift+_ का क्या कार्य है?</span></p>",
+                    options_en: [" <p> It is used to remove outline borders.</span></p>", " <p> It helps to add an outline to the selected cells.</span></p>", 
+                                " <p> It is used to fill color.</span></p>", " <p> It is used to move to the next cell.</span></p>"],
+                    options_hi: [" <p> इसका उपयोग रूपरेखा सीमाओं को हटाने के लिए किया जाता है।</span></p>", " <p> यह चयनित कोशिकाओं में एक रूपरेखा जोड़ने में मदद करता है।</span></p>",
+                                " <p> इसका उपयोग रंग भरने के लिए किया जाता है।</span></p>", " <p> इसका उपयोग अगली सेल में जाने के लिए किया जाता है।</span></p>"],
+                    solution_en: " <p>18.(a)</span><span style=\"font-family:Palanquin Dark\"> In ms excel to remove outline borders we use Ctrl + Shift + _ .</span></p>",
+                    solution_hi: " <p>18.(a)</span><span style=\"font-family:Palanquin Dark\"> एमएस एक्सेल में आउटलाइन बॉर्डर हटाने के लिए हम Ctrl + Shift + _ का उपयोग करते हैं।</span></p>",
+                    correct: "a",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "19",
+                    section: "31",
+                    question_en: "<p>19.<span style=\"font-family: Palanquin Dark;\"> ......... is one reason for problems of data integrity. </span></p>\n",
+                    question_hi: "<p>19.<span style=\"font-family: Palanquin Dark;\"> .......... &#2337;&#2375;&#2335;&#2366; &#2309;&#2326;&#2306;&#2337;&#2340;&#2366; &#2325;&#2368; &#2360;&#2350;&#2360;&#2381;&#2351;&#2366;&#2323;&#2306; &#2325;&#2366; &#2319;&#2325; &#2325;&#2366;&#2352;&#2339; &#2361;&#2376;&#2404;</span></p>\n",
+                    options_en: ["<p>Data availability constraints</p>\n", "<p>Data inconsistency</p>\n", 
+                                "<p>Security constraints</p>\n", "<p>Data redundancy</p>\n"],
+                    options_hi: ["<p><span style=\"font-weight: 400;\">&nbsp;&#2337;&#2375;&#2335;&#2366; &#2309;&#2357;&#2375;&#2354;&#2375;&#2348;&#2367;&#2354;&#2367;&#2335;&#2368; &#2325;&#2306;&#2360;&#2381;&#2335;&#2381;&#2352;&#2375;&#2306;&#2335; (Data availability constraints)</span></p>\n", "<p><span style=\"font-weight: 400;\">&nbsp;&#2337;&#2375;&#2335;&#2366; &#2311;&#2344;&#2325;&#2306;&#2360;&#2368;&#2360;&#2381;&#2335;&#2375;&#2306;&#2360;&#2368; (Data inconsistency)</span></p>\n",
+                                "<p><span style=\"font-weight: 400;\">&#2360;&#2367;&#2325;&#2381;&#2351;&#2379;&#2352;&#2367;&#2335;&#2368; &#2325;&#2306;&#2360;&#2381;&#2335;&#2381;&#2352;&#2375;&#2306;&#2335; (Security constraints)</span></p>\n", "<p><span style=\"font-weight: 400;\">&#2337;&#2375;&#2335;&#2366; &#2352;&#2375;&#2337;&#2369;&#2344;&#2381;&#2337;&#2375;&#2344;&#2381;&#2360;&#2368; (Data redundancy)</span></p>\n"],
+                    solution_en: "<p>19.(d)<span style=\"font-family: Palanquin Dark;\"> The main reason for the problems of data integrity is </span><span style=\"font-family: Palanquin Dark;\">data redundancy</span><span style=\"font-family: Palanquin Dark;\">.</span><span style=\"font-family: Palanquin Dark;\"><strong>Data redundancy</strong> occurs when the same piece of data exists in multiple places.</span></p>\n",
+                    solution_hi: "<p>19.(d)<strong><span style=\"font-family: Palanquin Dark;\"> </span><span style=\"font-family: Palanquin Dark;\">&#2337;&#2375;&#2335;&#2366; &#2311;&#2306;&#2335;&#2368;&#2327;&#2381;&#2352;&#2367;&#2335;&#2368;</span></strong><span style=\"font-family: Palanquin Dark;\">(Data integrity) &#2325;&#2368; &#2360;&#2350;&#2360;&#2381;&#2351;&#2366;&#2323;&#2306; &#2325;&#2366; &#2350;&#2369;&#2326;&#2381;&#2351; &#2325;&#2366;&#2352;&#2339; <strong>&#2337;&#2375;&#2335;&#2366; &#2352;&#2375;&#2337;&#2369;&#2344;&#2381;&#2337;&#2375;&#2344;&#2381;&#2360;&#2368;</strong> &#2361;&#2376;&#2404; </span><span style=\"font-family: Palanquin Dark;\">&#2337;&#2375;&#2335;&#2366; &#2352;&#2375;&#2337;&#2369;&#2344;&#2381;&#2337;&#2375;&#2344;&#2381;&#2360;&#2368;</span><span style=\"font-family: Palanquin Dark;\">(</span><span style=\"font-family: Palanquin Dark;\">Data redundancy</span><span style=\"font-family: Palanquin Dark;\">) &#2340;&#2348; &#2361;&#2379;&#2340;&#2368; &#2361;&#2376; &#2332;&#2348; &#2337;&#2375;&#2335;&#2366; &#2325;&#2366; &#2319;&#2325; &#2361;&#2368; &#2335;&#2369;&#2325;&#2337;&#2364;&#2366; &#2325;&#2312; &#2360;&#2381;&#2341;&#2366;&#2344;&#2379;&#2306; &#2346;&#2352; &#2350;&#2380;&#2332;&#2370;&#2342; &#2361;&#2379;&#2340;&#2366; &#2361;&#2376;&#2404;</span></p>\n",
+                    correct: "d",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "20",
+                    section: "misc",
+                    question_en: "<p>20. <span style=\"font-family: Palanquin Dark;\">A packet filtering firewall operates at which of the following OSI layers?</span></p>\n",
+                    question_hi: " <p>20. </span><span style=\"font-family:Palanquin Dark\">एक पैकेट फ़िल्टरिंग फ़ायरवॉल निम्न में से किस OSI लेयर पर काम करता है?</span></p>",
+                    options_en: ["<p>At the network layer</p>\n", "<p>At the application layer</p>\n", 
+                                "<p>At the transport layer</p>\n", "<p>At the gateway layer</p>\n"],
+                    options_hi: [" <p> नेटवर्क लेयर(network layer) पर</span></p>", " <p> एप्लीकेशन लेयर(application layer) पर</span></p>",
+                                " <p> ट्रांसपोर्ट लेयर(transport layer) पर</span></p>", " <p> गेटवे लेयर(gateway layer) पर</span></p>"],
+                    solution_en: "<p>20.(a)<span style=\"font-family: Palanquin Dark;\"> </span><span style=\"font-family: Palanquin Dark;\">Packet-filtering firewalls operate at the </span><strong><span style=\"font-family: Palanquin Dark;\">network layer (Layer 3)</span></strong><span style=\"font-family: Palanquin Dark;\"> of the OSI model. Packet-filtering firewalls make processing decisions based on network addresses, ports, or protocols.</span></p>\n",
+                    solution_hi: " <p>20.(a)</span><span style=\"font-family:Palanquin Dark\"> पैकेट-फ़िल्टरिंग फायरवॉल(packet-filtering firewall) OSI मॉडल के नेटवर्क लेयर (लेयर 3) पर काम करते हैं। पैकेट-फ़िल्टरिंग फ़ायरवॉल(packet-filtering firewall) नेटवर्क पते, पोर्ट या प्रोटोकॉल के आधार पर प्रसंस्करण निर्णय लेते हैं।</span></p>",
+                    correct: "a",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+            
+            // Generate question boxes
+            const boxesContainer = document.getElementById('question-boxes');
+            questions.forEach((q, index) => {
+                const box = document.createElement('div');
+                box.className = 'q-box';
+                box.textContent = index + 1;
+                box.onclick = () => showQuestion(index);
+                box.id = `box-${index}`;
+                boxesContainer.appendChild(box);
+            });
+            
+            // Show first question
+            showQuestion(0);
+            updateProgress();
+        }
+        
+        // Show a specific question
+        
+        function formatContent(text) {
+            if (!text) return '';
+            return text.replace(/<img/g, '<img style="max-width:100%;height:auto;"');
+        }
+        
+        function showQuestion(index) {
+            if (index < 0 || index >= questions.length) return;
+            
+            currentQuestion = index;
+            const question = questions[index];
+            
+            // Update question counter
+            document.getElementById('question-counter').textContent = `Question ${index + 1} of ${questions.length}`;
+            
+            // Update question boxes
+            document.querySelectorAll('.q-box').forEach(box => box.classList.remove('current'));
+            document.getElementById(`box-${index}`).classList.add('current');
+            
+            // Generate question HTML
+            let html = `
+                <div class="question-card">
+                    <div class="question-text">
+                        <div class="en">${formatContent(question.question_en)}</div>
+                        <div class="hi" style="display:none">${formatContent(question.question_hi)} </div>
+                    </div>
+                    <div class="options" id="options-container">`;
+            
+            // Add options
+            ['a', 'b', 'c', 'd'].forEach((opt, i) => {
+                let optionClass = '';
+                let isCorrectAnswer = opt === question.correct;
+                let isUserAnswer = answers[question.id] === opt;
+                
+                // When reviewing, add appropriate classes
+                if (submitted) {
+                    if (isCorrectAnswer) {
+                        optionClass += ' correct-answer';
+                    } else if (isUserAnswer && !isCorrectAnswer) {
+                        optionClass += ' incorrect';
+                    }
+                }
+                
+                html += `
+                    <div class="option-item">
+                        <input class="option-input" type="radio" name="q${index}" 
+                            id="opt-${index}-${opt}" value="${opt}" 
+                            ${isUserAnswer ? 'checked' : ''}
+                            onclick="selectAnswer('${question.id}', '${opt}')">
+                       <label class="option-label${optionClass}" for="opt-${index}-${opt}">
+                            <div class="en">${question.options_en[i]}</div>
+                            <div class="hi" style="display:none">${question.options_hi[i]}</div>
+                        </label>
+                    </div>`;
+            });
+            
+            // Add solution if submitted
+            if (submitted) {
+                const isCorrect = answers[question.id] === question.correct;
+                const resultText = answers[question.id] ? (isCorrect ? 'Correct!' : 'Incorrect!') : 'Not attempted';
+                
+                html += `
+                    <div class="solution-container">
+                        <div class="solution-title">${resultText}</div>
+                        <div class="solution-text">
+                            <div class="en">${question.solution_en}</div>
+                            <div class="hi" style="display:none">${question.solution_hi}</div>
+                        </div>
+                    </div>`;
+            }
+            
+            html += `</div></div>`;
+            
+            document.getElementById('questions-container').innerHTML = html;
+            
+            // Apply language settings
+            applyLanguage();
+            
+            // If in mobile view, close the menu
+            if (window.innerWidth < 992) {
+                toggleNav(false);
+            }
+            
+            // Add review mode class if submitted
+            if (submitted) {
+                document.getElementById('options-container').classList.add('review-mode');
+            }
+        }
+        
+        // Apply current language
+        function applyLanguage() {
+            document.querySelectorAll(`.${currentLang}`).forEach(el => el.style.display = 'block');
+            document.querySelectorAll(`.${currentLang === 'en' ? 'hi' : 'en'}`).forEach(el => el.style.display = 'none');
+            
+            // Update language button text
+            document.getElementById('lang-text').textContent = currentLang === 'en' ? 'Hi' : 'En';
+        }
+        
+        // Select an answer
+        function selectAnswer(qId, option) {
+            if (submitted) return;
+            
+            answers[qId] = option;
+            updateProgress();
+            
+            // Mark question as attempted in the navigation
+            const index = questions.findIndex(q => q.id === qId);
+            if (index >= 0) {
+                const box = document.getElementById(`box-${index}`);
+                box.classList.add('attempted');
+                box.classList.remove('unattempted');
+            }
+        }
+        
+        // Navigate to previous/next question
+        function prevQuestion() { 
+            if (currentQuestion > 0) showQuestion(currentQuestion - 1); 
+        }
+        
+        function nextQuestion() { 
+            if (currentQuestion < questions.length - 1) showQuestion(currentQuestion + 1); 
+        }
+        
+        // Switch section
+        function switchSection(sectionId) {
+            if (sectionId === 'all') {
+                showQuestion(0);
+                return;
+            }
+            
+            const section = sections[sectionId];
+            if (section) showQuestion(section.start);
+        }
+        
+        // Toggle language
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'hi' : 'en';
+            applyLanguage();
+        }
+        
+        // Toggle navigation sidebar
+        function toggleNav(show) {
+            const nav = document.getElementById('question-nav');
+            const overlay = document.getElementById('nav-overlay');
+            
+            if (show === undefined) {
+                show = !nav.classList.contains('show');
+            }
+            
+            if (show) {
+                nav.classList.add('show');
+                overlay.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            } else {
+                nav.classList.remove('show');
+                overlay.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+        }
+        
+        // Update progress
+        function updateProgress() {
+            const attempted = Object.keys(answers).length;
+            document.getElementById('attempted-count').textContent = attempted;
+        }
+        
+        // Start timer
+        function startTimer() {
+            const timerDisplay = document.getElementById('timer-display');
+            let timeLeft = totalTime;
+            
+            const timerInterval = setInterval(() => {
+                if (timeLeft <= 0 || submitted) {
+                    clearInterval(timerInterval);
+                    if (!submitted) submitTest();
+                    return;
+                }
+                
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                timeLeft--;
+            }, 1000);
+        }
+        
+        // Confirm before submitting
+        function confirmSubmit() {
+            if (submitted) return;
+            
+            const attempted = Object.keys(answers).length;
+            const remaining = questions.length - attempted;
+            
+            // Create a more modern confirmation dialog
+            const confirmHtml = `
+                <div style="text-align: center; padding: 20px;">
+                    <h4 style="margin-bottom: 16px; color: var(--dark);">Confirm Submission</h4>
+                    <p style="margin-bottom: 24px; color: var(--gray);">
+                        You have attempted ${attempted} of ${questions.length} questions.<br>
+                        ${remaining} questions are unattempted.
+                    </p>
+                    <div style="display: flex; justify-content: center; gap: 12px;">
+                        <button onclick="this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; border: 1px solid var(--light-gray); background: white; border-radius: 8px; cursor: pointer;">
+                            Cancel
+                        </button>
+                        <button onclick="submitTest(); this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer;">
+                            Submit Test
+                        </button>
+                    </div>
+                </div>`;
+            
+            // Create modal element
+            const modal = document.createElement('div');
+            modal.className = 'results-modal show';
+            modal.innerHTML = `
+                <div class="results-card" style="max-width: 400px;">
+                    <button class="cancel-btn" style="position: absolute; top: 12px; right: 12px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--gray);" onclick="this.closest('.results-modal').remove()">
+                        ×
+                    </button>
+                    ${confirmHtml}
+                </div>`;
+            
+            document.body.appendChild(modal);
+        }
+        
+        // Submit test
+        function submitTest() {
+            if (submitted) return;
+            
+            submitted = true;
+            
+            let score = 0;
+            let correctCount = 0;
+            let incorrectCount = 0;
+            let unattemptedCount = 0;
+            
+            questions.forEach((q, index) => {
+                const userAns = answers[q.id];
+                const box = document.getElementById(`box-${index}`);
+                
+                box.classList.remove('attempted');
+                
+                if (!userAns) {
+                    unattemptedCount++;
+                    box.classList.add('unattempted');
+                } else if (userAns === q.correct) {
+                    correctCount++;
+                    score += q.pos_marks;
+                    box.classList.add('correct');
+                } else {
+                    incorrectCount++;
+                    score -= q.neg_marks;
+                    box.classList.add('incorrect');
+                }
+            });
+            
+            // Update result values
+            document.getElementById('score-value').textContent = score.toFixed(2);
+            document.getElementById('correct-value').textContent = correctCount;
+            document.getElementById('incorrect-value').textContent = incorrectCount;
+            document.getElementById('unattempted-value').textContent = unattemptedCount;
+            
+            // Show the results modal
+            document.getElementById('results-modal').classList.add('show');
+            
+            // Disable submit button
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-check"></i>';
+            submitBtn.style.backgroundColor = 'var(--success)';
+            
+            // Refresh current question view to show solution
+            showQuestion(currentQuestion);
+        }
+        
+        // Review test
+        function reviewTest() {
+            document.getElementById('results-modal').classList.remove('show');
+            showQuestion(0);
+        }
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target === document.getElementById('results-modal')) {
+                document.getElementById('results-modal').classList.remove('show');
+            }
+        });
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') prevQuestion();
+            if (e.key === 'ArrowRight') nextQuestion();
+        });
+    </script>
+</body>
+</html>
