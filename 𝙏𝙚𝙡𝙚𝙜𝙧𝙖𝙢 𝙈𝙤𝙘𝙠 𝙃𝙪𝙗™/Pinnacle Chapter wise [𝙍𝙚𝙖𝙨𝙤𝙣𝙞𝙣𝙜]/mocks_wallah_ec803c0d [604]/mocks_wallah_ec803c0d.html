@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mocks Wallah</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --primary-light: #a29bfe;
+            --primary-dark: #5649c0;
+            --secondary: #00cec9;
+            --accent: #fd79a8;
+            --success: #00b894;
+            --warning: #fdcb6e;
+            --danger: #d63031;
+            --light: #f8f9fa;
+            --dark: #2d3436;
+            --gray: #636e72;
+            --light-gray: #dfe6e9;
+            --card-bg: #ffffff;
+            --body-bg: #f5f6fa;
+            --header-bg: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            --footer-bg: #ffffff;
+            --box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            --box-shadow-sm: 0 2px 10px rgba(0,0,0,0.05);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background-color: var(--body-bg);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            color: var(--dark);
+            line-height: 1.6;
+            padding-bottom: 80px; /* Space for fixed navigation */
+            overflow-x: hidden;
+        }
+        
+        /* Header Styles */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: var(--header-bg);
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            z-index: 1000;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .header-brand {
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .header-brand i {
+            margin-right: 8px;
+            font-size: 1.2rem;
+        }
+        
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .control-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .control-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .control-btn.active {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .timer-display {
+            background: rgba(0,0,0,0.2);
+            border-radius: 18px;
+            padding: 4px 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+        
+        .timer-display i {
+            margin-right: 6px;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-top: 60px;
+            padding: 16px;
+            min-height: calc(100vh - 140px);
+        }
+        
+        .question-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--box-shadow-sm);
+            border: none;
+            transition: var(--transition);
+        }
+        
+        .question-counter {
+            font-size: 0.9rem;
+            color: var(--gray);
+            text-align: center;
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+        
+        .question-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+        
+        .option-item {
+            margin-bottom: 12px;
+            position: relative;
+        }
+        
+        .option-input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+            .question-text {
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        hyphens: auto;
+        max-width: 100%;
+    }
+
+    .question-text img,
+    .option-label img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 8px 0;
+        border-radius: 8px;
+    }
+
+    .option-label {
+        overflow: hidden;
+    }
+
+    .question-card {
+        overflow: hidden;
+    }
+        
+        .option-label {
+            display: block;
+            padding: 14px 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--light-gray);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .option-label:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .option-input:checked + .option-label {
+            border-color: var(--primary);
+            background: rgba(108, 92, 231, 0.05);
+            box-shadow: 0 0 0 1px var(--primary);
+        }
+        
+        .option-input:checked + .option-label::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--primary);
+        }
+        
+        /* When reviewing answers */
+        .review-mode .option-input:checked + .option-label.correct {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.correct::after {
+            background: var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.incorrect {
+            border-color: var(--danger);
+            background: rgba(214, 48, 49, 0.05);
+            box-shadow: 0 0 0 1px var(--danger);
+        }
+        
+        .MathJax, .mjx-chtml {
+            overflow-x: auto;
+            max-width: 100%;
+            display: inline-block;
+        }
+
+        
+        .review-mode .option-input:checked + .option-label.incorrect::after {
+            background: var(--danger);
+        }
+        
+        .review-mode .option-label.correct-answer {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-label.correct-answer::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--success);
+        }
+        
+        .solution-container {
+            margin-top: 20px;
+            padding: 16px;
+            background: rgba(108, 92, 231, 0.05);
+            border-radius: 12px;
+            border-left: 3px solid var(--primary);
+        }
+        
+        .solution-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+        
+        /* Question Navigation */
+        .question-nav {
+            position: fixed;
+            top: 60px;
+            right: 0;
+            bottom: 80px;
+            width: 100%;
+            max-width: 320px;
+            background: var(--card-bg);
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            transform: translateX(100%);
+            transition: var(--transition);
+            z-index: 900;
+            overflow-y: auto;
+            padding: 16px;
+        }
+        
+        .question-nav.show {
+            transform: translateX(0);
+        }
+        
+        .nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .nav-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+        
+        .question-stats {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .stat-badge {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        
+        .section-selector {
+            width: 100%;
+            margin-bottom: 16px;
+            border-radius: 12px;
+            padding: 10px 16px;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            font-size: 0.9rem;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 16px;
+        }
+        
+        .question-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+            gap: 8px;
+        }
+        
+        .q-box {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .q-box:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .q-box.attempted {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .q-box.correct {
+            background-color: var(--success);
+            color: white;
+            border-color: var(--success);
+        }
+        
+        .q-box.incorrect {
+            background-color: var(--danger);
+            color: white;
+            border-color: var(--danger);
+        }
+        
+        .q-box.current {
+            border: 2px solid var(--accent) !important;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .q-box.unattempted {
+            background-color: var(--gray);
+            color: white;
+            border-color: var(--gray);
+        }
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: var(--footer-bg);
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            z-index: 800;
+        }
+        
+        .nav-btn {
+            height: 48px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 20px;
+            transition: var(--transition);
+            gap: 8px;
+        }
+        
+        .nav-btn i {
+            font-size: 1rem;
+        }
+        
+        .nav-btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .nav-btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+        
+        .nav-btn-outline:hover {
+            background: rgba(108, 92, 231, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        /* Overlay when nav is open */
+        .nav-overlay {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            bottom: 80px;
+            background: rgba(0,0,0,0.5);
+            z-index: 800;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+        }
+        
+        .nav-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        /* Results Modal */
+        .results-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1100;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+            padding: 16px;
+        }
+        
+        .results-modal.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .results-card {
+            background: white;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+            transform: translateY(20px);
+            transition: var(--transition);
+        }
+        
+        .results-modal.show .results-card {
+            transform: translateY(0);
+        }
+        
+        .results-header {
+            background: var(--header-bg);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .results-title {
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .results-body {
+            padding: 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            color: white;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+        
+        .results-footer {
+            padding: 16px 20px;
+            display: flex;
+            justify-content: center;
+            border-top: 1px solid var(--light-gray);
+        }
+        
+        /* Responsive Adjustments */
+        @media (min-width: 992px) {
+            .question-nav {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-right: 320px;
+            }
+            
+            .nav-overlay {
+                display: none;
+            }
+            
+            .bottom-nav {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .question-grid {
+                grid-template-columns: repeat(auto-fill, minmax(36px, 1fr));
+                gap: 6px;
+            }
+            
+            .q-box {
+                width: 36px;
+                height: 36px;
+                font-size: 0.9rem;
+            }
+            
+            .option-label {
+                padding: 12px 14px;
+            }
+            
+            .question-text {
+                font-size: 1rem;
+            }
+            
+            .header-brand {
+                font-size: 1rem;
+            }
+            
+            .control-btn {
+                width: 32px;
+                height: 32px;
+            }
+            
+            .timer-display {
+                font-size: 0.8rem;
+                padding: 4px 10px;
+            }
+            
+            .nav-btn {
+                height: 44px;
+                padding: 0 16px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="#" class="header-brand">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Mocks Wallah</span>
+            </a>
+            
+            <div class="header-controls">
+                <!-- Timer -->
+                <div class="timer-display">
+                    <i class="far fa-clock"></i>
+                    <span id="timer-display">15:00</span>
+                </div>
+                
+                <!-- Language toggle -->
+                <button class="control-btn" id="lang-btn" onclick="toggleLanguage()">
+                    <span id="lang-text">En</span>
+                </button>
+                
+                <!-- Submit button -->
+                <button class="control-btn" id="submit-btn" onclick="confirmSubmit()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+                
+                <!-- Questions toggle for mobile -->
+                <button class="control-btn nav-toggle-btn" id="nav-toggle" onclick="toggleNav()">
+                    <i class="fas fa-th"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main content -->
+    <main class="main-content" id="main-content">
+        <div class="question-counter" id="question-counter">Question 1 of 20</div>
+        
+        <!-- Questions will be displayed here -->
+        <div id="questions-container"></div>
+    </main>
+    
+    <!-- Overlay for mobile nav -->
+    <div class="nav-overlay" id="nav-overlay" onclick="toggleNav(false)"></div>
+    
+    <!-- Question navigation sidebar -->
+    <aside class="question-nav" id="question-nav">
+        <div class="nav-header">
+            <h3 class="nav-title">Questions</h3>
+            <div class="question-stats">
+                <span class="stat-badge bg-primary" id="attempted-count">0</span>
+                <span class="stat-badge bg-gray" id="total-count">20</span>
+                <button class="control-btn d-lg-none" onclick="toggleNav(false)">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Section selector -->
+        <select class="section-selector" id="section-selector" onchange="switchSection(this.value)">
+            <option value="all">All Sections</option>
+        </select>
+        
+        <!-- Question grid -->
+        <div class="question-grid" id="question-boxes"></div>
+    </aside>
+    
+    <!-- Bottom navigation for mobile -->
+    <nav class="bottom-nav d-lg-none">
+        <button class="nav-btn nav-btn-outline" onclick="prevQuestion()">
+            <i class="fas fa-chevron-left"></i>
+            <span>Previous</span>
+        </button>
+        <button class="nav-btn nav-btn-outline" onclick="nextQuestion()">
+            <span>Next</span>
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </nav>
+    
+    <!-- Results modal -->
+    <div class="results-modal" id="results-modal">
+        <div class="results-card">
+            <div class="results-header">
+                <h3 class="results-title">Test Results</h3>
+            </div>
+            <div class="results-body">
+                <div class="stats-grid">
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark))">
+                        <div class="stat-value" id="score-value">0</div>
+                        <div class="stat-label">Score</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--success), #1b9aaa)">
+                        <div class="stat-value" id="correct-value">0</div>
+                        <div class="stat-label">Correct</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--danger), var(--accent))">
+                        <div class="stat-value" id="incorrect-value">0</div>
+                        <div class="stat-label">Incorrect</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--gray), var(--dark))">
+                        <div class="stat-value" id="unattempted-value">0</div>
+                        <div class="stat-label">Unattempted</div>
+                    </div>
+                </div>
+            </div>
+            <div class="results-footer">
+                <button class="nav-btn nav-btn-primary" onclick="reviewTest()">
+                    <i class="fas fa-search me-1"></i>
+                    <span>Review Test</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Questions data
+        const questions = [];
+        const sections = {};
+        let currentLang = "en";
+        let currentQuestion = 0;
+        let answers = {};
+        let submitted = false;
+        let totalTime = 15 * 60;
+        
+        // Initialize the test
+        window.onload = function() {
+            initializeTest();
+            startTimer();
+            
+            // If on desktop, show the question navigation by default
+            if (window.innerWidth >= 992) {
+                document.getElementById('question-nav').classList.add('show');
+                document.getElementById('main-content').classList.add('with-nav');
+            }
+        };
+        
+        // Initialize test data
+        function initializeTest() {
+            // Add sections and questions
+            
+            sections["6"] = {
+                name: "Reasoning",
+                start: 0,
+                end: 18
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="6">Reasoning</option>`;
+            
+            sections["misc"] = {
+                name: "Miscellaneous",
+                start: 19,
+                end: 19
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="misc">Miscellaneous</option>`;
+            
+            
+                questions.push({
+                    id: "1",
+                    section: "6",
+                    question_en: "<p>1.<span style=\"font-family: Times New Roman;\"> In a certain language, </span><span style=\"font-family: Times New Roman;\">CHHAPAK</span><span style=\"font-family: Times New Roman;\"> is coded as </span><span style=\"font-family: Times New Roman;\">DJKEUGR</span><span style=\"font-family: Times New Roman;\">. How will </span><span style=\"font-family: Times New Roman;\">MALANGA</span><span style=\"font-family: Times New Roman;\"> be coded in that language?</span></p>",
+                    question_hi: "<p>1.<span style=\"font-family: Baloo;\"> एक निश्चित कूट भाषा में, </span><span style=\"font-family: Times New Roman;\">CHHAPAK</span><span style=\"font-family: Baloo;\"> को </span><span style=\"font-family: Times New Roman;\">DJKEUGR</span><span style=\"font-family: Baloo;\"> के रूप में कोडित किया जाता है। उसी भाषा में </span><span style=\"font-family: Times New Roman;\">MALANGA </span><span style=\"font-family: Baloo;\">को किस प्रकार कोडित किया जाएगा?</span></p>",
+                    options_en: ["<p>NCEOSMC</p>", "<p>NCOCSMC</p>", 
+                                "<p>NCOESMH</p>", "<p>NCOCMSC</p>"],
+                    options_hi: ["<p>NCEOSMC</p>", "<p>NCOCSMC</p>",
+                                "<p>NCOESMH</p>", "<p>NCOCMSC</p>"],
+                    solution_en: "<p>1.(c)<br><strong id=\"docs-internal-guid-7284790e-7fff-03eb-32a5-9bca3c576e2c\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdhrZAZ5_To5qpcNqPDQmZMbVpSR8rHsxuQteaKUS8BPQXM3YwvmkydPPeJovmHqhpfi87zKCQtSQEZd09YouDYonMDvGmuwovxhbRWtkSQs5HvHVEA0hDOd99K5Cbovza5R5tDYQ?key=7YDQ3QdWop8YGHoQzzIJzLpg\" width=\"162\" height=\"66\"></strong> &nbsp;<span style=\"font-family: Times New Roman;\">Similarly, <strong id=\"docs-internal-guid-2eb6fdf1-7fff-3677-d545-6a1d2772f14e\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXffF-eYfzB6Wo3UiHsY5YtYLxAgiq1VBbypJPOuG0xq-Q8Q2qKODGgfpBu57Pz0XYX8beW8JJvjoStSwbyJESroJtha17qIJ6xQ7LmxZ7-F5JLaue5RR9IU_i0YDMGxrav--zSe?key=7YDQ3QdWop8YGHoQzzIJzLpg\" width=\"157\" height=\"64\"></strong></span></p>",
+                    solution_hi: "<p>1.(c)<br><strong id=\"docs-internal-guid-7284790e-7fff-03eb-32a5-9bca3c576e2c\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdhrZAZ5_To5qpcNqPDQmZMbVpSR8rHsxuQteaKUS8BPQXM3YwvmkydPPeJovmHqhpfi87zKCQtSQEZd09YouDYonMDvGmuwovxhbRWtkSQs5HvHVEA0hDOd99K5Cbovza5R5tDYQ?key=7YDQ3QdWop8YGHoQzzIJzLpg\" width=\"162\" height=\"66\"></strong> &nbsp;<span style=\"font-family: Baloo;\">इसी तरह</span><span style=\"font-family: Times New Roman;\">, <strong id=\"docs-internal-guid-2eb6fdf1-7fff-3677-d545-6a1d2772f14e\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXffF-eYfzB6Wo3UiHsY5YtYLxAgiq1VBbypJPOuG0xq-Q8Q2qKODGgfpBu57Pz0XYX8beW8JJvjoStSwbyJESroJtha17qIJ6xQ7LmxZ7-F5JLaue5RR9IU_i0YDMGxrav--zSe?key=7YDQ3QdWop8YGHoQzzIJzLpg\" width=\"157\" height=\"64\"></strong></span></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "2",
+                    section: "6",
+                    question_en: "<p>2. <span style=\"font-family: Times New Roman;\">In a certain code language, </span><span style=\"font-family: Times New Roman;\">&lsquo;CROWD&rsquo; </span><span style=\"font-family: Times New Roman;\">is coded as </span><span style=\"font-family: Times New Roman;\">23415924</span><span style=\"font-family: Times New Roman;\"> and &lsquo;</span><span style=\"font-family: Times New Roman;\">TRHICK</span><span style=\"font-family: Times New Roman;\">&rsquo; is coded as </span><span style=\"font-family: Times New Roman;\">162491997</span><span style=\"font-family: Times New Roman;\">. How will </span><span style=\"font-family: Times New Roman;\">&lsquo;FRUGAL&rsquo;</span><span style=\"font-family: Times New Roman;\"> be coded in that language?</span></p>",
+                    question_hi: "<p>2.<span style=\"font-family: Baloo;\"> एक निश्चित कूट भाषा में, </span><span style=\"font-family: Times New Roman;\">\'CROWD\'</span><span style=\"font-family: Baloo;\"> को </span><span style=\"font-family: Times New Roman;\">23415924 </span><span style=\"font-family: Baloo;\">और \'</span><span style=\"font-family: Times New Roman;\">TRHICK\' </span><span style=\"font-family: Baloo;\">को </span><span style=\"font-family: Times New Roman;\">162491997</span><span style=\"font-family: Baloo;\"> के रूप में कोडित किया जाता है। उस भाषा में</span><span style=\"font-family: Times New Roman;\"> \'FRUGAL\'</span><span style=\"font-family: Baloo;\"> को कैसे कोडित किया जाएगा?</span></p>",
+                    options_en: ["<p>1226761821</p>", "<p>1521012291</p>", 
+                                "<p>1512021921</p>", "<p>1221021186</p>"],
+                    options_hi: ["<p>1226761821</p>", "<p>1521012291</p>",
+                                "<p>1512021921</p>", "<p>1221021186</p>"],
+                    solution_en: "<p>2.(c)<span style=\"font-family: Times New Roman;\"> </span><span style=\"font-family: Times New Roman;\"> <strong>Logic </strong>: </span><span style=\"font-family: Times New Roman;\">opposite place value of consonants and vowels have same place value.<br><strong id=\"docs-internal-guid-a07ee3fb-7fff-d1fa-a2fe-266f08dc5cc3\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeQa9vaY4Tp0fzZPstnHAOgEd9L5KF0kREFjrU0p_devedVw3--eG2-Q9gNd1RM2pfXjcr4dO7j-a75LYSpwT6jj4UefIAYbfycL2sjJ2_3l-GS3Nt4L8oTIzXeO_asxUDtpeYN4s2o7AKO6moIQZpDpQ?key=7YDQ3QdWop8YGHoQzzIJzLpg\" width=\"299\" height=\"86\"></strong><br></span></p>",
+                    solution_hi: "<p>2.(c)<span style=\"font-family: Times New Roman;\"> </span><span style=\"font-family: Times New Roman;\"> <strong>Logic</strong> : </span><span style=\"font-family: Baloo;\">व्यंजन का स्थानीय मान विपरीत और स्वरों का स्थानीय मान समान रखा गया है&nbsp;<br><strong id=\"docs-internal-guid-a07ee3fb-7fff-d1fa-a2fe-266f08dc5cc3\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeQa9vaY4Tp0fzZPstnHAOgEd9L5KF0kREFjrU0p_devedVw3--eG2-Q9gNd1RM2pfXjcr4dO7j-a75LYSpwT6jj4UefIAYbfycL2sjJ2_3l-GS3Nt4L8oTIzXeO_asxUDtpeYN4s2o7AKO6moIQZpDpQ?key=7YDQ3QdWop8YGHoQzzIJzLpg\" width=\"299\" height=\"86\"></strong><br></span></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "3",
+                    section: "6",
+                    question_en: "<p>3.<span style=\"font-family: Times New Roman;\"> In a certain code language, </span><span style=\"font-family: Times New Roman;\">6219</span><span style=\"font-family: Times New Roman;\"> means </span><span style=\"font-family: Times New Roman;\">&lsquo;Sachin is a cricketer</span><span style=\"font-family: Times New Roman;\">&rsquo; and </span><span style=\"font-family: Times New Roman;\">2646</span><span style=\"font-family: Times New Roman;\"> means </span><span style=\"font-family: Times New Roman;\">&lsquo;He </span><span style=\"font-family: Times New Roman;\">played from Mumbai&rsquo;</span><span style=\"font-family: Times New Roman;\">. Which of the following is the code for</span><span style=\"font-family: Times New Roman;\"> &lsquo;Mumbai is very famous</span><span style=\"font-family: Times New Roman;\">&rsquo;?</span></p>",
+                    question_hi: "<p>3.<span style=\"font-family: Baloo;\"> एक निश्चित कोड भाषा में,</span><span style=\"font-family: Times New Roman;\"> 6219 </span><span style=\"font-family: Baloo;\">का अर्थ है &lsquo;</span><span style=\"font-family: Times New Roman;\">Sachin is a cricketer</span><span style=\"font-family: Baloo;\">&rsquo; और </span><span style=\"font-family: Times New Roman;\">2646</span><span style=\"font-family: Baloo;\"> का अर्थ है </span><span style=\"font-family: Times New Roman;\">&lsquo;He </span><span style=\"font-family: Times New Roman;\">played from Mumbai</span><span style=\"font-family: Times New Roman;\">\',</span><span style=\"font-family: Times New Roman;\"> &lsquo;Mumbai is very famous\'</span><span style=\"font-family: Baloo;\"> के लिए निम्नलिखित में से कौन सा कूट है?</span></p>",
+                    options_en: ["<p>7945</p>", "<p>6246</p>", 
+                                "<p>6285</p>", "<p>2458</p>"],
+                    options_hi: ["<p>7945</p>", "<p>6246</p>",
+                                "<p>6285</p>", "<p>2458</p>"],
+                    solution_en: "<p>3.(b) <span style=\"font-family: Times New Roman;\"><strong>Logic </strong>:</span><span style=\"font-family: Times New Roman;\"> Here each word is coded by the number of letters in a particular word.<br></span><span style=\"font-family: Times New Roman;\">Sachin = 6, is = 2, a = 1, cricketer = 9, so we got code : 6219<br></span><span style=\"font-family: Times New Roman;\">Similarly,<br></span><span style=\"font-family: Times New Roman;\">Mumbai = 6, is = 2, very = 4, famous = 6, so we got code : 6246</span></p>",
+                    solution_hi: "<p>3.(b) <span style=\"font-family: Baloo;\"><strong>तर्क</strong> :</span><span style=\"font-family: Baloo;\"> यहाँ प्रत्येक शब्द को किसी विशेष शब्द के अक्षरों की संख्या से कोडित किया जाता है।<br></span><span style=\"font-family: Baloo;\">Sachin = 6, is = 2, a = 1, cricketer = 9, इसलिए हमें कूट मिला : 6219<br></span><span style=\"font-family: Baloo;\">इसी तरह,<br></span><span style=\"font-family: Baloo;\">Mumbai = 6, is = 2, very = 4, famous = 6, इसलिए हमें कूट मिला : 6246</span></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "4",
+                    section: "6",
+                    question_en: "<p>4.<span style=\"font-family: Times New Roman;\"> In a certain code language, </span><span style=\"font-family: Times New Roman;\">\'RAKHI\'</span><span style=\"font-family: Times New Roman;\"> is coded as </span><span style=\"font-family: Times New Roman;\">36-2-22-16-18</span><span style=\"font-family: Times New Roman;\"> and </span><span style=\"font-family: Times New Roman;\">\'SHALU\'</span><span style=\"font-family: Times New Roman;\"> is coded as </span><span style=\"font-family: Times New Roman;\">38-16-2-24-42</span><span style=\"font-family: Times New Roman;\">. How will </span><span style=\"font-family: Times New Roman;\">\'MANJU</span><span style=\"font-family: Times New Roman;\">\' be coded in that language?</span></p>",
+                    question_hi: "<p>4. <span style=\"font-family: Baloo;\">एक निश्चित कूट भाषा में </span><span style=\"font-family: Times New Roman;\">\'RAKHI\'</span><span style=\"font-family: Baloo;\"> को </span><span style=\"font-family: Times New Roman;\">36-2-22-16-18 </span><span style=\"font-family: Baloo;\">और </span><span style=\"font-family: Times New Roman;\">\'SHALU\'</span><span style=\"font-family: Baloo;\"> को </span><span style=\"font-family: Times New Roman;\">38-16-2-24-42</span><span style=\"font-family: Baloo;\"> के रूप में कोडित किया जाता है। उसी भाषा में </span><span style=\"font-family: Times New Roman;\">\'MANJU\'</span><span style=\"font-family: Baloo;\"> को किस प्रकार कोडित किया जाएगा?</span></p>",
+                    options_en: ["<p>13-2-28-10-24</p>", "<p>13-2-14-10-24</p>", 
+                                "<p>26-1-14-20-42</p>", "<p>26-2-28-20-42</p>"],
+                    options_hi: ["<p>13-2-28-10-24</p>", "<p>13-2-14-10-24</p>",
+                                "<p>26-1-14-20-42</p>", "<p>26-2-28-20-42</p>"],
+                    solution_en: "<p>4.(d) <span style=\"font-family: Times New Roman;\"><strong>Logic </strong>: </span><span style=\"font-family: Times New Roman;\">Each letter is coded by :- (Place value in alphabet &times; 2)</span><span style=\"font-family: Times New Roman;\"><br></span><span style=\"font-family: Times New Roman;\">In RAKHI,&nbsp;<br></span><span style=\"font-family: Times New Roman;\">R = 18 &rArr; </span><span style=\"font-family: Times New Roman;\">18 &times; </span><span style=\"font-family: Times New Roman;\">2 = 36, A = 1 &rArr;</span><span style=\"font-family: Times New Roman;\"> 1 &times; </span><span style=\"font-family: Times New Roman;\">2 = 2, K = 11 &rArr; </span><span style=\"font-family: Times New Roman;\">11 &times;</span><span style=\"font-family: Times New Roman;\">&nbsp;2 = 22, H = 8 &rArr;</span><span style=\"font-family: Times New Roman;\"> 8 &times; </span><span style=\"font-family: Times New Roman;\">2 = 16, I = 9 </span><span style=\"font-family: Times New Roman;\">&rArr; 9 </span><span style=\"font-family: Times New Roman;\">&times; 2 = 18&nbsp;<br></span><span style=\"font-family: Times New Roman;\">So, we get : 36 &ndash; 2 &ndash; 22 &ndash; 16 &ndash; 18<br></span><span style=\"font-family: Times New Roman;\">Similarly,&nbsp; </span><span style=\"font-family: Times New Roman;\">For MANJU,<br></span><span style=\"font-family: Times New Roman;\">M = 13 &rArr;</span><span style=\"font-family: Times New Roman;\"> 13 &times;</span><span style=\"font-family: Times New Roman;\"> 2 = 26, A = 1 &rArr;</span><span style=\"font-family: Times New Roman;\"> 1 &times;</span><span style=\"font-family: Times New Roman;\"> 2 = 2, N = 14 &rArr;</span><span style=\"font-family: Times New Roman;\"> 14 &times;</span><span style=\"font-family: Times New Roman;\"> 2 = 28, J = 10 &rArr; </span><span style=\"font-family: Times New Roman;\">10 &times;</span><span style=\"font-family: Times New Roman;\"> 2 = 20, U = 21&rArr; </span><span style=\"font-family: Times New Roman;\">21 &times;</span><span style=\"font-family: Times New Roman;\"> 2 = 42<br></span><span style=\"font-family: Times New Roman;\">So, we get : 26 &ndash; 2 &ndash; 28 &ndash; 20 &ndash; 42</span></p>",
+                    solution_hi: "<p>4.(d) <span style=\"font-family: Baloo;\"><strong>तर्क </strong>: </span><span style=\"font-family: Baloo;\">प्रत्येक अक्षर को कूटबद्ध किया जाता है :- (वर्णमाला में स्थितीय मान <span style=\"font-family: Times New Roman;\">&times; </span></span><span style=\"font-family: Times New Roman;\">2)<br></span><span style=\"font-family: Baloo;\">RAKHI में,<br></span><span style=\"font-family: Times New Roman;\">R = 18 &rArr; 18 &times;&nbsp;2 = 36, A = 1 &rArr; 1 &times; 2 = 2, K = 11 &rArr; 11 &times;&nbsp;2 = 22, H = 8 &rArr; 8 &times; 2 = 16, I = 9 &rArr; 9 &times; 2 = 18 <br></span><span style=\"font-family: Baloo;\">इसलिए, हम पाते हैं : 36 &ndash; 2 &ndash; 22 &ndash; 16 &ndash; 18<br></span><span style=\"font-family: Baloo;\">इसी तरह, </span><span style=\"font-family: Baloo;\">MANJU के लिए,<br></span><span style=\"font-family: Times New Roman;\">M = 13 &rArr; 13 &times; 2 = 26, A = 1 &rArr; 1 &times; 2 = 2, N = 14 &rArr; 14 &times; 2 = 28, J = 10 &rArr; 10 &times; 2 = 20, U = 21 &rArr;&nbsp;21 &times; 2 = 42<br></span><span style=\"font-family: Baloo;\">इसलिए, हमें प्राप्त होता है : 26 &ndash; 2 &ndash; 28 &ndash; 20 &ndash; 42</span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "5",
+                    section: "6",
+                    question_en: "<p>5.<span style=\"font-family: Times New Roman;\"> In a certain code language, </span><span style=\"font-family: Times New Roman;\">MONEY</span><span style=\"font-family: Times New Roman;\"> is written as </span><span style=\"font-family: Times New Roman;\">PRQHB.</span><span style=\"font-family: Times New Roman;\"> In the same code language, </span><span style=\"font-family: Times New Roman;\">CREDIT</span><span style=\"font-family: Times New Roman;\"> will be written as:</span></p>",
+                    question_hi: "<p>5.<span style=\"font-family: Baloo;\"> एक निश्चित कूट भाषा में </span><span style=\"font-family: Times New Roman;\">MONEY</span><span style=\"font-family: Baloo;\"> को </span><span style=\"font-family: Times New Roman;\">PRQHB</span><span style=\"font-family: Baloo;\"> लिखा जाता है। उसी कोड भाषा में, </span><span style=\"font-family: Times New Roman;\">CREDIT</span><span style=\"font-family: Baloo;\"> को किस प्रकार लिखा जाएगा ?</span></p>",
+                    options_en: ["<p>FUGHLW</p>", "<p>FUHGLW</p>", 
+                                "<p>FUHGWL</p>", "<p>FHGULW</p>"],
+                    options_hi: ["<p>FUGHLW</p>", "<p>FUHGLW</p>",
+                                "<p>FUHGWL</p>", "<p>FHGULW</p>"],
+                    solution_en: "<p>5.(b)<br><strong id=\"docs-internal-guid-351c6642-7fff-8e62-3427-cee4bc121d10\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeiRW-gxStfU0oBQ8aCeBK3_hcdbFb8WSdZ4J79XLcZd5rouYi5QqvVkFBH1YiRtmgTXE_2Wi0gThnnW_wfqZaiudy0ELLKbyBUJa-ubRtoX0pA_YXXhL9eHQZSsw2wbrhEmpgo6g?key=7YDQ3QdWop8YGHoQzzIJzLpg\" width=\"117\" height=\"67\"> &nbsp;</strong><span style=\"font-family: Times New Roman;\">Similarly,&nbsp; <strong id=\"docs-internal-guid-ef308980-7fff-a0d3-7127-44d1a8140396\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcmHhyTqtoy91Y2QaSBz3JBVQHmXvW8hx8jN6gmvNxWv6d0hOWHf1ZuEHNvLhbe2-aL8_Fz3nZYhtW0hN2FP1o4X8hyTVQ220cnIjclMRN12NWeWCazQfXzDqgyfIAwkO30mv4sMQ?key=7YDQ3QdWop8YGHoQzzIJzLpg\" width=\"139\" height=\"65\"></strong><br></span></p>",
+                    solution_hi: "<p>5.(b)<br><strong id=\"docs-internal-guid-351c6642-7fff-8e62-3427-cee4bc121d10\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeiRW-gxStfU0oBQ8aCeBK3_hcdbFb8WSdZ4J79XLcZd5rouYi5QqvVkFBH1YiRtmgTXE_2Wi0gThnnW_wfqZaiudy0ELLKbyBUJa-ubRtoX0pA_YXXhL9eHQZSsw2wbrhEmpgo6g?key=7YDQ3QdWop8YGHoQzzIJzLpg\" width=\"117\" height=\"67\"> &nbsp;</strong><span style=\"font-family: Baloo;\">इसी तरह, <span style=\"font-family: Times New Roman;\"><strong id=\"docs-internal-guid-ef308980-7fff-a0d3-7127-44d1a8140396\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcmHhyTqtoy91Y2QaSBz3JBVQHmXvW8hx8jN6gmvNxWv6d0hOWHf1ZuEHNvLhbe2-aL8_Fz3nZYhtW0hN2FP1o4X8hyTVQ220cnIjclMRN12NWeWCazQfXzDqgyfIAwkO30mv4sMQ?key=7YDQ3QdWop8YGHoQzzIJzLpg\" width=\"139\" height=\"65\"></strong></span><br></span></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "6",
+                    section: "6",
+                    question_en: "<p>6. <span style=\"font-family: Times New Roman;\">In a certain code language, </span><span style=\"font-family: Times New Roman;\">\'her father is okay\'</span><span style=\"font-family: Times New Roman;\"> is coded as </span><span style=\"font-family: Times New Roman;\">6583</span><span style=\"font-family: Times New Roman;\">, </span><span style=\"font-family: Times New Roman;\">\'my father is well\'</span><span style=\"font-family: Times New Roman;\"> is </span><span style=\"font-family: Times New Roman;\">coded as </span><span style=\"font-family: Times New Roman;\">5137</span><span style=\"font-family: Times New Roman;\"> and </span><span style=\"font-family: Times New Roman;\">\'her arm is injured\'</span><span style=\"font-family: Times New Roman;\"> is coded as </span><span style=\"font-family: Times New Roman;\">2839</span><span style=\"font-family: Times New Roman;\">. How will &lsquo;</span><span style=\"font-family: Times New Roman;\">okay</span><span style=\"font-family: Times New Roman;\">&rsquo; be coded in that language?</span></p>",
+                    question_hi: "<p>6. <span style=\"font-family: Baloo;\">एक निश्चित कोड भाषा में, </span><span style=\"font-family: Times New Roman;\">\'her father is okay\'</span><span style=\"font-family: Baloo;\"> को </span><span style=\"font-family: Times New Roman;\">6583</span><span style=\"font-family: Baloo;\"> के रूप में कोडित किया गया है, </span><span style=\"font-family: Times New Roman;\">\'my father is well\'</span><span style=\"font-family: Baloo;\"> को </span><span style=\"font-family: Times New Roman;\">5137</span><span style=\"font-family: Baloo;\"> के रूप में कोडित किया गया है और </span><span style=\"font-family: Times New Roman;\">\'her arm is injured</span><span style=\"font-family: Baloo;\">\' को </span><span style=\"font-family: Times New Roman;\">2839</span><span style=\"font-family: Baloo;\"> के रूप में कोड किया गया है। उस भाषा में </span><span style=\"font-family: Times New Roman;\">&lsquo;okay&rsquo;</span><span style=\"font-family: Baloo;\"> को कैसे कोड किया जाएगा?</span></p>",
+                    options_en: ["<p>6</p>", "<p>8</p>", 
+                                "<p>3</p>", "<p>5</p>"],
+                    options_hi: ["<p>6</p>", "<p>8</p>",
+                                "<p>3</p>", "<p>5</p>"],
+                    solution_en: "<p>6.(a) <span style=\"font-family: Times New Roman;\">From </span><span style=\"font-family: Times New Roman;\">\'my father is well\' </span><span style=\"font-family: Times New Roman;\">and </span><span style=\"font-family: Times New Roman;\">\'her arm is injured\'</span><span style=\"font-family: Times New Roman;\">, we get the common code </span><span style=\"font-family: Times New Roman;\">&ldquo;is&rdquo;</span><span style=\"font-family: Times New Roman;\"> =</span><span style=\"font-family: Times New Roman;\"> 3<br></span><span style=\"font-family: Times New Roman;\">From </span><span style=\"font-family: Times New Roman;\">\'her father is okay\' </span><span style=\"font-family: Times New Roman;\">and </span><span style=\"font-family: Times New Roman;\">\'my father is well\',</span><span style=\"font-family: Times New Roman;\"> we get the common code </span><span style=\"font-family: Times New Roman;\">&ldquo;father&rdquo;</span><span style=\"font-family: Times New Roman;\"> = </span><span style=\"font-family: Times New Roman;\">5<br></span><span style=\"font-family: Times New Roman;\">From </span><span style=\"font-family: Times New Roman;\">\'her father is okay\' </span><span style=\"font-family: Times New Roman;\">and </span><span style=\"font-family: Times New Roman;\">\'her arm is injured\'</span><span style=\"font-family: Times New Roman;\">, we get the common code </span><span style=\"font-family: Times New Roman;\">&ldquo;her&rdquo;</span><span style=\"font-family: Times New Roman;\"> = </span><span style=\"font-family: Times New Roman;\">8<br></span><span style=\"font-family: Times New Roman;\">So, on comparing obtained codes with</span><span style=\"font-family: Times New Roman;\"> \'her father is okay\'</span><span style=\"font-family: Times New Roman;\">, we get </span><span style=\"font-family: Times New Roman;\">&lsquo;okay\'</span><span style=\"font-family: Times New Roman;\"> =</span><span style=\"font-family: Times New Roman;\"> 6</span><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>6.(a) <span style=\"font-family: Times New Roman;\">\'my father is well\' </span><span style=\"font-family: Baloo;\"> और </span><span style=\"font-family: Times New Roman;\">\'her arm is injured\'</span><span style=\"font-family: Baloo;\"> से, हमें &nbsp;उभयनिष्ठ कोड <span style=\"font-family: Times New Roman;\">\"is\" </span><span style=\"font-family: Times New Roman;\">= 3 </span>मिलता है ।<br></span><span style=\"font-family: Times New Roman;\">\'her father is okay\'</span><span style=\"font-family: Baloo;\"> और </span><span style=\"font-family: Times New Roman;\">\'my father is well\'</span><span style=\"font-family: Baloo;\"> हमें उभयनिष्ठ &nbsp;कोड <span style=\"font-family: Times New Roman;\">&ldquo;father&rdquo;</span><span style=\"font-family: Times New Roman;\"> = 5 </span>मिलता है ।<br></span><span style=\"font-family: Times New Roman;\">\'her father is okay\'</span><span style=\"font-family: Baloo;\"> और </span><span style=\"font-family: Times New Roman;\">\'her arm is injured\'</span><span style=\"font-family: Baloo;\"> से, हमें उभयनिष्ठ कोड <span style=\"font-family: Times New Roman;\">&ldquo;her&rdquo;</span><span style=\"font-family: Times New Roman;\"> = 8 </span>मिलता है ।<br></span><span style=\"font-family: Baloo;\">अतः प्राप्त कूटों की </span><span style=\"font-family: Times New Roman;\">\'her father is okay\'</span><span style=\"font-family: Baloo;\"> से तुलना करने पर, हमें प्राप्त होता है </span><span style=\"font-family: Times New Roman;\">&lsquo;okay\'= 6</span></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "7",
+                    section: "6",
+                    question_en: "<p>7.<span style=\"font-family: Times New Roman;\"> In a certain code language, </span><span style=\"font-family: Times New Roman;\">\'do or die\'</span><span style=\"font-family: Times New Roman;\"> is written as \'</span><span style=\"font-family: Times New Roman;\">su ru ko\',</span><span style=\"font-family: Times New Roman;\"> </span><span style=\"font-family: Times New Roman;\">\'let us do it\'</span><span style=\"font-family: Times New Roman;\"> is written as&nbsp; </span><span style=\"font-family: Times New Roman;\">\'ko mo yo zu\'</span><span style=\"font-family: Times New Roman;\"> and </span><span style=\"font-family: Times New Roman;\">\'this or that\'</span><span style=\"font-family: Times New Roman;\"> is written as </span><span style=\"font-family: Times New Roman;\">\'ga tu ru\'</span><span style=\"font-family: Times New Roman;\">. How will </span><span style=\"font-family: Times New Roman;\">\'die\'</span><span style=\"font-family: Times New Roman;\"> be written in that language?</span></p>",
+                    question_hi: "<p>7.<span style=\"font-family: Baloo;\"> एक निश्चित कोड भाषा में, </span><span style=\"font-family: Times New Roman;\">\'do or die\'</span><span style=\"font-family: Baloo;\"> को </span><span style=\"font-family: Times New Roman;\">\'su ru ko\'</span><span style=\"font-family: Baloo;\"> लिखा जाता है, </span><span style=\"font-family: Times New Roman;\">\'let us do it\'</span><span style=\"font-family: Baloo;\"> को </span><span style=\"font-family: Times New Roman;\">\'ko mo yo zu\'</span><span style=\"font-family: Baloo;\"> लिखा जाता है और </span><span style=\"font-family: Times New Roman;\">\'this or that\'</span><span style=\"font-family: Baloo;\"> को \'</span><span style=\"font-family: Times New Roman;\">ga tu ru\'</span><span style=\"font-family: Baloo;\"> लिखा जाता है। उस भाषा में \'</span><span style=\"font-family: Times New Roman;\">die\'</span><span style=\"font-family: Baloo;\"> कैसे लिखा जाएगा?</span></p>",
+                    options_en: ["<p>su</p>", "<p>ru</p>", 
+                                "<p>ku</p>", "<p>ko</p>"],
+                    options_hi: ["<p>su</p>", "<p>ru</p>",
+                                "<p>ku</p>", "<p>ko</p>"],
+                    solution_en: "<p>7.(a) <span style=\"font-family: Times New Roman;\">From \'do or die\' and \'let us do it\' , we code for &lsquo;do&rsquo; = &lsquo;ko&rsquo;. From \'do or die\' and \'this or that\', we get code for &lsquo;or&rsquo; = &lsquo;ru&rsquo;. Now on comparing the obtained codes with \'do or die\' we get &lsquo;die&rsquo; = &lsquo;su&rsquo;. </span></p>",
+                    solution_hi: "<p>7.(a) <span style=\"font-family: Baloo;\">\'do or die\' और \'let us do it\' से, हम \'do\' = \'ko\' के लिए कोड करते हैं। \'do or die\' और \'this or that\' से, हमें \'or\' = \'ru\' के लिए कोड मिलता है। अब प्राप्त कूटों की \'do or die\' से तुलना करने पर हमें \'die\' = \'su\' प्राप्त होता है।</span></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "8",
+                    section: "6",
+                    question_en: "<p>8. <span style=\"font-family: Times New Roman;\">In a certain code language, </span><span style=\"font-family: Times New Roman;\">&lsquo;SANCTION&rsquo;</span><span style=\"font-family: Times New Roman;\"> is written as &lsquo;</span><span style=\"font-family: Times New Roman;\">TZOBUHPM</span><span style=\"font-family: Times New Roman;\">&rsquo;</span><span style=\"font-family: Times New Roman;\">. How will&nbsp; </span><span style=\"font-family: Times New Roman;\">&lsquo;</span><span style=\"font-family: Times New Roman;\">TELEVISE&rsquo;</span><span style=\"font-family: Times New Roman;\"> be written in that language?</span></p>",
+                    question_hi: "<p>8.<span style=\"font-family: Baloo;\"> एक निश्चित कूट भाषा में, </span><span style=\"font-family: Times New Roman;\">\'SANCTION\'</span><span style=\"font-family: Baloo;\"> को </span><span style=\"font-family: Times New Roman;\">\'TZOBUHPM\'</span><span style=\"font-family: Baloo;\"> लिखा जाता है। उस भाषा में </span><span style=\"font-family: Times New Roman;\">\'TELEVISE\' </span><span style=\"font-family: Baloo;\">कैसे लिखा जाएगा?</span></p>",
+                    options_en: ["<p><span style=\"font-family: Times New Roman;\">UDNDWGTF</span></p>", "<p><span style=\"font-family: Times New Roman;\">SFKGUHRD</span></p>", 
+                                "<p><span style=\"font-family: Times New Roman;\">UDMDUHTF</span></p>", "<p><span style=\"font-family: Times New Roman;\">UDMDWHTD</span><span style=\"font-family: Times New Roman;\"> </span></p>"],
+                    options_hi: ["<p><span style=\"font-family: Times New Roman;\">UDNDWGTF</span></p>", "<p><span style=\"font-family: Times New Roman;\">SFKGUHRD</span></p>",
+                                "<p><span style=\"font-family: Times New Roman;\">UDMDUHTF</span></p>", "<p><span style=\"font-family: Times New Roman;\">UDMDWHTD</span><span style=\"font-family: Times New Roman;\"> </span></p>"],
+                    solution_en: "<p>8.(d)<br><strong id=\"docs-internal-guid-01c1d2ea-7fff-4463-538e-1f50612b7d87\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXf16l1bvnLDl26W-7ITZnVjZqmqj_LV1o4f15qmrmK9bx1YJ8VEVCv9upIvSWTGQehYsoYI77IUJ9Q_tJkxGj_elcVcxMisv-EbPiJgRfCkDI7T2Kfs75R4Nn76DyPMh0Ve0wG5CQ?key=7YDQ3QdWop8YGHoQzzIJzLpg\" width=\"184\" height=\"65\"></strong><br><span style=\"font-family: Times New Roman;\">Similarly,&nbsp;<br><strong id=\"docs-internal-guid-39fbecfc-7fff-5946-45d7-0bb4b749252c\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdWl6Z-n5BAFiiKEI5RhYQg2weHUaBvwUy4OX4fAe0eZ_ra3EKIpg_bQZycUjtVcb5Ozt8lGJznFYKGa0g0fNEfG6yyVtOh29tbnpBC4lakl0aug-RmzoH-p9gyxe7rTX3rdS9ZsA?key=7YDQ3QdWop8YGHoQzzIJzLpg\" width=\"188\" height=\"68\"></strong><br></span></p>",
+                    solution_hi: "<p>8.(d)<br><strong id=\"docs-internal-guid-01c1d2ea-7fff-4463-538e-1f50612b7d87\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXf16l1bvnLDl26W-7ITZnVjZqmqj_LV1o4f15qmrmK9bx1YJ8VEVCv9upIvSWTGQehYsoYI77IUJ9Q_tJkxGj_elcVcxMisv-EbPiJgRfCkDI7T2Kfs75R4Nn76DyPMh0Ve0wG5CQ?key=7YDQ3QdWop8YGHoQzzIJzLpg\" width=\"184\" height=\"65\"></strong><br><span style=\"font-family: Baloo;\">इसी तरह,<br><span style=\"font-family: Times New Roman;\"><strong id=\"docs-internal-guid-39fbecfc-7fff-5946-45d7-0bb4b749252c\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdWl6Z-n5BAFiiKEI5RhYQg2weHUaBvwUy4OX4fAe0eZ_ra3EKIpg_bQZycUjtVcb5Ozt8lGJznFYKGa0g0fNEfG6yyVtOh29tbnpBC4lakl0aug-RmzoH-p9gyxe7rTX3rdS9ZsA?key=7YDQ3QdWop8YGHoQzzIJzLpg\" width=\"188\" height=\"68\"></strong></span><br></span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "9",
+                    section: "6",
+                    question_en: "<p>9. <span style=\"font-family: Times New Roman;\">In a certain code language, &lsquo;</span><span style=\"font-family: Times New Roman;\">TURKEY</span><span style=\"font-family: Times New Roman;\">&rsquo; is written as </span><span style=\"font-family: Times New Roman;\">&lsquo;76911525</span><span style=\"font-family: Times New Roman;\">&rsquo;. How will &lsquo;</span><span style=\"font-family: Times New Roman;\">BREATH</span><span style=\"font-family: Times New Roman;\">&rsquo; be&nbsp; </span><span style=\"font-family: Times New Roman;\">written in that language?</span></p>",
+                    question_hi: "<p>9.<span style=\"font-family: Baloo;\"> एक निश्चित कूट भाषा में, </span><span style=\"font-family: Times New Roman;\">\'TURKEY\' </span><span style=\"font-family: Baloo;\">को </span><span style=\"font-family: Times New Roman;\">\'76911525\'</span><span style=\"font-family: Baloo;\"> लिखा जाता है। उस भाषा में \'</span><span style=\"font-family: Times New Roman;\">BREATH\'</span><span style=\"font-family: Baloo;\"> कैसे लिखा जाएगा?</span></p>",
+                    options_en: ["<p>218526208</p>", "<p>259221208</p>", 
+                                "<p>259221197</p>", "<p>251841208</p>"],
+                    options_hi: ["<p>218526208</p>", "<p>259221208</p>",
+                                "<p>259221197</p>", "<p>251841208</p>"],
+                    solution_en: "<p>9.(b) <span style=\"font-family: Times New Roman;\"><strong>Logic </strong>:</span><span style=\"font-family: Times New Roman;\"> First three letters of the word are coded by reverse alphabetical position of respective letter and last three letters are coded by respective letter&rsquo;s position in alphabetical series.<br></span><span style=\"font-family: Times New Roman;\">T = 7, U = 6, R = 9, K = 11, E = 5, Y = 25 : so we get TURKEY = 76911525&nbsp;<br></span><span style=\"font-family: Times New Roman;\">Similarly,&nbsp;<br></span><span style=\"font-family: Times New Roman;\">B = 25, R = 9, E = 22, A = 1, T = 20, H = 8 : so we get BREATH = 259221208</span></p>",
+                    solution_hi: "<p>9.(b) <span style=\"font-family: Baloo;\"><strong>तर्क </strong>:</span><span style=\"font-family: Baloo;\"> शब्द के पहले तीन अक्षरों को संबंधित अक्षर की विपरीत वर्णमाला स्थिति द्वारा कोडित किया जाता है और अंतिम तीन अक्षरों को वर्णमाला श्रृंखला में संबंधित अक्षर की स्थिति द्वारा कोडित किया जाता है।<br></span><span style=\"font-family: Baloo;\">T = 7, U = 6, R = 9, K = 11, E = 5, Y = 25 : इसलिए हमें मिलता है TURKEY = 76911525<br></span><span style=\"font-family: Baloo;\">इसी तरह,<br></span><span style=\"font-family: Baloo;\">B = 25, R = 9, E = 22, A = 1, T = 20, H = 8 : इसलिए हमें मिलता है BREATH = 259221208</span></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "10",
+                    section: "6",
+                    question_en: "<p>10. <span style=\"font-family: Times New Roman;\">In a certain code language, </span><span style=\"font-family: Times New Roman;\">\'your attention please</span><span style=\"font-family: Times New Roman;\">\' is written as </span><span style=\"font-family: Times New Roman;\">\'puw cuw zuw\'</span><span style=\"font-family: Times New Roman;\">, </span><span style=\"font-family: Times New Roman;\">\'kind&nbsp; </span><span style=\"font-family: Times New Roman;\">attention\'</span><span style=\"font-family: Times New Roman;\"> is written as</span><span style=\"font-family: Times New Roman;\"> \'muw zuw</span><span style=\"font-family: Times New Roman;\">\', and</span><span style=\"font-family: Times New Roman;\"> \'please pay attention</span><span style=\"font-family: Times New Roman;\">\' is written as</span><span style=\"font-family: Times New Roman;\"> \'puw zuw&nbsp; </span><span style=\"font-family: Times New Roman;\">ruw</span><span style=\"font-family: Times New Roman;\">\'. How will </span><span style=\"font-family: Times New Roman;\">\'pay</span><span style=\"font-family: Times New Roman;\">\' be written in that language?</span></p>",
+                    question_hi: "<p>10.<span style=\"font-family: Baloo;\"> एक निश्चित कोड भाषा में, </span><span style=\"font-family: Times New Roman;\">\'your attention please\'</span><span style=\"font-family: Baloo;\"> को </span><span style=\"font-family: Times New Roman;\">\'puw cuw zuw\' </span><span style=\"font-family: Baloo;\">के रूप में लिखा जाता है, </span><span style=\"font-family: Baloo;\">\'kind attention\' को \'muw zuw\'</span><span style=\"font-family: Baloo;\"> के रूप में लिखा जाता है, और </span><span style=\"font-family: Times New Roman;\">\'please pay attention\'</span><span style=\"font-family: Baloo;\"> को \'\'</span><span style=\"font-family: Times New Roman;\">puw zuw ruw\'</span><span style=\"font-family: Baloo;\"> लिखा जाता है। उस भाषा में </span><span style=\"font-family: Times New Roman;\">\'Pay\'</span><span style=\"font-family: Baloo;\"> कैसे लिखा जाएगा?</span></p>",
+                    options_en: ["<p>puw</p>", "<p>zuw</p>", 
+                                "<p>ruw</p>", "<p>cuw</p>"],
+                    options_hi: ["<p>puw</p>", "<p>zuw</p>",
+                                "<p>ruw</p>", "<p>cuw</p>"],
+                    solution_en: "<p>10.(c) <span style=\"font-family: Times New Roman;\">From \'your attention please\' and \'kind attention\', we get the code for &lsquo;attention&rsquo; = &lsquo;zuw&rsquo;.<br></span><span style=\"font-family: Times New Roman;\">From \'your attention please\' and \'please pay attention\', we get the code for \'please&rsquo; = &lsquo;puw&rsquo;<br></span><span style=\"font-family: Times New Roman;\">Now, on comparing the obtained codes with \'please pay attention\', we get &lsquo;pay&rsquo; = &lsquo;ruw&rsquo;.</span></p>",
+                    solution_hi: "<p>10.(c) <span style=\"font-family: Baloo;\">\'your attention please\' और \'kind attention\' से, हमें \'attention\' के लिए कोड मिलता है = \'zuw\'<br></span><span style=\"font-family: Baloo;\">\'your attention please\' और \'please pay attention\' से, हमें \'please\' के लिए कोड मिलता है = \'puw\'<br></span><span style=\"font-family: Baloo;\">अब, प्राप्त कोड की तुलना \'please pay attention\' से करने पर, हमें \'pay\' मिलता है = \'ruw\'</span></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "11",
+                    section: "6",
+                    question_en: "<p>11. <span style=\"font-family: Times New Roman;\">In a code language, </span><span style=\"font-family: Times New Roman;\">SOUP</span><span style=\"font-family: Times New Roman;\"> is written as </span><span style=\"font-family: Times New Roman;\">TNVO</span><span style=\"font-family: Times New Roman;\">. How will </span><span style=\"font-family: Times New Roman;\">BOWL</span><span style=\"font-family: Times New Roman;\"> be written in that&nbsp; </span><span style=\"font-family: Times New Roman;\">Language?</span></p>",
+                    question_hi: "<p>11.<span style=\"font-family: Baloo;\"> एक कूट भाषा में </span><span style=\"font-family: Times New Roman;\">SOUP</span><span style=\"font-family: Baloo;\"> को </span><span style=\"font-family: Times New Roman;\">TNVO</span><span style=\"font-family: Baloo;\"> लिखा जाता है। उस भाषा में </span><span style=\"font-family: Times New Roman;\">BOWL</span><span style=\"font-family: Baloo;\"> कैसे लिखा जाएगा?</span></p>",
+                    options_en: ["<p>CPVM</p>", "<p>ANVK</p>", 
+                                "<p>APVM</p>", "<p>CNXK</p>"],
+                    options_hi: ["<p>CPVM</p>", "<p>ANVK</p>",
+                                "<p>APVM</p>", "<p>CNXK</p>"],
+                    solution_en: "<p>11.(d)<br><strong id=\"docs-internal-guid-62bca43c-7fff-ddab-a8c0-9f4381f68378\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfYeLXmi3RYe1HOx_HlfhqhF79KJYfpPKqtU-V32w9zdn4vMUHpoUCA-Ayx--LavshUuhWWHjd4RjMMhcfef-XykikDyRV3BiQOa3DhklQY_P8paVH95ijyvaJtezM82IrDipa5Kg?key=7YDQ3QdWop8YGHoQzzIJzLpg\" width=\"103\" height=\"73\"></strong> &nbsp;<span style=\"font-family: Times New Roman;\">Similarly, <strong id=\"docs-internal-guid-ff60bbd7-7fff-f89c-de3a-a94bff5be281\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXc_f3ZNdM7R9wX2cY86qRSST2ZI3vgPqCqDXxRAwUm2Z_zuBn7Cwm7E9Bt6U6AKj0mIrh7ljk732pQcyMGaRIBrrlW480AXNlk-7vpEDyfeKRknvKADbeuwwxS9sbOxsreHBIwwCg?key=7YDQ3QdWop8YGHoQzzIJzLpg\" width=\"102\" height=\"73\"></strong></span></p>",
+                    solution_hi: "<p>11.(d)<br><strong id=\"docs-internal-guid-62bca43c-7fff-ddab-a8c0-9f4381f68378\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfYeLXmi3RYe1HOx_HlfhqhF79KJYfpPKqtU-V32w9zdn4vMUHpoUCA-Ayx--LavshUuhWWHjd4RjMMhcfef-XykikDyRV3BiQOa3DhklQY_P8paVH95ijyvaJtezM82IrDipa5Kg?key=7YDQ3QdWop8YGHoQzzIJzLpg\" width=\"103\" height=\"73\"></strong> &nbsp;<span style=\"font-family: Baloo;\">इसी तरह</span><span style=\"font-family: Times New Roman;\">, <strong id=\"docs-internal-guid-ff60bbd7-7fff-f89c-de3a-a94bff5be281\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXc_f3ZNdM7R9wX2cY86qRSST2ZI3vgPqCqDXxRAwUm2Z_zuBn7Cwm7E9Bt6U6AKj0mIrh7ljk732pQcyMGaRIBrrlW480AXNlk-7vpEDyfeKRknvKADbeuwwxS9sbOxsreHBIwwCg?key=7YDQ3QdWop8YGHoQzzIJzLpg\" width=\"102\" height=\"73\"></strong></span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "12",
+                    section: "6",
+                    question_en: "<p>12.<span style=\"font-family: Times New Roman;\"> In a code language, if </span><span style=\"font-family: Times New Roman;\">PEN </span><span style=\"font-family: Times New Roman;\">is written as </span><span style=\"font-family: Times New Roman;\">17717</span><span style=\"font-family: Times New Roman;\">, then how will </span><span style=\"font-family: Times New Roman;\">CAP</span><span style=\"font-family: Times New Roman;\"> be written in the&nbsp; </span><span style=\"font-family: Times New Roman;\">same language?</span></p>",
+                    question_hi: "<p>12.<span style=\"font-family: Baloo;\"> एक कूट भाषा में, यदि </span><span style=\"font-family: Times New Roman;\">PEN</span><span style=\"font-family: Baloo;\"> को </span><span style=\"font-family: Times New Roman;\">17717</span><span style=\"font-family: Baloo;\"> लिखा जाता है, तो उसी भाषा में </span><span style=\"font-family: Times New Roman;\">CAP</span><span style=\"font-family: Baloo;\"> कैसे लिखा जाएगा?</span></p>",
+                    options_en: ["<p>4319</p>", "<p>2320</p>", 
+                                "<p>4219</p>", "<p>2319</p>"],
+                    options_hi: ["<p>4319</p>", "<p>2320</p>",
+                                "<p>4219</p>", "<p>2319</p>"],
+                    solution_en: "<p>12.(a) <span style=\"font-family: Times New Roman;\"><strong>Logic </strong>:-</span><span style=\"font-family: Times New Roman;\"> Place value of letter in alphabet + 1,&nbsp;<br></span><span style=\"font-family: Times New Roman;\">Place value of letter in alphabet + 2,&nbsp;<br></span><span style=\"font-family: Times New Roman;\">Place value of letter in alphabet + 3.&nbsp;<br></span><span style=\"font-family: Times New Roman;\">In PEN : P = 16 &rArr;</span><span style=\"font-family: Times New Roman;\"> 16 + </span><span style=\"font-family: Times New Roman;\">1</span><span style=\"font-family: Times New Roman;\"> = 17, E = 5 &rArr; </span><span style=\"font-family: Times New Roman;\">5 + </span><span style=\"font-family: Times New Roman;\">2</span><span style=\"font-family: Times New Roman;\"> = 7, N = 14 &rArr; </span><span style=\"font-family: Times New Roman;\">14 +</span><span style=\"font-family: Times New Roman;\"> 3</span><span style=\"font-family: Times New Roman;\"> = 17, so we get code 17717.&nbsp;<br></span><span style=\"font-family: Times New Roman;\">Similarly,&nbsp;<br></span><span style=\"font-family: Times New Roman;\">In CAP : C = 3 &rArr; </span><span style=\"font-family: Times New Roman;\">3 + </span><span style=\"font-family: Times New Roman;\">1</span><span style=\"font-family: Times New Roman;\"> = 4, A = 1 &rArr; </span><span style=\"font-family: Times New Roman;\">1 +</span><span style=\"font-family: Times New Roman;\"> 2</span><span style=\"font-family: Times New Roman;\"> = 3, P = 16 &rArr; </span><span style=\"font-family: Times New Roman;\">16 + </span><span style=\"font-family: Times New Roman;\">3</span><span style=\"font-family: Times New Roman;\"> = 19, so we get code 4319.</span></p>",
+                    solution_hi: "<p>12.(a) <span style=\"font-family: Baloo;\"><strong>तर्क </strong>:-</span><span style=\"font-family: Baloo;\"> वर्णमाला में अक्षर का स्थानीय मान + 1,<br></span><span style=\"font-family: Baloo;\">वर्णमाला में अक्षर का स्थानीय मान + 2,<br></span><span style=\"font-family: Baloo;\">वर्णमाला में अक्षर का स्थानीय मान +3<br></span><span style=\"font-family: Baloo;\">PEN में: P = 16 <span style=\"font-family: Times New Roman;\">&rArr;</span><span style=\"font-family: Times New Roman;\"> </span></span><span style=\"font-family: Times New Roman;\"> 16 + </span><span style=\"font-family: Times New Roman;\">1</span><span style=\"font-family: Times New Roman;\"> = 17, E = 5 &rArr; </span><span style=\"font-family: Times New Roman;\">5 + </span><span style=\"font-family: Times New Roman;\">2</span><span style=\"font-family: Times New Roman;\"> = 7, N = 14 &rArr; </span><span style=\"font-family: Times New Roman;\">14 +</span><span style=\"font-family: Times New Roman;\"> 3</span><span style=\"font-family: Baloo;\"> = 17, इसलिए हमें 17717 कोड मिलता है।<br></span><span style=\"font-family: Baloo;\">इसी तरह,<br></span><span style=\"font-family: Baloo;\">CAP में : C = 3 <span style=\"font-family: Times New Roman;\">&rArr; </span></span><span style=\"font-family: Times New Roman;\">3 + </span><span style=\"font-family: Times New Roman;\">1</span><span style=\"font-family: Times New Roman;\"> = 4, A = 1 &rArr; </span><span style=\"font-family: Times New Roman;\">1 +</span><span style=\"font-family: Times New Roman;\"> 2</span><span style=\"font-family: Times New Roman;\"> = 3, P = 16 &rArr; </span><span style=\"font-family: Times New Roman;\">16 + </span><span style=\"font-family: Times New Roman;\">3</span><span style=\"font-family: Baloo;\"> = 19, इसलिए हमें 4319 कोड मिलता है।</span></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "13",
+                    section: "6",
+                    question_en: "<p>13.<span style=\"font-family: Times New Roman;\"> In a certain code language, </span><span style=\"font-family: Times New Roman;\">\'so it be\'</span><span style=\"font-family: Times New Roman;\"> is written as </span><span style=\"font-family: Times New Roman;\">\'lor kor nor\'</span><span style=\"font-family: Times New Roman;\">,</span><span style=\"font-family: Times New Roman;\"> \'it is done\'</span><span style=\"font-family: Times New Roman;\"> is written as </span><span style=\"font-family: Times New Roman;\">\'zor kor tor</span><span style=\"font-family: Times New Roman;\">\', and </span><span style=\"font-family: Times New Roman;\">\'be yourself\'</span><span style=\"font-family: Times New Roman;\"> is written as </span><span style=\"font-family: Times New Roman;\">\'nor xor\'</span><span style=\"font-family: Times New Roman;\">. How will </span><span style=\"font-family: Times New Roman;\">\'so\' </span><span style=\"font-family: Times New Roman;\">be written in that language?</span></p>",
+                    question_hi: "<p>13.<span style=\"font-family: Baloo;\"> एक निश्चित कूट भाषा में, </span><span style=\"font-family: Times New Roman;\">\'so it be\'</span><span style=\"font-family: Baloo;\"> को </span><span style=\"font-family: Times New Roman;\">\'lor kor nor\'</span><span style=\"font-family: Baloo;\"> के रूप में लिखा जाता है, </span><span style=\"font-family: Times New Roman;\">\'it is done\'</span><span style=\"font-family: Baloo;\"> को </span><span style=\"font-family: Times New Roman;\">\'zor kor tor\'</span><span style=\"font-family: Baloo;\"> के रूप में लिखा जाता है, और \'</span><span style=\"font-family: Times New Roman;\">be yourself</span><span style=\"font-family: Baloo;\">\' को </span><span style=\"font-family: Times New Roman;\">\'nor xor\'</span><span style=\"font-family: Baloo;\"> के रूप में लिखा जाता है। इस भाषा में </span><span style=\"font-family: Times New Roman;\">\'so\' </span><span style=\"font-family: Baloo;\">कैसे लिखा जाएगा?</span></p>",
+                    options_en: ["<p>nor</p>", "<p>xor</p>", 
+                                "<p>lor</p>", "<p>kor</p>"],
+                    options_hi: ["<p>nor</p>", "<p>xor</p>",
+                                "<p>lor</p>", "<p>kor</p>"],
+                    solution_en: "<p>13.(c) <span style=\"font-family: Times New Roman;\">From \'so it be\' and \'it is done\', we get &lsquo;it&rsquo; = &lsquo;kor&rsquo;.<br></span><span style=\"font-family: Times New Roman;\">From \'so it be\' and \'be yourself\', we get &lsquo;be&rsquo; = &lsquo;nor&rsquo;.<br></span><span style=\"font-family: Times New Roman;\">On comparing the obtained codes with \'so it be\', we get &lsquo;so&rsquo; = &lsquo;lor&rsquo;.</span></p>",
+                    solution_hi: "<p>13.(c) <span style=\"font-family: Baloo;\">\'So it be\' और \'it is done\' से हमें \'it\' प्राप्त होता है = \'kor\'<br></span><span style=\"font-family: Baloo;\">\'So it be\' और \'be yourself\' से हमें \'be\' मिलता है = \'nor\'।<br></span><span style=\"font-family: Baloo;\">प्राप्त कूटों की \'so it be\' से तुलना करने पर, हमें प्राप्त होता है \'so\' = \'lor\'</span></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "14",
+                    section: "6",
+                    question_en: "<p>14.<span style=\"font-family: Times New Roman;\"> In a certain code language, </span><span style=\"font-family: Times New Roman;\">&lsquo;TANKER&rsquo; </span><span style=\"font-family: Times New Roman;\">is written as &lsquo;</span><span style=\"font-family: Times New Roman;\">VCPMGT</span><span style=\"font-family: Times New Roman;\">&rsquo;, how will &lsquo;</span><span style=\"font-family: Times New Roman;\">SOCRATES</span><span style=\"font-family: Times New Roman;\">&rsquo; be written in that language?</span></p>",
+                    question_hi: "<p>14.<span style=\"font-family: Baloo;\"> एक निश्चित कूट भाषा में, \'</span><span style=\"font-family: Times New Roman;\">TANKER</span><span style=\"font-family: Baloo;\">\' को </span><span style=\"font-family: Times New Roman;\">\'VCPMGT\'</span><span style=\"font-family: Baloo;\"> के रूप में लिखा जाता है, उस भाषा में </span><span style=\"font-family: Times New Roman;\">\'SOCRATES\'</span><span style=\"font-family: Baloo;\"> को कैसे लिखा जाएगा?</span></p>",
+                    options_en: ["<p>UQETCVGU</p>", "<p>UQETCWGU</p>", 
+                                "<p>UQFTCVHU</p>", "<p>UQGTCVHU</p>"],
+                    options_hi: ["<p>UQETCVGU</p>", "<p>UQETCWGU</p>",
+                                "<p>UQFTCVHU</p>", "<p>UQGTCVHU</p>"],
+                    solution_en: "<p>14.(a)<br><strong id=\"docs-internal-guid-9e6ed65f-7fff-b99b-8bda-0dde1ec5d4af\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdl6wdQQbheKE0zTwBjxykw7XhrAuSSLnwxrcZ32XYldPm-sKT4NsgpsisMvxQbf06eSfijheR7kcdsNQhajuV18hkizB29_iKIieOLo18H7H86SRXkG7JJtrtkkf_P6uii37Ts?key=7YDQ3QdWop8YGHoQzzIJzLpg\" width=\"136\" height=\"64\"></strong> &nbsp;Similarly,<strong id=\"docs-internal-guid-e1697aac-7fff-d61b-9827-ec2899503a1c\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdFsVaMeJvl_n8Gxgk1xCP1xHp5CexTaJby7VE-E7JO9cR9dgASoLj9vhkTPJ8baSM-aaNu3B_qjyMx75eq0WvSVZyElZJCjQgkhoo5puG5mHrsvDSO919ZtxWqLoSvVrBbCmP0?key=7YDQ3QdWop8YGHoQzzIJzLpg\" width=\"172\" height=\"63\"></strong></p>\n<p>&nbsp;</p>",
+                    solution_hi: "<p>14.(a)<br><strong id=\"docs-internal-guid-9e6ed65f-7fff-b99b-8bda-0dde1ec5d4af\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdl6wdQQbheKE0zTwBjxykw7XhrAuSSLnwxrcZ32XYldPm-sKT4NsgpsisMvxQbf06eSfijheR7kcdsNQhajuV18hkizB29_iKIieOLo18H7H86SRXkG7JJtrtkkf_P6uii37Ts?key=7YDQ3QdWop8YGHoQzzIJzLpg\" width=\"136\" height=\"64\"></strong> &nbsp;<span style=\"font-family: Baloo;\">इसी तरह</span>, <strong id=\"docs-internal-guid-e1697aac-7fff-d61b-9827-ec2899503a1c\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdFsVaMeJvl_n8Gxgk1xCP1xHp5CexTaJby7VE-E7JO9cR9dgASoLj9vhkTPJ8baSM-aaNu3B_qjyMx75eq0WvSVZyElZJCjQgkhoo5puG5mHrsvDSO919ZtxWqLoSvVrBbCmP0?key=7YDQ3QdWop8YGHoQzzIJzLpg\" width=\"172\" height=\"63\"></strong></p>\n<p>&nbsp;</p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "15",
+                    section: "6",
+                    question_en: "<p>15. <span style=\"font-family: Times New Roman;\">In a certain code language, </span><span style=\"font-family: Times New Roman;\">&lsquo;PARK&rsquo;</span><span style=\"font-family: Times New Roman;\"> is coded as &lsquo;</span><span style=\"font-family: Times New Roman;\">3749</span><span style=\"font-family: Times New Roman;\">&rsquo;, and &lsquo;</span><span style=\"font-family: Times New Roman;\">RACE</span><span style=\"font-family: Times New Roman;\">&rsquo; is coded as </span><span style=\"font-family: Times New Roman;\">&lsquo;4762&rsquo;</span><span style=\"font-family: Times New Roman;\">.How will &lsquo;</span><span style=\"font-family: Times New Roman;\">CARE&rsquo;</span><span style=\"font-family: Times New Roman;\"> be coded in that language?</span></p>",
+                    question_hi: "<p>15.<span style=\"font-family: Baloo;\"> एक निश्चित कूट भाषा में, </span><span style=\"font-family: Times New Roman;\">\'PARK\'</span><span style=\"font-family: Baloo;\"> को</span><span style=\"font-family: Times New Roman;\"> \'3749\' </span><span style=\"font-family: Baloo;\">के रूप में कूटबद्ध किया जाता है, और</span><span style=\"font-family: Times New Roman;\"> \'RACE\' </span><span style=\"font-family: Baloo;\">को </span><span style=\"font-family: Times New Roman;\">\'4762\'</span><span style=\"font-family: Baloo;\"> के रूप में कूटबद्ध किया जाता है। उस भाषा में </span><span style=\"font-family: Times New Roman;\">\'CARE\'</span><span style=\"font-family: Baloo;\"> को किस प्रकार कूटबद्ध किया जाएगा?</span></p>",
+                    options_en: ["<p>6724</p>", "<p>7642</p>", 
+                                "<p>7624</p>", "<p>6742</p>"],
+                    options_hi: ["<p>6724</p>", "<p>7642</p>",
+                                "<p>7624</p>", "<p>6742</p>"],
+                    solution_en: "<p>15.(d) <span style=\"font-family: Times New Roman;\">From PARK = 3749 and RACE = 4762,&nbsp;<br></span><span style=\"font-family: Times New Roman;\">we get C = 6, A = 7, R = 4, E = 2.<br></span><span style=\"font-family: Times New Roman;\">So, CARE = 6742</span></p>",
+                    solution_hi: "<p>15.(d) <span style=\"font-family: Baloo;\">PARK = 3749 और RACE से = 4762,&nbsp;<br></span><span style=\"font-family: Baloo;\">हमें मिलता है C = 6, A = 7, R = 4, E = 2.<br></span><span style=\"font-family: Baloo;\">इसलिए, CARE = 6742</span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "16",
+                    section: "6",
+                    question_en: "<p>16.<span style=\"font-family: Times New Roman;\"> In a certain code language, </span><span style=\"font-family: Times New Roman;\">&lsquo;DURABLES&rsquo;</span><span style=\"font-family: Times New Roman;\"> is written as </span><span style=\"font-family: Times New Roman;\">&lsquo;BSVETFMC&rsquo;</span><span style=\"font-family: Times New Roman;\">. How will&nbsp; </span><span style=\"font-family: Times New Roman;\">&lsquo;</span><span style=\"font-family: Times New Roman;\">FEASIBLE&rsquo;</span><span style=\"font-family: Times New Roman;\"> be written in that language?&nbsp;</span></p>",
+                    question_hi: "<p>16.<span style=\"font-family: Baloo;\"> एक निश्चित कूट भाषा में, \'</span><span style=\"font-family: Times New Roman;\">DURABLES\'</span><span style=\"font-family: Baloo;\"> को \'</span><span style=\"font-family: Times New Roman;\">BSVETFMC</span><span style=\"font-family: Baloo;\">\' लिखा जाता है। कैसे </span><span style=\"font-family: Times New Roman;\">\'FEASIBLE\'</span><span style=\"font-family: Baloo;\"> उस भाषा में लिखा जाएगा?</span></p>",
+                    options_en: ["<p>TBFFGMJC</p>", "<p>TDFGFNCJ</p>", 
+                                "<p>TBGHFMDJ</p>", "<p>TBFGFMCJ</p>"],
+                    options_hi: ["<p>TBFFGMJC</p>", "<p>TDFGFNCJ</p>",
+                                "<p>TBGHFMDJ</p>", "<p>TBFGFMCJ</p>"],
+                    solution_en: "<p>16.(d)<br><strong id=\"docs-internal-guid-0013c38c-7fff-d1c8-0e2d-b34bef1fd247\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeRwwxrrgSwNXDKgLUhaXVSLJluNYZGw2MkzIGr-ZQWj77ZeHCMfdRc5BgeeMQdcjjtbc5dRo-SO_1rKiz2zVwgy3IGqVlOUqYZ300MS0xBDY5NA3-_Th29UHIO0Scv42rJFHbTDg?key=7YDQ3QdWop8YGHoQzzIJzLpg\" width=\"163\" height=\"72\"></strong><br>Similarly,<br><strong id=\"docs-internal-guid-75b18cbe-7fff-ea6d-6d70-2e54b4f92dd5\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfiEzOIgr2PIbIKjHq23nB7ZDbQUNcxfh1lloAc9JU6RjwFSfYHJtNW9GnhXFC7taTlN4qLGVBXgY-4-r0Aicxy2STdg7vUO-bpcD93fwQmygpQMM1vJT54dqDHoKcquA68mwgulw?key=7YDQ3QdWop8YGHoQzzIJzLpg\" width=\"161\" height=\"70\"></strong></p>",
+                    solution_hi: "<p>16.(d)<br><strong id=\"docs-internal-guid-0013c38c-7fff-d1c8-0e2d-b34bef1fd247\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeRwwxrrgSwNXDKgLUhaXVSLJluNYZGw2MkzIGr-ZQWj77ZeHCMfdRc5BgeeMQdcjjtbc5dRo-SO_1rKiz2zVwgy3IGqVlOUqYZ300MS0xBDY5NA3-_Th29UHIO0Scv42rJFHbTDg?key=7YDQ3QdWop8YGHoQzzIJzLpg\" width=\"163\" height=\"72\"></strong><br><span style=\"font-family: Baloo;\">इसी तरह,</span><br><strong id=\"docs-internal-guid-75b18cbe-7fff-ea6d-6d70-2e54b4f92dd5\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfiEzOIgr2PIbIKjHq23nB7ZDbQUNcxfh1lloAc9JU6RjwFSfYHJtNW9GnhXFC7taTlN4qLGVBXgY-4-r0Aicxy2STdg7vUO-bpcD93fwQmygpQMM1vJT54dqDHoKcquA68mwgulw?key=7YDQ3QdWop8YGHoQzzIJzLpg\" width=\"161\" height=\"70\"></strong>&nbsp;</p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "17",
+                    section: "6",
+                    question_en: "<p>17.<span style=\"font-family: Times New Roman;\"> In a certain code language, \'take this vaccine\' is written as \'892\', \'vaccine protects us\'&nbsp; </span><span style=\"font-family: Times New Roman;\">is written as \'263\', and \'take us safe\' is written as \'593\'. How will \'safe vaccine\' be written in that language?&nbsp;</span></p>",
+                    question_hi: "<p>17.<span style=\"font-family: Baloo;\"> एक निश्चित कोड भाषा में, \'take this vaccine\' को \'892\' लिखा जाता है, \'vaccine protects us\' को \'263\' और \'take us safe\' को \'593\' लिखा जाता है। उस भाषा में &lsquo;safe vaccine\' कैसे लिखा जाएगा?</span></p>",
+                    options_en: ["<p>85</p>", "<p>25</p>", 
+                                "<p>23</p>", "<p>26</p>"],
+                    options_hi: ["<p>85</p>", "<p>25</p>",
+                                "<p>23</p>", "<p>26</p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>"],
+                    solution_en: "<p>17.(b) <span style=\"font-family: Times New Roman;\">From \'take this vaccine\' and \'vaccine protects us\', we get &lsquo;vaccine&rsquo; = 2.<br></span><span style=\"font-family: Times New Roman;\">From \'take this vaccine\' and \'take us safe\', we get &lsquo;take&rsquo; = 9.<br></span><span style=\"font-family: Times New Roman;\">From \'vaccine protects us\' and \'take us safe\', we get &lsquo;us&rsquo; = 3.<br></span><span style=\"font-family: Times New Roman;\">On comparing the obtained codes with \'take us safe\' we get &lsquo;safe&rsquo; = 5,&nbsp;<br></span><span style=\"font-family: Times New Roman;\">so &lsquo;safe vaccine&rsquo; = 25 </span></p>",
+                    solution_hi: "<p>17.(b) <span style=\"font-family: Baloo;\">\'take this vaccine\' और \'vaccine protects us\' से हमें &lsquo;vaccine&rsquo; मिलती है = 2<br></span><span style=\"font-family: Baloo;\">\'take this vaccine\' और \'take us safe\' से, हमें &lsquo;take&rsquo; मिलता है = 9<br></span><span style=\"font-family: Baloo;\">\'vaccine protects us\' और \'take us safe\' से हमें &lsquo;us&rsquo; मिलता है = 3<br></span><span style=\"font-family: Baloo;\">प्राप्त कूटों की तुलना \'take us safe\' से करने पर हमें &lsquo;safe&rsquo; प्राप्त होता है। = 5<br></span><span style=\"font-family: Baloo;\">इसलिए &lsquo;safe vaccine&rsquo; = 25</span></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "18",
+                    section: "6",
+                    question_en: "<p>18. <span style=\"font-family: Times New Roman;\">In a certain code language, </span><span style=\"font-family: Times New Roman;\">&lsquo;SALT&rsquo;</span><span style=\"font-family: Times New Roman;\"> is coded as </span><span style=\"font-family: Times New Roman;\">&lsquo;16&rsquo;</span><span style=\"font-family: Times New Roman;\">, and </span><span style=\"font-family: Times New Roman;\">&lsquo;PICKLE&rsquo; </span><span style=\"font-family: Times New Roman;\">is coded as &lsquo;</span><span style=\"font-family: Times New Roman;\">36</span><span style=\"font-family: Times New Roman;\">&rsquo;. How </span><span style=\"font-family: Times New Roman;\">will &lsquo;</span><span style=\"font-family: Times New Roman;\">PRESERVATIVE&rsquo; </span><span style=\"font-family: Times New Roman;\">be coded in that language?</span></p>",
+                    question_hi: "<p>18.<span style=\"font-family: Baloo;\"> एक निश्चित कोड भाषा में, \'SALT\' को \'16\' के रूप में कोडित किया जाता है, और \'PICKLE\' को \'36\' के रूप में कोडित किया जाता है। कैसे क्या उस भाषा में \'PRESERVATIVE\' को कूटबद्ध किया जाएगा?</span></p>",
+                    options_en: ["<p>144</p>", "<p>88</p>", 
+                                "<p>72</p>", "<p>96</p>"],
+                    options_hi: ["<p>144</p>", "<p>88</p>",
+                                "<p>72</p>", "<p>96</p>"],
+                    solution_en: "<p>18.(a) <span style=\"font-family: Times New Roman;\"><strong>Logic </strong>:</span><span style=\"font-family: Times New Roman;\"> (Number of letters in a given word)<sup>2<br></sup></span><span style=\"font-family: Times New Roman;\">In SALT, number of letters = 4, so SALT = 4<sup>2</sup> </span><span style=\"font-family: Times New Roman;\">= 16<br></span><span style=\"font-family: Times New Roman;\">In PICKLE, number of letters = 6, so PICKLE = 6<sup>2 </sup></span><span style=\"font-family: Times New Roman;\">= 36<br></span><span style=\"font-family: Times New Roman;\"><strong>Similarly,</strong> <br>in PRESERVATIVE, number of letters = 12,&nbsp;<br></span><span style=\"font-family: Times New Roman;\">so PRESERVATIVE = 12<sup>2 </sup></span><span style=\"font-family: Times New Roman;\">= 144 </span></p>",
+                    solution_hi: "<p>18.(a) <span style=\"font-family: Baloo;\"><strong>तर्क </strong>:</span><span style=\"font-family: Times New Roman;\"> (दिए गए शब्द में अक्षरों की संख्या)<span style=\"font-family: Baloo;\"><span style=\"font-family: Times New Roman;\"><sup>2</sup></span></span><br></span><span style=\"font-family: Baloo;\">SALT में अक्षरों की संख्या = 4, अतः SALT = 4<span style=\"font-family: Times New Roman;\"><sup>2 </sup></span></span><span style=\"font-family: Times New Roman;\">= 16<br></span><span style=\"font-family: Baloo;\">PICKLE में अक्षरों की संख्या = 6, अतः PICKLE = 6<span style=\"font-family: Times New Roman;\"><sup>2 </sup></span></span><span style=\"font-family: Times New Roman;\">= 36<br></span><span style=\"font-family: Baloo;\"><strong>इसी प्रकार,&nbsp;</strong><br></span><span style=\"font-family: Baloo;\">PRESERVATIVE में, अक्षरों की संख्या = 12,<br></span><span style=\"font-family: Baloo;\">इसलिए PRESERVATIVE = 12<span style=\"font-family: Times New Roman;\"><sup>2 </sup></span></span><span style=\"font-family: Times New Roman;\">= 144</span></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "19",
+                    section: "6",
+                    question_en: "<p>19.<span style=\"font-family: Times New Roman;\"> In a certain code language, </span><span style=\"font-family: Times New Roman;\">\'POTATO\'</span><span style=\"font-family: Times New Roman;\"> is coded as </span><span style=\"font-family: Times New Roman;\">32-30-40-2-40-30</span><span style=\"font-family: Times New Roman;\"> and </span><span style=\"font-family: Times New Roman;\">\'TURNIP\'</span><span style=\"font-family: Times New Roman;\"> is coded as </span><span style=\"font-family: Times New Roman;\">40-42-36-28-18-32</span><span style=\"font-family: Times New Roman;\">. How will </span><span style=\"font-family: Times New Roman;\">\'RADISH\'</span><span style=\"font-family: Times New Roman;\"> be coded in that language?&nbsp;</span></p>",
+                    question_hi: "<p>19.<span style=\"font-family: Baloo;\">एक निश्चित कूट भाषा में </span><span style=\"font-family: Times New Roman;\">\'POTATO\'</span><span style=\"font-family: Baloo;\"> को </span><span style=\"font-family: Times New Roman;\">32-30-40-2-40-30</span><span style=\"font-family: Baloo;\"> और</span><span style=\"font-family: Times New Roman;\"> \'TURNIP\' </span><span style=\"font-family: Baloo;\">को </span><span style=\"font-family: Times New Roman;\">40-42-36-28-18-32 </span><span style=\"font-family: Baloo;\">के रूप में कोडित किया जाता है। उसी भाषा में </span><span style=\"font-family: Times New Roman;\">\'RADISH\'</span><span style=\"font-family: Baloo;\"> को किस प्रकार कोडित किया जाएगा?</span></p>",
+                    options_en: ["<p>36-1-4-19-16-15</p>", "<p>18-2-4-19-18-20</p>", 
+                                "<p>18-1-8-38-18-16</p>", "<p>36-2-8-18-38-16</p>"],
+                    options_hi: ["<p>36-1-4-19-16-15</p>", "<p>18-2-4-19-18-20</p>",
+                                "<p>18-1-8-38-18-16</p>", "<p>36-2-8-18-38-16</p>"],
+                    solution_en: "<p>19.(d) <strong>Logic</strong>:<span style=\"font-family: Times New Roman;\"> In the given question just double the place value of the letters.</span></p>",
+                    solution_hi: "<p>19.(d)<span style=\"font-family: Times New Roman;\"> </span><span style=\"font-family: Baloo;\"><strong>तर्क</strong>: </span><span style=\"font-family: Baloo;\">दिए गए प्रश्न में अक्षरों के स्थानीय मान को दुगुना कर दें।</span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "20",
+                    section: "misc",
+                    question_en: "<p>20.<span style=\"font-family: Times New Roman;\"> In a certain code language,</span><span style=\"font-family: Times New Roman;\"> &lsquo;this is fact&rsquo; </span><span style=\"font-family: Times New Roman;\">is written as</span><span style=\"font-family: Times New Roman;\"> &lsquo;cuz duz ruz&rsquo;,</span><span style=\"font-family: Times New Roman;\"> &lsquo;</span><span style=\"font-family: Times New Roman;\">fact is fictional&rsquo;</span><span style=\"font-family: Times New Roman;\"> is written as &lsquo;</span><span style=\"font-family: Times New Roman;\">guz ruz cuz&rsquo;,</span><span style=\"font-family: Times New Roman;\"> and </span><span style=\"font-family: Times New Roman;\">&lsquo;doubt is clear&rsquo; i</span><span style=\"font-family: Times New Roman;\">s written as &lsquo;</span><span style=\"font-family: Times New Roman;\">cuz kuz buz&rsquo;.</span><span style=\"font-family: Times New Roman;\"> How will &lsquo;this is fictional&rsquo; be written in that language?&nbsp;</span></p>",
+                    question_hi: "<p>20.<span style=\"font-family: Baloo;\"> एक निश्चित कूट भाषा में, </span><span style=\"font-family: Times New Roman;\">\'this is fact\' </span><span style=\"font-family: Baloo;\">को </span><span style=\"font-family: Times New Roman;\">\'cuz duz ruz\'</span><span style=\"font-family: Baloo;\"> के रूप में लिखा जाता है, </span><span style=\"font-family: Times New Roman;\">\'fact is fictional\' </span><span style=\"font-family: Baloo;\">को \'</span><span style=\"font-family: Times New Roman;\">guz ruz cuz\' </span><span style=\"font-family: Baloo;\">के रूप में लिखा जाता है, और </span><span style=\"font-family: Times New Roman;\">\'doubt is clear\' </span><span style=\"font-family: Baloo;\">को </span><span style=\"font-family: Times New Roman;\">\'cuz kuz buz\'</span><span style=\"font-family: Baloo;\"> के रूप में लिखा जाता है। उस भाषा में &lsquo;this is fictional&rsquo; कैसे लिखा जाएगा?&nbsp;</span></p>",
+                    options_en: ["<p>duz guz ruz</p>", "<p>duz buz cuz</p>", 
+                                "<p>kuz guz ruz</p>", "<p>duz guz cuz</p>"],
+                    options_hi: ["<p>duz guz ruz</p>", "<p>duz buz cuz</p>",
+                                "<p>kuz guz ruz</p>", "<p>duz guz cuz</p>"],
+                    solution_en: "<p>20.(d) <span style=\"font-family: Times New Roman;\">From &lsquo;this is fact&rsquo; and &lsquo;doubt is clear&rsquo;, we get &lsquo;is&rsquo; = &lsquo;cuz&rsquo;.<br></span><span style=\"font-family: Times New Roman;\">From &lsquo;this is fact&rsquo; and &lsquo;fact is fictional&rsquo;, we get &lsquo;this&rsquo; = &lsquo;duz&rsquo; and &lsquo;fictional&rsquo; = &lsquo;guz&rsquo;.<br></span><span style=\"font-family: Times New Roman;\">So, &lsquo;this is fictional&rsquo; = &lsquo;duz guz cuz&rsquo; </span></p>",
+                    solution_hi: "<p>20.(d) <span style=\"font-family: Baloo;\">&lsquo;this is fact&rsquo; और &lsquo;doubt is clear&rsquo; से, हमें \'is\' = \'cuz\' मिलता है।<br></span><span style=\"font-family: Baloo;\">&lsquo;this is fact&rsquo;\' और &lsquo;fact is fictional&rsquo; से, हमें &lsquo;this&rsquo; = &lsquo;duz&rsquo; और &lsquo;fictional&rsquo; = &lsquo;guz&rsquo; प्राप्त होता है<br></span><span style=\"font-family: Baloo;\">इसलिए , &lsquo;this is fictional&rsquo; = &lsquo;duz guz cuz&rsquo; </span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+            
+            // Generate question boxes
+            const boxesContainer = document.getElementById('question-boxes');
+            questions.forEach((q, index) => {
+                const box = document.createElement('div');
+                box.className = 'q-box';
+                box.textContent = index + 1;
+                box.onclick = () => showQuestion(index);
+                box.id = `box-${index}`;
+                boxesContainer.appendChild(box);
+            });
+            
+            // Show first question
+            showQuestion(0);
+            updateProgress();
+        }
+        
+        // Show a specific question
+        
+        function formatContent(text) {
+            if (!text) return '';
+            return text.replace(/<img/g, '<img style="max-width:100%;height:auto;"');
+        }
+        
+        function showQuestion(index) {
+            if (index < 0 || index >= questions.length) return;
+            
+            currentQuestion = index;
+            const question = questions[index];
+            
+            // Update question counter
+            document.getElementById('question-counter').textContent = `Question ${index + 1} of ${questions.length}`;
+            
+            // Update question boxes
+            document.querySelectorAll('.q-box').forEach(box => box.classList.remove('current'));
+            document.getElementById(`box-${index}`).classList.add('current');
+            
+            // Generate question HTML
+            let html = `
+                <div class="question-card">
+                    <div class="question-text">
+                        <div class="en">${formatContent(question.question_en)}</div>
+                        <div class="hi" style="display:none">${formatContent(question.question_hi)} </div>
+                    </div>
+                    <div class="options" id="options-container">`;
+            
+            // Add options
+            ['a', 'b', 'c', 'd'].forEach((opt, i) => {
+                let optionClass = '';
+                let isCorrectAnswer = opt === question.correct;
+                let isUserAnswer = answers[question.id] === opt;
+                
+                // When reviewing, add appropriate classes
+                if (submitted) {
+                    if (isCorrectAnswer) {
+                        optionClass += ' correct-answer';
+                    } else if (isUserAnswer && !isCorrectAnswer) {
+                        optionClass += ' incorrect';
+                    }
+                }
+                
+                html += `
+                    <div class="option-item">
+                        <input class="option-input" type="radio" name="q${index}" 
+                            id="opt-${index}-${opt}" value="${opt}" 
+                            ${isUserAnswer ? 'checked' : ''}
+                            onclick="selectAnswer('${question.id}', '${opt}')">
+                       <label class="option-label${optionClass}" for="opt-${index}-${opt}">
+                            <div class="en">${question.options_en[i]}</div>
+                            <div class="hi" style="display:none">${question.options_hi[i]}</div>
+                        </label>
+                    </div>`;
+            });
+            
+            // Add solution if submitted
+            if (submitted) {
+                const isCorrect = answers[question.id] === question.correct;
+                const resultText = answers[question.id] ? (isCorrect ? 'Correct!' : 'Incorrect!') : 'Not attempted';
+                
+                html += `
+                    <div class="solution-container">
+                        <div class="solution-title">${resultText}</div>
+                        <div class="solution-text">
+                            <div class="en">${question.solution_en}</div>
+                            <div class="hi" style="display:none">${question.solution_hi}</div>
+                        </div>
+                    </div>`;
+            }
+            
+            html += `</div></div>`;
+            
+            document.getElementById('questions-container').innerHTML = html;
+            
+            // Apply language settings
+            applyLanguage();
+            
+            // If in mobile view, close the menu
+            if (window.innerWidth < 992) {
+                toggleNav(false);
+            }
+            
+            // Add review mode class if submitted
+            if (submitted) {
+                document.getElementById('options-container').classList.add('review-mode');
+            }
+        }
+        
+        // Apply current language
+        function applyLanguage() {
+            document.querySelectorAll(`.${currentLang}`).forEach(el => el.style.display = 'block');
+            document.querySelectorAll(`.${currentLang === 'en' ? 'hi' : 'en'}`).forEach(el => el.style.display = 'none');
+            
+            // Update language button text
+            document.getElementById('lang-text').textContent = currentLang === 'en' ? 'Hi' : 'En';
+        }
+        
+        // Select an answer
+        function selectAnswer(qId, option) {
+            if (submitted) return;
+            
+            answers[qId] = option;
+            updateProgress();
+            
+            // Mark question as attempted in the navigation
+            const index = questions.findIndex(q => q.id === qId);
+            if (index >= 0) {
+                const box = document.getElementById(`box-${index}`);
+                box.classList.add('attempted');
+                box.classList.remove('unattempted');
+            }
+        }
+        
+        // Navigate to previous/next question
+        function prevQuestion() { 
+            if (currentQuestion > 0) showQuestion(currentQuestion - 1); 
+        }
+        
+        function nextQuestion() { 
+            if (currentQuestion < questions.length - 1) showQuestion(currentQuestion + 1); 
+        }
+        
+        // Switch section
+        function switchSection(sectionId) {
+            if (sectionId === 'all') {
+                showQuestion(0);
+                return;
+            }
+            
+            const section = sections[sectionId];
+            if (section) showQuestion(section.start);
+        }
+        
+        // Toggle language
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'hi' : 'en';
+            applyLanguage();
+        }
+        
+        // Toggle navigation sidebar
+        function toggleNav(show) {
+            const nav = document.getElementById('question-nav');
+            const overlay = document.getElementById('nav-overlay');
+            
+            if (show === undefined) {
+                show = !nav.classList.contains('show');
+            }
+            
+            if (show) {
+                nav.classList.add('show');
+                overlay.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            } else {
+                nav.classList.remove('show');
+                overlay.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+        }
+        
+        // Update progress
+        function updateProgress() {
+            const attempted = Object.keys(answers).length;
+            document.getElementById('attempted-count').textContent = attempted;
+        }
+        
+        // Start timer
+        function startTimer() {
+            const timerDisplay = document.getElementById('timer-display');
+            let timeLeft = totalTime;
+            
+            const timerInterval = setInterval(() => {
+                if (timeLeft <= 0 || submitted) {
+                    clearInterval(timerInterval);
+                    if (!submitted) submitTest();
+                    return;
+                }
+                
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                timeLeft--;
+            }, 1000);
+        }
+        
+        // Confirm before submitting
+        function confirmSubmit() {
+            if (submitted) return;
+            
+            const attempted = Object.keys(answers).length;
+            const remaining = questions.length - attempted;
+            
+            // Create a more modern confirmation dialog
+            const confirmHtml = `
+                <div style="text-align: center; padding: 20px;">
+                    <h4 style="margin-bottom: 16px; color: var(--dark);">Confirm Submission</h4>
+                    <p style="margin-bottom: 24px; color: var(--gray);">
+                        You have attempted ${attempted} of ${questions.length} questions.<br>
+                        ${remaining} questions are unattempted.
+                    </p>
+                    <div style="display: flex; justify-content: center; gap: 12px;">
+                        <button onclick="this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; border: 1px solid var(--light-gray); background: white; border-radius: 8px; cursor: pointer;">
+                            Cancel
+                        </button>
+                        <button onclick="submitTest(); this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer;">
+                            Submit Test
+                        </button>
+                    </div>
+                </div>`;
+            
+            // Create modal element
+            const modal = document.createElement('div');
+            modal.className = 'results-modal show';
+            modal.innerHTML = `
+                <div class="results-card" style="max-width: 400px;">
+                    <button class="cancel-btn" style="position: absolute; top: 12px; right: 12px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--gray);" onclick="this.closest('.results-modal').remove()">
+                        ×
+                    </button>
+                    ${confirmHtml}
+                </div>`;
+            
+            document.body.appendChild(modal);
+        }
+        
+        // Submit test
+        function submitTest() {
+            if (submitted) return;
+            
+            submitted = true;
+            
+            let score = 0;
+            let correctCount = 0;
+            let incorrectCount = 0;
+            let unattemptedCount = 0;
+            
+            questions.forEach((q, index) => {
+                const userAns = answers[q.id];
+                const box = document.getElementById(`box-${index}`);
+                
+                box.classList.remove('attempted');
+                
+                if (!userAns) {
+                    unattemptedCount++;
+                    box.classList.add('unattempted');
+                } else if (userAns === q.correct) {
+                    correctCount++;
+                    score += q.pos_marks;
+                    box.classList.add('correct');
+                } else {
+                    incorrectCount++;
+                    score -= q.neg_marks;
+                    box.classList.add('incorrect');
+                }
+            });
+            
+            // Update result values
+            document.getElementById('score-value').textContent = score.toFixed(2);
+            document.getElementById('correct-value').textContent = correctCount;
+            document.getElementById('incorrect-value').textContent = incorrectCount;
+            document.getElementById('unattempted-value').textContent = unattemptedCount;
+            
+            // Show the results modal
+            document.getElementById('results-modal').classList.add('show');
+            
+            // Disable submit button
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-check"></i>';
+            submitBtn.style.backgroundColor = 'var(--success)';
+            
+            // Refresh current question view to show solution
+            showQuestion(currentQuestion);
+        }
+        
+        // Review test
+        function reviewTest() {
+            document.getElementById('results-modal').classList.remove('show');
+            showQuestion(0);
+        }
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target === document.getElementById('results-modal')) {
+                document.getElementById('results-modal').classList.remove('show');
+            }
+        });
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') prevQuestion();
+            if (e.key === 'ArrowRight') nextQuestion();
+        });
+    </script>
+</body>
+</html>
