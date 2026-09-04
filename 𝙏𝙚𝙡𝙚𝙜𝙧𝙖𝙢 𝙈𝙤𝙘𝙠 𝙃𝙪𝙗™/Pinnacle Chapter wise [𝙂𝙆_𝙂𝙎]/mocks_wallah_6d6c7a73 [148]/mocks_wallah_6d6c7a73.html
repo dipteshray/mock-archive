@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mocks Wallah</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --primary-light: #a29bfe;
+            --primary-dark: #5649c0;
+            --secondary: #00cec9;
+            --accent: #fd79a8;
+            --success: #00b894;
+            --warning: #fdcb6e;
+            --danger: #d63031;
+            --light: #f8f9fa;
+            --dark: #2d3436;
+            --gray: #636e72;
+            --light-gray: #dfe6e9;
+            --card-bg: #ffffff;
+            --body-bg: #f5f6fa;
+            --header-bg: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            --footer-bg: #ffffff;
+            --box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            --box-shadow-sm: 0 2px 10px rgba(0,0,0,0.05);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background-color: var(--body-bg);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            color: var(--dark);
+            line-height: 1.6;
+            padding-bottom: 80px; /* Space for fixed navigation */
+            overflow-x: hidden;
+        }
+        
+        /* Header Styles */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: var(--header-bg);
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            z-index: 1000;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .header-brand {
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .header-brand i {
+            margin-right: 8px;
+            font-size: 1.2rem;
+        }
+        
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .control-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .control-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .control-btn.active {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .timer-display {
+            background: rgba(0,0,0,0.2);
+            border-radius: 18px;
+            padding: 4px 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+        
+        .timer-display i {
+            margin-right: 6px;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-top: 60px;
+            padding: 16px;
+            min-height: calc(100vh - 140px);
+        }
+        
+        .question-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--box-shadow-sm);
+            border: none;
+            transition: var(--transition);
+        }
+        
+        .question-counter {
+            font-size: 0.9rem;
+            color: var(--gray);
+            text-align: center;
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+        
+        .question-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+        
+        .option-item {
+            margin-bottom: 12px;
+            position: relative;
+        }
+        
+        .option-input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+            .question-text {
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        hyphens: auto;
+        max-width: 100%;
+    }
+
+    .question-text img,
+    .option-label img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 8px 0;
+        border-radius: 8px;
+    }
+
+    .option-label {
+        overflow: hidden;
+    }
+
+    .question-card {
+        overflow: hidden;
+    }
+        
+        .option-label {
+            display: block;
+            padding: 14px 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--light-gray);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .option-label:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .option-input:checked + .option-label {
+            border-color: var(--primary);
+            background: rgba(108, 92, 231, 0.05);
+            box-shadow: 0 0 0 1px var(--primary);
+        }
+        
+        .option-input:checked + .option-label::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--primary);
+        }
+        
+        /* When reviewing answers */
+        .review-mode .option-input:checked + .option-label.correct {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.correct::after {
+            background: var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.incorrect {
+            border-color: var(--danger);
+            background: rgba(214, 48, 49, 0.05);
+            box-shadow: 0 0 0 1px var(--danger);
+        }
+        
+        .MathJax, .mjx-chtml {
+            overflow-x: auto;
+            max-width: 100%;
+            display: inline-block;
+        }
+
+        
+        .review-mode .option-input:checked + .option-label.incorrect::after {
+            background: var(--danger);
+        }
+        
+        .review-mode .option-label.correct-answer {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-label.correct-answer::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--success);
+        }
+        
+        .solution-container {
+            margin-top: 20px;
+            padding: 16px;
+            background: rgba(108, 92, 231, 0.05);
+            border-radius: 12px;
+            border-left: 3px solid var(--primary);
+        }
+        
+        .solution-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+        
+        /* Question Navigation */
+        .question-nav {
+            position: fixed;
+            top: 60px;
+            right: 0;
+            bottom: 80px;
+            width: 100%;
+            max-width: 320px;
+            background: var(--card-bg);
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            transform: translateX(100%);
+            transition: var(--transition);
+            z-index: 900;
+            overflow-y: auto;
+            padding: 16px;
+        }
+        
+        .question-nav.show {
+            transform: translateX(0);
+        }
+        
+        .nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .nav-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+        
+        .question-stats {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .stat-badge {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        
+        .section-selector {
+            width: 100%;
+            margin-bottom: 16px;
+            border-radius: 12px;
+            padding: 10px 16px;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            font-size: 0.9rem;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 16px;
+        }
+        
+        .question-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+            gap: 8px;
+        }
+        
+        .q-box {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .q-box:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .q-box.attempted {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .q-box.correct {
+            background-color: var(--success);
+            color: white;
+            border-color: var(--success);
+        }
+        
+        .q-box.incorrect {
+            background-color: var(--danger);
+            color: white;
+            border-color: var(--danger);
+        }
+        
+        .q-box.current {
+            border: 2px solid var(--accent) !important;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .q-box.unattempted {
+            background-color: var(--gray);
+            color: white;
+            border-color: var(--gray);
+        }
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: var(--footer-bg);
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            z-index: 800;
+        }
+        
+        .nav-btn {
+            height: 48px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 20px;
+            transition: var(--transition);
+            gap: 8px;
+        }
+        
+        .nav-btn i {
+            font-size: 1rem;
+        }
+        
+        .nav-btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .nav-btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+        
+        .nav-btn-outline:hover {
+            background: rgba(108, 92, 231, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        /* Overlay when nav is open */
+        .nav-overlay {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            bottom: 80px;
+            background: rgba(0,0,0,0.5);
+            z-index: 800;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+        }
+        
+        .nav-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        /* Results Modal */
+        .results-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1100;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+            padding: 16px;
+        }
+        
+        .results-modal.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .results-card {
+            background: white;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+            transform: translateY(20px);
+            transition: var(--transition);
+        }
+        
+        .results-modal.show .results-card {
+            transform: translateY(0);
+        }
+        
+        .results-header {
+            background: var(--header-bg);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .results-title {
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .results-body {
+            padding: 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            color: white;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+        
+        .results-footer {
+            padding: 16px 20px;
+            display: flex;
+            justify-content: center;
+            border-top: 1px solid var(--light-gray);
+        }
+        
+        /* Responsive Adjustments */
+        @media (min-width: 992px) {
+            .question-nav {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-right: 320px;
+            }
+            
+            .nav-overlay {
+                display: none;
+            }
+            
+            .bottom-nav {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .question-grid {
+                grid-template-columns: repeat(auto-fill, minmax(36px, 1fr));
+                gap: 6px;
+            }
+            
+            .q-box {
+                width: 36px;
+                height: 36px;
+                font-size: 0.9rem;
+            }
+            
+            .option-label {
+                padding: 12px 14px;
+            }
+            
+            .question-text {
+                font-size: 1rem;
+            }
+            
+            .header-brand {
+                font-size: 1rem;
+            }
+            
+            .control-btn {
+                width: 32px;
+                height: 32px;
+            }
+            
+            .timer-display {
+                font-size: 0.8rem;
+                padding: 4px 10px;
+            }
+            
+            .nav-btn {
+                height: 44px;
+                padding: 0 16px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="#" class="header-brand">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Mocks Wallah</span>
+            </a>
+            
+            <div class="header-controls">
+                <!-- Timer -->
+                <div class="timer-display">
+                    <i class="far fa-clock"></i>
+                    <span id="timer-display">5:00</span>
+                </div>
+                
+                <!-- Language toggle -->
+                <button class="control-btn" id="lang-btn" onclick="toggleLanguage()">
+                    <span id="lang-text">En</span>
+                </button>
+                
+                <!-- Submit button -->
+                <button class="control-btn" id="submit-btn" onclick="confirmSubmit()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+                
+                <!-- Questions toggle for mobile -->
+                <button class="control-btn nav-toggle-btn" id="nav-toggle" onclick="toggleNav()">
+                    <i class="fas fa-th"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main content -->
+    <main class="main-content" id="main-content">
+        <div class="question-counter" id="question-counter">Question 1 of 17</div>
+        
+        <!-- Questions will be displayed here -->
+        <div id="questions-container"></div>
+    </main>
+    
+    <!-- Overlay for mobile nav -->
+    <div class="nav-overlay" id="nav-overlay" onclick="toggleNav(false)"></div>
+    
+    <!-- Question navigation sidebar -->
+    <aside class="question-nav" id="question-nav">
+        <div class="nav-header">
+            <h3 class="nav-title">Questions</h3>
+            <div class="question-stats">
+                <span class="stat-badge bg-primary" id="attempted-count">0</span>
+                <span class="stat-badge bg-gray" id="total-count">17</span>
+                <button class="control-btn d-lg-none" onclick="toggleNav(false)">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Section selector -->
+        <select class="section-selector" id="section-selector" onchange="switchSection(this.value)">
+            <option value="all">All Sections</option>
+        </select>
+        
+        <!-- Question grid -->
+        <div class="question-grid" id="question-boxes"></div>
+    </aside>
+    
+    <!-- Bottom navigation for mobile -->
+    <nav class="bottom-nav d-lg-none">
+        <button class="nav-btn nav-btn-outline" onclick="prevQuestion()">
+            <i class="fas fa-chevron-left"></i>
+            <span>Previous</span>
+        </button>
+        <button class="nav-btn nav-btn-outline" onclick="nextQuestion()">
+            <span>Next</span>
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </nav>
+    
+    <!-- Results modal -->
+    <div class="results-modal" id="results-modal">
+        <div class="results-card">
+            <div class="results-header">
+                <h3 class="results-title">Test Results</h3>
+            </div>
+            <div class="results-body">
+                <div class="stats-grid">
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark))">
+                        <div class="stat-value" id="score-value">0</div>
+                        <div class="stat-label">Score</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--success), #1b9aaa)">
+                        <div class="stat-value" id="correct-value">0</div>
+                        <div class="stat-label">Correct</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--danger), var(--accent))">
+                        <div class="stat-value" id="incorrect-value">0</div>
+                        <div class="stat-label">Incorrect</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--gray), var(--dark))">
+                        <div class="stat-value" id="unattempted-value">0</div>
+                        <div class="stat-label">Unattempted</div>
+                    </div>
+                </div>
+            </div>
+            <div class="results-footer">
+                <button class="nav-btn nav-btn-primary" onclick="reviewTest()">
+                    <i class="fas fa-search me-1"></i>
+                    <span>Review Test</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Questions data
+        const questions = [];
+        const sections = {};
+        let currentLang = "en";
+        let currentQuestion = 0;
+        let answers = {};
+        let submitted = false;
+        let totalTime = 5 * 60;
+        
+        // Initialize the test
+        window.onload = function() {
+            initializeTest();
+            startTimer();
+            
+            // If on desktop, show the question navigation by default
+            if (window.innerWidth >= 992) {
+                document.getElementById('question-nav').classList.add('show');
+                document.getElementById('main-content').classList.add('with-nav');
+            }
+        };
+        
+        // Initialize test data
+        function initializeTest() {
+            // Add sections and questions
+            
+            sections["18"] = {
+                name: "General Awareness",
+                start: 0,
+                end: 15
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="18">General Awareness</option>`;
+            
+            sections["misc"] = {
+                name: "Miscellaneous",
+                start: 16,
+                end: 16
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="misc">Miscellaneous</option>`;
+            
+            
+                questions.push({
+                    id: "1",
+                    section: "18",
+                    question_en: "<p>1. Which of the following is an example of &lsquo;Arthropod&rsquo;?</p>",
+                    question_hi: "<p>1.<span style=\"font-family: Palanquin Dark;\"> निम्नलिखित में से कौन \'आर्थ्रोपोड\' का उदाहरण है?</span></p>",
+                    options_en: ["<p>Blood sucking leech</p>", "<p>Hookworm</p>", 
+                                "<p>Earthworm</p>", "<p>Scorpion</p>"],
+                    options_hi: ["<p>रक्त चूसने वाली जोंक</p>", "<p>हुकवर्म</p>",
+                                "<p>केंचुआ</p>", "<p>बिच्छू</p>"],
+                    solution_en: "<p>1.(d) <span style=\"font-family: Palanquin Dark;\">Scorpion is an example of </span><span style=\"font-family: Palanquin Dark;\">&lsquo;<strong>Arthropod</strong>&rsquo;</span><span style=\"font-family: Palanquin Dark;\">. More Examples are </span><span style=\"font-family: Palanquin Dark;\">lobsters, crabs, spiders, mites, insects, centipedes, and millipedes.</span><span style=\"font-family: Palanquin Dark;\"> <strong>Annelida</strong></span><span style=\"font-family: Palanquin Dark;\">- Earthworm, Leeches, Lugworms, Polychaetes. Hookworm- Nematode (phylum Aschelminthes).</span></p>",
+                    solution_hi: "<p>1.(d) <span style=\"font-family: Palanquin Dark;\">बिच्छू \'</span><strong><span style=\"font-family: Palanquin Dark;\">आर्थ्रोपोड</span></strong><span style=\"font-family: Palanquin Dark;\">\' का उदाहरण है। अधिक उदाहरण झींगा मछली, केकड़े, मकड़ी, घुन, कीड़े, सेंटीपीड और मिलीपेड हैं। </span><strong><span style=\"font-family: Palanquin Dark;\">एनेलिडा</span></strong><span style=\"font-family: Palanquin Dark;\">- केंचुए, जोंक, लूगवर्म, पॉलीचेट्स। हुकवर्म- नेमाटोड (फाइलम एस्केल्मिन्थेस)।</span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "2",
+                    section: "18",
+                    question_en: "<p>2.<span style=\"font-family: Palanquin Dark;\"> Saccharomyces Cerevisiae is commonly used to make ______.</span></p>",
+                    question_hi: "<p>2. <span style=\"font-family: Palanquin Dark;\">सच्चारॉयसस सर्विसिए (Saccharomyces Cerevisiae ) का उपयोग आमतौर पर ______ बनाने के लिए किया जाता है।</span></p>",
+                    options_en: ["<p><span style=\"font-family: Palanquin Dark;\">yoghurt</span></p>", "<p>carbonated beverages</p>", 
+                                "<p>cheese</p>", "<p>bread</p>"],
+                    options_hi: ["<p>दही</p>", "<p>कार्बोनेटेड पेय पदार्थ</p>",
+                                "<p>पनीर</p>", "<p>रोटी</p>"],
+                    solution_en: "<p>2.(d) <strong>Saccharomyces Cerevisiae</strong>&nbsp;<span style=\"font-family: Palanquin Dark;\">is commonly used to make bread . It </span><span style=\"font-family: Palanquin Dark;\">is known as &ldquo;brewer\'s yeast&rdquo; or &ldquo;baker\'s yeast&rdquo;. Saccharomyces cerevisiae, a type of budding yeast, is able to ferment sugar into carbon dioxide and alcohol and is commonly used in the baking and brewing industries.</span></p>",
+                    solution_hi: "<p>2.(d) <strong><span style=\"font-family: Palanquin Dark;\">सच्चारॉयसस सर्विसिए (</span></strong><span style=\"font-family: Palanquin Dark;\"><strong>Saccharomyces Cerevisiae)</strong> </span><span style=\"font-family: Palanquin Dark;\">का इस्तेमाल आमतौर पर ब्रेड बनाने के लिए किया जाता है। इसे \"शराब बनाने वाले का खमीर\" या \"बेकर का खमीर\" के रूप में जाना जाता है। सच्चारॉयसस सर्विसिए, एक प्रकार का नवोदित खमीर, चीनी को कार्बन डाइऑक्साइड और अल्कोहल में किण्वित करने में सक्षम है और आमतौर पर इसका उपयोग बेकिंग और शराब बनाने का उद्योग में किया जाता है।</span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "3",
+                    section: "18",
+                    question_en: "<p>3.<span style=\"font-family: Palanquin Dark;\"> Capsaicinoids, carotenoids, phenolics, and vitamins are dominant chemicals in which&nbsp; </span><span style=\"font-family: Palanquin Dark;\">of the following foods?</span></p>",
+                    question_hi: "<p>3. <span style=\"font-family: Palanquin Dark;\">कैप्साइसिनोइड्स, कैरोटीनॉयड, फेनोलिक्स और विटामिन निम्नलिखित में से किस खाद्य पदार्थों में पाए जाने वाले प्रमुख रसायन हैं ?</span></p>",
+                    options_en: ["<p>Carrot</p>", "<p>Garlic</p>", 
+                                "<p>Radish</p>", "<p><span style=\"font-family: Palanquin Dark;\">Chilli</span><span style=\"font-family: Palanquin Dark;\"> </span></p>"],
+                    options_hi: ["<p>गाजर</p>", "<p>लहसुन</p>",
+                                "<p>मूली</p>", "<p>मिर्च</p>"],
+                    solution_en: "<p>3.(d) <span style=\"font-family: Palanquin Dark;\">Capsaicinoids, carotenoids, phenolics, and vitamins are dominant chemicals in </span><strong><span style=\"font-family: Palanquin Dark;\">Chilli</span></strong><span style=\"font-family: Palanquin Dark;\">. </span><span style=\"font-family: Palanquin Dark;\">Caffeic acid is the predominant phenolic acid in </span><strong><span style=\"font-family: Palanquin Dark;\">carrots</span></strong><span style=\"font-family: Palanquin Dark;\">. Allicin chemical gives flavour to </span><strong><span style=\"font-family: Palanquin Dark;\">garlic</span></strong><span style=\"font-family: Palanquin Dark;\">. Four major organic acids are present in the roots of the </span><strong><span style=\"font-family: Palanquin Dark;\">radish</span></strong><span style=\"font-family: Palanquin Dark;\">: oxalic, malic, malonic, and erythorbic acid.</span></p>",
+                    solution_hi: "<p>3.(d) <strong><span style=\"font-family: Palanquin Dark;\">मिर्च</span></strong><span style=\"font-family: Palanquin Dark;\"><strong> </strong>में कैप्साइसिनोइड्स (</span><span style=\"font-family: Palanquin Dark;\">Capsaicinoids)</span><span style=\"font-family: Palanquin Dark;\">, कैरोटीनॉयड (</span><span style=\"font-family: Palanquin Dark;\">carotenoids)</span><span style=\"font-family: Palanquin Dark;\">, फेनोलिक्स (</span><span style=\"font-family: Palanquin Dark;\">phenolics)</span><span style=\"font-family: Palanquin Dark;\"> और विटामिन प्रमुख रसायन हैं। कैफीक एसिड (Caffeic acid) <strong>गाजर </strong>में प्रमुख फेनोलिक एसिड है। एलिसिन (Allicin) रसायन <strong>लहसुन </strong>को स्वाद देता है। <strong>मूली </strong>की जड़ों में चार प्रमुख कार्बनिक अम्ल मौजूद होते हैं: ऑक्सालिक, मैलिक, मैलोनिक और एरिथोरबिक एसिड। </span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "4",
+                    section: "18",
+                    question_en: "<p>4.<span style=\"font-family: Palanquin Dark;\"> Which of the following is a disease caused by drinking contaminated water?</span></p>",
+                    question_hi: "<p>4. <span style=\"font-family: Palanquin Dark;\">निम्न में से कौन दूषित पानी पीने से होने वाला रोग है?</span></p>",
+                    options_en: ["<p>Scurvy</p>", "<p>Cholera</p>", 
+                                "<p>Rickets</p>", "<p><span style=\"font-family: Palanquin Dark;\">Anaemia</span><span style=\"font-family: Palanquin Dark;\"> </span></p>"],
+                    options_hi: ["<p>स्कर्वी</p>", "<p>हैजा</p>",
+                                "<p>रिकेट्स</p>", "<p>एनीमिया</p>"],
+                    solution_en: "<p>4.(b) <span style=\"font-family: Palanquin Dark;\"><strong>Cholera </strong>is a disease caused by drinking contaminated water. </span><span style=\"font-family: Palanquin Dark;\">Scurvy is caused by not having enough </span><strong><span style=\"font-family: Palanquin Dark;\">vitamin C</span></strong><span style=\"font-family: Palanquin Dark;\"> . The most common cause of rickets is a lack of </span><span style=\"font-family: Palanquin Dark;\"><strong>vitamin D</strong> <strong>or calcium</strong></span><span style=\"font-family: Palanquin Dark;\"> in a child\'s diet. Both are essential for children to develop strong and healthy bones. Anaemia is due to </span><strong><span style=\"font-family: Palanquin Dark;\">insufficient iron</span></strong><span style=\"font-family: Palanquin Dark;\">.</span></p>",
+                    solution_hi: "<p>4.(b) <span style=\"font-family: Palanquin Dark;\"><strong>हैजा </strong>दूषित पानी पीने से होने वाली बीमारी है। स्कर्वी रोग पर्याप्त <strong>विटामिन सी </strong>न होने के कारण होता है। रिकेट्स का सबसे आम कारण बच्चे के आहार में </span><strong><span style=\"font-family: Palanquin Dark;\">विटामिन D या कैल्शियम</span></strong><span style=\"font-family: Palanquin Dark;\"> की कमी है। दोनों विटामिन बच्चों को मजबूत और स्वस्थ हड्डियों के विकास के लिए आवश्यक हैं। एनीमिया </span><strong><span style=\"font-family: Palanquin Dark;\">अपर्याप्त आयरन</span></strong><span style=\"font-family: Palanquin Dark;\"> के कारण होता है।</span></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "5",
+                    section: "18",
+                    question_en: "<p>5. <span style=\"font-family: Palanquin Dark;\">Organisms belonging to the phylum ______ are also called &lsquo;flatworms&rsquo;.</span></p>",
+                    question_hi: "<p>5.<span style=\"font-family: Palanquin Dark;\"> ______संघ से संबंधित जीवों को चपटाकृमि \'फ्लैटवर्म\' भी कहा जाता है।</span></p>",
+                    options_en: ["<p>Platyhelminthes</p>", "<p>Ctenophora</p>", 
+                                "<p>Porifera</p>", "<p>Cnidaria</p>"],
+                    options_hi: ["<p><span style=\"font-weight: 400;\">प्लेटिहेल्मिन्थेस (Platyhelminthes)</span></p>", "<p><span style=\"font-weight: 400;\">केटेनोफोरा(Ctenophora)</span></p>",
+                                "<p><span style=\"font-weight: 400;\">पोरिफेरा (Porifera)</span></p>", "<p><span style=\"font-weight: 400;\">निडारिया (Cnidaria)</span></p>"],
+                    solution_en: "<p>5.(a) <span style=\"font-family: Palanquin Dark;\">Organisms belonging to the phylum Platyhelminthes are also called &lsquo;flatworms&rsquo;. </span><strong><span style=\"font-family: Palanquin Dark;\">Platyhelminthes Examples</span></strong><span style=\"font-family: Palanquin Dark;\">- Taenia (Tapeworms), Fasciola (Liver fluke), Taenia saginata (Beef tapeworm), Echinococcus granulosus &ndash; The dog tapeworm .&nbsp;<br></span><strong><span style=\"font-family: Palanquin Dark;\">Ctenophora Examples</span></strong><span style=\"font-family: Palanquin Dark;\">- Mertensia, Thalassocalyce inconstans, Pleurobrachia, Ctenoplana, Coeloplana, Cestum, Hormiphora, Mnemiopsis, Bolinopsis, Velamen.</span><span style=\"font-family: Palanquin Dark;\"> <strong>Porifera examples</strong></span><span style=\"font-family: Palanquin Dark;\">: Clathrina, Sycon, Grantia, Euplectella, Hyalonema, Oscarella, Plakina, Thenea, Cliona, Halichondria, Cladorhiza, Spongilla.</span><span style=\"font-family: Palanquin Dark;\"> </span><strong><span style=\"font-family: Palanquin Dark;\">Cnidaria examples</span></strong><span style=\"font-family: Palanquin Dark;\">- </span><span style=\"font-family: Palanquin Dark;\">corals, hydras, jellyfish, Portuguese men-of-war, sea anemones, sea pens, sea whips, and sea fans.</span></p>",
+                    solution_hi: "<p>5.(a) <span style=\"font-family: Palanquin Dark;\">प्लेटिहेल्मिन्थस फ़ाइलम से संबंधित जीवों को \'फ्लैटवर्म\' भी कहा जाता है। </span><strong><span style=\"font-family: Palanquin Dark;\">प्लेटिहेल्मिन्थेस उदाहरण</span></strong><span style=\"font-family: Palanquin Dark;\">- टेनिया (टेपवर्म), फासिओला (लिवर फ्लूक), टेनिया सागिनाटा (बीफ टैपवार्म), इचिनोकोकस ग्रैनुलोसस(</span><span style=\"font-family: Palanquin Dark;\">श्वान फीता कृमि)</span><span style=\"font-family: Palanquin Dark;\"> - द डॉग टैपवार्म। </span><span style=\"font-family: Palanquin Dark;\"><strong>टेनोफोरा</strong> <strong>(कंकनी)</strong> <strong>उदाहरण</strong></span><span style=\"font-family: Palanquin Dark;\">- मर्टेंसिया, थैलासोकैलिस इनकॉन्स्टेंस, प्लुरोब्राचिया, केटेनोप्लाना, कोलोप्लाना, सेस्टम, होर्मिफोरा, मेनेमिओप्सिस, बोलिनोप्सिस, वेलामेन। </span><strong><span style=\"font-family: Palanquin Dark;\">पोरिफेरा के उदाहरण</span></strong><span style=\"font-family: Palanquin Dark;\">: क्लैथ्रिना, साइकॉन, ग्रांटिया, यूपलेक्टेला, हायलोनिमा, ऑस्करेला, प्लाकिना, थेनिया, क्लियोना, हलीचोंड्रिया, क्लैडोरहिजा, स्पोंजिला। </span><strong><span style=\"font-family: Palanquin Dark;\">निडारिया </span><span style=\"font-family: Palanquin Dark;\">उदाहरण</span></strong><span style=\"font-family: Palanquin Dark;\">- मूंगा </span><span style=\"font-family: Palanquin Dark;\">(</span><span style=\"font-family: Palanquin Dark;\">कोरल)</span><span style=\"font-family: Palanquin Dark;\">, हाइड्रस, जेलीफ़िश, </span><span style=\"font-family: Palanquin Dark;\">पुर्तगाली मैन ओ \'वॉर&rsquo; (मैन-ऑफ-वॉर)</span><span style=\"font-family: Palanquin Dark;\">,</span><span style=\"font-family: Palanquin Dark;\"> समुद्री एनीमोन, </span><span style=\"font-family: Palanquin Dark;\">सी पेन</span><span style=\"font-family: Palanquin Dark;\">, सी-व्हीप और सी-फैन्स ।</span></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "6",
+                    section: "18",
+                    question_en: "<p>6.<span style=\"font-family: Palanquin Dark;\"> &lsquo;Hypnea Indica and Hypnea bullata&rsquo; are types of :</span></p>",
+                    question_hi: "<p>6.<span style=\"font-family: Palanquin Dark;\"> \'हाइपनिया इंडिका&rsquo; और &lsquo;हाइपनिया बुलैटा\' के प्रकार हैं:</span></p>",
+                    options_en: ["<p>green seaweeds</p>", "<p>black seaweeds</p>", 
+                                "<p>yellow seaweeds</p>", "<p>red seaweeds</p>"],
+                    options_hi: ["<p>हरी समुद्री शैवाल</p>", "<p>काले समुद्री शैवाल</p>",
+                                "<p>पीले समुद्री शैवाल</p>", "<p>लाल समुद्री शैवाल</p>"],
+                    solution_en: "<p>6.(d) <span style=\"font-family: Palanquin Dark;\">&lsquo;Hypnea Indica and Hypnea bullata&rsquo; are types of red seaweeds.</span><span style=\"font-family: Palanquin Dark;\"> </span><span style=\"font-family: Palanquin Dark;\">\"<strong>Seaweed</strong>\"</span><span style=\"font-family: Palanquin Dark;\"> is the common name for countless species of marine plants and algae that grow in the ocean as well as in rivers, lakes, and other water bodies. Three types of Seaweed- Brown Algae (Phaeophyta), Green Algae (Chlorophyta),Red Algae (Rhodophyta).</span></p>",
+                    solution_hi: "<p>6.(d)&nbsp;<span style=\"font-family: Palanquin Dark;\">\'हाइपनिया इंडिका और हाइपनिया बुलटा\' लाल समुद्री शैवाल के प्रकार हैं। \"<strong>समुद्री शैवाल</strong>\" समुद्री पौधों और शैवाल की अनगिनत प्रजातियों का सामान्य नाम है जो समुद्र के साथ-साथ नदियों, झीलों और अन्य जल निकायों में उगते हैं। तीन प्रकार के समुद्री शैवाल हैं- भूरा शैवाल (फियोफाइटा), हरा शैवाल (क्लोरोफाइटा), लाल शैवाल (रोडोफाइटा)।</span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "7",
+                    section: "18",
+                    question_en: "<p>7. <span style=\"font-family: Palanquin Dark;\">The scientific name for the domestic ______ is Canis lupus familiaris.</span></p>",
+                    question_hi: "<p>7. <span style=\"font-family: Palanquin Dark;\">घरेलू ______ का वैज्ञानिक नाम कैनिस ल्यूपस फेमिलेरिस है।</span></p>",
+                    options_en: ["<p>buffalo</p>", "<p>cat</p>", 
+                                "<p>dog</p>", "<p>cow</p>"],
+                    options_hi: ["<p>भैंस</p>", "<p>बिल्ली</p>",
+                                "<p>कुत्ता</p>", "<p>गाय</p>"],
+                    solution_en: "<p>7.(c) <span style=\"font-family: Palanquin Dark;\">The scientific name for the domestic </span><strong><span style=\"font-family: Palanquin Dark;\">dog </span></strong><span style=\"font-family: Palanquin Dark;\">is Canis lupus familiaris. Bubalus bubalis - </span><strong><span style=\"font-family: Palanquin Dark;\">Buffalo</span></strong><span style=\"font-family: Palanquin Dark;\">, Felis catus- </span><strong><span style=\"font-family: Palanquin Dark;\">Cat</span></strong><span style=\"font-family: Palanquin Dark;\">, Bos taurus - </span><strong><span style=\"font-family: Palanquin Dark;\">Cow</span></strong><span style=\"font-family: Palanquin Dark;\">. </span></p>",
+                    solution_hi: "<p>7.(c) <span style=\"font-family: Palanquin Dark;\">घरेलू </span><strong><span style=\"font-family: Palanquin Dark;\">कुत्ते</span></strong><span style=\"font-family: Palanquin Dark;\"><strong> </strong>का वैज्ञानिक नाम कैनिस ल्यूपस फेमिलेरिस है। बुबलस बुबलिस - </span><strong><span style=\"font-family: Palanquin Dark;\">भैंस</span></strong><span style=\"font-family: Palanquin Dark;\">, फेलिस कैटस- </span><strong><span style=\"font-family: Palanquin Dark;\">बिल्ली</span></strong><span style=\"font-family: Palanquin Dark;\">, बोस टॉरस - </span><strong><span style=\"font-family: Palanquin Dark;\">गाय</span></strong><span style=\"font-family: Palanquin Dark;\">।</span></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "8",
+                    section: "18",
+                    question_en: "<p>8.<span style=\"font-family: Palanquin Dark;\"> Which of the following does NOT belong to &lsquo;Kingdom Fungi&rsquo;?</span></p>",
+                    question_hi: "<p>8.<span style=\"font-family: Palanquin Dark;\"> निम्नलिखित में से कौन \'किंगडम फंगी\' से संबंधित नहीं है?</span></p>",
+                    options_en: [" <p> Aspergillus</span></p>", " <p> Rhizopus</span></p>", 
+                                " <p> Mucor</span></p>", " <p> Euglena</span></p>"],
+                    options_hi: ["<p><span style=\"font-weight: 400;\">एस्परगिलस(Aspergillus)</span></p>", "<p><span style=\"font-weight: 400;\">राइजोपस(Rhizopus)</span></p>",
+                                "<p><span style=\"font-weight: 400;\">म्यूकर(Mucor)</span></p>", "<p><span style=\"font-weight: 400;\">यूग्लेना(Euglena)</span></p>"],
+                    solution_en: "<p>8.(d) <span style=\"font-family: Palanquin Dark;\">Euglena is a genus of single cell flagellate eukaryotes. </span><strong><span style=\"font-family: Palanquin Dark;\">Euglena </span></strong><span style=\"font-family: Palanquin Dark;\">are unicellular organisms classified into the Kingdom Protista, and the Phylum Euglenophyta. </span><strong><span style=\"font-family: Palanquin Dark;\">Fungi examples</span></strong><span style=\"font-family: Palanquin Dark;\">- Rhizopus, Penicillium and Aspergillus, Taphrina and Puccinia, Lichens and mycorrhiza, Mucor, Saccharomyces, Agaricus, Trichoderma.</span></p>",
+                    solution_hi: "<p>8.(d) <span style=\"font-family: Palanquin Dark;\">यूग्लेना सिंगल सेल फ्लैगेलेट यूकेरियोट्स का एक जीनस है। </span><strong><span style=\"font-family: Palanquin Dark;\">यूग्लेना</span></strong><span style=\"font-family: Palanquin Dark;\"><strong> </strong>एककोशिकीय जीव हैं जिन्हें किंगडम प्रोटिस्टा और फाइलम यूग्लेनोफाइटा में वर्गीकृत किया गया है। <strong>कवक के उदाहरण</strong>- राइजोपस, पेनिसिलियम और एस्परगिलस, टैफ्रिना और पुकिनिया, लाइकेन और माइकोराइजा, म्यूकोर, सैक्रोमाइसेस, अगरिकस, ट्राइकोडर्मा।</span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "9",
+                    section: "18",
+                    question_en: "<p>9. <span style=\"font-family: Palanquin Dark;\">Participation in which of the following activities is NOT recommended for the motor development of a student?</span></p>",
+                    question_hi: "<p>9. <span style=\"font-family: Palanquin Dark;\">एक छात्र के मोटर विकास के लिए निम्नलिखित में से किस गतिविधि में भाग लेने की अनुशंसा नहीं की जाती है?</span></p>",
+                    options_en: ["<p>Playing cricket</p>", "<p>Joining a dance class</p>", 
+                                "<p><span style=\"font-family: Palanquin Dark;\">Attending Yoga sessions</span></p>", "<p>Helping the visually challenge</p>"],
+                    options_hi: ["<p>क्रिकेट खेलना</p>", "<p>एक नृत्य कक्षा में शामिल होना</p>",
+                                "<p>योग सत्र में भाग लेना</p>", "<p>दृष्टिहीन चुनौती में मदद करना</p>"],
+                    solution_en: "<p>9.(d) <span style=\"font-family: Palanquin Dark;\">Examples of Motor Development of students </span><span style=\"font-family: Palanquin Dark;\">include being able to run, hop, balance on one foot, throw and kick a ball, climb up stairs or playground equipment, ride a tricycle, pushing, climbing, bending, throwing, scooping, crawling, kicking, bouncing, dancing, and scooting. </span></p>",
+                    solution_hi: "<p>9.(d) <span style=\"font-family: Palanquin Dark;\">छात्रों के गतिक विकास के उदाहरणों में शामिल हैं: दौड़ना, कूदना, एक पैर पर संतुलन बनाना, गेंद को फेंकना और लात मारना, सीढ़ियों या खेल के उपकरण पर चढ़ना, ट्राइसाइकिल की सवारी करना, धक्का देना, चढ़ना, झुकना, फेंकना ,स्कूपिंग, रेंगना, लात मारना, उछलना, नाचना और स्कूटर चलाना।</span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "10",
+                    section: "18",
+                    question_en: "<p>10.<span style=\"font-family: Palanquin Dark;\"> _______ is a disorder resulting in abnormal electrical discharge from the brain cells causing seizures,</span></p>",
+                    question_hi: "<p>10.<span style=\"font-family: Palanquin Dark;\"> _______ एक विकार है जिसके परिणामस्वरूप मस्तिष्क की कोशिकाओं से असामान्य विद्युत निर्वहन होता है जिससे दौरे पड़ते हैं,</span></p>",
+                    options_en: ["<p>Prostatitis</p>", "<p><span style=\"font-family: Palanquin Dark;\">Hypoglycaemia</span></p>", 
+                                "<p>Epilepsy</p>", "<p>Rheumatoid arthritis</p>"],
+                    options_hi: ["<p>प्रोस्टेटाइटिस</p>", "<p>हाइपोग्लाइकेमिया</p>",
+                                "<p>मिर्गी</p>", "<p>रूमेटोइड गठिया</p>"],
+                    solution_en: "<p>10.(c) <strong>Epilepsy&nbsp;</strong><span style=\"font-family: Palanquin Dark;\"><strong> </strong>is a disorder resulting in abnormal electrical discharge from the brain cells causing seizures. </span><strong><span style=\"font-family: Palanquin Dark;\">Prostatitis </span></strong><span style=\"font-family: Palanquin Dark;\">is a disorder of the prostate gland usually associated with inflammation. A low blood sugar level, also called </span><strong><span style=\"font-family: Palanquin Dark;\">hypoglycaemia</span></strong><span style=\"font-family: Palanquin Dark;\"><strong> </strong>is where the level of sugar (glucose) in your blood drops too low. </span><strong><span style=\"font-family: Palanquin Dark;\">Rheumatoid arthritis</span></strong><span style=\"font-family: Palanquin Dark;\"> is </span><span style=\"font-family: Palanquin Dark;\">a chronic inflammatory disorder affecting many joints, including those in the hands and feet.</span></p>",
+                    solution_hi: "<p>10.(c) <strong><span style=\"font-family: Palanquin Dark;\">मिर्गी</span></strong><span style=\"font-family: Palanquin Dark;\"><strong> </strong>एक विकार है जिसके परिणामस्वरूप मस्तिष्क की कोशिकाओं से असामान्य विद्युत निर्वहन होता है जिससे दौरे पड़ते हैं। </span><strong><span style=\"font-family: Palanquin Dark;\">प्रोस्टेटाइटिस</span></strong><span style=\"font-family: Palanquin Dark;\"><strong> </strong>प्रोस्टेट ग्रंथि का एक विकार है जो आमतौर पर सूजन से जुड़ा होता है। एक निम्न रक्त शर्करा का स्तर, जिसे </span><strong><span style=\"font-family: Palanquin Dark;\">हाइपोग्लाइकेमिया</span></strong><span style=\"font-family: Palanquin Dark;\"><strong> </strong>भी कहा जाता है, जहां आपके रक्त में शर्करा (ग्लूकोज) का स्तर बहुत कम हो जाता है। </span><strong><span style=\"font-family: Palanquin Dark;\">रूमेटोइड गठिया</span></strong><span style=\"font-family: Palanquin Dark;\"> एक पुरानी सूजन संबंधी विकार है जो हाथों और पैरों सहित कई जोड़ों को प्रभावित करता है।</span></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "11",
+                    section: "18",
+                    question_en: "<p>11.<span style=\"font-family: Palanquin Dark;\"> Bacille Calmette-Gu&eacute;rin (BCG) is a vaccine for______</span></p>",
+                    question_hi: "<p>11.<span style=\"font-family: Palanquin Dark;\"> बेसिल कैलमेट-गुएरिन (BCG) ________ के लिए एक टीका है।</span></p>",
+                    options_en: ["<p>typhoid</p>", "<p>plague</p>", 
+                                "<p>mumps</p>", "<p><span style=\"font-weight: 400;\">tuberculosis (TB)</span></p>"],
+                    options_hi: ["<p>टाइफाइड</p>", "<p>प्लेग</p>",
+                                "<p>कण्ठमाला का रोग</p>", "<p><span style=\"font-weight: 400;\">तपेदिक (TB)</span></p>"],
+                    solution_en: "<p>11.(d) <strong>Bacille Calmette-Gu&eacute;rin (BCG)</strong><span style=\"font-family: Palanquin Dark;\"> </span><span style=\"font-family: Palanquin Dark;\">is a</span><span style=\"font-family: Palanquin Dark;\"> </span><span style=\"font-family: Palanquin Dark;\">vaccine</span><span style=\"font-family: Palanquin Dark;\"> </span><span style=\"font-family: Palanquin Dark;\">for</span><span style=\"font-family: Palanquin Dark;\"> Tuberculosis. </span><strong><span style=\"font-family: Palanquin Dark;\">Tuberculosis</span></strong><span style=\"font-family: Palanquin Dark;\"><strong> </strong>(TB) is caused by a bacterium called Mycobacterium tuberculosis. </span><strong><span style=\"font-family: Palanquin Dark;\">Plague </span></strong><span style=\"font-family: Palanquin Dark;\">is an infectious disease that affects animals and humans. It is caused by the bacterium Yersinia pestis. </span><strong><span style=\"font-family: Palanquin Dark;\">Mumps</span></strong><span style=\"font-family: Palanquin Dark;\"><strong> </strong>is a viral illness caused by a paramyxovirus, a member of the Rubulavirus family. </span><strong><span style=\"font-family: Palanquin Dark;\">Typhoid </span></strong><span style=\"font-family: Palanquin Dark;\">fever is a life-threatening illness caused by Salmonella Typhi bacteria.</span></p>",
+                    solution_hi: "<p>11.(d) <strong>बेसिल कैल्मेट-गुएरिना</strong> <strong>(</strong><span style=\"font-family: Palanquin Dark;\"><strong>Bacille Calmette-Gu&eacute;rin) (BCG)</strong> </span><span style=\"font-family: Palanquin Dark;\">तपेदिक के लिए एक टीका है। </span><strong><span style=\"font-family: Palanquin Dark;\">क्षय रोग</span></strong><span style=\"font-family: Palanquin Dark;\"> (TB) माइकोबैक्टीरियम ट्यूबरकुलोसिस नामक जीवाणु के कारण होता है। </span><strong><span style=\"font-family: Palanquin Dark;\">प्लेग</span></strong><span style=\"font-family: Palanquin Dark;\"><strong> </strong>एक संक्रामक रोग है जो जानवरों और मनुष्यों को प्रभावित करता है। यह जीवाणु येर्सिनिया पेस्टिस के कारण होता है। </span><strong><span style=\"font-family: Palanquin Dark;\">कण्ठमाला</span></strong><span style=\"font-family: Palanquin Dark;\"><strong> </strong>एक वायरल बीमारी है, जो रुबुलावायरस परिवार के एक सदस्य पैरामाइक्सोवायरस (paramyxovirus) के कारण होती है। </span><strong><span style=\"font-family: Palanquin Dark;\">टाइफाइड</span></strong><span style=\"font-family: Palanquin Dark;\"><strong> </strong>बुखार साल्मोनेला टाइफी (Salmonella Typhi) बैक्टीरिया के कारण होने वाली एक जानलेवा बीमारी है।</span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "12",
+                    section: "18",
+                    question_en: "<p>12.<span style=\"font-family: Palanquin Dark;\"> The branch of horticulture which deals with the production, storages , processing and marketing of vegetables is called_____</span></p>",
+                    question_hi: "<p>12.<span style=\"font-family: Palanquin Dark;\"> बागवानी की वह शाखा जो सब्जियों के उत्पादन, भंडारण, प्रसंस्करण और विपणन से संबंधित है, _____ कहलाती है।</span></p>",
+                    options_en: ["<p>Pomology</p>", "<p>agronomy</p>", 
+                                "<p>olericulture</p>", "<p>apiculture</p>"],
+                    options_hi: ["<p>पोमोलॉजी</p>", "<p>कृषि विज्ञान</p>",
+                                "<p>ओलेरीकल्चर</p>", "<p>मधुमक्खी पालन</p>"],
+                    solution_en: "<p>12.(c) <span style=\"font-family: Palanquin Dark;\">The branch of horticulture which deals with the production, storage , processing and marketing of vegetables is called </span><strong><span style=\"font-family: Palanquin Dark;\">olericulture</span></strong><span style=\"font-family: Palanquin Dark;\"><strong> </strong>. </span><strong><span style=\"font-family: Palanquin Dark;\">Pomology</span></strong><span style=\"font-family: Palanquin Dark;\"><strong> </strong>is </span><span style=\"font-family: Palanquin Dark;\">the science that deals with fruits and fruit growing. </span><strong><span style=\"font-family: Palanquin Dark;\">Agronomy</span></strong><span style=\"font-family: Palanquin Dark;\">, branch of agriculture that deals with field crop production and soil management. Beekeeping (or </span><strong><span style=\"font-family: Palanquin Dark;\">apiculture</span></strong><span style=\"font-family: Palanquin Dark;\">) is the maintenance of bee colonies, commonly in man-made hives, by humans.</span></p>",
+                    solution_hi: "<p>12.(c) <span style=\"font-family: Palanquin Dark;\">बागवानी की वह शाखा जो सब्जियों के उत्पादन, भंडारण, प्रसंस्करण और विपणन से संबंधित है, </span><strong><span style=\"font-family: Palanquin Dark;\">ओलेरीकल्चर</span></strong><span style=\"font-family: Palanquin Dark;\"><strong> </strong>कहलाती है। </span><strong><span style=\"font-family: Palanquin Dark;\">पोमोलॉजी</span></strong><span style=\"font-family: Palanquin Dark;\"><strong> </strong>वह विज्ञान है जो फल और फल उगाने से संबंधित है। <strong>कृषि विज्ञान</strong>, कृषि की वह शाखा जो खेत में फसल उत्पादन और मृदा प्रबंधन से संबंधित है। </span><strong><span style=\"font-family: Palanquin Dark;\">मधुमक्खी पालन</span></strong><span style=\"font-family: Palanquin Dark;\"> (या मधुमक्खी पालन) मधुमक्खी कालोनियों का रखरखाव है, आमतौर पर मनुष्यों द्वारा मानव निर्मित पित्ती में।</span></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "13",
+                    section: "18",
+                    question_en: "<p>13. <span style=\"font-family: Palanquin Dark;\">which of the following is a carnivorous plant</span></p>",
+                    question_hi: "<p>13. <span style=\"font-family: Palanquin Dark;\">निम्नलिखित में से कौन एक मांसाहारी पौधा है?</span></p>",
+                    options_en: ["<p>Clarkia</p>", "<p>Drosera</p>", 
+                                "<p>Hollyhock</p>", "<p>Alyssum</p>"],
+                    options_hi: ["<p>क्लार्किया</p>", "<p>ड्रोसेरा</p>",
+                                "<p>होलीहॉक</p>", "<p>एलिसम</p>"],
+                    solution_en: "<p>13.(b) <strong>Carnivorous Plants</strong> <span style=\"font-family: Palanquin Dark;\">- Drosera Capensis, </span><span style=\"font-family: Palanquin Dark;\">Pitcher Plant, Venus Flytrap, Yellow Pitcher Plant,Cobra Lily, Butterwort Monkey Cup, Australian Sundew, Big Floating Bladderwort, Darlingtonia californica .</span></p>",
+                    solution_hi: "<p>13.(b) <span style=\"font-family: Palanquin Dark;\"><strong>मांसाहारी पादप</strong> <strong>(</strong></span><strong><span style=\"font-family: Palanquin Dark;\">Carnivorous Plants)</span></strong><span style=\"font-family: Palanquin Dark;\">- ड्रोसेरा कैपेंसिस, पिचर प्लांट, वीनस फ्लाईट्रैप, येलो पिचर प्लांट, कोबरा लिली, बटरवॉर्ट मंकी कप, ऑस्ट्रेलियन सनड्यू, बिग फ्लोटिंग ब्लैडरवॉर्ट, डार्लिंगटन कैलिफ़ोर्निया।</span></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "14",
+                    section: "18",
+                    question_en: "<p>14. <span style=\"font-family: Palanquin Dark;\">Which of the following is the middle layer in the root apical meristem that gives rise to the cortex?</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">SSC CGL 2021 21/04/2022(Afternoon)</span></p>",
+                    question_hi: "<p>14. <span style=\"font-family: Palanquin Dark;\">निम्नलिखित में से कौन-सी जड़ शीर्षस्थ विभज्योतक में मध्य परत है जो प्रांतस्था को जन्म देती है?</span></p>",
+                    options_en: [" <p> Periblem</span></p>", " <p> Calyptrogen</span></p>", 
+                                " <p> Dermatogen </span></p>", " <p> Plerome</span></p>"],
+                    options_hi: [" <p> पेरिबलम</span></p>", " <p> कैलिप्ट्रोजन</span></p>",
+                                " <p> त्वचाजन</span></p>", " <p> प्लेरोम</span></p>"],
+                    solution_en: "<p>14.(a) <strong>Periblem </strong><span style=\"font-family: Palanquin Dark;\">is the middle layer in the root apical meristem that gives rise to the cortex. </span><span style=\"font-family: Palanquin Dark;\"> </span><strong><span style=\"font-family: Palanquin Dark;\">Calyptrogen </span></strong><span style=\"font-family: Palanquin Dark;\">is </span><span style=\"font-family: Palanquin Dark;\">a layer of rapidly dividing cells at the tip of a plant root, from which the root cap is formed. </span><strong><span style=\"font-family: Palanquin Dark;\">Dermatogen </span></strong><span style=\"font-family: Palanquin Dark;\"> is </span><span style=\"font-family: Palanquin Dark;\">the outer primary meristem of a plant or plant part that, according to the histogen theory, gives rise to epidermis. </span><span style=\"font-family: Palanquin Dark;\"><strong>Plerome</strong> </span><span style=\"font-family: Palanquin Dark;\">is </span><span style=\"font-family: Palanquin Dark;\">the central core of the primary meristem of a plant or plant part that according to the histogen theory gives rise to the stele. The term </span><strong><span style=\"font-family: Palanquin Dark;\">meristem </span></strong><span style=\"font-family: Palanquin Dark;\">was coined by C. Nageli 1858.</span></p>",
+                    solution_hi: "<p>14.(a) <strong><span style=\"font-family: Palanquin Dark;\">पेरिबलम</span></strong><span style=\"font-family: Palanquin Dark;\"><strong> </strong>रूट एपिकल मेरिस्टेम में मध्य परत है जो कोर्टेक्स (छाल) को जन्म देती है। </span><strong><span style=\"font-family: Palanquin Dark;\">कैलीप्ट्रोजन</span></strong><span style=\"font-family: Palanquin Dark;\"><strong> </strong>एक पौधे की जड़ की नोक पर तेजी से विभाजित होने वाली कोशिकाओं की एक परत है जिससे रूट कैप बनता है। </span><strong><span style=\"font-family: Palanquin Dark;\">डर्माटोजेन</span></strong><span style=\"font-family: Palanquin Dark;\"><strong> </strong>एक पौधे या पौधे के हिस्से का बाहरी प्राथमिक मेरिस्टेम है, जो हिस्टोजन सिद्धांत के अनुसार, एपिडर्मिस को जन्म देता है। </span><strong><span style=\"font-family: Palanquin Dark;\">प्लेरोम</span></strong><span style=\"font-family: Palanquin Dark;\"><strong> </strong>एक पौधे या पौधे के हिस्से के प्राथमिक विभज्योतक का केंद्रीय कोर है जो कि हिस्टोजन सिद्धांत के अनुसार स्टील (stele) को जन्म देता है। <strong>मेरिस्टेम </strong>शब्द सी. नगेली द्वारा 1858 में गढ़ा गया था।</span></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "15",
+                    section: "18",
+                    question_en: "<p>15.<span style=\"font-family: Palanquin Dark;\"> Which of the following is NOT a type of mosquito?</span></p>",
+                    question_hi: "<p>15.<span style=\"font-family: Palanquin Dark;\"> निम्न में से कौन सा मच्छर का प्रकार नहीं है?</span></p>",
+                    options_en: ["<p>Limulus</p>", "<p>Culex</p>", 
+                                "<p>Aedes</p>", "<p>Anopheles</p>"],
+                    options_hi: ["<p>लिमुलस</p>", "<p>क्यूलेक्स</p>",
+                                "<p>एडीस</p>", "<p>एनोफिलीज</p>"],
+                    solution_en: "<p>15.(a) <strong><span style=\"font-family: Palanquin Dark;\">Limulus</span></strong><span style=\"font-family: Palanquin Dark;\"><strong> </strong>is a genus of horseshoe crab. </span><strong><span style=\"font-family: Palanquin Dark;\">Culex</span></strong><span style=\"font-family: Palanquin Dark;\">, a large group of mosquitoes also known as common house mosquitoes, are the principal vectors that spread the viruses that cause West Nile fever, St. Louis encephalitis, and Japanese encephalitis.</span><span style=\"font-family: Palanquin Dark;\"> <strong>Aedes aegypti</strong></span><span style=\"font-family: Palanquin Dark;\">, the yellow fever mosquito, is a mosquito that can spread dengue fever, chikungunya, Zika fever, Mayaro and yellow fever viruses. </span><strong><span style=\"font-family: Palanquin Dark;\">Malaria</span></strong><span style=\"font-family: Palanquin Dark;\"><strong> </strong>is transmitted to humans by female mosquitoes of the genus</span><span style=\"font-family: Palanquin Dark;\"> <strong>Anopheles</strong></span><span style=\"font-family: Palanquin Dark;\">.</span></p>",
+                    solution_hi: "<p>15.(a) <strong><span style=\"font-family: Palanquin Dark;\">लिमुलस</span><span style=\"font-family: Palanquin Dark;\"> (</span></strong><span style=\"font-family: Palanquin Dark;\"><strong>Limulus)</strong> </span><span style=\"font-family: Palanquin Dark;\">घोड़े की नाल केकड़े की एक प्रजाति है। </span><strong><span style=\"font-family: Palanquin Dark;\">क्यूलेक्स</span></strong><span style=\"font-family: Palanquin Dark;\">, मच्छरों का एक बड़ा समूह जिसे आम घर के मच्छरों के रूप में भी जाना जाता है। इसके प्रमुख वाहक जो वायरस फैलाते वे सभी वेस्ट नाइल बुखार, सेंट लुइस एन्सेफलाइटिस और जापानी एन्सेफलाइटिस का कारण बनते हैं। </span><strong><span style=\"font-family: Palanquin Dark;\">एडीज एजिप्टी</span></strong><span style=\"font-family: Palanquin Dark;\"> या पीला बुखार मच्छर, एक मच्छर है जो डेंगू बुखार, चिकनगुनिया, जीका बुखार, मायारो और पीले बुखार के वायरस फैला सकता है। <strong>मलेरिया </strong>जीनस </span><strong><span style=\"font-family: Palanquin Dark;\">एनोफिलीज</span></strong><span style=\"font-family: Palanquin Dark;\"><strong> </strong>के मादा मच्छरों द्वारा मनुष्यों में फैलता है।</span></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "16",
+                    section: "18",
+                    question_en: "<p>16. <span style=\"font-family: Palanquin Dark;\">How many eyes does a bee have?&nbsp;</span></p>",
+                    question_hi: "<p>16. <span style=\"font-family: Palanquin Dark;\">मधुमक्खी की कितनी आंखें होती हैं?</span></p>",
+                    options_en: ["<p>Two</p>", "<p>Four</p>", 
+                                "<p>Three</p>", "<p>Five</p>"],
+                    options_hi: ["<p>दो</p>", "<p>चार</p>",
+                                "<p>तीन</p>", "<p>पांच</p>"],
+                    solution_en: "<p>16.(d) <span style=\"font-family: Palanquin Dark;\">The honey bee has <strong>five </strong>eyes, two large compound eyes and three smaller ocelli eyes in the centre of its head. The science and art of managing honey bees is called apiculture or beekeeping. </span></p>",
+                    solution_hi: "<p>16.(d)&nbsp;<span style=\"font-family: Palanquin Dark;\">मधुमक्खी के सिर के केंद्र में <strong>पांच </strong>आंखें, दो बड़ी मिश्रित आंखें और तीन छोटी ओसेली आंखें होती हैं। मधुमक्खी पालन के विज्ञान और कला को एपीकल्चर या मधुमक्खी पालन कहा जाता है।</span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "17",
+                    section: "misc",
+                    question_en: "<p>17.<span style=\"font-family: Palanquin Dark;\"> In the context of the spread of germs by </span><span style=\"font-family: Palanquin Dark;\">faecal</span><span style=\"font-family: Palanquin Dark;\"> matter, which of the following does NOT figure in the F-Diagram?&nbsp;</span></p>",
+                    question_hi: "<p>17.<span style=\"font-family: Palanquin Dark;\"> मल पदार्थ द्वारा रोगाणुओं के प्रसार के संदर्भ में, निम्नलिखित में से कौन F-डायग्राम में नहीं आता है?</span></p>",
+                    options_en: ["<p>Fingers</p>", "<p>Fluids</p>", 
+                                "<p>Flies</p>", "<p>Fungi</p>"],
+                    options_hi: ["<p>उंगलियां</p>", "<p>तरल पदार्थ</p>",
+                                "<p>मक्खियों</p>", "<p>कवक</p>"],
+                    solution_en: "<p>17.(d)<span style=\"font-family: Palanquin Dark;\"> F-Diagram - </span><span style=\"font-family: Palanquin Dark;\">The F-Diagram is one of the many tools in the Participatory Hygiene and Transformation (PHAST) methodology which seeks to vividly describe in detail the </span><span style=\"font-family: Palanquin Dark;\">fecal</span><span style=\"font-family: Palanquin Dark;\"> oral transmission route.</span><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654167276/word/media/image1.png\" width=\"340\"></p>",
+                    solution_hi: "<p>17.(d) <span style=\"font-family: Palanquin Dark;\">F-आरेख &ndash; F-आरेख, सहभागी स्वच्छता और स्वच्छता परिवर्तन (PHAST) पद्धति के कई उपकरणों में से एक है, जो फेकल ओरल ट्रांसमिशन रूट का विस्तार से वर्णन करने का प्रयास करता है।<br></span><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654167276/word/media/image1.png\" width=\"340\"></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+            
+            // Generate question boxes
+            const boxesContainer = document.getElementById('question-boxes');
+            questions.forEach((q, index) => {
+                const box = document.createElement('div');
+                box.className = 'q-box';
+                box.textContent = index + 1;
+                box.onclick = () => showQuestion(index);
+                box.id = `box-${index}`;
+                boxesContainer.appendChild(box);
+            });
+            
+            // Show first question
+            showQuestion(0);
+            updateProgress();
+        }
+        
+        // Show a specific question
+        
+        function formatContent(text) {
+            if (!text) return '';
+            return text.replace(/<img/g, '<img style="max-width:100%;height:auto;"');
+        }
+        
+        function showQuestion(index) {
+            if (index < 0 || index >= questions.length) return;
+            
+            currentQuestion = index;
+            const question = questions[index];
+            
+            // Update question counter
+            document.getElementById('question-counter').textContent = `Question ${index + 1} of ${questions.length}`;
+            
+            // Update question boxes
+            document.querySelectorAll('.q-box').forEach(box => box.classList.remove('current'));
+            document.getElementById(`box-${index}`).classList.add('current');
+            
+            // Generate question HTML
+            let html = `
+                <div class="question-card">
+                    <div class="question-text">
+                        <div class="en">${formatContent(question.question_en)}</div>
+                        <div class="hi" style="display:none">${formatContent(question.question_hi)} </div>
+                    </div>
+                    <div class="options" id="options-container">`;
+            
+            // Add options
+            ['a', 'b', 'c', 'd'].forEach((opt, i) => {
+                let optionClass = '';
+                let isCorrectAnswer = opt === question.correct;
+                let isUserAnswer = answers[question.id] === opt;
+                
+                // When reviewing, add appropriate classes
+                if (submitted) {
+                    if (isCorrectAnswer) {
+                        optionClass += ' correct-answer';
+                    } else if (isUserAnswer && !isCorrectAnswer) {
+                        optionClass += ' incorrect';
+                    }
+                }
+                
+                html += `
+                    <div class="option-item">
+                        <input class="option-input" type="radio" name="q${index}" 
+                            id="opt-${index}-${opt}" value="${opt}" 
+                            ${isUserAnswer ? 'checked' : ''}
+                            onclick="selectAnswer('${question.id}', '${opt}')">
+                       <label class="option-label${optionClass}" for="opt-${index}-${opt}">
+                            <div class="en">${question.options_en[i]}</div>
+                            <div class="hi" style="display:none">${question.options_hi[i]}</div>
+                        </label>
+                    </div>`;
+            });
+            
+            // Add solution if submitted
+            if (submitted) {
+                const isCorrect = answers[question.id] === question.correct;
+                const resultText = answers[question.id] ? (isCorrect ? 'Correct!' : 'Incorrect!') : 'Not attempted';
+                
+                html += `
+                    <div class="solution-container">
+                        <div class="solution-title">${resultText}</div>
+                        <div class="solution-text">
+                            <div class="en">${question.solution_en}</div>
+                            <div class="hi" style="display:none">${question.solution_hi}</div>
+                        </div>
+                    </div>`;
+            }
+            
+            html += `</div></div>`;
+            
+            document.getElementById('questions-container').innerHTML = html;
+            
+            // Apply language settings
+            applyLanguage();
+            
+            // If in mobile view, close the menu
+            if (window.innerWidth < 992) {
+                toggleNav(false);
+            }
+            
+            // Add review mode class if submitted
+            if (submitted) {
+                document.getElementById('options-container').classList.add('review-mode');
+            }
+        }
+        
+        // Apply current language
+        function applyLanguage() {
+            document.querySelectorAll(`.${currentLang}`).forEach(el => el.style.display = 'block');
+            document.querySelectorAll(`.${currentLang === 'en' ? 'hi' : 'en'}`).forEach(el => el.style.display = 'none');
+            
+            // Update language button text
+            document.getElementById('lang-text').textContent = currentLang === 'en' ? 'Hi' : 'En';
+        }
+        
+        // Select an answer
+        function selectAnswer(qId, option) {
+            if (submitted) return;
+            
+            answers[qId] = option;
+            updateProgress();
+            
+            // Mark question as attempted in the navigation
+            const index = questions.findIndex(q => q.id === qId);
+            if (index >= 0) {
+                const box = document.getElementById(`box-${index}`);
+                box.classList.add('attempted');
+                box.classList.remove('unattempted');
+            }
+        }
+        
+        // Navigate to previous/next question
+        function prevQuestion() { 
+            if (currentQuestion > 0) showQuestion(currentQuestion - 1); 
+        }
+        
+        function nextQuestion() { 
+            if (currentQuestion < questions.length - 1) showQuestion(currentQuestion + 1); 
+        }
+        
+        // Switch section
+        function switchSection(sectionId) {
+            if (sectionId === 'all') {
+                showQuestion(0);
+                return;
+            }
+            
+            const section = sections[sectionId];
+            if (section) showQuestion(section.start);
+        }
+        
+        // Toggle language
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'hi' : 'en';
+            applyLanguage();
+        }
+        
+        // Toggle navigation sidebar
+        function toggleNav(show) {
+            const nav = document.getElementById('question-nav');
+            const overlay = document.getElementById('nav-overlay');
+            
+            if (show === undefined) {
+                show = !nav.classList.contains('show');
+            }
+            
+            if (show) {
+                nav.classList.add('show');
+                overlay.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            } else {
+                nav.classList.remove('show');
+                overlay.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+        }
+        
+        // Update progress
+        function updateProgress() {
+            const attempted = Object.keys(answers).length;
+            document.getElementById('attempted-count').textContent = attempted;
+        }
+        
+        // Start timer
+        function startTimer() {
+            const timerDisplay = document.getElementById('timer-display');
+            let timeLeft = totalTime;
+            
+            const timerInterval = setInterval(() => {
+                if (timeLeft <= 0 || submitted) {
+                    clearInterval(timerInterval);
+                    if (!submitted) submitTest();
+                    return;
+                }
+                
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                timeLeft--;
+            }, 1000);
+        }
+        
+        // Confirm before submitting
+        function confirmSubmit() {
+            if (submitted) return;
+            
+            const attempted = Object.keys(answers).length;
+            const remaining = questions.length - attempted;
+            
+            // Create a more modern confirmation dialog
+            const confirmHtml = `
+                <div style="text-align: center; padding: 20px;">
+                    <h4 style="margin-bottom: 16px; color: var(--dark);">Confirm Submission</h4>
+                    <p style="margin-bottom: 24px; color: var(--gray);">
+                        You have attempted ${attempted} of ${questions.length} questions.<br>
+                        ${remaining} questions are unattempted.
+                    </p>
+                    <div style="display: flex; justify-content: center; gap: 12px;">
+                        <button onclick="this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; border: 1px solid var(--light-gray); background: white; border-radius: 8px; cursor: pointer;">
+                            Cancel
+                        </button>
+                        <button onclick="submitTest(); this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer;">
+                            Submit Test
+                        </button>
+                    </div>
+                </div>`;
+            
+            // Create modal element
+            const modal = document.createElement('div');
+            modal.className = 'results-modal show';
+            modal.innerHTML = `
+                <div class="results-card" style="max-width: 400px;">
+                    <button class="cancel-btn" style="position: absolute; top: 12px; right: 12px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--gray);" onclick="this.closest('.results-modal').remove()">
+                        ×
+                    </button>
+                    ${confirmHtml}
+                </div>`;
+            
+            document.body.appendChild(modal);
+        }
+        
+        // Submit test
+        function submitTest() {
+            if (submitted) return;
+            
+            submitted = true;
+            
+            let score = 0;
+            let correctCount = 0;
+            let incorrectCount = 0;
+            let unattemptedCount = 0;
+            
+            questions.forEach((q, index) => {
+                const userAns = answers[q.id];
+                const box = document.getElementById(`box-${index}`);
+                
+                box.classList.remove('attempted');
+                
+                if (!userAns) {
+                    unattemptedCount++;
+                    box.classList.add('unattempted');
+                } else if (userAns === q.correct) {
+                    correctCount++;
+                    score += q.pos_marks;
+                    box.classList.add('correct');
+                } else {
+                    incorrectCount++;
+                    score -= q.neg_marks;
+                    box.classList.add('incorrect');
+                }
+            });
+            
+            // Update result values
+            document.getElementById('score-value').textContent = score.toFixed(2);
+            document.getElementById('correct-value').textContent = correctCount;
+            document.getElementById('incorrect-value').textContent = incorrectCount;
+            document.getElementById('unattempted-value').textContent = unattemptedCount;
+            
+            // Show the results modal
+            document.getElementById('results-modal').classList.add('show');
+            
+            // Disable submit button
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-check"></i>';
+            submitBtn.style.backgroundColor = 'var(--success)';
+            
+            // Refresh current question view to show solution
+            showQuestion(currentQuestion);
+        }
+        
+        // Review test
+        function reviewTest() {
+            document.getElementById('results-modal').classList.remove('show');
+            showQuestion(0);
+        }
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target === document.getElementById('results-modal')) {
+                document.getElementById('results-modal').classList.remove('show');
+            }
+        });
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') prevQuestion();
+            if (e.key === 'ArrowRight') nextQuestion();
+        });
+    </script>
+</body>
+</html>
