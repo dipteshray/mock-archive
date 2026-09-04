@@ -1,0 +1,1434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mocks Wallah</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --primary-light: #a29bfe;
+            --primary-dark: #5649c0;
+            --secondary: #00cec9;
+            --accent: #fd79a8;
+            --success: #00b894;
+            --warning: #fdcb6e;
+            --danger: #d63031;
+            --light: #f8f9fa;
+            --dark: #2d3436;
+            --gray: #636e72;
+            --light-gray: #dfe6e9;
+            --card-bg: #ffffff;
+            --body-bg: #f5f6fa;
+            --header-bg: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            --footer-bg: #ffffff;
+            --box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            --box-shadow-sm: 0 2px 10px rgba(0,0,0,0.05);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background-color: var(--body-bg);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            color: var(--dark);
+            line-height: 1.6;
+            padding-bottom: 80px; /* Space for fixed navigation */
+            overflow-x: hidden;
+        }
+        
+        /* Header Styles */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: var(--header-bg);
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            z-index: 1000;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .header-brand {
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .header-brand i {
+            margin-right: 8px;
+            font-size: 1.2rem;
+        }
+        
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .control-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .control-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .control-btn.active {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .timer-display {
+            background: rgba(0,0,0,0.2);
+            border-radius: 18px;
+            padding: 4px 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+        
+        .timer-display i {
+            margin-right: 6px;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-top: 60px;
+            padding: 16px;
+            min-height: calc(100vh - 140px);
+        }
+        
+        .question-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--box-shadow-sm);
+            border: none;
+            transition: var(--transition);
+        }
+        
+        .question-counter {
+            font-size: 0.9rem;
+            color: var(--gray);
+            text-align: center;
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+        
+        .question-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+        
+        .option-item {
+            margin-bottom: 12px;
+            position: relative;
+        }
+        
+        .option-input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+            .question-text {
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        hyphens: auto;
+        max-width: 100%;
+    }
+
+    .question-text img,
+    .option-label img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 8px 0;
+        border-radius: 8px;
+    }
+
+    .option-label {
+        overflow: hidden;
+    }
+
+    .question-card {
+        overflow: hidden;
+    }
+        
+        .option-label {
+            display: block;
+            padding: 14px 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--light-gray);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .option-label:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .option-input:checked + .option-label {
+            border-color: var(--primary);
+            background: rgba(108, 92, 231, 0.05);
+            box-shadow: 0 0 0 1px var(--primary);
+        }
+        
+        .option-input:checked + .option-label::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--primary);
+        }
+        
+        /* When reviewing answers */
+        .review-mode .option-input:checked + .option-label.correct {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.correct::after {
+            background: var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.incorrect {
+            border-color: var(--danger);
+            background: rgba(214, 48, 49, 0.05);
+            box-shadow: 0 0 0 1px var(--danger);
+        }
+        
+        .MathJax, .mjx-chtml {
+            overflow-x: auto;
+            max-width: 100%;
+            display: inline-block;
+        }
+
+        
+        .review-mode .option-input:checked + .option-label.incorrect::after {
+            background: var(--danger);
+        }
+        
+        .review-mode .option-label.correct-answer {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-label.correct-answer::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--success);
+        }
+        
+        .solution-container {
+            margin-top: 20px;
+            padding: 16px;
+            background: rgba(108, 92, 231, 0.05);
+            border-radius: 12px;
+            border-left: 3px solid var(--primary);
+        }
+        
+        .solution-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+        
+        /* Question Navigation */
+        .question-nav {
+            position: fixed;
+            top: 60px;
+            right: 0;
+            bottom: 80px;
+            width: 100%;
+            max-width: 320px;
+            background: var(--card-bg);
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            transform: translateX(100%);
+            transition: var(--transition);
+            z-index: 900;
+            overflow-y: auto;
+            padding: 16px;
+        }
+        
+        .question-nav.show {
+            transform: translateX(0);
+        }
+        
+        .nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .nav-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+        
+        .question-stats {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .stat-badge {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        
+        .section-selector {
+            width: 100%;
+            margin-bottom: 16px;
+            border-radius: 12px;
+            padding: 10px 16px;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            font-size: 0.9rem;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 16px;
+        }
+        
+        .question-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+            gap: 8px;
+        }
+        
+        .q-box {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .q-box:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .q-box.attempted {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .q-box.correct {
+            background-color: var(--success);
+            color: white;
+            border-color: var(--success);
+        }
+        
+        .q-box.incorrect {
+            background-color: var(--danger);
+            color: white;
+            border-color: var(--danger);
+        }
+        
+        .q-box.current {
+            border: 2px solid var(--accent) !important;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .q-box.unattempted {
+            background-color: var(--gray);
+            color: white;
+            border-color: var(--gray);
+        }
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: var(--footer-bg);
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            z-index: 800;
+        }
+        
+        .nav-btn {
+            height: 48px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 20px;
+            transition: var(--transition);
+            gap: 8px;
+        }
+        
+        .nav-btn i {
+            font-size: 1rem;
+        }
+        
+        .nav-btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .nav-btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+        
+        .nav-btn-outline:hover {
+            background: rgba(108, 92, 231, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        /* Overlay when nav is open */
+        .nav-overlay {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            bottom: 80px;
+            background: rgba(0,0,0,0.5);
+            z-index: 800;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+        }
+        
+        .nav-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        /* Results Modal */
+        .results-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1100;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+            padding: 16px;
+        }
+        
+        .results-modal.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .results-card {
+            background: white;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+            transform: translateY(20px);
+            transition: var(--transition);
+        }
+        
+        .results-modal.show .results-card {
+            transform: translateY(0);
+        }
+        
+        .results-header {
+            background: var(--header-bg);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .results-title {
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .results-body {
+            padding: 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            color: white;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+        
+        .results-footer {
+            padding: 16px 20px;
+            display: flex;
+            justify-content: center;
+            border-top: 1px solid var(--light-gray);
+        }
+        
+        /* Responsive Adjustments */
+        @media (min-width: 992px) {
+            .question-nav {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-right: 320px;
+            }
+            
+            .nav-overlay {
+                display: none;
+            }
+            
+            .bottom-nav {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .question-grid {
+                grid-template-columns: repeat(auto-fill, minmax(36px, 1fr));
+                gap: 6px;
+            }
+            
+            .q-box {
+                width: 36px;
+                height: 36px;
+                font-size: 0.9rem;
+            }
+            
+            .option-label {
+                padding: 12px 14px;
+            }
+            
+            .question-text {
+                font-size: 1rem;
+            }
+            
+            .header-brand {
+                font-size: 1rem;
+            }
+            
+            .control-btn {
+                width: 32px;
+                height: 32px;
+            }
+            
+            .timer-display {
+                font-size: 0.8rem;
+                padding: 4px 10px;
+            }
+            
+            .nav-btn {
+                height: 44px;
+                padding: 0 16px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="#" class="header-brand">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Mocks Wallah</span>
+            </a>
+            
+            <div class="header-controls">
+                <!-- Timer -->
+                <div class="timer-display">
+                    <i class="far fa-clock"></i>
+                    <span id="timer-display">15:00</span>
+                </div>
+                
+                <!-- Language toggle -->
+                <button class="control-btn" id="lang-btn" onclick="toggleLanguage()">
+                    <span id="lang-text">En</span>
+                </button>
+                
+                <!-- Submit button -->
+                <button class="control-btn" id="submit-btn" onclick="confirmSubmit()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+                
+                <!-- Questions toggle for mobile -->
+                <button class="control-btn nav-toggle-btn" id="nav-toggle" onclick="toggleNav()">
+                    <i class="fas fa-th"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main content -->
+    <main class="main-content" id="main-content">
+        <div class="question-counter" id="question-counter">Question 1 of 22</div>
+        
+        <!-- Questions will be displayed here -->
+        <div id="questions-container"></div>
+    </main>
+    
+    <!-- Overlay for mobile nav -->
+    <div class="nav-overlay" id="nav-overlay" onclick="toggleNav(false)"></div>
+    
+    <!-- Question navigation sidebar -->
+    <aside class="question-nav" id="question-nav">
+        <div class="nav-header">
+            <h3 class="nav-title">Questions</h3>
+            <div class="question-stats">
+                <span class="stat-badge bg-primary" id="attempted-count">0</span>
+                <span class="stat-badge bg-gray" id="total-count">22</span>
+                <button class="control-btn d-lg-none" onclick="toggleNav(false)">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Section selector -->
+        <select class="section-selector" id="section-selector" onchange="switchSection(this.value)">
+            <option value="all">All Sections</option>
+        </select>
+        
+        <!-- Question grid -->
+        <div class="question-grid" id="question-boxes"></div>
+    </aside>
+    
+    <!-- Bottom navigation for mobile -->
+    <nav class="bottom-nav d-lg-none">
+        <button class="nav-btn nav-btn-outline" onclick="prevQuestion()">
+            <i class="fas fa-chevron-left"></i>
+            <span>Previous</span>
+        </button>
+        <button class="nav-btn nav-btn-outline" onclick="nextQuestion()">
+            <span>Next</span>
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </nav>
+    
+    <!-- Results modal -->
+    <div class="results-modal" id="results-modal">
+        <div class="results-card">
+            <div class="results-header">
+                <h3 class="results-title">Test Results</h3>
+            </div>
+            <div class="results-body">
+                <div class="stats-grid">
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark))">
+                        <div class="stat-value" id="score-value">0</div>
+                        <div class="stat-label">Score</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--success), #1b9aaa)">
+                        <div class="stat-value" id="correct-value">0</div>
+                        <div class="stat-label">Correct</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--danger), var(--accent))">
+                        <div class="stat-value" id="incorrect-value">0</div>
+                        <div class="stat-label">Incorrect</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--gray), var(--dark))">
+                        <div class="stat-value" id="unattempted-value">0</div>
+                        <div class="stat-label">Unattempted</div>
+                    </div>
+                </div>
+            </div>
+            <div class="results-footer">
+                <button class="nav-btn nav-btn-primary" onclick="reviewTest()">
+                    <i class="fas fa-search me-1"></i>
+                    <span>Review Test</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Questions data
+        const questions = [];
+        const sections = {};
+        let currentLang = "en";
+        let currentQuestion = 0;
+        let answers = {};
+        let submitted = false;
+        let totalTime = 15 * 60;
+        
+        // Initialize the test
+        window.onload = function() {
+            initializeTest();
+            startTimer();
+            
+            // If on desktop, show the question navigation by default
+            if (window.innerWidth >= 992) {
+                document.getElementById('question-nav').classList.add('show');
+                document.getElementById('main-content').classList.add('with-nav');
+            }
+        };
+        
+        // Initialize test data
+        function initializeTest() {
+            // Add sections and questions
+            
+            sections["7"] = {
+                name: "English",
+                start: 0,
+                end: 20
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="7">English</option>`;
+            
+            sections["misc"] = {
+                name: "Miscellaneous",
+                start: 21,
+                end: 21
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="misc">Miscellaneous</option>`;
+            
+            
+                questions.push({
+                    id: "1",
+                    section: "7",
+                    question_en: "1. Select the most appropriate meaning of the following idiom. <br />Lion\'s share ",
+                    question_hi: "1. Select the most appropriate meaning of the following idiom. <br />Lion\'s share ",
+                    options_en: [" The strongest and richest partner in a group", " The part that must be left for the guests in a party", 
+                                " The greatest and most desirable portion of something ", " The sound produced by a lion when it is attacking a prey "],
+                    options_hi: [" The strongest and richest partner in a group", " The part that must be left for the guests in a party",
+                                " The greatest and most desirable portion of something ", " The sound produced by a lion when it is attacking a prey "],
+                    solution_en: "1.(c) Lion\'s share - the greatest and most desirable portion of something. <br />Example-Military and nuclear research have received the lion\'s share of public funding.",
+                    solution_hi: "1.(c) Lion\'s share - the greatest and most desirable portion of something./किसी चीज़ का सर्वश्रेष्ठ और सबसे वांछनीय भाग।<br />Example-Military and nuclear research have received the lion\'s share of public funding.",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "2",
+                    section: "7",
+                    question_en: "2. Select the most appropriate meaning of the following idiom. <br />A live wire ",
+                    question_hi: "2. Select the most appropriate meaning of the following idiom. <br />A live wire<br /> ",
+                    options_en: [" An influential and powerful person ", " A very active or energetic person ", 
+                                " A dangerous and evil person ", " An angry and bad-tempered person "],
+                    options_hi: [" An influential and powerful person ", " A very active or energetic person ",
+                                " A dangerous and evil person ", " An angry and bad-tempered person "],
+                    solution_en: "2.(b) A live wire - a very active or energetic person.   <br />Example- Nakul being a live wire does not get tired easily during physical activities.",
+                    solution_hi: "2.(b) A live wire - a very active or energetic person./एक बहुत सक्रिय या ऊर्जावान व्यक्ति।   <br />Example- Nakul being a live wire does not get tired easily during physical activities.",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "3",
+                    section: "7",
+                    question_en: "3. Select the most appropriate meaning of the given idiom. <br />Sit on the fence",
+                    question_hi: "3. Select the most appropriate meaning of the given idiom. <br />Sit on the fence",
+                    options_en: [" Create Conflicts", " Protect Something", 
+                                " Avoid making a decision", " Poke fun at people"],
+                    options_hi: [" Create Conflicts", " Protect Something",
+                                " Avoid making a decision", " Poke fun at people"],
+                    solution_en: "3.(c) Sit on the fence - avoid making a decision. <br />Example- You can\'t sit on the fence any longer - you have decide whose side you\'re on",
+                    solution_hi: "3.(c) Sit on the fence - avoid making a decision. /निर्णय लेने से बचना<br />Example- You can\'t sit on the fence any longer - you have decide whose side you\'re on",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "4",
+                    section: "7",
+                    question_en: "4. Select the most appropriate meaning of the given idiom. <br />Fair and square",
+                    question_hi: "4. Select the most appropriate meaning of the given idiom. <br />Fair and square",
+                    options_en: [" By and means available", " According to the rules", 
+                                " Beautiful in appearance", " Calm and quiet"],
+                    options_hi: [" By and means available", " According to the rules",
+                                " Beautiful in appearance", " Calm and quiet"],
+                    solution_en: "4.(b) Fair and square- according to the rules. <br />Example- The X party won the recently held election in a fair and square way.",
+                    solution_hi: "4.(b) Fair and square - according to the rules./नियमों के अनुसार। <br />Example- The X party won the recently held election in a fair and square way.",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "5",
+                    section: "7",
+                    question_en: "5. Select the most appropriate meaning of the given idiom. <br />A bad egg ",
+                    question_hi: "5. Select the most appropriate meaning of the given idiom. <br />A bad egg ",
+                    options_en: [" Someone who is dishonest and unreliable ", " Someone who regularly makes mistakes ", 
+                                " Someone who doesn\'t like eggs ", " Someone who likes to break eggs "],
+                    options_hi: [" Someone who is dishonest and unreliable ", " Someone who regularly makes mistakes ",
+                                " Someone who doesn\'t like eggs ", " Someone who likes to break eggs "],
+                    solution_en: "5.(a) A bad egg - someone who is dishonest and unreliable.  <br />Example- I had already warned you not to trust Shivam on financial matters because he is a bad egg.",
+                    solution_hi: "5.(a) A bad egg - someone who is dishonest and unreliable./एक ऐसा व्यक्ति जो बेईमान एवं अविश्वसनीय हो। <br />Example- I had already warned you not to trust Shivam on financial matters because he is a bad egg.",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "6",
+                    section: "7",
+                    question_en: "6. Select the most appropriate meaning of the given idiom. <br />Tide someone over ",
+                    question_hi: "6. Select the most appropriate meaning of the given idiom. <br />Tide someone over ",
+                    options_en: [" Complete a voyage successfully ", " Give temporary help, usually financial ", 
+                                " Ask someone for financial assistance ", " Get a boat ready to cross a river or water body "],
+                    options_hi: [" Complete a voyage successfully ", " Give temporary help, usually financial ",
+                                " Ask someone for financial assistance ", " Get a boat ready to cross a river or water body "],
+                    solution_en: "6.(b) Tide someone over - give temporary help, usually financial. <br />Example- Can you lend me some money to tide me over till next month?",
+                    solution_hi: "6.(b) Tide someone over- give temporary help, usually financial./अस्थायी मदद देना, आमतौर पर आर्थिक।<br />Example- Can you lend me some money to tide me over till next month?",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "7",
+                    section: "7",
+                    question_en: "7. Select the most appropriate meaning of the following idiom. <br />To pay lip service ",
+                    question_hi: "7. Select the most appropriate meaning of the following idiom. <br />To pay lip service ",
+                    options_en: [" To ask for permission ", " To be insincere ", 
+                                " To make loud statements ", " To talk out of turn "],
+                    options_hi: [" To ask for permission ", " To be insincere ",
+                                " To make loud statements ", " To talk out of turn "],
+                    solution_en: "7.(b) To pay lip service - to be insincere. <br />Example- Tarun did not offer any help so far and only paid lip service to the cause.",
+                    solution_hi: "7.(b) To pay lip service - to be insincere./निष्ठाहीन होना।<br />Example- Tarun did not offer any help so far and only paid lip service to the cause.",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "8",
+                    section: "7",
+                    question_en: "8. Select the most appropriate meaning of the following idiom. <br />To get the ball rolling ",
+                    question_hi: "8. Select the most appropriate meaning of the following idiom. <br />To get the ball rolling ",
+                    options_en: [" To match an opponent ", " To keep working until late ", 
+                                " To play a ball game well ", " To begin a process "],
+                    options_hi: [" To match an opponent ", " To keep working until late ",
+                                " To play a ball game well ", " To begin a process "],
+                    solution_en: "8.(d) To get the ball rolling - to begin a process. <br />Example- Ram is shy, so he always waits for other people to get the ball rolling. ",
+                    solution_hi: "8.(d) To get the ball rolling - to begin a process./कोई प्रक्रिया शुरू करना। <br />Example- Ram is shy, so he always waits for other people to get the ball rolling. ",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "9",
+                    section: "7",
+                    question_en: "<p>9. Select the most appropriate meaning of the given idiom. <br>Through thick and thin</p>",
+                    question_hi: "<p>9. Select the most appropriate meaning of the given idiom. <br>Through thick and thin</p>",
+                    options_en: ["<p>With ego and pride</p>", "<p>Under all conditions</p>", 
+                                "<p>With all kinds of people</p>", "<p>With humility</p>"],
+                    options_hi: ["<p>With ego and pride</p>", "<p>Under all conditions</p>",
+                                "<p>With all kinds of people</p>", "<p>With humility</p>"],
+                    solution_en: "<p>9.(b) Under all conditions.<br>Through thick and thin- under all conditions; be with someone in good and bad times.<br><strong>Example</strong>- She has stuck with me through thick and thin.</p>",
+                    solution_hi: "<p>9.(b) Under all conditions.<br>Through thick and thin - under all conditions; be with someone in good and bad times./हर परिस्थिति में, अच्छे एवं बुरे समय में किसी के साथ रहना।<br><strong>Example</strong>- She has stuck with me through thick and thin.</p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "10",
+                    section: "7",
+                    question_en: "10. Select the most appropriate meaning of the given idiom. <br />On the horizon ",
+                    question_hi: "10. Select the most appropriate meaning of the given idiom. <br />On the horizon ",
+                    options_en: [" The successful beginning of a business venture ", " A plan for the distant future ", 
+                                " An event that is likely to end soon ", " An event that is likely to happen soon "],
+                    options_hi: [" The successful beginning of a business venture ", " A plan for the distant future ",
+                                " An event that is likely to end soon ", " An event that is likely to happen soon "],
+                    solution_en: "10.(d) On the horizon- an event that is likely to happen soon.  <br />Example- We have some new and fresh plans on the horizon.",
+                    solution_hi: "10.(d) On the horizon- an event that is likely to happen soon./ एक घटना जिसके जल्द ही होने की संभावना है। <br />Example- We have some new and fresh plans on the horizon.",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "11",
+                    section: "7",
+                    question_en: "11. Select the most appropriate meaning of the given idiom. <br />On cloud nine ",
+                    question_hi: "11. Select the most appropriate meaning of the given idiom. <br />On cloud nine ",
+                    options_en: [" Extremely happy ", " Flying with a parachute ", 
+                                " Frequently flying by air ", " Extremely sad "],
+                    options_hi: [" Extremely happy ", " Flying with a parachute ",
+                                " Frequently flying by air ", " Extremely sad "],
+                    solution_en: "11.(a) On cloud nine - extremely happy.<br />Example- Rohit  is on cloud nine as he got selected in the Excise Department. ",
+                    solution_hi: "11.(a) On cloud nine - extremely happy./अत्यधिक प्रसन्न। <br />Example- Rohit  is on cloud nine as he got selected in the Excise Department. ",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "12",
+                    section: "7",
+                    question_en: "12. Select the most appropriate meaning of the given idiom. <br />Draw the line at something ",
+                    question_hi: "12. Select the most appropriate meaning of the given idiom. <br />Draw the line at something ",
+                    options_en: [" Agreeing to an idea ", " Accept something up to a particular point ", 
+                                " Coming to a conclusion ", " Making pencil sketches "],
+                    options_hi: [" Agreeing to an idea ", " Accept something up to a particular point ",
+                                " Coming to a conclusion ", " Making pencil sketches "],
+                    solution_en: "12.(b) Draw the line at something - accept something up to a particular point <br />Example- Mukesh is going to draw the line about working more than 180 hours a month. ",
+                    solution_hi: "12.(b) Draw the line at something - accept something up to a particular point./किसी चीज़ को एक विशेष बिंदु/हद तक स्वीकार करना।<br />Example- Mukesh is going to draw the line about working more than 180 hours a month. ",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "13",
+                    section: "7",
+                    question_en: "13. Select the most appropriate meaning of the following idiom. <br />A fish out of water ",
+                    question_hi: "13. Select the most appropriate meaning of the following idiom. <br />A fish out of water ",
+                    options_en: [" Feel as if you are unable to breathe ", " Feel like going to an unfamiliar and new place ", 
+                                " Feel comfortable in any kind of place ", " Feel uncomfortable in unfamiliar surroundings "],
+                    options_hi: [" Feel as if you are unable to breathe ", " Feel like going to an unfamiliar and new place ",
+                                " Feel comfortable in any kind of place ", " Feel uncomfortable in unfamiliar surroundings "],
+                    solution_en: "13.(d) A fish out of water- feel uncomfortable in unfamiliar surroundings. <br />Example- When Raj shifted to the USA from a small village in India, he was like a fish out of water. ",
+                    solution_hi: "13.(d) A fish out of water- feel uncomfortable in unfamiliar surroundings./अपरिचित परिवेश में असहज महसूस करना। <br />Example- When Raj shifted to the USA from a small village in India, he was like a fish out of water.",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "14",
+                    section: "7",
+                    question_en: "14. Select the most appropriate meaning of the following idiom. <br />To be light years away ",
+                    question_hi: "14. Select the most appropriate meaning of the following idiom. <br />To be light years away ",
+                    options_en: [" An extremely long time from now in the past or future ", " To be too distant for human beings to reach ", 
+                                " An unlikely event that happened suddenly ", " When something seems like it is about to happen in the near future "],
+                    options_hi: [" An extremely long time from now in the past or future ", " To be too distant for human beings to reach ",
+                                " An unlikely event that happened suddenly ", " When something seems like it is about to happen in the near future "],
+                    solution_en: "14.(b) To be light years away - to be too distant for human beings to reach. <br />Example- The nearest star to our sun, Proxima Centauri, is 4.2 light years away.",
+                    solution_hi: "14.(b) To be light years away- to be too distant for human beings to reach./इंसानों की पहुंच से परे।  <br />Example- The nearest star to our sun, Proxima Centauri, is 4.2 light years away.",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "15",
+                    section: "7",
+                    question_en: "15. Select the most appropriate meaning of the given idiom. <br />A square deal ",
+                    question_hi: "15. Select the most appropriate meaning of the given idiom. <br />A square deal ",
+                    options_en: [" A fair agreement ", " An unfair agreement ", 
+                                " A nice decoration ", " A dishonest transaction "],
+                    options_hi: [" A fair agreement ", " An unfair agreement ",
+                                " A nice decoration ", " A dishonest transaction "],
+                    solution_en: "15.(a) A square deal- a fair agreement.  <br />Example-  The team leader tries to get a square deal for all its employees.",
+                    solution_hi: "15.(a) A square deal - a fair agreement./एक निष्पक्ष या उचित समझौता। <br />Example-  The team leader tries to get a square deal for all its employees.",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "16",
+                    section: "7",
+                    question_en: "16. Select the most appropriate meaning of the given idiom. <br />On edge ",
+                    question_hi: "16. Select the most appropriate meaning of the given idiom. <br />On edge ",
+                    options_en: [" Keeping things safely ", " Doing exercises regularly ", 
+                                " Nervous and unable to relax ", " Playing a tiring game "],
+                    options_hi: [" Keeping things safely ", " Doing exercises regularly ",
+                                " Nervous and unable to relax ", " Playing a tiring game "],
+                    solution_en: "16.(c) On edge - Nervous and unable to relax. <br />Example- I was on edge last week waiting to see my SSC exam result. <br /> ",
+                    solution_hi: "16.(c) On edge - Nervous and unable to relax./घबराहट होना या आराम करने में असमर्थ होना।<br />Example- I was on edge last week waiting to see my SSC exam result. ",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "17",
+                    section: "7",
+                    question_en: "17. Select the most appropriate meaning of the given idiom. <br />The gift of the gab ",
+                    question_hi: "17. Select the most appropriate meaning of the given idiom. <br />The gift of the gab ",
+                    options_en: [" Loves to give gifts ", " Writes very well ", 
+                                " Used to grabbing others’ gifts ", " Talks well and persuasively "],
+                    options_hi: [" Loves to give gifts ", " Writes very well ",
+                                " Used to grabbing others’ gifts ", " Talks well and persuasively "],
+                    solution_en: "17.(d) The gift of the gab- talks well and persuasively. <br />Example- One must have the gift of the gab if one wants to become a good communicator.",
+                    solution_hi: "17.(d) The gift of the gab- talks well and persuasively./अच्छी तरह और प्रेरक ढंग से बात करना। <br />Example- One must have the gift of the gab if one wants to become a good communicator.",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "18",
+                    section: "7",
+                    question_en: "18. Select the most appropriate meaning of the given idiom. <br />Feel at sea ",
+                    question_hi: "18. Select the most appropriate meaning of the given idiom. <br />Feel at sea ",
+                    options_en: [" Feel comfortable while travelling by water ", " Feel angry ", 
+                                " Feel seasick ", " Feel lost or confused  "],
+                    options_hi: [" Feel comfortable while travelling by water ", " Feel angry ",
+                                " Feel seasick ", " Feel lost or confused  "],
+                    solution_en: "18.(d) Feel at sea- feel lost or confused <br />Example- The manager should not feel at sea if he wants to complete his presentation. ",
+                    solution_hi: "18.(d) Feel at sea- feel lost or confused./खोया हुआ या भ्रमित महसूस करना। <br />Example- The manager should not feel at sea if he wants to complete his presentation. ",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "19",
+                    section: "7",
+                    question_en: "<p>19. Select the most appropriate meaning of the given idiom. <br><strong>Twiddling one&rsquo;s thumbs</strong></p>",
+                    question_hi: "<p>19. Select the most appropriate meaning of the given idiom. <br><strong>Twiddling one&rsquo;s thumbs</strong></p>",
+                    options_en: [" Feeling hungry ", " Feeling bored ", 
+                                " Feeling angry ", " Feeling sad "],
+                    options_hi: [" Feeling hungry ", " Feeling bored ",
+                                " Feeling angry ", " Feeling sad "],
+                    solution_en: "<p>19.(b) <strong>Twiddling one&rsquo;s thumbs</strong> - feeling bored. <br>Example- Rohit arrived early for the meeting so he was twiddling his thumbs for an hour.</p>",
+                    solution_hi: "<p>19.(b) <strong>Twiddling one&rsquo;s thumbs </strong>- feeling bored./ऊब महसूस करना। <br>Example- Rohit arrived early for the meeting so he was twiddling his thumbs for an hour. </p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "20",
+                    section: "7",
+                    question_en: "<p>20. Select the most appropriate meaning of the given idiom. <br><strong>Out of the blue</strong></p>",
+                    question_hi: "<p>20. Select the most appropriate meaning of the given idiom. <br><strong>Out of the blue</strong></p>",
+                    options_en: ["<p>Beat someone black and blue</p>", "<p>Loves to wear only blue colour clothes</p>", 
+                                "<p>Completely honestly</p>", "<p>Completely unexpectedly</p>"],
+                    options_hi: ["<p>Beat someone black and blue</p>", "<p>Loves to wear only blue colour clothes</p>",
+                                "<p>Completely honestly</p>", "<p>Completely unexpectedly</p>"],
+                    solution_en: "<p>20.(d) <strong>Out of the blue </strong>- completely unexpectedly. <br>Example- One day, out of the blue, Rohan called me up.</p>",
+                    solution_hi: "<p>20.(d) <strong>Out of the blue</strong> - completely unexpectedly./ पूर्णतया अप्रत्याशित रूप से।<br>Example- One day, out of the blue, Rohan called me up.</p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "21",
+                    section: "7",
+                    question_en: "21. Select the most appropriate meaning of the given idiom. <br />To fan the flames ",
+                    question_hi: "21. Select the most appropriate meaning of the given idiom. <br />To fan the flames ",
+                    options_en: [" To resolve the issue amicably ", " To call for help to solve an issue ", 
+                                " To cool the situation ", " To make a bad situation worse "],
+                    options_hi: [" To resolve the issue amicably ", " To call for help to solve an issue ",
+                                " To cool the situation ", " To make a bad situation worse "],
+                    solution_en: "21.(d) To fan the flames- to make a bad situation worse <br />Example- The politician’s comments are really going to fan the flames of hatred among the public.  ",
+                    solution_hi: "21.(d) To fan the flames- to make a bad situation worse./ किसी बुरी स्थिति को और भी बदतर बनाना। <br />Example- The politician’s comments are really going to fan the flames of hatred among the public. ",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "22",
+                    section: "misc",
+                    question_en: "22. Select the most appropriate meaning of the given idiom. <br />To fight tooth and nail ",
+                    question_hi: "22. Select the most appropriate meaning of the given idiom. <br />To fight tooth and nail ",
+                    options_en: [" To fight or compete with great ferocity and intensity ", " To silently leave the scene of battle ", 
+                                " To keep the enemy guessing about the weapons used ", " To use unusual weapons to fight "],
+                    options_hi: [" To fight or compete with great ferocity and intensity ", " To silently leave the scene of battle ",
+                                " To keep the enemy guessing about the weapons used ", " To use unusual weapons to fight "],
+                    solution_en: "22.(a) To fight tooth and nail- to fight or compete with great ferocity and intensity. <br />Example- I am going to fight tooth and nail for that seat in the Excise department.",
+                    solution_hi: "22.(a) To fight tooth and nail- to fight or compete with great ferocity and intensity./अत्यधिक उग्रता और तीव्रता से लड़ना या प्रतिस्पर्धा करना।  <br />Example- I am going to fight tooth and nail for that seat in the Excise department.",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+            
+            // Generate question boxes
+            const boxesContainer = document.getElementById('question-boxes');
+            questions.forEach((q, index) => {
+                const box = document.createElement('div');
+                box.className = 'q-box';
+                box.textContent = index + 1;
+                box.onclick = () => showQuestion(index);
+                box.id = `box-${index}`;
+                boxesContainer.appendChild(box);
+            });
+            
+            // Show first question
+            showQuestion(0);
+            updateProgress();
+        }
+        
+        // Show a specific question
+        
+        function formatContent(text) {
+            if (!text) return '';
+            return text.replace(/<img/g, '<img style="max-width:100%;height:auto;"');
+        }
+        
+        function showQuestion(index) {
+            if (index < 0 || index >= questions.length) return;
+            
+            currentQuestion = index;
+            const question = questions[index];
+            
+            // Update question counter
+            document.getElementById('question-counter').textContent = `Question ${index + 1} of ${questions.length}`;
+            
+            // Update question boxes
+            document.querySelectorAll('.q-box').forEach(box => box.classList.remove('current'));
+            document.getElementById(`box-${index}`).classList.add('current');
+            
+            // Generate question HTML
+            let html = `
+                <div class="question-card">
+                    <div class="question-text">
+                        <div class="en">${formatContent(question.question_en)}</div>
+                        <div class="hi" style="display:none">${formatContent(question.question_hi)} </div>
+                    </div>
+                    <div class="options" id="options-container">`;
+            
+            // Add options
+            ['a', 'b', 'c', 'd'].forEach((opt, i) => {
+                let optionClass = '';
+                let isCorrectAnswer = opt === question.correct;
+                let isUserAnswer = answers[question.id] === opt;
+                
+                // When reviewing, add appropriate classes
+                if (submitted) {
+                    if (isCorrectAnswer) {
+                        optionClass += ' correct-answer';
+                    } else if (isUserAnswer && !isCorrectAnswer) {
+                        optionClass += ' incorrect';
+                    }
+                }
+                
+                html += `
+                    <div class="option-item">
+                        <input class="option-input" type="radio" name="q${index}" 
+                            id="opt-${index}-${opt}" value="${opt}" 
+                            ${isUserAnswer ? 'checked' : ''}
+                            onclick="selectAnswer('${question.id}', '${opt}')">
+                       <label class="option-label${optionClass}" for="opt-${index}-${opt}">
+                            <div class="en">${question.options_en[i]}</div>
+                            <div class="hi" style="display:none">${question.options_hi[i]}</div>
+                        </label>
+                    </div>`;
+            });
+            
+            // Add solution if submitted
+            if (submitted) {
+                const isCorrect = answers[question.id] === question.correct;
+                const resultText = answers[question.id] ? (isCorrect ? 'Correct!' : 'Incorrect!') : 'Not attempted';
+                
+                html += `
+                    <div class="solution-container">
+                        <div class="solution-title">${resultText}</div>
+                        <div class="solution-text">
+                            <div class="en">${question.solution_en}</div>
+                            <div class="hi" style="display:none">${question.solution_hi}</div>
+                        </div>
+                    </div>`;
+            }
+            
+            html += `</div></div>`;
+            
+            document.getElementById('questions-container').innerHTML = html;
+            
+            // Apply language settings
+            applyLanguage();
+            
+            // If in mobile view, close the menu
+            if (window.innerWidth < 992) {
+                toggleNav(false);
+            }
+            
+            // Add review mode class if submitted
+            if (submitted) {
+                document.getElementById('options-container').classList.add('review-mode');
+            }
+        }
+        
+        // Apply current language
+        function applyLanguage() {
+            document.querySelectorAll(`.${currentLang}`).forEach(el => el.style.display = 'block');
+            document.querySelectorAll(`.${currentLang === 'en' ? 'hi' : 'en'}`).forEach(el => el.style.display = 'none');
+            
+            // Update language button text
+            document.getElementById('lang-text').textContent = currentLang === 'en' ? 'Hi' : 'En';
+        }
+        
+        // Select an answer
+        function selectAnswer(qId, option) {
+            if (submitted) return;
+            
+            answers[qId] = option;
+            updateProgress();
+            
+            // Mark question as attempted in the navigation
+            const index = questions.findIndex(q => q.id === qId);
+            if (index >= 0) {
+                const box = document.getElementById(`box-${index}`);
+                box.classList.add('attempted');
+                box.classList.remove('unattempted');
+            }
+        }
+        
+        // Navigate to previous/next question
+        function prevQuestion() { 
+            if (currentQuestion > 0) showQuestion(currentQuestion - 1); 
+        }
+        
+        function nextQuestion() { 
+            if (currentQuestion < questions.length - 1) showQuestion(currentQuestion + 1); 
+        }
+        
+        // Switch section
+        function switchSection(sectionId) {
+            if (sectionId === 'all') {
+                showQuestion(0);
+                return;
+            }
+            
+            const section = sections[sectionId];
+            if (section) showQuestion(section.start);
+        }
+        
+        // Toggle language
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'hi' : 'en';
+            applyLanguage();
+        }
+        
+        // Toggle navigation sidebar
+        function toggleNav(show) {
+            const nav = document.getElementById('question-nav');
+            const overlay = document.getElementById('nav-overlay');
+            
+            if (show === undefined) {
+                show = !nav.classList.contains('show');
+            }
+            
+            if (show) {
+                nav.classList.add('show');
+                overlay.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            } else {
+                nav.classList.remove('show');
+                overlay.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+        }
+        
+        // Update progress
+        function updateProgress() {
+            const attempted = Object.keys(answers).length;
+            document.getElementById('attempted-count').textContent = attempted;
+        }
+        
+        // Start timer
+        function startTimer() {
+            const timerDisplay = document.getElementById('timer-display');
+            let timeLeft = totalTime;
+            
+            const timerInterval = setInterval(() => {
+                if (timeLeft <= 0 || submitted) {
+                    clearInterval(timerInterval);
+                    if (!submitted) submitTest();
+                    return;
+                }
+                
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                timeLeft--;
+            }, 1000);
+        }
+        
+        // Confirm before submitting
+        function confirmSubmit() {
+            if (submitted) return;
+            
+            const attempted = Object.keys(answers).length;
+            const remaining = questions.length - attempted;
+            
+            // Create a more modern confirmation dialog
+            const confirmHtml = `
+                <div style="text-align: center; padding: 20px;">
+                    <h4 style="margin-bottom: 16px; color: var(--dark);">Confirm Submission</h4>
+                    <p style="margin-bottom: 24px; color: var(--gray);">
+                        You have attempted ${attempted} of ${questions.length} questions.<br>
+                        ${remaining} questions are unattempted.
+                    </p>
+                    <div style="display: flex; justify-content: center; gap: 12px;">
+                        <button onclick="this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; border: 1px solid var(--light-gray); background: white; border-radius: 8px; cursor: pointer;">
+                            Cancel
+                        </button>
+                        <button onclick="submitTest(); this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer;">
+                            Submit Test
+                        </button>
+                    </div>
+                </div>`;
+            
+            // Create modal element
+            const modal = document.createElement('div');
+            modal.className = 'results-modal show';
+            modal.innerHTML = `
+                <div class="results-card" style="max-width: 400px;">
+                    <button class="cancel-btn" style="position: absolute; top: 12px; right: 12px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--gray);" onclick="this.closest('.results-modal').remove()">
+                        ×
+                    </button>
+                    ${confirmHtml}
+                </div>`;
+            
+            document.body.appendChild(modal);
+        }
+        
+        // Submit test
+        function submitTest() {
+            if (submitted) return;
+            
+            submitted = true;
+            
+            let score = 0;
+            let correctCount = 0;
+            let incorrectCount = 0;
+            let unattemptedCount = 0;
+            
+            questions.forEach((q, index) => {
+                const userAns = answers[q.id];
+                const box = document.getElementById(`box-${index}`);
+                
+                box.classList.remove('attempted');
+                
+                if (!userAns) {
+                    unattemptedCount++;
+                    box.classList.add('unattempted');
+                } else if (userAns === q.correct) {
+                    correctCount++;
+                    score += q.pos_marks;
+                    box.classList.add('correct');
+                } else {
+                    incorrectCount++;
+                    score -= q.neg_marks;
+                    box.classList.add('incorrect');
+                }
+            });
+            
+            // Update result values
+            document.getElementById('score-value').textContent = score.toFixed(2);
+            document.getElementById('correct-value').textContent = correctCount;
+            document.getElementById('incorrect-value').textContent = incorrectCount;
+            document.getElementById('unattempted-value').textContent = unattemptedCount;
+            
+            // Show the results modal
+            document.getElementById('results-modal').classList.add('show');
+            
+            // Disable submit button
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-check"></i>';
+            submitBtn.style.backgroundColor = 'var(--success)';
+            
+            // Refresh current question view to show solution
+            showQuestion(currentQuestion);
+        }
+        
+        // Review test
+        function reviewTest() {
+            document.getElementById('results-modal').classList.remove('show');
+            showQuestion(0);
+        }
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target === document.getElementById('results-modal')) {
+                document.getElementById('results-modal').classList.remove('show');
+            }
+        });
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') prevQuestion();
+            if (e.key === 'ArrowRight') nextQuestion();
+        });
+    </script>
+</body>
+</html>
