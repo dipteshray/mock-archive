@@ -1,0 +1,1434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mocks Wallah</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --primary-light: #a29bfe;
+            --primary-dark: #5649c0;
+            --secondary: #00cec9;
+            --accent: #fd79a8;
+            --success: #00b894;
+            --warning: #fdcb6e;
+            --danger: #d63031;
+            --light: #f8f9fa;
+            --dark: #2d3436;
+            --gray: #636e72;
+            --light-gray: #dfe6e9;
+            --card-bg: #ffffff;
+            --body-bg: #f5f6fa;
+            --header-bg: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            --footer-bg: #ffffff;
+            --box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            --box-shadow-sm: 0 2px 10px rgba(0,0,0,0.05);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background-color: var(--body-bg);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            color: var(--dark);
+            line-height: 1.6;
+            padding-bottom: 80px; /* Space for fixed navigation */
+            overflow-x: hidden;
+        }
+        
+        /* Header Styles */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: var(--header-bg);
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            z-index: 1000;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .header-brand {
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .header-brand i {
+            margin-right: 8px;
+            font-size: 1.2rem;
+        }
+        
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .control-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .control-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .control-btn.active {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .timer-display {
+            background: rgba(0,0,0,0.2);
+            border-radius: 18px;
+            padding: 4px 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+        
+        .timer-display i {
+            margin-right: 6px;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-top: 60px;
+            padding: 16px;
+            min-height: calc(100vh - 140px);
+        }
+        
+        .question-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--box-shadow-sm);
+            border: none;
+            transition: var(--transition);
+        }
+        
+        .question-counter {
+            font-size: 0.9rem;
+            color: var(--gray);
+            text-align: center;
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+        
+        .question-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+        
+        .option-item {
+            margin-bottom: 12px;
+            position: relative;
+        }
+        
+        .option-input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+            .question-text {
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        hyphens: auto;
+        max-width: 100%;
+    }
+
+    .question-text img,
+    .option-label img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 8px 0;
+        border-radius: 8px;
+    }
+
+    .option-label {
+        overflow: hidden;
+    }
+
+    .question-card {
+        overflow: hidden;
+    }
+        
+        .option-label {
+            display: block;
+            padding: 14px 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--light-gray);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .option-label:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .option-input:checked + .option-label {
+            border-color: var(--primary);
+            background: rgba(108, 92, 231, 0.05);
+            box-shadow: 0 0 0 1px var(--primary);
+        }
+        
+        .option-input:checked + .option-label::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--primary);
+        }
+        
+        /* When reviewing answers */
+        .review-mode .option-input:checked + .option-label.correct {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.correct::after {
+            background: var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.incorrect {
+            border-color: var(--danger);
+            background: rgba(214, 48, 49, 0.05);
+            box-shadow: 0 0 0 1px var(--danger);
+        }
+        
+        .MathJax, .mjx-chtml {
+            overflow-x: auto;
+            max-width: 100%;
+            display: inline-block;
+        }
+
+        
+        .review-mode .option-input:checked + .option-label.incorrect::after {
+            background: var(--danger);
+        }
+        
+        .review-mode .option-label.correct-answer {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-label.correct-answer::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--success);
+        }
+        
+        .solution-container {
+            margin-top: 20px;
+            padding: 16px;
+            background: rgba(108, 92, 231, 0.05);
+            border-radius: 12px;
+            border-left: 3px solid var(--primary);
+        }
+        
+        .solution-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+        
+        /* Question Navigation */
+        .question-nav {
+            position: fixed;
+            top: 60px;
+            right: 0;
+            bottom: 80px;
+            width: 100%;
+            max-width: 320px;
+            background: var(--card-bg);
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            transform: translateX(100%);
+            transition: var(--transition);
+            z-index: 900;
+            overflow-y: auto;
+            padding: 16px;
+        }
+        
+        .question-nav.show {
+            transform: translateX(0);
+        }
+        
+        .nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .nav-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+        
+        .question-stats {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .stat-badge {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        
+        .section-selector {
+            width: 100%;
+            margin-bottom: 16px;
+            border-radius: 12px;
+            padding: 10px 16px;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            font-size: 0.9rem;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 16px;
+        }
+        
+        .question-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+            gap: 8px;
+        }
+        
+        .q-box {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .q-box:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .q-box.attempted {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .q-box.correct {
+            background-color: var(--success);
+            color: white;
+            border-color: var(--success);
+        }
+        
+        .q-box.incorrect {
+            background-color: var(--danger);
+            color: white;
+            border-color: var(--danger);
+        }
+        
+        .q-box.current {
+            border: 2px solid var(--accent) !important;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .q-box.unattempted {
+            background-color: var(--gray);
+            color: white;
+            border-color: var(--gray);
+        }
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: var(--footer-bg);
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            z-index: 800;
+        }
+        
+        .nav-btn {
+            height: 48px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 20px;
+            transition: var(--transition);
+            gap: 8px;
+        }
+        
+        .nav-btn i {
+            font-size: 1rem;
+        }
+        
+        .nav-btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .nav-btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+        
+        .nav-btn-outline:hover {
+            background: rgba(108, 92, 231, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        /* Overlay when nav is open */
+        .nav-overlay {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            bottom: 80px;
+            background: rgba(0,0,0,0.5);
+            z-index: 800;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+        }
+        
+        .nav-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        /* Results Modal */
+        .results-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1100;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+            padding: 16px;
+        }
+        
+        .results-modal.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .results-card {
+            background: white;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+            transform: translateY(20px);
+            transition: var(--transition);
+        }
+        
+        .results-modal.show .results-card {
+            transform: translateY(0);
+        }
+        
+        .results-header {
+            background: var(--header-bg);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .results-title {
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .results-body {
+            padding: 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            color: white;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+        
+        .results-footer {
+            padding: 16px 20px;
+            display: flex;
+            justify-content: center;
+            border-top: 1px solid var(--light-gray);
+        }
+        
+        /* Responsive Adjustments */
+        @media (min-width: 992px) {
+            .question-nav {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-right: 320px;
+            }
+            
+            .nav-overlay {
+                display: none;
+            }
+            
+            .bottom-nav {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .question-grid {
+                grid-template-columns: repeat(auto-fill, minmax(36px, 1fr));
+                gap: 6px;
+            }
+            
+            .q-box {
+                width: 36px;
+                height: 36px;
+                font-size: 0.9rem;
+            }
+            
+            .option-label {
+                padding: 12px 14px;
+            }
+            
+            .question-text {
+                font-size: 1rem;
+            }
+            
+            .header-brand {
+                font-size: 1rem;
+            }
+            
+            .control-btn {
+                width: 32px;
+                height: 32px;
+            }
+            
+            .timer-display {
+                font-size: 0.8rem;
+                padding: 4px 10px;
+            }
+            
+            .nav-btn {
+                height: 44px;
+                padding: 0 16px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="#" class="header-brand">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Mocks Wallah</span>
+            </a>
+            
+            <div class="header-controls">
+                <!-- Timer -->
+                <div class="timer-display">
+                    <i class="far fa-clock"></i>
+                    <span id="timer-display">15:00</span>
+                </div>
+                
+                <!-- Language toggle -->
+                <button class="control-btn" id="lang-btn" onclick="toggleLanguage()">
+                    <span id="lang-text">En</span>
+                </button>
+                
+                <!-- Submit button -->
+                <button class="control-btn" id="submit-btn" onclick="confirmSubmit()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+                
+                <!-- Questions toggle for mobile -->
+                <button class="control-btn nav-toggle-btn" id="nav-toggle" onclick="toggleNav()">
+                    <i class="fas fa-th"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main content -->
+    <main class="main-content" id="main-content">
+        <div class="question-counter" id="question-counter">Question 1 of 22</div>
+        
+        <!-- Questions will be displayed here -->
+        <div id="questions-container"></div>
+    </main>
+    
+    <!-- Overlay for mobile nav -->
+    <div class="nav-overlay" id="nav-overlay" onclick="toggleNav(false)"></div>
+    
+    <!-- Question navigation sidebar -->
+    <aside class="question-nav" id="question-nav">
+        <div class="nav-header">
+            <h3 class="nav-title">Questions</h3>
+            <div class="question-stats">
+                <span class="stat-badge bg-primary" id="attempted-count">0</span>
+                <span class="stat-badge bg-gray" id="total-count">22</span>
+                <button class="control-btn d-lg-none" onclick="toggleNav(false)">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Section selector -->
+        <select class="section-selector" id="section-selector" onchange="switchSection(this.value)">
+            <option value="all">All Sections</option>
+        </select>
+        
+        <!-- Question grid -->
+        <div class="question-grid" id="question-boxes"></div>
+    </aside>
+    
+    <!-- Bottom navigation for mobile -->
+    <nav class="bottom-nav d-lg-none">
+        <button class="nav-btn nav-btn-outline" onclick="prevQuestion()">
+            <i class="fas fa-chevron-left"></i>
+            <span>Previous</span>
+        </button>
+        <button class="nav-btn nav-btn-outline" onclick="nextQuestion()">
+            <span>Next</span>
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </nav>
+    
+    <!-- Results modal -->
+    <div class="results-modal" id="results-modal">
+        <div class="results-card">
+            <div class="results-header">
+                <h3 class="results-title">Test Results</h3>
+            </div>
+            <div class="results-body">
+                <div class="stats-grid">
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark))">
+                        <div class="stat-value" id="score-value">0</div>
+                        <div class="stat-label">Score</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--success), #1b9aaa)">
+                        <div class="stat-value" id="correct-value">0</div>
+                        <div class="stat-label">Correct</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--danger), var(--accent))">
+                        <div class="stat-value" id="incorrect-value">0</div>
+                        <div class="stat-label">Incorrect</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--gray), var(--dark))">
+                        <div class="stat-value" id="unattempted-value">0</div>
+                        <div class="stat-label">Unattempted</div>
+                    </div>
+                </div>
+            </div>
+            <div class="results-footer">
+                <button class="nav-btn nav-btn-primary" onclick="reviewTest()">
+                    <i class="fas fa-search me-1"></i>
+                    <span>Review Test</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Questions data
+        const questions = [];
+        const sections = {};
+        let currentLang = "en";
+        let currentQuestion = 0;
+        let answers = {};
+        let submitted = false;
+        let totalTime = 15 * 60;
+        
+        // Initialize the test
+        window.onload = function() {
+            initializeTest();
+            startTimer();
+            
+            // If on desktop, show the question navigation by default
+            if (window.innerWidth >= 992) {
+                document.getElementById('question-nav').classList.add('show');
+                document.getElementById('main-content').classList.add('with-nav');
+            }
+        };
+        
+        // Initialize test data
+        function initializeTest() {
+            // Add sections and questions
+            
+            sections["6"] = {
+                name: "Reasoning",
+                start: 0,
+                end: 20
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="6">Reasoning</option>`;
+            
+            sections["misc"] = {
+                name: "Miscellaneous",
+                start: 21,
+                end: 21
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="misc">Miscellaneous</option>`;
+            
+            
+                questions.push({
+                    id: "1",
+                    section: "6",
+                    question_en: "<p>1. Saloni is the daughter of the only son of Kartik. Nirupama is the mother of Deepak. Yamini&rsquo;s only son, Ankit, is married to Nirupama. Kartik is the paternal grandfather of Deepak. How is Kartik related to Ankit?</p>",
+                    question_hi: "<p>1. <span style=\"font-family: Palanquin Dark;\">सलोनी कार्तिक के इकलौते बेटे की बेटी है। निरुपमा, दीपक की माता हैं। यामिनी के इकलौते बेटे अंकित की शादी निरुपमा से हुई है। कार्तिक, दीपक के पैतृक दादाजी हैं। कार्तिक, अंकित से किस प्रकार संबंधित है?</span></p>",
+                    options_en: ["<p>Brother</p>", "<p>Paternal uncle</p>", 
+                                "<p>Son</p>", "<p>Father</p>"],
+                    options_hi: ["<p>भाई</p>", "<p>पैतृक चाचा</p>",
+                                "<p>बेटा</p>", "<p>पिता</p>"],
+                    solution_en: "<p>1.(d)</p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654772168/word/media/image14.png\"></p>\n<p><span style=\"font-family: Palanquin Dark;\">From the above figure we can see that Kartik is the Father of Ankit. </span></p>",
+                    solution_hi: "<p>1.(d)</p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654772168/word/media/image14.png\"></p>\n<p><span style=\"font-family: Palanquin Dark;\">उपरोक्त आकृति से हम देख सकते हैं कि कार्तिक, अंकित का पिता है।</span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "2",
+                    section: "6",
+                    question_en: "<p>2.<span style=\"font-family: Palanquin Dark;\"> Parmila is the granddaughter of Akun who is married to Nikita. Murali is the brother-in-law of Akun who has two daughters but no son. Rahul is the cousin of Kamal and brother of Parmila. Uday and Vanmay are the sons-in-law of Nikita. Vanmay is married to Yamini and they have two daughters and one son. Uday has one son and one daughter. Tina and Smita are the daughters of Yamini. Murali is unmarried. How is Yamini related to Rahul?</span></p>",
+                    question_hi: "<p>2. <span style=\"font-family: Palanquin Dark;\">परमिला अकुन की पोती है, जिसकी शादी निकिता से हुई है। मुरली अकुन का साला है जिसकी दो बेटियां हैं लेकिन कोई बेटा नहीं है। राहुल कमल का चचेरा भाई और परमिला का भाई है। उदय और वनमय निकिता के दामाद हैं। वनमय की शादी यामिनी से हुई है और उनकी दो बेटियां और एक बेटा है। उदय का एक बेटा और एक बेटी है। टीना और स्मिता यामिनी की बेटियां हैं। मुरली अविवाहित है। यामिनी का राहुल से क्या संबंध है?</span></p>",
+                    options_en: ["<p>Aunt</p>", "<p>Mother</p>", 
+                                "<p>Sister</p>", "<p>Daughter</p>"],
+                    options_hi: ["<p>चाची</p>", "<p>माँ</p>",
+                                "<p>बहन</p>", "<p>बेटी</p>"],
+                    solution_en: "<p>2.(a)</p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654772168/word/media/image3.png\"></p>\n<p><span style=\"font-family: Palanquin Dark;\">From the above diagram we can see that Yamini is the aunt of Rahul.</span></p>",
+                    solution_hi: "<p>2.(a)</p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654772168/word/media/image3.png\"></p>\n<p><span style=\"font-family: Palanquin Dark;\">उपरोक्त चित्र से हम देख सकते हैं कि यामिनी राहुल की मौसी है।</span></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "3",
+                    section: "6",
+                    question_en: "<p>3.<span style=\"font-family: Palanquin Dark;\"> &lsquo;A % B&rsquo; means &lsquo;A is the sister of B&rsquo;.&nbsp; </span></p>\n<p><span style=\"font-family: Palanquin Dark;\">&lsquo;A $ B&rsquo; means &lsquo;A is the brother of B&rsquo;.&nbsp; </span></p>\n<p><span style=\"font-family: Palanquin Dark;\">&lsquo;A @ B&rsquo; means &lsquo;A is the son of B&rsquo;.&nbsp;</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">&nbsp;</span><span style=\"font-family: Palanquin Dark;\">&lsquo;A &amp; B&rsquo; means &lsquo;A is the mother of B&rsquo;.</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">&nbsp; </span><span style=\"font-family: Palanquin Dark;\">If </span><span style=\"font-family: Palanquin Dark;\">&lsquo;R % T &amp; Z $ S @ V @ C % Y&rsquo;,</span><span style=\"font-family: Palanquin Dark;\"> then which of the following statements is NOT correct?</span></p>",
+                    question_hi: "<p>3.<span style=\"font-family: Palanquin Dark;\"> \'A% B\' का अर्थ है \'A, B की बहन है\'।</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">&nbsp;</span><span style=\"font-family: Palanquin Dark;\">\'A $ B\' का अर्थ है \'A, B का भाई है\'।</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">&nbsp;</span><span style=\"font-family: Palanquin Dark;\">\'A @ B\' का अर्थ है \'A, B का बेटा है\'।</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">&nbsp;</span><span style=\"font-family: Palanquin Dark;\">\'A &amp; B\' का अर्थ है \'A, B की मां है\'।</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">&nbsp;</span><span style=\"font-family: Palanquin Dark;\">यदि</span><span style=\"font-family: Palanquin Dark;\"> \'R % T &amp; Z $ S @ V @ C % Y\',</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">&nbsp;तो निम्नलिखित में से कौन सा कथन सही नहीं है?</span></p>",
+                    options_en: ["<p>C is the paternal grandmother of Z.</p>", "<p>V is the father of Z.</p>", 
+                                "<p>T is the daughter of C.</p>", "<p>T is the mother of S.</p>"],
+                    options_hi: ["<p>C, Z की पैतृक दादी है।</p>", "<p>V, Z का पिता है।</p>",
+                                "<p>T, C की बेटी है।</p>", "<p>T, S की मां है।</p>"],
+                    solution_en: "<p>3.(c)</p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654772168/word/media/image10.png\"></p>\n<p><span style=\"font-family: Palanquin Dark;\">From the above figure we can see that all the options except C are correct.</span></p>",
+                    solution_hi: "<p>3.(c)</p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654772168/word/media/image22.png\"></p>\n<p><span style=\"font-family: Palanquin Dark;\">उपरोक्त आकृति से हम देख सकते हैं कि C को छोड़कर सभी विकल्प सही हैं।</span></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "4",
+                    section: "6",
+                    question_en: "<p>4.<span style=\"font-family: Palanquin Dark;\"> &lsquo;A # B&rsquo; means &lsquo;A is the father of B&rsquo;.</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">&nbsp; </span><span style=\"font-family: Palanquin Dark;\">&lsquo;A % B&rsquo; means &lsquo;A is the mother of B&rsquo;.&nbsp; </span></p>\n<p><span style=\"font-family: Palanquin Dark;\">&lsquo;A @ B&rsquo; means &lsquo;A is the sister of B&rsquo;. </span></p>\n<p><span style=\"font-family: Palanquin Dark;\">&lsquo;A &amp; B&rsquo; means &lsquo;A is the son of B&rsquo;.&nbsp;</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">&nbsp;</span><span style=\"font-family: Palanquin Dark;\">If &lsquo;G # M # T % S @ H &amp; R &amp; W @ U&rsquo;, then which of the following statements is NOT&nbsp; </span><span style=\"font-family: Palanquin Dark;\">Correct?</span></p>",
+                    question_hi: "<p>4. <span style=\"font-family: Palanquin Dark;\">\'A # B\' का अर्थ है \'A, B का पिता है\'।</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">&nbsp;</span><span style=\"font-family: Palanquin Dark;\">\'A% B\' का अर्थ है \'A B की मां है\'।</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">&nbsp;</span><span style=\"font-family: Palanquin Dark;\">\'A @ B\' का अर्थ है \'A B की बहन है\'। </span></p>\n<p><span style=\"font-family: Palanquin Dark;\">\'A और B\' का अर्थ है \'A B का पुत्र है\'।</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">&nbsp;</span><span style=\"font-family: Palanquin Dark;\">यदि &lsquo;G # M # T % S @ H &amp; R &amp; W @ U\', तो निम्नलिखित में से कौन सा कथन सही नहीं है?</span></p>",
+                    options_en: ["<p>G is the paternal grandfather of T.</p>", "<p>W is the maternal grandmother of H.</p>", 
+                                "<p>R is the husband of T.</p>", "<p>M is the maternal grandfather of S.</p>"],
+                    options_hi: ["<p>G, T का दादा है।</p>", "<p>W, H की नानी है।</p>",
+                                "<p>R, T का पति है।</p>", "<p>M, S का नाना है।</p>"],
+                    solution_en: "<p>4.(b)</p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654772168/word/media/image9.png\"></p>\n<p><span style=\"font-family: Times New Roman;\">According to the above figure we can see that W is the paternal grandmother of H.</span></p>",
+                    solution_hi: "<p>4.(b)</p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654772168/word/media/image9.png\"></p>\n<p><span style=\"font-family: Baloo;\">उपरोक्त आकृति के अनुसार हम देख सकते हैं कि W, H की पैतृक दादी है।</span></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "5",
+                    section: "6",
+                    question_en: "<p>5. <span style=\"font-family: Baloo;\">There are seven members B, C, D, E, F, G and H in a family. </span><span style=\"font-family: Baloo;\">H is</span><span style=\"font-family: Baloo;\"> the only daughter-in-law of D. E is the sister of C. C is the only son of F, who is the wife of D. B and G are the sons of H. How is G related to F?</span></p>",
+                    question_hi: "<p>5. <span style=\"font-family: Palanquin Dark;\">&nbsp;एक परिवार में सात सदस्य B, C, D, E, F, G और H हैं। H, D की एकमात्र बहू है। E, C की बहन है। C , F का इकलौता बेटा है जो D की पत्नी है। B और G, H के बेटे हैं। G, F से किस प्रकार संबंधित है?</span></p>",
+                    options_en: [" <p> Grandson</span></p>", " <p> Brother</span></p>", 
+                                " <p> Father</span></p>", " <p> Son</span></p>"],
+                    options_hi: [" <p> पोता</span></p>", " <p> भाई</span></p>",
+                                " <p> पिता</span></p>", " <p> पुत्र</span></p>"],
+                    solution_en: "<p>5.(a)</p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654772168/word/media/image24.png\" width=\"217\" height=\"222\"></p>\n<p><span style=\"font-family: Palanquin Dark;\">According to the figure G is the grandson of F</span></p>",
+                    solution_hi: "<p>5.(a)</p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654772168/word/media/image2.png\" width=\"214\" height=\"218\"></p>\n<p><span style=\"font-family: Palanquin Dark;\">चित्र के अनुसार G, F का पोता है</span></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "6",
+                    section: "6",
+                    question_en: "<p>6.<span style=\"font-family: Palanquin Dark;\"> There are six members, P, Q, R, S, T and U, in a family. T is the brother of P&rsquo;s husband.&nbsp; </span><span style=\"font-family: Palanquin Dark;\">U is the mother of T. Q is the daughter of S and P and the granddaughter of R. How is&nbsp; </span><span style=\"font-family: Palanquin Dark;\">R related to T?&nbsp;</span></p>",
+                    question_hi: "<p>6. <span style=\"font-family: Palanquin Dark;\">एक परिवार में छह सदस्य, P, Q, R, S, T और U हैं। T, P के पति का भाई है। U, T की माता है। Q, S और P की पुत्री है और R की पोती है। R, T से कैसे संबंधित&nbsp; है?</span></p>",
+                    options_en: ["<p>Father</p>", "<p>Son</p>", 
+                                "<p><span style=\"font-family: Arial Rounded;\"> Brother </span></p>", "<p>Uncle</p>"],
+                    options_hi: ["<p>पिता</p>", "<p>बेटा</p>",
+                                "<p><span style=\"font-family: Palanquin Dark;\"> भाई</span></p>", "<p>चाचा</p>"],
+                    solution_en: "<p>6.(a)</p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654772168/word/media/image1.png\" width=\"168\" height=\"142\"></p>\n<p><span style=\"font-family: Palanquin Dark;\">From the above figure we can see that R is the father of T.</span></p>",
+                    solution_hi: "<p>6.(a)</p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654772168/word/media/image1.png\" width=\"165\" height=\"139\"></p>\n<p><span style=\"font-family: Palanquin Dark;\">उपरोक्त आकृति से हम देख सकते हैं कि R, T का पिता है।</span></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "7",
+                    section: "6",
+                    question_en: "<p>7. <span style=\"font-family: Palanquin Dark;\">Pointing towards a woman, Reena said, &ldquo;She is the only daughter of my father-in-law.&rdquo; How is the woman related to Reena?&nbsp;</span></p>",
+                    question_hi: "<p>7.<span style=\"font-family: Palanquin Dark;\"> एक औरत की तरफ इशारा करते हुए रीना बोली- वो मेरे ससुर की इकलौती बेटी है। वह महिला रीना से किस प्रकार संबंधित है?&nbsp;</span></p>",
+                    options_en: ["<p>Sister</p>", "<p>Mother</p>", 
+                                "<p>Daughter</p>", "<p>Sister-in-law</p>"],
+                    options_hi: ["<p>बहन</p>", "<p>माँ</p>",
+                                "<p>बेटी</p>", "<p>भाभी/ननद</p>"],
+                    solution_en: "<p>7.(d) <span style=\"font-family: Palanquin Dark;\"> F = Father , W= Women , H = Husband , R = Reena </span></p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654772168/word/media/image20.png\"></p>",
+                    solution_hi: "<p>7.(d) <span style=\"font-family: Palanquin Dark;\"> F = Father , W= Women , H = Husband , R = Reena </span></p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654772168/word/media/image20.png\"></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "8",
+                    section: "6",
+                    question_en: "<p>8. <span style=\"font-family: Palanquin Dark;\">Mahesh is the father of Riva and paternal grandfather of Vansh. Aakash is the brother of Riva and father of Vansh and Ritu. Ritu is the only daughter of Aakash and Maya. How is Maya related to Mahesh?</span></p>",
+                    question_hi: "<p>8. <span style=\"font-family: Palanquin Dark;\">महेश रीवा का पिता है और वंश का दादा है। आकाश रीवा का भाई है और वंश और रितु का पिता है। आकाश और माया की इकलौती बेटी है रितु। माया, महेश से किस प्रकार संबंधित है?</span></p>",
+                    options_en: ["<p>Daughter-in-law</p>", "<p>Aunt</p>", 
+                                "<p>Sister</p>", "<p>Daughter</p>\n<p><span style=\"font-family: Palanquin Dark;\"> </span></p>"],
+                    options_hi: ["<p>बहू</p>", "<p>चाची</p>",
+                                "<p>बहन</p>", "<p>बेटी</p>"],
+                    solution_en: "<p>8.(a)</p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654772168/word/media/image11.png\" width=\"181\" height=\"143\"></p>\n<p><span style=\"font-family: Palanquin Dark;\">From the above figure it is clearly inferred that maya is the daughter-in-law of mahesh</span></p>",
+                    solution_hi: "<p>8.(a)</p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654772168/word/media/image11.png\" width=\"188\" height=\"148\"></p>\n<p><span style=\"font-family: Palanquin Dark;\">उपरोक्त आकृति से स्पष्ट रूप है कि माया , महेश की पुत्रवधू है</span></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "9",
+                    section: "6",
+                    question_en: "<p>9. <span style=\"font-family: Palanquin Dark;\">If Arpita is the only daughter of Pritam&rsquo;s wife&rsquo;s mother&rsquo;s husband, then how is Arpita </span><span style=\"font-family: Palanquin Dark;\">related to Pritam&rsquo;s son?</span></p>",
+                    question_hi: "<p>9.<span style=\"font-family: Palanquin Dark;\"> यदि अर्पिता, प्रीतम की पत्नी की माँ के पति की इकलौती पुत्री है, तो अर्पिता का प्रीतम के पुत्र से क्या सम्बन्ध है?</span></p>",
+                    options_en: ["<p>Sister</p>", "<p>Paternal granddaughter</p>", 
+                                "<p>Daughter</p>", "<p>Mother</p>"],
+                    options_hi: ["<p>बहन</p>", "<p>पैतृक पोती</p>",
+                                "<p>बेटी</p>", "<p>मां</p>"],
+                    solution_en: "<p>9.(d) <span style=\"font-family: Palanquin Dark;\">in the following figure,</span></p>\n<p><span style=\"font-family: Palanquin Dark;\"> H = husband</span></p>\n<p><span style=\"font-family: Palanquin Dark;\"> M = mother</span></p>\n<p><span style=\"font-family: Palanquin Dark;\"> S = son</span></p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654772168/word/media/image16.png\" width=\"110\" height=\"139\"></p>",
+                    solution_hi: "<p>9.(d) <span style=\"font-family: Palanquin;\">निम्नलिखित आकृति में,</span></p>\n<p><span style=\"font-family: Palanquin;\"> H = पति</span></p>\n<p><span style=\"font-family: Palanquin;\"> M = माँ</span></p>\n<p><span style=\"font-family: Palanquin;\"> S = बेटा</span></p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654772168/word/media/image16.png\" width=\"110\" height=\"139\"></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "10",
+                    section: "6",
+                    question_en: "<p>10. <span style=\"font-family: Palanquin;\">&nbsp;&lsquo;A + B&rsquo; means &lsquo;A is the daughter of B&rsquo;.&nbsp;</span></p>\n<p><span style=\"font-family: Palanquin;\">&nbsp;</span><span style=\"font-family: Palanquin;\">&lsquo;A $ B&rsquo; means &lsquo;A is the husband of B&rsquo;.&nbsp;</span></p>\n<p><span style=\"font-family: Palanquin;\">&nbsp;</span><span style=\"font-family: Palanquin;\">&lsquo;A @ B&rsquo; means &lsquo;A is the brother of B&rsquo;.&nbsp;</span></p>\n<p><span style=\"font-family: Palanquin;\">&nbsp;</span><span style=\"font-family: Palanquin;\">&lsquo;A &amp; B&rsquo; means &lsquo;A is the mother of B&rsquo;.&nbsp;</span></p>\n<p><span style=\"font-family: Palanquin;\">&nbsp;</span><span style=\"font-family: Palanquin;\">&lsquo;A % B&rsquo; means &lsquo;A is the son of B&rsquo;.</span></p>\n<p><span style=\"font-family: Palanquin;\">&nbsp; </span><span style=\"font-family: Palanquin;\">If &lsquo;W @ S % K $ G &amp; U &amp; T @ R + C&rsquo;, then which of the following statements is correct?</span></p>",
+                    question_hi: "<p>10. <span style=\"font-family: Palanquin Dark;\">\'A + B\' का अर्थ है \'A B की बेटी है\'।</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">&nbsp;</span><span style=\"font-family: Palanquin Dark;\">\'A $ B\' का अर्थ है \'A B का पति है\'।</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">&nbsp;</span><span style=\"font-family: Palanquin Dark;\">\'A @ B\' का अर्थ है \'A B का भाई है\'।</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">&nbsp;</span><span style=\"font-family: Palanquin Dark;\">\'A &amp; B\' का अर्थ है \'A B की माँ है\'।</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">&nbsp;</span><span style=\"font-family: Palanquin Dark;\">\'A % B\' का अर्थ है \'A B का बेटा है\'।</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">यदि &lsquo;W @ S % K $ G &amp; U &amp; T @ R + C&rsquo;, है, </span></p>\n<p><span style=\"font-family: Palanquin Dark;\">तो निम्नलिखित में से कौन सा कथन सही है?</span></p>",
+                    options_en: ["<p>G is the maternal grandmother of R.</p>", "<p>G is the father of W.</p>", 
+                                "<p>C is the father-in-law of K.</p>", "<p>C is the wife of U.</p>"],
+                    options_hi: ["<p>G, R की नानी है।</p>", "<p>G, W का पिता है।</p>",
+                                "<p>C, K का ससुर है।</p>", "<p>C, U की पत्नी है।</p>"],
+                    solution_en: "<p>10.(a) <span style=\"font-family: Palanquin Dark;\">Given that </span></p>\n<p><span style=\"font-family: Palanquin Dark;\">&lsquo;A+ B&rsquo; means &lsquo;A is the daughter of &lsquo;B&rsquo; </span></p>\n<p><span style=\"font-family: Palanquin Dark;\">&lsquo;A$B&rsquo; means &lsquo; A is the husband of the &lsquo;B&rsquo; </span></p>\n<p><span style=\"font-family: Palanquin Dark;\">&lsquo;A@B&rsquo; means &lsquo;A is the brother of &lsquo;B&rsquo;</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">&lsquo;A &amp; B&rsquo; means &lsquo;A is the mother of &lsquo;B&rsquo; </span></p>\n<p><span style=\"font-family: Palanquin Dark;\">&lsquo;A % B&rsquo; means &lsquo; A is the son of the &lsquo; B&rsquo; </span></p>\n<p><span style=\"font-family: Palanquin Dark;\">And asked &lsquo;w@ S % K $ G &amp; U T @ R + C&rsquo;</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">Decode the given sign . We can see the relation. </span></p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654772168/word/media/image15.png\"></p>",
+                    solution_hi: "<p>10.(a) <span style=\"font-family: Palanquin Dark;\">दिया गया है, </span></p>\n<p><span style=\"font-family: Palanquin Dark;\">\'A + B\' का अर्थ है \'A\', \'B\' की बेटी है</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">\'A $ B\' का अर्थ है \'A\', \'B\' का पति है</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">\'A @ B\' का अर्थ है \'A\', \'B\' का भाई है</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">\'A &amp; B\' का अर्थ है \'A\', \'B\' की मां है</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">\'A% B\' का अर्थ है \'A\', \'B\' का बेटा है</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">और पूछा गया है, \'w @ S % K $ G &amp; U T@ R + C\'</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">दिए गए चिन्ह को डिकोड करें। हम संबंध देख सकते हैं। </span></p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654772168/word/media/image15.png\"></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "11",
+                    section: "6",
+                    question_en: "<p>11.<span style=\"font-family: Palanquin Dark;\"> Introducing Kaumudi to a guest, a boy Mihir said, \"She is my mother\'s brother-in-law\'s only daughter\". How is Mihir related to Kaumudi?</span></p>",
+                    question_hi: "<p>11. <span style=\"font-family: Palanquin Dark;\">एक मेहमान को कौमुदी का परिचय कराते हुए एक लड़के मिहिर ने कहा, \"वह मेरी माँ के देवर की </span><span style=\"font-family: Palanquin Dark;\">इकलौती बेटी है\"।मिहिर का कौमुदी से क्या संबंध है?</span></p>",
+                    options_en: ["<p>father</p>", "<p>Uncle</p>", 
+                                "<p>Cousin</p>", "<p>Brother</p>"],
+                    options_hi: ["<p>पिता</p>", "<p>चाचा</p>",
+                                "<p>चचेरा भाई</p>", "<p>भाई</p>"],
+                    solution_en: "<p>11.(c)<span style=\"font-family: Palanquin Dark;\"> B = brother in law</span></p>\n<p><span style=\"font-family: Palanquin Dark;\"> M = mother</span></p>\n<p><span style=\"font-family: Palanquin Dark;\"> K = kaumudi</span></p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654772168/word/media/image21.png\" width=\"225\" height=\"117\"></p>\n<p><span style=\"font-family: Palanquin Dark;\">From the above figure we can see that Mihir is the cousin of kaumudi.</span></p>",
+                    solution_hi: "<p>11.(c)<span style=\"font-family: Palanquin Dark;\"> B = जीजाजी</span></p>\n<p><span style=\"font-family: Palanquin Dark;\"> M = माँ</span></p>\n<p><span style=\"font-family: Palanquin Dark;\"> K = कौमुदी</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">.</span><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654772168/word/media/image21.png\" width=\"240\" height=\"125\"></p>\n<p><span style=\"font-family: Palanquin Dark;\">उपरोक्त आकृति से हम देख सकते हैं कि मिहिर, कौमुदी का चचेरा भाई है।</span></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "12",
+                    section: "6",
+                    question_en: "<p>12.<span style=\"font-family: Palanquin Dark;\"> Jahnavi is the sister of Taruni. Taruni is married to Dilip. Dilip is the father of Raghu. Manoj is the son of Hema. Taruni is the mother-in-law of Hema. Dilip has only one son and no daughter. Jahnavi is married to Barun. Lekha is the daughter of Barun. How is Jahnavi&rsquo;s sister related to Manoj&rsquo;s paternal grandfather?</span></p>",
+                    question_hi: "<p>12.<span style=\"font-family: Palanquin Dark;\"> जाह्नवी, तरुणी की बहन हैं, तरुणी की शादी दिलीप से हुई है दिलीप, रघु का पिता है, मनोज, हेमा का पुत्र है, तरुणी, हेमा की सास हैं। दिलीप का एक ही बेटा है और कोई बेटी नहीं है, जाह्नवी की शादी बरुण से हुई है, लेखा बरुण की पुत्री है।जाह्नवी की बहन का मनोज के दादा से क्या संबंध है?</span></p>",
+                    options_en: ["<p>Sister</p>", "<p>Wife</p>", 
+                                "<p>Mother-in-law</p>", "<p>Mother</p>"],
+                    options_hi: ["<p>बहन</p>", "<p>पत्नी</p>",
+                                "<p>सास</p>", "<p>मां</p>"],
+                    solution_en: "<p>12.(b)</p>\n<p><strong id=\"docs-internal-guid-abe3467a-7fff-308c-0e7e-2dfbe7a4fc67\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXereBaM4N3ulETloIOcdpbORyDl7mfJmv1ZcBToIo-byPPaqLYSLMMSqeSg917tTl0wiCo1ZOIHrRaZaxQUuss92s4-JwGKwQ3hglwkYMSohSalM4WBMY-fvFBRWae88HyKpRftcme8krVe0PrYJD52vMI?key=nScMEb60edgVJKLj6M18mOWU\" width=\"266\" height=\"114\"></strong></p>",
+                    solution_hi: "<p>12.(b)</p>\n<p><strong id=\"docs-internal-guid-abe3467a-7fff-308c-0e7e-2dfbe7a4fc67\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXereBaM4N3ulETloIOcdpbORyDl7mfJmv1ZcBToIo-byPPaqLYSLMMSqeSg917tTl0wiCo1ZOIHrRaZaxQUuss92s4-JwGKwQ3hglwkYMSohSalM4WBMY-fvFBRWae88HyKpRftcme8krVe0PrYJD52vMI?key=nScMEb60edgVJKLj6M18mOWU\" width=\"278\" height=\"119\"></strong></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "13",
+                    section: "6",
+                    question_en: "<p>13.<span style=\"font-family: Palanquin Dark;\"> \'Z + Y\' means \'Y is the son of Z\'.&nbsp;</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">&nbsp;</span><span style=\"font-family: Palanquin Dark;\">\'Z $ Y\' means \'Y is the father of Z\'.</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">&nbsp;</span><span style=\"font-family: Palanquin Dark;\">\'Y % Z\' means \'Y is the son-in-law of Z\'.</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">&nbsp; </span><span style=\"font-family: Palanquin Dark;\">\'Z &ndash; Y\' means \'Y is the wife of Z\'.&nbsp;</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">&nbsp;</span><span style=\"font-family: Palanquin Dark;\">\'Y * Z\' means \'Z is the brother of Y\'. </span></p>\n<p><span style=\"font-family: Palanquin Dark;\">\'Y # Z\' means \'Z is the only sister of Y\'.&nbsp;</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">&nbsp;</span><span style=\"font-family: Palanquin Dark;\">Which two symbols can sequentially replace the question marks (?) in the following expression to show that &lsquo;D is the wife of W&rsquo;?</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">&nbsp;</span><span style=\"font-family: Palanquin Dark;\">W % O &ndash; B ? C ? D</span></p>",
+                    question_hi: "<p>13.<span style=\"font-family: Palanquin Dark;\"> \'Z + Y\' का अर्थ है \'Y, Z का पुत्र है\'। </span></p>\n<p><span style=\"font-family: \'Palanquin Dark\';\">\'Z $ Y\' का अर्थ है \'Y, Z का पिता है\'।</span></p>\n<p><span style=\"font-family: \'Palanquin Dark\';\">&nbsp;</span><span style=\"font-family: \'Palanquin Dark\';\">\'Y% Z\' का अर्थ है \'Y, Z का दामाद है\'।</span></p>\n<p><span style=\"font-family: \'Palanquin Dark\';\">&nbsp;</span><span style=\"font-family: \'Palanquin Dark\';\">\'Z - Y\' का अर्थ है \'Y, Z की पत्नी है\'।</span></p>\n<p><span style=\"font-family: \'Palanquin Dark\';\">&nbsp;</span><span style=\"font-family: \'Palanquin Dark\';\">\'Y * Z\' का अर्थ है \'Z, Y का भाई है\'। </span></p>\n<p><span style=\"font-family: Palanquin Dark;\">\'Y # Z\'&nbsp;</span><span style=\"font-family: Palanquin Dark;\">का अर्थ है </span><span style=\"font-family: Palanquin Dark;\">\'Z, Y की इकलौती बहन है\'।&nbsp;</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">&nbsp;</span><span style=\"font-family: Palanquin Dark;\">निम्नलिखित व्यंजक में कौन से दो चिह्न क्रमिक रूप से प्रश्न चिह्न (?) को प्रतिस्थापित कर सकते हैं ताकि यह दर्शाया जा सके कि \'D, W की पत्नी है\'?</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">W % O &ndash; B ? C ? D</span></p>",
+                    options_en: ["<p>+ and &ndash;</p>", "<p>% and &ndash;</p>", 
+                                "<p>$ and +</p>", "<p>+ and #</p>"],
+                    options_hi: ["<p>+ और &ndash;</p>", "<p>% और &ndash;</p>",
+                                "<p>$ और +</p>", "<p>+ और #</p>"],
+                    solution_en: "<p>13.(d) <span style=\"font-family: Palanquin Dark;\">According to given question </span></p>\n<p><span style=\"font-family: Palanquin Dark;\">&lsquo;Z+Y&rsquo; means &ldquo; Y is the son of &lsquo;Z&rsquo;</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">&lsquo;Z$Y&rsquo; means &lsquo;Y is the father of &lsquo;Z&rsquo;</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">&ldquo;Y%Z&rsquo; means &lsquo; Y is the son in law of &lsquo;Z&rsquo; </span></p>\n<p><span style=\"font-family: Palanquin Dark;\">&lsquo;Z&ndash;Y&rsquo; means &lsquo;Y is the wife of &lsquo;Z&rsquo;</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">And &lsquo;Y*Z&rsquo; means &lsquo;Z&rsquo; is the brother of &lsquo;Y&rsquo;</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">&lsquo;Y# Z&rsquo; means &lsquo;Z is the only sister of &lsquo;Y&rsquo; </span></p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654772168/word/media/image12.png\" width=\"232\" height=\"107\"></p>",
+                    solution_hi: "<p>13.(d) <span style=\"font-family: Palanquin Dark;\">दिए गए प्रश्न के अनुसार,</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">\'Z + Y\' का अर्थ है \"Y, \'Z\' का पुत्र है।</span><span style=\"font-family: Palanquin Dark;\">\'Z$Y\' का अर्थ है \'Y, \'Z\' का पिता है। </span><span style=\"font-family: Palanquin Dark;\">\"Y%Z\' का अर्थ है \'Y\' \'Z\' का दामाद है। </span><span style=\"font-family: Palanquin Dark;\">\'Z&ndash;Y\' का अर्थ है \'Y\' \'Z\' की पत्नी है। </span><span style=\"font-family: Palanquin Dark;\">और \'Y*Z\' का अर्थ है \'Z\', \'Y\' का भाई है।</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">\'Y# Z\' का अर्थ है \'Z, \'Y\' की इकलौती बहन है।</span></p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654772168/word/media/image12.png\" width=\"252\" height=\"116\"></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "14",
+                    section: "6",
+                    question_en: "<p>14. <span style=\"font-family: Palanquin Dark;\"> &lsquo;P$Q&rsquo; means &lsquo;P is </span><span style=\"font-family: Palanquin Dark;\">to the north</span><span style=\"font-family: Palanquin Dark;\"> of Q&rsquo;.</span></p>\n<p><span style=\"font-family: Palanquin Dark;\"> &lsquo;P&amp;Q&rsquo; means &lsquo;P is to the east of Q&rsquo;.</span></p>\n<p><span style=\"font-family: Palanquin Dark;\"> &lsquo;P*Q&rsquo; means &lsquo;Q is </span><span style=\"font-family: Palanquin Dark;\">to the west</span><span style=\"font-family: Palanquin Dark;\"> of P&rsquo;.</span></p>\n<p><span style=\"font-family: Palanquin Dark;\"> &lsquo;P%Q&rsquo; means &lsquo;Q is to the south of P&rsquo;</span></p>\n<p><span style=\"font-family: Palanquin Dark;\"> &lsquo;P@QR&rsquo; means &lsquo;P stands exactly in the middle </span><span style=\"font-family: Palanquin Dark;\">of horizontal</span><span style=\"font-family: Palanquin Dark;\"> line QR&rsquo;.</span></p>\n<p><span style=\"font-family: Palanquin Dark;\"> &lsquo;P!QR&rsquo; means &lsquo;P stands exactly in the middle </span><span style=\"font-family: Palanquin Dark;\">of vertical</span><span style=\"font-family: Palanquin Dark;\"> line QR&rsquo;.</span></p>\n<p><span style=\"font-family: Palanquin Dark;\"> Note : &lsquo;P6m$Q&rsquo; means &lsquo;P is 6m to the north of Q&rsquo; and so on.</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">Find the shortest distance between G and C in the following expression:</span></p>\n<p><span style=\"font-family: Palanquin Dark;\"> </span><span style=\"font-family: Palanquin Dark;\">C12m$S5m*G3m&amp;J6m%K!JT</span></p>",
+                    question_hi: "<p>14. <span style=\"font-family: Palanquin Dark;\">\'P$Q\' का अर्थ है \'P, Q के उत्तर में है\'।</span></p>\n<p><span style=\"font-family: Palanquin Dark;\"> \'P&amp;Q\' का अर्थ है \'P, Q के पूर्व में है\'।</span></p>\n<p><span style=\"font-family: Palanquin Dark;\"> \'P*Q\' का अर्थ है \'Q, P के पश्चिम में है\'।</span></p>\n<p><span style=\"font-family: Palanquin Dark;\"> \'P%Q\' का अर्थ है \'Q, P के दक्षिण में है\'</span></p>\n<p><span style=\"font-family: Palanquin Dark;\"> \'P@QR\' का अर्थ है \'P क्षैतिज रेखा QR के ठीक बीच में स्थित है\'।</span></p>\n<p><span style=\"font-family: Palanquin Dark;\"> &lsquo;P!QR&rsquo;का अर्थ है &lsquo;P ऊर्ध्वाधर रेखा QR के ठीक बीच में स्थित है\'।</span></p>\n<p><span style=\"font-family: Palanquin Dark;\"> नोट : \'P6m$Q\' का अर्थ है \'P, Q के उत्तर में 6m है\' और उसी तरह </span></p>\n<p><span style=\"font-family: Palanquin Dark;\"> निम्नलिखित व्यंजक में G और C के बीच न्यूनतम दूरी ज्ञात कीजिए: </span></p>\n<p><span style=\"font-family: Palanquin Dark;\"> </span><span style=\"font-family: Palanquin Dark;\">&nbsp;C12m$S5m*G3m&amp;J6m%K!JT</span></p>",
+                    options_en: ["<p>12 m</p>", "<p>10 m</p>", 
+                                "<p>15 m</p>", "<p>13 m</p>"],
+                    options_hi: ["<p>12 m</p>", "<p>10 m</p>",
+                                "<p>15 m</p>", "<p>13 m</p>"],
+                    solution_en: "<p>14.(d) <span style=\"font-family: Palanquin Dark;\"><strong>Logic </strong>: </span></p>\n<p><span style=\"font-family: Palanquin Dark;\">According to the given question . &lsquo;</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">P$Q means P is to the north of &lsquo;Q&rsquo;</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">&lsquo;P&amp;Q&rsquo; means P is to the east of &lsquo;Q&rsquo;</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">&lsquo;P*Q&rsquo; means Q is to the west of &lsquo;P&rsquo;</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">&lsquo;P %Q&rsquo; means Q is to the south of &lsquo;P&rsquo;</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">&lsquo;P@QR &lsquo; means P stands exactly in the middle of vertical line &ldquo;QR&rsquo; </span></p>\n<p><span style=\"font-family: Palanquin Dark;\">And &lsquo;P6m$Q&rsquo; means P is 6 m to the north of Q and so on. </span></p>\n<p><span style=\"font-family: Palanquin Dark;\">By this given condition we can arrange . and </span></p>\n<p><strong id=\"docs-internal-guid-619d1de2-7fff-cee1-c38a-f2603507fc6e\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXd7RB1moAg_8hHfi2Ur11O52fXgDVEsoMFxAWHSP-La5f_pmsxnAYad1Qpxn0QedQbd2I2tPO4VMy96bxSX_YfeQbbAwX8nvBtu7Qu6ryeslSoeEjxn0vBqvjYOgd5KFs__lzVP4FoNrRDNUL70vfybv1k?key=nScMEb60edgVJKLj6M18mOWU\" width=\"176\" height=\"218\"></strong></p>\n<p><span style=\"font-family: Palanquin Dark;\">So distance between c and g is (GC)&sup2; = (12)&sup2; +(5)&sup2;</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">By solving we get GC =13</span></p>",
+                    solution_hi: "<p>14.(d) <span style=\"font-family: Palanquin Dark;\"><strong>तर्क </strong>:</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">दिए गए प्रश्न के अनुसार,</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">P$Q का अर्थ है P, \'Q\' के उत्तर में है।</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">\'P&amp;Q\' का अर्थ है कि P, \'Q\' के पूर्व में है।</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">\'P*Q\' का अर्थ है Q, \'P\' के पश्चिम में है।</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">\'P %Q\' का अर्थ है Q, \'P\' के दक्षिण में है।</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">\'P@QR\' का अर्थ है कि P, लंबवत रेखा \"QR\" के ठीक बीच में खड़ा है।</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">और \'P6m$Q\' का अर्थ है कि P, Q के उत्तर में 6 मीटर है और इसी तरह आगे भी।</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">इस दी गई शर्त से हम व्यवस्था कर सकते हैं। और</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">तो c और g के बीच की दूरी है (GC)&sup2; = (12)&sup2; + (5)&sup2;</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">हल करने पर हमें GC = 13 मिलता है।</span></p>\n<p><strong id=\"docs-internal-guid-619d1de2-7fff-cee1-c38a-f2603507fc6e\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXd7RB1moAg_8hHfi2Ur11O52fXgDVEsoMFxAWHSP-La5f_pmsxnAYad1Qpxn0QedQbd2I2tPO4VMy96bxSX_YfeQbbAwX8nvBtu7Qu6ryeslSoeEjxn0vBqvjYOgd5KFs__lzVP4FoNrRDNUL70vfybv1k?key=nScMEb60edgVJKLj6M18mOWU\" width=\"159\" height=\"197\"></strong></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "15",
+                    section: "6",
+                    question_en: "<p>15. <span style=\"font-family: Palanquin Dark;\">If the father of Swati is the maternal grandfather of Divya, who is the daughter of Manya, then how is Manya&rsquo;s husband&rsquo;s father related to Divya?&nbsp;</span></p>",
+                    question_hi: "<p>15. <span style=\"font-family: Palanquin Dark;\">यदि स्वाति का पिता दिव्या का नाना है, जो मान्या की बेटी है, तो मान्या के पति के पिता दिव्या से किस प्रकार संबंधित हैं?&nbsp;</span></p>",
+                    options_en: ["<p>Maternal uncle</p>", "<p>Paternal grandfather</p>", 
+                                "<p>Father</p>", "<p>Paternal uncle</p>"],
+                    options_hi: ["<p>मामा</p>", "<p>दादा</p>",
+                                "<p>पिता</p>", "<p>चाचा</p>"],
+                    solution_en: "<p>15.(b)</p>\n<p><strong id=\"docs-internal-guid-109bb545-7fff-c8f8-116e-61ba2d9ff6ce\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdtWSjWvTYFJKQcu134UiQy4_u9G5fSfnpyFZ83VtL4AmJR5ttcupRod7xC8dIr4ruuPwJ07FQqaX2j8hZgW9p88jlCpHpWqyBfZi6FRhF-rtW3fz2lYPF9ybTk1PYuVxVsW15cXf9QmZWqFPhirk6KeiQ?key=nScMEb60edgVJKLj6M18mOWU\" width=\"306\" height=\"216\"></strong></p>",
+                    solution_hi: "<p>15.(b)</p>\n<p><strong id=\"docs-internal-guid-109bb545-7fff-c8f8-116e-61ba2d9ff6ce\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdtWSjWvTYFJKQcu134UiQy4_u9G5fSfnpyFZ83VtL4AmJR5ttcupRod7xC8dIr4ruuPwJ07FQqaX2j8hZgW9p88jlCpHpWqyBfZi6FRhF-rtW3fz2lYPF9ybTk1PYuVxVsW15cXf9QmZWqFPhirk6KeiQ?key=nScMEb60edgVJKLj6M18mOWU\" width=\"306\" height=\"216\"></strong></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "16",
+                    section: "6",
+                    question_en: "<p>16.<span style=\"font-family: Palanquin Dark;\"> Niraj is the father of Rinku. Jiya and Tiya are the daughters of Ruby, who is the only sister of Rinku. Vishnu is the son of Rinku and Gita. How is Niraj related to Tiya?</span></p>",
+                    question_hi: "<p>16.<span style=\"font-family: Palanquin Dark;\"> नीरज, रिंकू का पिता है। जिया और टिया रूबी की बेटियां हैं, जो रिंकू की इकलौती बहन है। विष्णु , रिंकू और गीता के पुत्र हैं। नीरज , टिया से किस प्रकार संबंधित है?</span></p>",
+                    options_en: ["<p>Maternal grandfather</p>", "<p>Paternal uncle</p>", 
+                                "<p>Paternal grandfather</p>", "<p>Maternal uncle</p>"],
+                    options_hi: ["<p>नाना</p>", "<p>चाचा</p>",
+                                "<p>दादा</p>", "<p>मामा</p>"],
+                    solution_en: "<p>16.(a) <span style=\"font-family: Palanquin Dark;\"> Here &lsquo;+&rsquo; represents male candidate and &lsquo;-&rsquo; represents female candidate</span></p>\n<p><strong id=\"docs-internal-guid-3e863069-7fff-767e-f052-3ff54a3a6e88\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfO4MQgwUHK9roBBPvyLPUSdqTvbgSOKr9ytQukyc7zMkQpiYg2ftUFCWlPSiRJ-aOMERpmrJb9ewtWYYAH4j3Fg28Sx_tLqkLtcihrV8p277AhnS0rZIDUBrEEUrViYkh8iwGyy9v60OJtdcnOtfDKLjw?key=nScMEb60edgVJKLj6M18mOWU\" width=\"281\" height=\"177\"></strong></p>",
+                    solution_hi: "<p>16.(a)<span style=\"font-family: Palanquin Dark;\"> यहां &lsquo;+&rsquo; पुरुष उम्मीदवार का प्रतिनिधित्व करता है और \' &ndash; \' महिला उम्मीदवार का प्रतिनिधित्व करता है</span></p>\n<p><strong id=\"docs-internal-guid-3e863069-7fff-767e-f052-3ff54a3a6e88\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfO4MQgwUHK9roBBPvyLPUSdqTvbgSOKr9ytQukyc7zMkQpiYg2ftUFCWlPSiRJ-aOMERpmrJb9ewtWYYAH4j3Fg28Sx_tLqkLtcihrV8p277AhnS0rZIDUBrEEUrViYkh8iwGyy9v60OJtdcnOtfDKLjw?key=nScMEb60edgVJKLj6M18mOWU\" width=\"267\" height=\"168\"></strong></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "17",
+                    section: "6",
+                    question_en: "<p>17.<span style=\"font-family: Palanquin Dark;\"> Vinita and Amita are the sisters of Gaurav. Ashish is the father of Vinita. Ansh is the son of Amita. How is Ashish related to Ansh?</span></p>",
+                    question_hi: "<p>17.<span style=\"font-family: Palanquin Dark;\"> विनीता और अमिता गौरव की बहनें हैं। आशीष, विनीता का पिता है। अंश, अमिता का पुत्र है। आशीष, अंश से किस प्रकार संबंधित है?</span></p>",
+                    options_en: ["<p>Maternal uncle</p>", "<p>Paternal grandfather</p>", 
+                                "<p>Paternal uncle</p>", "<p>Maternal grandfather</p>"],
+                    options_hi: ["<p>मामा</p>", "<p>पैतृक दादा</p>",
+                                "<p>पैतृक चाचा</p>", "<p>नाना</p>"],
+                    solution_en: "<p>17.(d)<span style=\"font-family: Times New Roman;\"> Here (+) represents male candidate and (-) represents female candidate</span></p>\n<p><strong id=\"docs-internal-guid-ccdf01bd-7fff-21c7-b235-e800cb97a5ee\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeSgEq4CBrplSOmM9TzIhVrOdlDE6zfOvlmN3T6TCUaTuLu9JJ0JPdz2_A1vjEjHUA1X6y228FxZJNKRIQKM1kFgJJpKh0qLmzZMgVwquqvY8dXKh7NSIj-pvN1OEHLeDgsx4L61s30-jq9VE6gYMTDUA?key=nScMEb60edgVJKLj6M18mOWU\" width=\"223\" height=\"195\"></strong></p>",
+                    solution_hi: "<p>17. (d)<span style=\"font-family: Palanquin Dark;\"> यहां (+) पुरुष उम्मीदवार का प्रतिनिधित्व करता है, और (-) महिला उम्मीदवार का प्रतिनिधित्व करता है।</span></p>\n<p><strong id=\"docs-internal-guid-ccdf01bd-7fff-21c7-b235-e800cb97a5ee\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeSgEq4CBrplSOmM9TzIhVrOdlDE6zfOvlmN3T6TCUaTuLu9JJ0JPdz2_A1vjEjHUA1X6y228FxZJNKRIQKM1kFgJJpKh0qLmzZMgVwquqvY8dXKh7NSIj-pvN1OEHLeDgsx4L61s30-jq9VE6gYMTDUA?key=nScMEb60edgVJKLj6M18mOWU\" width=\"227\" height=\"199\"></strong></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "18",
+                    section: "6",
+                    question_en: "<p>18.<span style=\"font-family: Times New Roman;\"> Pointing towards a boy, Shalini said, &ldquo;He is my daughter&rsquo;s father&rsquo;s wife&rsquo;s father&rsquo;s wife&rsquo;s only son&rdquo;. How is Shalini related to the boy?</span></p>",
+                    question_hi: "<p>18.<span style=\"font-family: Baloo;\"> एक लड़के की ओर इशारा करते हुए, शालिनी ने कहा, \"वह मेरी बेटी के पिता की पत्नी के पिता की पत्नी का इकलौता बेटा है\"। शालिनी का लड़के से क्या संबंध है?</span></p>",
+                    options_en: ["<p>Daughter-in-law</p>", "<p>Daughter</p>", 
+                                "<p>Sister</p>", "<p>Sister-in-law</p>"],
+                    options_hi: ["<p>बहू</p>", "<p>बेटी</p>",
+                                "<p>बहन</p>", "<p>भाभी</p>"],
+                    solution_en: "<p>18.(c)</p>\n<p><strong id=\"docs-internal-guid-259482e0-7fff-1f1d-62f4-d7d5211b0f67\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXf-9UFKc7AUGMN7djWWfFEeMD553u5TcghDvsvj2FsUEarpf52B9XabyrGHdCjIzl8orKPEPPaWb3buO0_XKNGiQLC6kscbsRwnfkJhzH74XJddDIrIPiILmpdEDpyurUzVYbF726HdD0y0wZMqmCLBPYg?key=nScMEb60edgVJKLj6M18mOWU\" width=\"214\" height=\"152\"></strong></p>",
+                    solution_hi: "<p>18.(C)</p>\n<p><strong id=\"docs-internal-guid-259482e0-7fff-1f1d-62f4-d7d5211b0f67\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXf-9UFKc7AUGMN7djWWfFEeMD553u5TcghDvsvj2FsUEarpf52B9XabyrGHdCjIzl8orKPEPPaWb3buO0_XKNGiQLC6kscbsRwnfkJhzH74XJddDIrIPiILmpdEDpyurUzVYbF726HdD0y0wZMqmCLBPYg?key=nScMEb60edgVJKLj6M18mOWU\" width=\"224\" height=\"159\"></strong></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "19",
+                    section: "6",
+                    question_en: "<p><span style=\"font-family: Times New Roman;\">19. </span><span style=\"font-family: Times New Roman;\">Ranjana said to a woman, &ldquo;My father is the paternal grandfather of your son Piyush&rdquo;. How is Piyush related to Ranjana?</span></p>",
+                    question_hi: "<p>19. <span style=\"font-family: Palanquin Dark;\">रंजना ने एक महिला से कहा, \"मेरे पिता आपके पुत्र पीयूष के दादा हैं\"। पीयूष , रंजना से किस प्रकार संबंधित है ?</span></p>",
+                    options_en: ["<p>Cousin</p>", "<p>Nephew</p>", 
+                                "<p>Grandson</p>", "<p>Brother</p>"],
+                    options_hi: ["<p>कज़न</p>", "<p>भतीजे</p>",
+                                "<p>पोता</p>", "<p>भाई</p>"],
+                    solution_en: "<p>19. (b)</p>\n<p><strong id=\"docs-internal-guid-8d25eebc-7fff-c1c3-3e62-93dbae5e3106\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXclZ0C9rVLFsqeT-fWRFxsR3lxlOrHkiQuofjTbF3c9rDr1CZLr9vYY5U6t0zA5qciFx33dh6VzZfLP6fUC38OwftibILpoOxyICknte9_obmkBeFBBhGJ-Yqa51fWgjD1aLbQREtgv97DiEPAv3cfaT5o?key=nScMEb60edgVJKLj6M18mOWU\" width=\"234\" height=\"162\"></strong></p>",
+                    solution_hi: "<p>19.</p>\n<p><strong id=\"docs-internal-guid-8d25eebc-7fff-c1c3-3e62-93dbae5e3106\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXclZ0C9rVLFsqeT-fWRFxsR3lxlOrHkiQuofjTbF3c9rDr1CZLr9vYY5U6t0zA5qciFx33dh6VzZfLP6fUC38OwftibILpoOxyICknte9_obmkBeFBBhGJ-Yqa51fWgjD1aLbQREtgv97DiEPAv3cfaT5o?key=nScMEb60edgVJKLj6M18mOWU\" width=\"234\" height=\"162\"></strong></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "20",
+                    section: "6",
+                    question_en: "<p>20.<span style=\"font-family: Times New Roman;\"> &lsquo;A # B&rsquo; means &lsquo;A is the sister of B&rsquo;; </span></p>\n<p><span style=\"font-family: Times New Roman;\">&lsquo;A $ B&rsquo; means &lsquo;A is the father of B&rsquo;. </span></p>\n<p><span style=\"font-family: Times New Roman;\">&lsquo;A @ B&rsquo; means &lsquo;A is the wife of B&rsquo;. </span></p>\n<p><span style=\"font-family: Times New Roman;\">&lsquo;A % B&rsquo; means &lsquo;A is the brother of B&rsquo;. </span></p>\n<p><span style=\"font-family: Times New Roman;\">Which of the following options means &lsquo;J is the father of R&rsquo;?&nbsp;</span></p>",
+                    question_hi: "<p>20.<span style=\"font-family: Palanquin Dark;\"> &lsquo;A # B&rsquo; का अर्थ है \'A, B की बहन है\';</span></p>\n<p><span style=\"font-family: Palanquin Dark;\"> &lsquo;A $ B&rsquo; का अर्थ है \'A, B का पिता है\'।</span></p>\n<p><span style=\"font-family: Palanquin Dark;\"> &lsquo;A @ B&rsquo; का अर्थ है \'A, B की पत्नी है\'।</span></p>\n<p><span style=\"font-family: Palanquin Dark;\"> &lsquo;A % B&rsquo; का अर्थ है \'A, B का भाई है\'।</span></p>\n<p><span style=\"font-family: Palanquin Dark;\">निम्नलिखित में से किस विकल्प का अर्थ है \'J, R का पिता है\'?</span></p>",
+                    options_en: ["<p>C @ J % K $ M # R</p>", "<p>C @ R $ K % M # J</p>", 
+                                "<p>C @ J $ K % M # R</p>", "<p>J @ C $ K % M # R</p>"],
+                    options_hi: ["<p>C @ J % K $ M # R</p>", "<p>C @ R $ K % M # J</p>",
+                                "<p>C @ J $ K % M # R</p>", "<p>J @ C $ K % M # R</p>"],
+                    solution_en: "<p>20.(c) <span style=\"font-family: Times New Roman;\">According to question only option (c) satisfy this condition .Note (+) represents male candidate and (-) represents female candidate</span></p>\n<p><strong id=\"docs-internal-guid-8cc798b6-7fff-81d8-9dad-0082e8a56c86\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXexXP0b_9VHCN6b9VHidQk1pyRqapkGRbG5ouQ_ZD2sfce5ww_fydhTm9_8lDLgB2YJbMDDp1PSHseP_b0sCEtoM2bfHUEcqg5gCjjJHtmS8GtLDVB19pe2dY3Uv-8Q3xzH5sVgg_J8W_dHZDJlLQXiIA?key=nScMEb60edgVJKLj6M18mOWU\" width=\"250\" height=\"150\"></strong></p>",
+                    solution_hi: "<p>20.(c) <span style=\"font-family: Baloo;\">प्रश्न के अनुसार, केवल विकल्प (c) इस शर्त को पूरा करता है। नोट (+) पुरुष उम्मीदवार का प्रतिनिधित्व करता है और (-) महिला उम्मीदवार का प्रतिनिधित्व करता है।</span></p>\n<p><strong id=\"docs-internal-guid-8cc798b6-7fff-81d8-9dad-0082e8a56c86\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXexXP0b_9VHCN6b9VHidQk1pyRqapkGRbG5ouQ_ZD2sfce5ww_fydhTm9_8lDLgB2YJbMDDp1PSHseP_b0sCEtoM2bfHUEcqg5gCjjJHtmS8GtLDVB19pe2dY3Uv-8Q3xzH5sVgg_J8W_dHZDJlLQXiIA?key=nScMEb60edgVJKLj6M18mOWU\" width=\"203\" height=\"122\"></strong></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "21",
+                    section: "6",
+                    question_en: "<p>21.<span style=\"font-family: Times New Roman;\"> Introducing Reshma to a guest, a lady, Karishma, said, &ldquo;She is the daughter of my father-in-law&rsquo;s daughter&rdquo;. How is Reshma related to Karishma?&nbsp;</span></p>",
+                    question_hi: "<p>21.<span style=\"font-family: Baloo;\"> एक अतिथि से रेशमा का परिचय कराते हुए, एक महिला, करिश्मा ने कहा, \"वह मेरे ससुर की बेटी की बेटी है\"। रेशमा, करिश्मा से किस प्रकार संबंधित है?</span></p>",
+                    options_en: ["<p>sister-in-law</p>", "<p>Sister</p>", 
+                                "<p>Cousin</p>", "<p>Niece</p>"],
+                    options_hi: ["<p>भाभी</p>", "<p>बहन</p>",
+                                "<p>चचेरा भाई</p>", "<p>भतीजी</p>"],
+                    solution_en: "<p>21. (d)</p>\n<p><strong id=\"docs-internal-guid-6bf7683b-7fff-57e3-f6de-4722167bc4c9\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfXJdPARCnqpv1jkwh4lQZuvsEfG_GcydUMszaoFkP1FwOh92vtGY3AFzz-w6_O3eZz_HD5Qy8G_DsJ2uadxSHZZInJoj5WJ83IphetcQiF7GiwSf2wVNzUKGp5w0fMqj_k_jwZUbm6y3sa7cCA98hVqQ?key=nScMEb60edgVJKLj6M18mOWU\" width=\"256\" height=\"172\"></strong></p>",
+                    solution_hi: "<p>21. (d)</p>\n<p><strong id=\"docs-internal-guid-6bf7683b-7fff-57e3-f6de-4722167bc4c9\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfXJdPARCnqpv1jkwh4lQZuvsEfG_GcydUMszaoFkP1FwOh92vtGY3AFzz-w6_O3eZz_HD5Qy8G_DsJ2uadxSHZZInJoj5WJ83IphetcQiF7GiwSf2wVNzUKGp5w0fMqj_k_jwZUbm6y3sa7cCA98hVqQ?key=nScMEb60edgVJKLj6M18mOWU\" width=\"256\" height=\"172\"></strong></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "22",
+                    section: "misc",
+                    question_en: "<p>22. <span style=\"font-family: Times New Roman;\">Pointing towards the photograph of a lady, Varun said, &ldquo;She is my father-in-law&rsquo;s son&rsquo;s only sister&rsquo;s mother-in-law&rdquo;. How is Varun related to that lady?</span><span style=\"font-family: Times New Roman;\">&nbsp;</span></p>",
+                    question_hi: "<p>22.<span style=\"font-family: Palanquin Dark;\"> एक महिला की तस्वीर की ओर इशारा करते हुए, वरुण ने कहा, \"वह मेरे ससुर के बेटे की इकलौती बहन की सास है\"। वरुण उस महिला से किस प्रकार संबंधित है?</span></p>",
+                    options_en: ["<p>Brother</p>", "<p>Son</p>", 
+                                "<p>Husband</p>", "<p>Son-in-law</p>"],
+                    options_hi: ["<p>भाई</p>", "<p>बेटा</p>",
+                                "<p>पति</p>", "<p>दामाद</p>"],
+                    solution_en: "<p>22.(b)<span style=\"font-family: Palanquin Dark;\"> </span></p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654772168/word/media/image6.png\" width=\"352\" height=\"171\"></p>",
+                    solution_hi: "<p>22.(b)<span style=\"font-family: Palanquin Dark;\"> </span></p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654772168/word/media/image6.png\" width=\"341\" height=\"166\"></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+            
+            // Generate question boxes
+            const boxesContainer = document.getElementById('question-boxes');
+            questions.forEach((q, index) => {
+                const box = document.createElement('div');
+                box.className = 'q-box';
+                box.textContent = index + 1;
+                box.onclick = () => showQuestion(index);
+                box.id = `box-${index}`;
+                boxesContainer.appendChild(box);
+            });
+            
+            // Show first question
+            showQuestion(0);
+            updateProgress();
+        }
+        
+        // Show a specific question
+        
+        function formatContent(text) {
+            if (!text) return '';
+            return text.replace(/<img/g, '<img style="max-width:100%;height:auto;"');
+        }
+        
+        function showQuestion(index) {
+            if (index < 0 || index >= questions.length) return;
+            
+            currentQuestion = index;
+            const question = questions[index];
+            
+            // Update question counter
+            document.getElementById('question-counter').textContent = `Question ${index + 1} of ${questions.length}`;
+            
+            // Update question boxes
+            document.querySelectorAll('.q-box').forEach(box => box.classList.remove('current'));
+            document.getElementById(`box-${index}`).classList.add('current');
+            
+            // Generate question HTML
+            let html = `
+                <div class="question-card">
+                    <div class="question-text">
+                        <div class="en">${formatContent(question.question_en)}</div>
+                        <div class="hi" style="display:none">${formatContent(question.question_hi)} </div>
+                    </div>
+                    <div class="options" id="options-container">`;
+            
+            // Add options
+            ['a', 'b', 'c', 'd'].forEach((opt, i) => {
+                let optionClass = '';
+                let isCorrectAnswer = opt === question.correct;
+                let isUserAnswer = answers[question.id] === opt;
+                
+                // When reviewing, add appropriate classes
+                if (submitted) {
+                    if (isCorrectAnswer) {
+                        optionClass += ' correct-answer';
+                    } else if (isUserAnswer && !isCorrectAnswer) {
+                        optionClass += ' incorrect';
+                    }
+                }
+                
+                html += `
+                    <div class="option-item">
+                        <input class="option-input" type="radio" name="q${index}" 
+                            id="opt-${index}-${opt}" value="${opt}" 
+                            ${isUserAnswer ? 'checked' : ''}
+                            onclick="selectAnswer('${question.id}', '${opt}')">
+                       <label class="option-label${optionClass}" for="opt-${index}-${opt}">
+                            <div class="en">${question.options_en[i]}</div>
+                            <div class="hi" style="display:none">${question.options_hi[i]}</div>
+                        </label>
+                    </div>`;
+            });
+            
+            // Add solution if submitted
+            if (submitted) {
+                const isCorrect = answers[question.id] === question.correct;
+                const resultText = answers[question.id] ? (isCorrect ? 'Correct!' : 'Incorrect!') : 'Not attempted';
+                
+                html += `
+                    <div class="solution-container">
+                        <div class="solution-title">${resultText}</div>
+                        <div class="solution-text">
+                            <div class="en">${question.solution_en}</div>
+                            <div class="hi" style="display:none">${question.solution_hi}</div>
+                        </div>
+                    </div>`;
+            }
+            
+            html += `</div></div>`;
+            
+            document.getElementById('questions-container').innerHTML = html;
+            
+            // Apply language settings
+            applyLanguage();
+            
+            // If in mobile view, close the menu
+            if (window.innerWidth < 992) {
+                toggleNav(false);
+            }
+            
+            // Add review mode class if submitted
+            if (submitted) {
+                document.getElementById('options-container').classList.add('review-mode');
+            }
+        }
+        
+        // Apply current language
+        function applyLanguage() {
+            document.querySelectorAll(`.${currentLang}`).forEach(el => el.style.display = 'block');
+            document.querySelectorAll(`.${currentLang === 'en' ? 'hi' : 'en'}`).forEach(el => el.style.display = 'none');
+            
+            // Update language button text
+            document.getElementById('lang-text').textContent = currentLang === 'en' ? 'Hi' : 'En';
+        }
+        
+        // Select an answer
+        function selectAnswer(qId, option) {
+            if (submitted) return;
+            
+            answers[qId] = option;
+            updateProgress();
+            
+            // Mark question as attempted in the navigation
+            const index = questions.findIndex(q => q.id === qId);
+            if (index >= 0) {
+                const box = document.getElementById(`box-${index}`);
+                box.classList.add('attempted');
+                box.classList.remove('unattempted');
+            }
+        }
+        
+        // Navigate to previous/next question
+        function prevQuestion() { 
+            if (currentQuestion > 0) showQuestion(currentQuestion - 1); 
+        }
+        
+        function nextQuestion() { 
+            if (currentQuestion < questions.length - 1) showQuestion(currentQuestion + 1); 
+        }
+        
+        // Switch section
+        function switchSection(sectionId) {
+            if (sectionId === 'all') {
+                showQuestion(0);
+                return;
+            }
+            
+            const section = sections[sectionId];
+            if (section) showQuestion(section.start);
+        }
+        
+        // Toggle language
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'hi' : 'en';
+            applyLanguage();
+        }
+        
+        // Toggle navigation sidebar
+        function toggleNav(show) {
+            const nav = document.getElementById('question-nav');
+            const overlay = document.getElementById('nav-overlay');
+            
+            if (show === undefined) {
+                show = !nav.classList.contains('show');
+            }
+            
+            if (show) {
+                nav.classList.add('show');
+                overlay.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            } else {
+                nav.classList.remove('show');
+                overlay.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+        }
+        
+        // Update progress
+        function updateProgress() {
+            const attempted = Object.keys(answers).length;
+            document.getElementById('attempted-count').textContent = attempted;
+        }
+        
+        // Start timer
+        function startTimer() {
+            const timerDisplay = document.getElementById('timer-display');
+            let timeLeft = totalTime;
+            
+            const timerInterval = setInterval(() => {
+                if (timeLeft <= 0 || submitted) {
+                    clearInterval(timerInterval);
+                    if (!submitted) submitTest();
+                    return;
+                }
+                
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                timeLeft--;
+            }, 1000);
+        }
+        
+        // Confirm before submitting
+        function confirmSubmit() {
+            if (submitted) return;
+            
+            const attempted = Object.keys(answers).length;
+            const remaining = questions.length - attempted;
+            
+            // Create a more modern confirmation dialog
+            const confirmHtml = `
+                <div style="text-align: center; padding: 20px;">
+                    <h4 style="margin-bottom: 16px; color: var(--dark);">Confirm Submission</h4>
+                    <p style="margin-bottom: 24px; color: var(--gray);">
+                        You have attempted ${attempted} of ${questions.length} questions.<br>
+                        ${remaining} questions are unattempted.
+                    </p>
+                    <div style="display: flex; justify-content: center; gap: 12px;">
+                        <button onclick="this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; border: 1px solid var(--light-gray); background: white; border-radius: 8px; cursor: pointer;">
+                            Cancel
+                        </button>
+                        <button onclick="submitTest(); this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer;">
+                            Submit Test
+                        </button>
+                    </div>
+                </div>`;
+            
+            // Create modal element
+            const modal = document.createElement('div');
+            modal.className = 'results-modal show';
+            modal.innerHTML = `
+                <div class="results-card" style="max-width: 400px;">
+                    <button class="cancel-btn" style="position: absolute; top: 12px; right: 12px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--gray);" onclick="this.closest('.results-modal').remove()">
+                        ×
+                    </button>
+                    ${confirmHtml}
+                </div>`;
+            
+            document.body.appendChild(modal);
+        }
+        
+        // Submit test
+        function submitTest() {
+            if (submitted) return;
+            
+            submitted = true;
+            
+            let score = 0;
+            let correctCount = 0;
+            let incorrectCount = 0;
+            let unattemptedCount = 0;
+            
+            questions.forEach((q, index) => {
+                const userAns = answers[q.id];
+                const box = document.getElementById(`box-${index}`);
+                
+                box.classList.remove('attempted');
+                
+                if (!userAns) {
+                    unattemptedCount++;
+                    box.classList.add('unattempted');
+                } else if (userAns === q.correct) {
+                    correctCount++;
+                    score += q.pos_marks;
+                    box.classList.add('correct');
+                } else {
+                    incorrectCount++;
+                    score -= q.neg_marks;
+                    box.classList.add('incorrect');
+                }
+            });
+            
+            // Update result values
+            document.getElementById('score-value').textContent = score.toFixed(2);
+            document.getElementById('correct-value').textContent = correctCount;
+            document.getElementById('incorrect-value').textContent = incorrectCount;
+            document.getElementById('unattempted-value').textContent = unattemptedCount;
+            
+            // Show the results modal
+            document.getElementById('results-modal').classList.add('show');
+            
+            // Disable submit button
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-check"></i>';
+            submitBtn.style.backgroundColor = 'var(--success)';
+            
+            // Refresh current question view to show solution
+            showQuestion(currentQuestion);
+        }
+        
+        // Review test
+        function reviewTest() {
+            document.getElementById('results-modal').classList.remove('show');
+            showQuestion(0);
+        }
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target === document.getElementById('results-modal')) {
+                document.getElementById('results-modal').classList.remove('show');
+            }
+        });
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') prevQuestion();
+            if (e.key === 'ArrowRight') nextQuestion();
+        });
+    </script>
+</body>
+</html>
