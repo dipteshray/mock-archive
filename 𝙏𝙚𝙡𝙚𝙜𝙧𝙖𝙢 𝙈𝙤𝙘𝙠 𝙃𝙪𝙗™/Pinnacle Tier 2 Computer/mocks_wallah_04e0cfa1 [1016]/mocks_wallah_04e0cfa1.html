@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mocks Wallah</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --primary-light: #a29bfe;
+            --primary-dark: #5649c0;
+            --secondary: #00cec9;
+            --accent: #fd79a8;
+            --success: #00b894;
+            --warning: #fdcb6e;
+            --danger: #d63031;
+            --light: #f8f9fa;
+            --dark: #2d3436;
+            --gray: #636e72;
+            --light-gray: #dfe6e9;
+            --card-bg: #ffffff;
+            --body-bg: #f5f6fa;
+            --header-bg: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            --footer-bg: #ffffff;
+            --box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            --box-shadow-sm: 0 2px 10px rgba(0,0,0,0.05);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background-color: var(--body-bg);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            color: var(--dark);
+            line-height: 1.6;
+            padding-bottom: 80px; /* Space for fixed navigation */
+            overflow-x: hidden;
+        }
+        
+        /* Header Styles */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: var(--header-bg);
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            z-index: 1000;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .header-brand {
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .header-brand i {
+            margin-right: 8px;
+            font-size: 1.2rem;
+        }
+        
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .control-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .control-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .control-btn.active {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .timer-display {
+            background: rgba(0,0,0,0.2);
+            border-radius: 18px;
+            padding: 4px 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+        
+        .timer-display i {
+            margin-right: 6px;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-top: 60px;
+            padding: 16px;
+            min-height: calc(100vh - 140px);
+        }
+        
+        .question-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--box-shadow-sm);
+            border: none;
+            transition: var(--transition);
+        }
+        
+        .question-counter {
+            font-size: 0.9rem;
+            color: var(--gray);
+            text-align: center;
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+        
+        .question-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+        
+        .option-item {
+            margin-bottom: 12px;
+            position: relative;
+        }
+        
+        .option-input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+            .question-text {
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        hyphens: auto;
+        max-width: 100%;
+    }
+
+    .question-text img,
+    .option-label img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 8px 0;
+        border-radius: 8px;
+    }
+
+    .option-label {
+        overflow: hidden;
+    }
+
+    .question-card {
+        overflow: hidden;
+    }
+        
+        .option-label {
+            display: block;
+            padding: 14px 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--light-gray);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .option-label:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .option-input:checked + .option-label {
+            border-color: var(--primary);
+            background: rgba(108, 92, 231, 0.05);
+            box-shadow: 0 0 0 1px var(--primary);
+        }
+        
+        .option-input:checked + .option-label::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--primary);
+        }
+        
+        /* When reviewing answers */
+        .review-mode .option-input:checked + .option-label.correct {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.correct::after {
+            background: var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.incorrect {
+            border-color: var(--danger);
+            background: rgba(214, 48, 49, 0.05);
+            box-shadow: 0 0 0 1px var(--danger);
+        }
+        
+        .MathJax, .mjx-chtml {
+            overflow-x: auto;
+            max-width: 100%;
+            display: inline-block;
+        }
+
+        
+        .review-mode .option-input:checked + .option-label.incorrect::after {
+            background: var(--danger);
+        }
+        
+        .review-mode .option-label.correct-answer {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-label.correct-answer::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--success);
+        }
+        
+        .solution-container {
+            margin-top: 20px;
+            padding: 16px;
+            background: rgba(108, 92, 231, 0.05);
+            border-radius: 12px;
+            border-left: 3px solid var(--primary);
+        }
+        
+        .solution-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+        
+        /* Question Navigation */
+        .question-nav {
+            position: fixed;
+            top: 60px;
+            right: 0;
+            bottom: 80px;
+            width: 100%;
+            max-width: 320px;
+            background: var(--card-bg);
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            transform: translateX(100%);
+            transition: var(--transition);
+            z-index: 900;
+            overflow-y: auto;
+            padding: 16px;
+        }
+        
+        .question-nav.show {
+            transform: translateX(0);
+        }
+        
+        .nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .nav-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+        
+        .question-stats {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .stat-badge {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        
+        .section-selector {
+            width: 100%;
+            margin-bottom: 16px;
+            border-radius: 12px;
+            padding: 10px 16px;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            font-size: 0.9rem;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 16px;
+        }
+        
+        .question-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+            gap: 8px;
+        }
+        
+        .q-box {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .q-box:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .q-box.attempted {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .q-box.correct {
+            background-color: var(--success);
+            color: white;
+            border-color: var(--success);
+        }
+        
+        .q-box.incorrect {
+            background-color: var(--danger);
+            color: white;
+            border-color: var(--danger);
+        }
+        
+        .q-box.current {
+            border: 2px solid var(--accent) !important;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .q-box.unattempted {
+            background-color: var(--gray);
+            color: white;
+            border-color: var(--gray);
+        }
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: var(--footer-bg);
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            z-index: 800;
+        }
+        
+        .nav-btn {
+            height: 48px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 20px;
+            transition: var(--transition);
+            gap: 8px;
+        }
+        
+        .nav-btn i {
+            font-size: 1rem;
+        }
+        
+        .nav-btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .nav-btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+        
+        .nav-btn-outline:hover {
+            background: rgba(108, 92, 231, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        /* Overlay when nav is open */
+        .nav-overlay {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            bottom: 80px;
+            background: rgba(0,0,0,0.5);
+            z-index: 800;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+        }
+        
+        .nav-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        /* Results Modal */
+        .results-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1100;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+            padding: 16px;
+        }
+        
+        .results-modal.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .results-card {
+            background: white;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+            transform: translateY(20px);
+            transition: var(--transition);
+        }
+        
+        .results-modal.show .results-card {
+            transform: translateY(0);
+        }
+        
+        .results-header {
+            background: var(--header-bg);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .results-title {
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .results-body {
+            padding: 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            color: white;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+        
+        .results-footer {
+            padding: 16px 20px;
+            display: flex;
+            justify-content: center;
+            border-top: 1px solid var(--light-gray);
+        }
+        
+        /* Responsive Adjustments */
+        @media (min-width: 992px) {
+            .question-nav {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-right: 320px;
+            }
+            
+            .nav-overlay {
+                display: none;
+            }
+            
+            .bottom-nav {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .question-grid {
+                grid-template-columns: repeat(auto-fill, minmax(36px, 1fr));
+                gap: 6px;
+            }
+            
+            .q-box {
+                width: 36px;
+                height: 36px;
+                font-size: 0.9rem;
+            }
+            
+            .option-label {
+                padding: 12px 14px;
+            }
+            
+            .question-text {
+                font-size: 1rem;
+            }
+            
+            .header-brand {
+                font-size: 1rem;
+            }
+            
+            .control-btn {
+                width: 32px;
+                height: 32px;
+            }
+            
+            .timer-display {
+                font-size: 0.8rem;
+                padding: 4px 10px;
+            }
+            
+            .nav-btn {
+                height: 44px;
+                padding: 0 16px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="#" class="header-brand">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Mocks Wallah</span>
+            </a>
+            
+            <div class="header-controls">
+                <!-- Timer -->
+                <div class="timer-display">
+                    <i class="far fa-clock"></i>
+                    <span id="timer-display">15:00</span>
+                </div>
+                
+                <!-- Language toggle -->
+                <button class="control-btn" id="lang-btn" onclick="toggleLanguage()">
+                    <span id="lang-text">En</span>
+                </button>
+                
+                <!-- Submit button -->
+                <button class="control-btn" id="submit-btn" onclick="confirmSubmit()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+                
+                <!-- Questions toggle for mobile -->
+                <button class="control-btn nav-toggle-btn" id="nav-toggle" onclick="toggleNav()">
+                    <i class="fas fa-th"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main content -->
+    <main class="main-content" id="main-content">
+        <div class="question-counter" id="question-counter">Question 1 of 20</div>
+        
+        <!-- Questions will be displayed here -->
+        <div id="questions-container"></div>
+    </main>
+    
+    <!-- Overlay for mobile nav -->
+    <div class="nav-overlay" id="nav-overlay" onclick="toggleNav(false)"></div>
+    
+    <!-- Question navigation sidebar -->
+    <aside class="question-nav" id="question-nav">
+        <div class="nav-header">
+            <h3 class="nav-title">Questions</h3>
+            <div class="question-stats">
+                <span class="stat-badge bg-primary" id="attempted-count">0</span>
+                <span class="stat-badge bg-gray" id="total-count">20</span>
+                <button class="control-btn d-lg-none" onclick="toggleNav(false)">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Section selector -->
+        <select class="section-selector" id="section-selector" onchange="switchSection(this.value)">
+            <option value="all">All Sections</option>
+        </select>
+        
+        <!-- Question grid -->
+        <div class="question-grid" id="question-boxes"></div>
+    </aside>
+    
+    <!-- Bottom navigation for mobile -->
+    <nav class="bottom-nav d-lg-none">
+        <button class="nav-btn nav-btn-outline" onclick="prevQuestion()">
+            <i class="fas fa-chevron-left"></i>
+            <span>Previous</span>
+        </button>
+        <button class="nav-btn nav-btn-outline" onclick="nextQuestion()">
+            <span>Next</span>
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </nav>
+    
+    <!-- Results modal -->
+    <div class="results-modal" id="results-modal">
+        <div class="results-card">
+            <div class="results-header">
+                <h3 class="results-title">Test Results</h3>
+            </div>
+            <div class="results-body">
+                <div class="stats-grid">
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark))">
+                        <div class="stat-value" id="score-value">0</div>
+                        <div class="stat-label">Score</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--success), #1b9aaa)">
+                        <div class="stat-value" id="correct-value">0</div>
+                        <div class="stat-label">Correct</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--danger), var(--accent))">
+                        <div class="stat-value" id="incorrect-value">0</div>
+                        <div class="stat-label">Incorrect</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--gray), var(--dark))">
+                        <div class="stat-value" id="unattempted-value">0</div>
+                        <div class="stat-label">Unattempted</div>
+                    </div>
+                </div>
+            </div>
+            <div class="results-footer">
+                <button class="nav-btn nav-btn-primary" onclick="reviewTest()">
+                    <i class="fas fa-search me-1"></i>
+                    <span>Review Test</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Questions data
+        const questions = [];
+        const sections = {};
+        let currentLang = "en";
+        let currentQuestion = 0;
+        let answers = {};
+        let submitted = false;
+        let totalTime = 15 * 60;
+        
+        // Initialize the test
+        window.onload = function() {
+            initializeTest();
+            startTimer();
+            
+            // If on desktop, show the question navigation by default
+            if (window.innerWidth >= 992) {
+                document.getElementById('question-nav').classList.add('show');
+                document.getElementById('main-content').classList.add('with-nav');
+            }
+        };
+        
+        // Initialize test data
+        function initializeTest() {
+            // Add sections and questions
+            
+            sections["31"] = {
+                name: "Computer Knowledge",
+                start: 0,
+                end: 18
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="31">Computer Knowledge</option>`;
+            
+            sections["misc"] = {
+                name: "Miscellaneous",
+                start: 19,
+                end: 19
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="misc">Miscellaneous</option>`;
+            
+            
+                questions.push({
+                    id: "1",
+                    section: "31",
+                    question_en: " <p>1. With reference to text formatting, ‘Italic’ option belongs to which of the following categories.</p>",
+                    question_hi: " <p>1. <span style=\"font-family:Palanquin Dark\">टेक्स्ट फॉर्मेटिंग के संदर्भ( reference )  में, \'इटैलिक\' विकल्प निम्नलिखित में से किस श्रेणी ( category )  से संबंधित है।</span></p>",
+                    options_en: [" <p> Size</p>", " <p> Font face</p>", 
+                                " <p> Effects</p>", " <p> Font style</p>"],
+                    options_hi: [" <p> साइज </span></p>", " <p> फॉण्ट  फेस </span></p>",
+                                " <p> इफेक्ट्स </span></p>", " <p> फॉण्ट  स्टाइल </span></p>"],
+                    solution_en: " <p>1.(d). </span><span style=\"font-family:Palanquin Dark\">The</span><span style=\"font-family:Palanquin Dark\"> Italic option (use for emphasis or contrast)</span><span style=\"font-family:Palanquin Dark\"> refers to the font style in MS Word. The most common font styles are Regular, Italic, Bold, and BoldItalic. The shortcut key to make text italic is Ctrl + I on the PC and Chromebook or Command + I on the Mac.</span></p>",
+                    solution_hi: " <p>1.(d). इटैलिक विकल्प</span><span style=\"font-family:Palanquin Dark\"> MS वर्ड में फ़ॉन्ट स्टाइल को रिप्रेजेंट करता है। सबसे आम फ़ॉन्ट स्टाइल रेगुलर, इटैलिक, बोल्ड और बोल्ड इटैलिक हैं। टेक्स्ट को इटैलिक बनाने की शॉर्टकट key ,  PC पर Ctrl + I और Mac पर क्रोमबुक  या कमांड + I है।</span></p>",
+                    correct: "d",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "2",
+                    section: "31",
+                    question_en: " <p>2. </span><span style=\"font-family:Palanquin Dark\">Which of the following shows the address of the current selection or active cell in MS-Excel?</span></p>",
+                    question_hi: " <p>2. </span><span style=\"font-family:Palanquin Dark\">निम्नलिखित में से कौन MS-Excel में वर्तमान चयन या एक्टिव सेल का एड्रेस दिखाता है?</span></p>",
+                    options_en: [" <p> Formula bar</span></p>", " <p> Column heading</span></p>", 
+                                " <p> Name box</span></p>", " <p> Row heading</span></p>"],
+                    options_hi: [" <p> फॉर्मूला बार</span></p>", " <p> कॉलम हैडिंग</span></p>",
+                                " <p> नेम बॉक्स</span></p>", " <p> रो हैडिंग </span></p>"],
+                    solution_en: " <p>2.(c) In Excel, the Name Box</span><span style=\"font-family:Palanquin Dark\"> refers to an input box directly to the left of the formula bar.It displays the address ,the name of the cell, range or object selected . It can be used to name a cell, range or object like a chart. Name Box Shortcut Key : Ctrl+F3. </span></p>",
+                    solution_hi: " <p>2.(c)एक्सेल में, </span><span style=\"font-family:Palanquin Dark\">नेम बॉक्स</span><span style=\"font-family:Palanquin Dark\"> सीधे फॉर्मूला बार के बाईं ओर एक इनपुट बॉक्स को रिप्रेजेंट करता है। यह एड्रेस , सेल का नाम,रेंज  या ऑब्जेक्ट का नाम प्रदर्शित करता है । इसका उपयोग किसी सेल, रेंज या ऑब्जेक्ट को चार्ट की तरह नाम देने के लिए किया जा सकता है। नेम बॉक्स शॉर्टकट कुंजी ( key )  : Ctrl+F3.</span></p>",
+                    correct: "c",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "3",
+                    section: "31",
+                    question_en: " <p>3.</span><span style=\"font-family:Palanquin Dark\"> Which of the following is the full form of ‘BCC’, a field of E-mail header?</span></p>",
+                    question_hi: " <p>3.</span><span style=\"font-family:Palanquin Dark\"> निम्नलिखित में से कौन ई-मेल हेडर के क्षेत्र \'BCC\' का पूर्ण रूप है?</span></p>",
+                    options_en: [" <p> Blind carbon copy</span></p>", " <p> Blind common copy</span></p>", 
+                                " <p> Basic carbon copy</span></p>", " <p> Basic common copy</span></p>"],
+                    options_hi: [" <p> ब्लाइंड कार्बन कॉपी</span></p>", " <p> ब्लाइंड कॉमन कॉपी</span></p>",
+                                " <p> बेसिक कार्बन कॉपी</span></p>", " <p>  बेसिक कॉमन कॉपी </span></p>"],
+                    solution_en: " <p>3.(a)</span><span style=\"font-family:Palanquin Dark\"> </span><span style=\"font-family:Palanquin Dark\">Blind carbon copy ( Bcc)</span><span style=\"font-family:Palanquin Dark\"> allows the sender of a message to conceal the person entered in the Bcc field from the other recipients. The difference between the two is that, while you can see a list of recipients when CC (Carbon copy) is used, that\'s not the case with BCC. </span><span style=\"font-family:Palanquin Dark\">Control + Shift + C</span><span style=\"font-family:Palanquin Dark\"> to get to the CC field and</span><span style=\"font-family:Palanquin Dark\"> Control + Shift + B</span><span style=\"font-family:Palanquin Dark\"> to get to the BCC field.</span></p>",
+                    solution_hi: " <p>3.(a)</span><span style=\"font-family:Palanquin Dark\"> </span><span style=\"font-family:Palanquin Dark\">ब्लाइंड कार्बन कॉपी (Bcc)</span><span style=\"font-family:Palanquin Dark\"> संदेश भेजने वाले को अन्य प्राप्तकर्ताओं से  Bcc field  फ़ील्ड में दर्ज किए गए व्यक्ति को छिपाने की अनुमति देता है। दोनों के बीच अंतर यह है कि, जब आप CC(कार्बन कॉपी) का उपयोग करते समय प्राप्तकर्ताओं की सूची देख सकते हैं, तो  BCC के मामले में ऐसा नहीं है। CC फील्ड में जाने के लिए </span><span style=\"font-family:Palanquin Dark\">Control + Shift + C</span><span style=\"font-family:Palanquin Dark\"> और BCC फील्ड में जाने के लिए </span><span style=\"font-family:Palanquin Dark\">Control + Shift + B</span><span style=\"font-family:Palanquin Dark\">।</span></p>",
+                    correct: "a",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "4",
+                    section: "31",
+                    question_en: " <p>4. </span><span style=\"font-family:Palanquin Dark\">Which of the following functions returns the current date and time in MS-Excel?</span></p>",
+                    question_hi: " <p>4. </span><span style=\"font-family:Palanquin Dark\">निम्नलिखित में से कौन सा कार्य MS-Excel में वर्तमान दिनांक और समय लौटाता ( return )  है?</span></p>",
+                    options_en: [" <p> TIME</span></p>", " <p> NOW</span></p>", 
+                                " <p> DATEVALUE</span></p>", " <p> DATE</span></p>"],
+                    options_hi: [" <p> TIME</span></p>", " <p> NOW</span></p>",
+                                " <p> DATEVALUE</span></p>", " <p> DATE</span></p>"],
+                    solution_en: " <p>4.(b) </span><span style=\"font-family:Palanquin Dark\">The </span><span style=\"font-family:Palanquin Dark\">NOW function</span><span style=\"font-family:Palanquin Dark\"> is useful when you need to display the current date and time on a worksheet or calculate a value based on the current date and time, and have that value updated each time you open the worksheet. The Excel </span><span style=\"font-family:Palanquin Dark\">TIME function</span><span style=\"font-family:Palanquin Dark\"> is a built-in function that allows you to create a time with individual hour, minute, and second components. The Excel </span><span style=\"font-family:Palanquin Dark\">DATE </span><span style=\"font-family:Palanquin Dark\">function creates a valid date from individual year, month, and day components. The </span><span style=\"font-family:Palanquin Dark\">Excel DATEVALUE function</span><span style=\"font-family:Palanquin Dark\"> converts a date represented as a text string into a valid Excel date.</span></p>",
+                    solution_hi: " <p><span style=\"font-family:Palanquin Dark\">4.(b) </span><span style=\"font-family:Palanquin Dark\">NOW </span><span style=\"font-family:Palanquin Dark\">फ़ंक्शन तब उपयोगी होता है जब आपको किसी वर्कशीट पर वर्तमान दिनांक और समय प्रदर्शित करने या वर्तमान दिनांक और समय के आधार पर वैल्यू  की गणना करने की आवश्यकता होती है, और हर बार जब आप वर्कशीट खोलते हैं तो उस वैल्यू को अपडेट किया जाता है।</span></p> <p><span style=\"font-family:Palanquin Dark\"> एक्सेल टाइम फ़ंक्शन</span><span style=\"font-family:Palanquin Dark\"> एक in - built  फ़ंक्शन है जो आपको अलग-अलग घंटे, मिनट और दूसरे components  के साथ एक समय बनाने की अनुमति देता है। </span></p> <p><span style=\"font-family:Palanquin Dark\">एक्सेल डेट</span><span style=\"font-family:Palanquin Dark\"> फ़ंक्शन अलग-अलग वर्ष, महीने और दिन के घटकों ( components ) से एक valid दिनांक बनाता है। </span></p> <p><span style=\"font-family:Palanquin Dark\">एक्सेल DATE VALUE फ़ंक्शन</span><span style=\"font-family:Palanquin Dark\"> एक टेक्स्ट स्ट्रिंग के रूप में प्रदर्शित दिनांक को एक वैलिड एक्सेल दिनांक में परिवर्तित करता है</span></p>",
+                    correct: "b",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "5",
+                    section: "31",
+                    question_en: " <p>5. </span><span style=\"font-family:Palanquin Dark\">Which of the following refers to the specific address associated with each web page displayed on the internet ?</span></p>",
+                    question_hi: " <p>5.</span><span style=\"font-family:Palanquin Dark\"> निम्नलिखित में से कौन इंटरनेट पर प्रदर्शित प्रत्येक वेब पेज से जुड़े specific address  को डिस्प्ले करता है?</span></p>",
+                    options_en: [" <p> URL</span></p>", " <p> WWW</span></p>", 
+                                " <p> FTP</span></p>", " <p> HTTP</span></p>"],
+                    options_hi: [" <p> URL</span></p>", " <p> WWW</span></p>",
+                                " <p> FTP</span></p>", " <p> HTTP</span></p>"],
+                    solution_en: " <p>5.(a) </span><span style=\"font-family:Palanquin Dark\">A </span><span style=\"font-family:Palanquin Dark\">URL (Uniform Resource Locator)</span><span style=\"font-family:Palanquin Dark\"> is a unique identifier used to locate a resource on the Internet. It is also referred to as a web address. </span></p> <p><span style=\"font-family:Palanquin Dark\">The </span><span style=\"font-family:Palanquin Dark\">World Wide Web (WWW)</span><span style=\"font-family:Palanquin Dark\"> is a combination of all resources and users on the Internet that are using the Hypertext Transfer Protocol (HTTP). </span></p> <p><span style=\"font-family:Palanquin Dark\">FTP (File Transfer Protocol)</span><span style=\"font-family:Palanquin Dark\">  refers to a group of rules that govern how computers transfer files from one system to another over the internet. </span></p> <p><span style=\"font-family:Palanquin Dark\">Hypertext Transfer Protocol (HTTP)</span><span style=\"font-family:Palanquin Dark\"> is an application-layer protocol for transmitting hypermedia documents, such as HTML.</span></p>",
+                    solution_hi: " <p><span style=\"font-family:Palanquin Dark\">5.(a)</span><span style=\"font-family:Palanquin Dark\"> URL (यूनिफ़ॉर्म रिसोर्स लोकेटर) </span><span style=\"font-family:Palanquin Dark\">एक specific identifier है जिसका उपयोग इंटरनेट पर किसी संसाधन ( resources )  का पता लगाने के लिए किया जाता है। इसे वेब एड्रेस भी कहा जाता है। </span></p> <p><span style=\"font-family:Palanquin Dark\">वर्ल्ड वाइड वेब (WWW) </span><span style=\"font-family:Palanquin Dark\">इंटरनेट पर उन सभी संसाधनों ( resources ) और यूजर का एक कॉम्बिनेशन है जो हाइपरटेक्स्ट ट्रांसफर प्रोटोकॉल (HTTP) का उपयोग कर रहे हैं। </span></p> <p><span style=\"font-family:Palanquin Dark\">FTP (फाइल ट्रांसफर प्रोटोकॉल)</span><span style=\"font-family:Palanquin Dark\"> नियमों के एक समूह को संदर्भित करता है जो यह नियंत्रित करता है कि कंप्यूटर इंटरनेट पर एक सिस्टम से दूसरे सिस्टम में फाइल कैसे ट्रांसफर करते हैं।</span></p> <p><span style=\"font-family:Palanquin Dark\"> </span><span style=\"font-family:Palanquin Dark\">हाइपरटेक्स्ट ट्रांसफर प्रोटोकॉल</span><span style=\"font-family:Palanquin Dark\"> (HTTP) हाइपरमीडिया दस्तावेज़ों को प्रसारित करने के लिए एक एप्लिकेशन-लेयर प्रोटोकॉल है, जैसे कि HTML</span></p>",
+                    correct: "a",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "6",
+                    section: "31",
+                    question_en: " <p>6.</span><span style=\"font-family:Palanquin Dark\"> Which of the following options is used to view the page or make adjustments before any document gets printed in MS-Word?</span></p>",
+                    question_hi: "<p>6. <span style=\"font-family: Palanquin Dark;\">MS-Word में किसी भी दस्तावेज़ के प्रिंट होने से पहले पेज को देखने या एडजस्टमेंट करने के लिए निम्नलिखित में से किस विकल्प का उपयोग किया जाता है?</span></p>",
+                    options_en: [" <p> Outline</span></p>", " <p> Print Preview</span></p>", 
+                                " <p> Web Layout</span></p>", " <p> Draft</span></p>"],
+                    options_hi: ["<p>आउटलाइन&nbsp;</p>", "<p>प्रिंट प्रीव्यू&nbsp;</p>",
+                                "<p>वेब लेआउट</p>", "<p>ड्राफ्ट</p>"],
+                    solution_en: " <p>6.(b)</span><span style=\"font-family:Palanquin Dark\"> </span><span style=\"font-family:Palanquin Dark\">Print preview</span><span style=\"font-family:Palanquin Dark\"> (</span><span style=\"font-family:Palanquin Dark\">Ctrl+P</span><span style=\"font-family:Palanquin Dark\">) is a feature that displays on the screen what a hard copy would look like when printed. . When you\'re working with a long document, the </span><span style=\"font-family:Palanquin Dark\">Outline</span><span style=\"font-family:Palanquin Dark\"> view helps you arrange your text.</span><span style=\"font-family:Palanquin Dark\"> Web Layout view</span><span style=\"font-family:Palanquin Dark\"> is designed to show you what your document would like if you intend to publish it as a webpage. </span><span style=\"font-family:Palanquin Dark\">Draft mode</span><span style=\"font-family:Palanquin Dark\"> was used to show the user what the print job would look like before printing the final copy.</span></p>",
+                    solution_hi: "<p>6.(b)<span style=\"font-family: Palanquin Dark;\"> </span><span style=\"font-family: Palanquin Dark;\">प्रिंट प्रीव्यू (Ctrl+P)</span><span style=\"font-family: Palanquin Dark;\"> एक ऐसी सुविधा है जो स्क्रीन पर प्रदर्शित करती है कि प्रिंट होने पर हार्ड कॉपी कैसी दिखेगी। जब आप एक लंबे दस्तावेज़ के साथ काम कर रहे होते हैं, तो </span><span style=\"font-family: Palanquin Dark;\">आउटलाइन व्यू</span><span style=\"font-family: Palanquin Dark;\"> आपको अपना टेक्स्ट व्यवस्थित करने में मदद करता है। </span></p>\r\n<p><span style=\"font-family: Palanquin Dark;\">वेब लेआउट</span><span style=\"font-family: Palanquin Dark;\"> दृश्य आपको यह दिखाने के लिए डिज़ाइन किया गया है कि यदि आप इसे वेबपेज के रूप में publish करना चाहते हैं तो आपका दस्तावेज़ क्या पसंद करेगा।</span></p>\r\n<p><span style=\"font-family: Palanquin Dark;\"> </span><span style=\"font-family: Palanquin Dark;\">ड्राफ्ट मोड</span><span style=\"font-family: Palanquin Dark;\"> का उपयोग उपयोगकर्ता को यह दिखाने के लिए किया जाता था कि अंतिम कॉपी प्रिंट करने से पहले प्रिंट जॉब कैसा दिखेगा।</span></p>",
+                    correct: "b",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "7",
+                    section: "31",
+                    question_en: " <p>7. </span><span style=\"font-family:Palanquin Dark\">Electronic mail belongs to which of the following services on the internet?</span></p>",
+                    question_hi: " <p>7.</span><span style=\"font-family:Palanquin Dark\"> इलेक्ट्रॉनिक मेल इंटरनेट पर निम्नलिखित में से किस सेवा से संबंधित है?</span></p>",
+                    options_en: [" <p> World wide web</span></p>", " <p> Communication service </span></p>", 
+                                " <p> Information retrieval services</span></p>", " <p> Web services</span></p>"],
+                    options_hi: [" <p> वर्ल्ड वाइड वेब</span></p>", " <p> संचार सेवा</span></p>",
+                                " <p> सूचना पुनर्प्राप्ति सेवाएं</span></p>", " <p> वेब सेवाएं</span></p>"],
+                    solution_en: " <p>7.(b) Electronic mail (e-mail)</span><span style=\"font-family:Palanquin Dark\"> is an efficient communication tool, it allows Internet users to send and receive messages from around the world. An </span><span style=\"font-family:Palanquin Dark\">IR system</span><span style=\"font-family:Palanquin Dark\"> is a software system that provides access to </span><span style=\"font-family:Palanquin Dark\">books, journals and other documents</span><span style=\"font-family:Palanquin Dark\">; stores and manages those documents. Web search engines are the most visible IR applications. A </span><span style=\"font-family:Palanquin Dark\">Web service</span><span style=\"font-family:Palanquin Dark\"> is a method of communication between two electronic devices over a network.</span></p>",
+                    solution_hi: " <p>7.(b) इलेक्ट्रॉनिक मेल </span><span style=\"font-family:Palanquin Dark\">(ई-मेल) एक कुशल संचार उपकरण है, यह इंटरनेट उपयोगकर्ताओं को दुनिया भर से संदेश भेजने और प्राप्त करने की अनुमति देता है। एक </span><span style=\"font-family:Palanquin Dark\">IR </span><span style=\"font-family:Palanquin Dark\">सिस्टम एक सॉफ्टवेयर सिस्टम है जो पुस्तकों, पत्रिकाओं और अन्य दस्तावेजों तक पहुंच प्रदान करता है; उन दस्तावेजों को स्टोर और प्रबंधित करता है। वेब सर्च इंजन सबसे अधिक दिखाई देने वाले IR एप्लिकेशन हैं। एक वेब सेवा एक नेटवर्क पर दो इलेक्ट्रॉनिक उपकरणों के बीच संचार ( communication ) की एक विधि ( method )है।</span></p>",
+                    correct: "b",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "8",
+                    section: "31",
+                    question_en: " <p>8. </span><span style=\"font-family:Palanquin Dark\">Which of the following shortcut keys is used to cut data from a cell in MS-Excel?</span></p>",
+                    question_hi: " <p>8. </span><span style=\"font-family:Palanquin Dark\">MS-Excel में सेल से डेटा काटने के लिए निम्न में से किस शॉर्टकट की का उपयोग किया जाता है?</span></p>",
+                    options_en: [" <p> Ctrl+V</span></p>", " <p> Ctrl+Z</span></p>", 
+                                " <p> Ctrl+X</span></p>", " <p> Ctrl+C</span></p>"],
+                    options_hi: [" <p> Ctrl+V</span></p>", " <p> Ctrl+Z</span></p>",
+                                " <p> Ctrl+X</span></p>", " <p> Ctrl+C</span></p>"],
+                    solution_en: " <p>8.(c) Ctrl + X </span><span style=\"font-family:Palanquin Dark\">(cut the contents of selected cells);</span><span style=\"font-family:Palanquin Dark\"> Ctrl + C</span><span style=\"font-family:Palanquin Dark\"> (copy the contents of selected cells); </span><span style=\"font-family:Palanquin Dark\">Ctrl + V</span><span style=\"font-family:Palanquin Dark\"> (paste content into a selected cell), and </span><span style=\"font-family:Palanquin Dark\">Ctrl + Z</span><span style=\"font-family:Palanquin Dark\"> (undo the last action).</span></p>",
+                    solution_hi: " <p>8.(c)</span></p> <p><span style=\"font-family:Palanquin Dark\">Ctrl + X</span><span style=\"font-family:Palanquin Dark\"> (चयनित सेल की कंटेंट को कट); </span></p> <p><span style=\"font-family:Palanquin Dark\">Ctrl + C</span><span style=\"font-family:Palanquin Dark\"> (चयनित सेल की कंटेंट की कॉपी); </span></p> <p><span style=\"font-family:Palanquin Dark\">Ctrl + V</span><span style=\"font-family:Palanquin Dark\"> (चयनित सेल में कंटेंट पेस्ट करना),</span></p> <p><span style=\"font-family:Palanquin Dark\"> </span><span style=\"font-family:Palanquin Dark\">Ctrl + Z</span><span style=\"font-family:Palanquin Dark\"> (अंतिम क्रिया को पूर्ववत करना / undo )</span></p>",
+                    correct: "c",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "9",
+                    section: "31",
+                    question_en: " <p>9. </span><span style=\"font-family:Palanquin Dark\">Which of the following options in MS-Word is used to </span><span style=\"font-family:Palanquin Dark\">colour</span><span style=\"font-family:Palanquin Dark\"> the background behind the selected text or paragraph?</span></p>",
+                    question_hi: "<p>9.<span style=\"font-family: Palanquin Dark;\"> MS-Word में निम्नलिखित में से कौन सा विकल्प चयनित टेक्स्ट या पैराग्राफ के पीछे के बैकग्राउंड को रंगने के लिए प्रयोग किया जाता है?</span></p>",
+                    options_en: [" <p> Shading</span></p>", " <p> Format Painter</span></p>", 
+                                " <p> Font </span><span style=\"font-family:Palanquin Dark\">Colour</span></p>", " <p> Text Highlight </span><span style=\"font-family:Palanquin Dark\">Colour</span></p>"],
+                    options_hi: ["<p>शेडिंग&nbsp;</p>", "<p>फॉर्मेट पेंटर&nbsp;</p>",
+                                "<p>फ़ॉन्ट रंग</p>", "<p>टेक्स्ट हाइलाइट रंग</p>"],
+                    solution_en: " <p>9.(a) Borders and shading (</span><span style=\"font-family:Palanquin Dark\"> </span><span style=\"font-family:Palanquin Dark\">Alt – H – H) </span><span style=\"font-family:Palanquin Dark\">are used in Word Documents when we want some text/ paragraph to grab the attention of the viewers, making it the First Impression. </span></p> <p><span style=\"font-family:Palanquin Dark\">The </span><span style=\"font-family:Palanquin Dark\">Format Painter </span><span style=\"font-family:Palanquin Dark\">(Crtl+Shift+V) copies font-level formatting from one block of text to another within your document.</span></p> <p><span style=\"font-family:Palanquin Dark\"> </span><span style=\"font-family:Palanquin Dark\">Font colour</span><span style=\"font-family:Palanquin Dark\"> extension helps pick, select and conveniently store colors and fonts from most web pages.</span></p> <p><span style=\"font-family:Palanquin Dark\"> </span><span style=\"font-family:Palanquin Dark\">Text highlight colour-</span><span style=\"font-family:Palanquin Dark\"> Word contains many highlighters to make your text pop off the screen.</span></p>",
+                    solution_hi: "<p>9.(a)</p>\r\n<p><span style=\"font-family: Palanquin Dark;\"> वर्ड डॉक्यूमेंट में बॉर्डर और शेडिंग ( Alt - H - H ) </span><span style=\"font-family: Palanquin Dark;\">का उपयोग तब किया जाता है जब हम चाहते हैं कि कुछ टेक्स्ट / पैराग्राफ दर्शकों का ध्यान खींचे, जिससे यह पहला इम्प्रैशन बन जाए। </span></p>\r\n<p><span style=\"font-family: Palanquin Dark;\">फ़ॉर्मेट पेंटर</span><span style=\"font-family: Palanquin Dark;\"> (Crtl+Shift+V) </span><span style=\"font-family: Palanquin Dark;\">आपके दस्तावेज़ में टेक्स्ट के एक ब्लॉक से दूसरे में font-level formatting की कॉपी बनाता है। फ़ॉन्ट रंग एक्सटेंशन अधिकांश वेब पेजों से रंगों और फोंट को चुनने, चुनने और आसानी से संग्रहीत करने में मदद करता है। टेक्स्ट हाइलाइट रंग- आपके टेक्स्ट को स्क्रीन से पॉप करने के लिए</span><span style=\"font-family: Palanquin Dark;\"> वर्ड में कई हाइलाइटर्स</span><span style=\"font-family: Palanquin Dark;\"> होते हैं।</span></p>",
+                    correct: "a",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "10",
+                    section: "31",
+                    question_en: " <p>10. </span><span style=\"font-family:Palanquin Dark\">Which of the following, with reference to opening an already existing document, is FALSE in MS-Word 2007?</span></p>",
+                    question_hi: " <p>10.</span><span style=\"font-family:Palanquin Dark\"> MS-Word 2007 में पहले से मौजूद दस्तावेज़ को खोलने के संदर्भ में निम्नलिखित में से कौन सा गलत है?</span></p>",
+                    options_en: [" <p> Click on the “office button</span><span style=\"font-family:Palanquin Dark\">Open”</span></p>", " <p> shortcut key for opening existing word document is Ctrl+M</span></p>", 
+                                " <p> shortcut key for opening existing word document is Ctrl+O</span></p>", " <p> After clicking on open, from the window opened, double click on the file</span></p>"],
+                    options_hi: [" <p> \"ऑफिस बटन</span><span style=\"font-family:Palanquin Dark\"> ओपन\" पर क्लिक करें</span></p>", " <p> मौजूदा वर्ड दस्तावेज़ को खोलने के लिए शॉर्टकट कुंजी है Ctrl + M</span></p>",
+                                " <p> मौजूदा वर्ड दस्तावेज़ को खोलने के लिए शॉर्टकट कुंजी है Ctrl + O</span></p>", " <p> ओपन पर क्लिक करने के बाद ओपन हुई विंडो से फाइल पर डबल क्लिक करें</span></p>"],
+                    solution_en: " <p>10.(b) Opening an Existing Document: </span><span style=\"font-family:Arial Unicode MS\">Choose Office button → Open (Alt+F, O). In the Open window , navigate to the folder and file you want to open. With the file selected, click Open in the lower-right corner. The Open box goes away and your document opens in Word. </span><span style=\"font-family:Arial Unicode MS\">Ctrl + M</span><span style=\"font-family:Arial Unicode MS\"> </span><span style=\"font-family:Arial Unicode MS\">(Indent the paragraph).</span><span style=\"font-family:Arial Unicode MS\"> </span><span style=\"font-family:Arial Unicode MS\">Ctrl+O</span><span style=\"font-family:Arial Unicode MS\"> (Open the document)</span></p>",
+                    solution_hi: " <p>10.(b)</span><span style=\"font-family:Palanquin Dark\"> एक मौजूदा </span><span style=\"font-family:Palanquin Dark\">डॉक्यूमेंट खोलना:</span><span style=\"font-family:Arial Unicode MS\"> ऑफिस बटन चुनें → खोलें (Alt+F, O), ओपन विंडो में, उस फ़ोल्डर और फ़ाइल पर नेविगेट करें जिसे आप खोलना चाहते हैं। चयनित फ़ाइल के साथ, निचले-दाएँ कोने में खोलें क्लिक करें। ओपन बॉक्स चला जाता है और आपका दस्तावेज़ वर्ड में खुल जाता है।</span><span style=\"font-family:Arial Unicode MS\"> </span></p> <p><span style=\"font-family:Arial Unicode MS\">Ctrl + M </span><span style=\"font-family:Palanquin Dark\">(पैराग्राफ इंडेंट करना)। </span><span style=\"font-family:Palanquin Dark\">Ctrl+O </span><span style=\"font-family:Palanquin Dark\">(डॉक्यूमेंट खोलें)</span></p>",
+                    correct: "b",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "11",
+                    section: "31",
+                    question_en: " <p>1</span><span style=\"font-family:Palanquin Dark\">1. </span><span style=\"font-family:Palanquin Dark\">A collection of related web pages is called:</span></p>",
+                    question_hi: " <p>1</span><span style=\"font-family:Palanquin Dark\">1. </span><span style=\"font-family:Palanquin Dark\">संबंधित वेब पेजों के संग्रह को कहा जाता है:</span></p>",
+                    options_en: [" <p> search engine</span></p>", " <p> website</span></p>", 
+                                " <p> server</span></p>", " <p> client</span></p>"],
+                    options_hi: [" <p> सर्च इंजन </span></p>", " <p> वेबसाइट </span></p>",
+                                " <p> सर्वर </span></p>", " <p> क्लाइंट </span></p>"],
+                    solution_en: " <p>11.(b) </span><span style=\"font-family:Palanquin Dark\">A </span><span style=\"font-family:Palanquin Dark\">website</span><span style=\"font-family:Palanquin Dark\"> is a collection of related web pages, images, videos or other digital assets that are addressed relative to a common Uniform.</span></p> <p><span style=\"font-family:Palanquin Dark\"> A</span><span style=\"font-family:Palanquin Dark\"> search engine</span><span style=\"font-family:Palanquin Dark\"> is a software system designed to carry out web searches. </span></p> <p><span style=\"font-family:Palanquin Dark\">A serve</span><span style=\"font-family:Palanquin Dark\">r is a computer or system that provides resources, data, services, or programs to other computers, known as clients, over a network. </span></p> <p><span style=\"font-family:Palanquin Dark\">A </span><span style=\"font-family:Palanquin Dark\">client</span><span style=\"font-family:Palanquin Dark\"> is any computer hardware or software device that requests access to a service provided by a server.</span></p>",
+                    solution_hi: " <p>11.(b)</span><span style=\"font-family:Palanquin Dark\"> एक वेबसाइट संबंधित वेब पृष्ठों( pages ) , छवियों ( pictures ) , वीडियो या अन्य डिजिटल परिसंपत्तियों ( assets ) का एक संग्रह है जो एक सामान्य यूनिफार्म के सापेक्ष एड्रेस  की जाती हैं।</span></p> <p><span style=\"font-family:Palanquin Dark\"> एक </span><span style=\"font-family:Palanquin Dark\">सर्च इंजन</span><span style=\"font-family:Palanquin Dark\"> एक सॉफ्टवेयर प्रणाली है जिसे वेब खोजों को पूरा करने के लिए डिज़ाइन किया गया है। </span></p> <p><span style=\"font-family:Palanquin Dark\">सर्वर </span><span style=\"font-family:Palanquin Dark\">एक कंप्यूटर या सिस्टम है जो अन्य कंप्यूटरों को संसाधन, डेटा, सेवाएं या प्रोग्राम प्रदान करता है, जिसे क्लाइंट के रूप में जाना जाता है, एक नेटवर्क पर।</span></p> <p><span style=\"font-family:Palanquin Dark\"> एक </span><span style=\"font-family:Palanquin Dark\">क्लाइंट </span><span style=\"font-family:Palanquin Dark\">कोई भी कंप्यूटर हार्डवेयर या सॉफ़्टवेयर डिवाइस है जो सर्वर द्वारा प्रदान की गई सेवा तक पहुंच का अनुरोध करता है।</span></p>",
+                    correct: "b",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "12",
+                    section: "31",
+                    question_en: "<p>1<span style=\"font-family: Palanquin Dark;\">2. </span><span style=\"font-family: Palanquin Dark;\">In MS-Excel worksheet, the &ldquo;zoom&rdquo; bar appears at the ______ portion of the worksheet.</span></p>\n",
+                    question_hi: "<p>1<span style=\"font-family: Palanquin Dark;\">2. </span><span style=\"font-family: Palanquin Dark;\">MS-Excel &#2357;&#2352;&#2381;&#2325;&#2358;&#2368;&#2335; &#2350;&#2375;&#2306;, \"zoom\" &#2348;&#2366;&#2352; &#2357;&#2352;&#2381;&#2325;&#2358;&#2368;&#2335; &#2325;&#2375; ______ &#2349;&#2366;&#2327; &#2346;&#2352; &#2342;&#2367;&#2326;&#2366;&#2312; &#2342;&#2375;&#2340;&#2366; &#2361;&#2376;&#2404;</span></p>\n",
+                    options_en: ["<p>bottom-left</p>\n", "<p>top-right</p>\n", 
+                                "<p>bottom-right</p>\n", "<p>top-left</p>\n"],
+                    options_hi: ["<p><span style=\"font-weight: 400;\">&#2344;&#2368;&#2330;&#2375;-&#2348;&#2366;&#2319;&#2306; (bottom-left)</span></p>\n", "<p><span style=\"font-weight: 400;\">&#2358;&#2368;&#2352;&#2381;&#2359;-&#2342;&#2366;&#2319;&#2306; (top-right )</span></p>\n",
+                                "<p>&#2344;&#2368;&#2330;&#2375;-&#2342;&#2366;&#2319;&#2306; (bottom-right )</p>\n", "<p>&#2314;&#2346;&#2352;-&#2348;&#2366;&#2319;&#2306;( top-left )</p>\n"],
+                    solution_en: "<p>12.(c). <span style=\"font-family: Palanquin Dark;\">The zoom feature in Excel changes the scale of a worksheet. Zoom slider in the bottom right corner of the Excel window. Shortcut for Zoom: Ctrl + Alt + plus sign (+) or Ctrl + Alt + minus sign (-).</span></p>\n",
+                    solution_hi: "<p>12.(c). <span style=\"font-family: Palanquin Dark;\">&#2319;&#2325;&#2381;&#2360;&#2375;&#2354; &#2350;&#2375;&#2306; zoom feature &#2325;&#2367;&#2360;&#2368; &#2357;&#2352;&#2381;&#2325;&#2358;&#2368;&#2335; &#2325;&#2375; &#2346;&#2376;&#2350;&#2366;&#2344;&#2375; ( scale ) &#2325;&#2379; &#2346;&#2352;&#2367;&#2357;&#2352;&#2381;&#2340;&#2367;&#2340; &#2325;&#2352;&#2340;&#2368; &#2361;&#2376;&#2404; &#2319;&#2325;&#2381;&#2360;&#2375;&#2354; &#2357;&#2367;&#2306;&#2337;&#2379; &#2325;&#2375; &#2344;&#2367;&#2330;&#2354;&#2375; &#2342;&#2366;&#2319;&#2305; &#2325;&#2379;&#2344;&#2375; &#2350;&#2375;&#2306; &#2360;&#2381;&#2354;&#2366;&#2311;&#2337;&#2352; &#2332;&#2364;&#2370;&#2350; &#2325;&#2352;&#2375;&#2306;. &#2332;&#2364;&#2370;&#2350; &#2325;&#2375; &#2354;&#2367;&#2319; &#2358;&#2377;&#2352;&#2381;&#2335;&#2325;&#2335;: Ctrl + Alt + &#2346;&#2381;&#2354;&#2360; &#2330;&#2367;&#2361;&#2381;&#2344; (+) &#2351;&#2366; Ctrl + Alt + &#2350;&#2366;&#2311;&#2344;&#2360; &#2330;&#2367;&#2361;&#2381;&#2344; (-).</span></p>\n",
+                    correct: "c",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "13",
+                    section: "31",
+                    question_en: " <p>1</span><span style=\"font-family:Palanquin Dark\">3.</span><span style=\"font-family:Palanquin Dark\"> What does the term URL mean?</span></p>",
+                    question_hi: " <p>1</span><span style=\"font-family:Palanquin Dark\">3. </span><span style=\"font-family:Palanquin Dark\">URLशब्द का क्या अर्थ है?</span></p>",
+                    options_en: [" <p> Unique Reference Line</span></p>", " <p> Universal Resource Line</span></p>", 
+                                " <p> Unidentified Resource Location</span></p>", " <p> Uniform Resource Locator</span></p>"],
+                    options_hi: [" <p> Unique Reference Line</span></p>", " <p> Universal Resource Line</span></p>",
+                                " <p> Unidentified Resource Location</span></p>", " <p> Uniform Resource Locator</span></p>"],
+                    solution_en: " <p>13.(d) </span><span style=\"font-family:Palanquin Dark\">Web Pages also have unique addresses to help people locate them, on the Internet, these addresses are called URLs (Uniform Resource Locators). Three basic elements of a website URL: The protocol – HTTP or HTTPS, The domain name (including the TLD) that identifies a site and The path leading to a specific web page.</span></p>",
+                    solution_hi: " <p>13.(d) </span><span style=\"font-family:Palanquin Dark\">इंटरनेट पर लोगों को उनका पता लगाने में मदद करने के लिए वेब पेजों में यूनिक एड्रेस भी होते हैं, इन एड्रेस को URLs (यूनिफ़ॉर्म रिसोर्स लोकेटर) कहा जाता है। एक वेबसाइट URL के तीन बुनियादी तत्व: प्रोटोकॉल - HTTP या HTTPS, डोमेन नाम (TLD सहित) जो एक साइट की पहचान करता है और एक विशिष्ट वेब पेज पर जाने वाला पथ ( path ) ।</span></p>",
+                    correct: "d",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "14",
+                    section: "31",
+                    question_en: "<p>1<span style=\"font-family: Palanquin Dark;\">4.</span><span style=\"font-family: Palanquin Dark;\"> Which of the following statements is/are FALSE?</span></p>\r\n<p><span style=\"font-weight: 400;\">(i) In MS-Word, different letters of a word cannot be of different font-colors.</span></p>\r\n<p><span style=\"font-weight: 400;\">(ii) In MS-Word, the Show/Hide command button can be used to display paragraph marks in a document.</span></p>",
+                    question_hi: "<p>1<span style=\"font-family: Palanquin Dark;\">4.</span><span style=\"font-family: Palanquin Dark;\"> निम्नलिखित में से कौन सा/से कथन असत्य है/हैं?</span></p>\r\n<p><span style=\"font-weight: 400;\">(i) MS-Word में, किसी शब्द के अलग-अलग अक्षर ( letters ) अलग-अलग फ़ॉन्ट-रंगों के नहीं हो सकते हैं।</span></p>\r\n<p><span style=\"font-family: Palanquin Dark;\"><span style=\"font-weight: 400;\">(ii) MS-Word में, किसी दस्तावेज़ में </span><span style=\"font-weight: 400;\">पैराग्राफ</span><span style=\"font-weight: 400;\">चिह्न प्रदर्शित करने के लिए दिखाएँ / छिपाएँ कमांड बटन का उपयोग किया जा सकता है।</span></span></p>",
+                    options_en: ["<p><span style=\"font-weight: 400;\">Neither (i) nor (ii)</span></p>", "<p><span style=\"font-weight: 400;\">Only (ii)</span></p>", 
+                                "<p><span style=\"font-weight: 400;\">Both (i) and (ii)</span></p>", "<p><span style=\"font-weight: 400;\">Only (i)</span></p>"],
+                    options_hi: ["<p><span style=\"font-weight: 400;\">न तो (i) और न ही (ii)</span></p>", "<p><span style=\"font-weight: 400;\">केवल (ii)</span></p>",
+                                "<p>(i) और(ii) दोनों</p>", "<p><span style=\"font-weight: 400;\">केवल (i)</span></p>"],
+                    solution_en: "<p>14.(d) <span style=\"font-family: Palanquin Dark;\">(i) In MS-Word - With the help of the font color button, different letters of a word can be managed with different font colors. (ii) In MS-Word - The Show/Hide command button can be used to display paragraph marks in a document.</span></p>",
+                    solution_hi: "<p>14.(d)<span style=\"font-family: Palanquin Dark;\">(i) MS-वर्ड में - फॉन्ट कलर बटन की मदद से किसी शब्द के अलग-अलग अक्षरों को अलग-अलग फॉन्ट कलर से मैनेज किया जा सकता है। (ii) MS-वर्ड में - दिखाएँ/छिपाएँ कमांड बटन का उपयोग किसी दस्तावेज़ में पैराग्राफ चिह्न प्रदर्शित करने के लिए किया जा सकता है।</span></p>",
+                    correct: "d",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "15",
+                    section: "31",
+                    question_en: " <p>1</span><span style=\"font-family:Palanquin Dark\">5. </span><span style=\"font-family:Palanquin Dark\">Which of the following is NOT a word processing software?</span></p>",
+                    question_hi: " <p>1</span><span style=\"font-family:Palanquin Dark\">5. </span><span style=\"font-family:Palanquin Dark\">निम्न में से कौन सा वर्ड प्रोसेसिंग सॉफ्टवेयर नहीं है?</span></p>",
+                    options_en: [" <p> Notepad</span></p>", " <p> MS-Excel</span></p>", 
+                                " <p> MS-Word</span></p>", " <p> WordPad</span></p>"],
+                    options_hi: [" <p> Notepad</span></p>", " <p> MS-Excel</span></p>",
+                                " <p> MS-Word</span></p>", " <p> WordPad</span></p>"],
+                    solution_en: " <p>15.(b)</span><span style=\"font-family:Palanquin Dark\"> A </span><span style=\"font-family:Palanquin Dark\">word processor </span><span style=\"font-family:Palanquin Dark\">is a device or computer program that provides for input, editing, formatting, and output of text, often with some additional features. Example- Wordpad. Microsoft Word. Lotus word pro. Notepad, Corel WordPerfect and Google Docs (online and free).</span></p>",
+                    solution_hi: " <p>15.(b)</span><span style=\"font-family:Palanquin Dark\"> एक </span><span style=\"font-family:Palanquin Dark\">वर्ड प्रोसेसर</span><span style=\"font-family:Palanquin Dark\"> एक उपकरण या कंप्यूटर प्रोग्राम है जो अक्सर कुछ अतिरिक्त सुविधाओं के साथ इनपुट, एडिटिंग,  फॉर्मेटिंग और टेक्स्ट के आउटपुट प्रदान करता है। उदाहरण- वर्डपैड, माइक्रोसॉफ्ट वर्ड, लोटस वर्ड प्रो. नोटपैड, कोरल वर्डपरफेक्ट और गूगल डॉक्स (ऑनलाइन और मुफ्त)।</span></p>",
+                    correct: "b",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "16",
+                    section: "31",
+                    question_en: "<p>1<span style=\"font-family: Palanquin Dark;\">6. </span><span style=\"font-family: Palanquin Dark;\">Which of the following characters must be a part of an email id?</span></p>",
+                    question_hi: "<p>1<span style=\"font-family: Palanquin Dark;\">6.</span><span style=\"font-family: Palanquin Dark;\"> निम्नलिखित में से कौन सा अक्षर email id का हिस्सा होना चाहिए?</span></p>",
+                    options_en: ["<p><span style=\"font-weight: 400;\">Dot (.)</span></p>", "<p><span style=\"font-weight: 400;\">Dollar ($)</span></p>", 
+                                "<p><span style=\"font-weight: 400;\">Ampersand (&amp;)</span></p>", "<p><span style=\"font-weight: 400;\">At the rate (@)</span></p>"],
+                    options_hi: ["<p><span style=\"font-weight: 400;\">Dot (.)</span></p>", "<p><span style=\"font-weight: 400;\">Dollar ($)</span></p>",
+                                "<p><span style=\"font-weight: 400;\">Ampersand (&amp;)</span></p>", "<p><span style=\"font-weight: 400;\">At the rate (@)</span></p>"],
+                    solution_en: "<p>16.(d) Electronic mail <span style=\"font-family: Palanquin Dark;\">(e-mail) is a method of exchanging messages (\"mail\") between people using electronic devices.</span><span style=\"font-family: Palanquin Dark;\"> </span><span style=\"font-family: Palanquin Dark;\">Every email address consists of </span><span style=\"font-family: Palanquin Dark;\">3 elements</span><span style=\"font-family: Palanquin Dark;\">: local-part, @ symbol (pronounced as &ldquo;at&rdquo;), and domain name. The local-part is placed before the @ symbol, and the domain name is placed after the @ symbol. </span><span style=\"font-family: Palanquin Dark;\">Raymond Samuel Tomlinson</span><span style=\"font-family: Palanquin Dark;\"> created the first email on the ARPANET system.</span></p>",
+                    solution_hi: "<p>16.(d)<span style=\"font-family: Palanquin Dark;\"> इलेक्ट्रॉनिक मेल (ई-मेल) इलेक्ट्रॉनिक उपकरणों का उपयोग करने वाले लोगों के बीच संदेशों (\"मेल\") के आदान-प्रदान की एक method है। प्रत्येक ईमेल पते में </span><span style=\"font-family: Palanquin Dark;\">3 तत्व</span><span style=\"font-family: Palanquin Dark;\"> होते हैं: स्थानीय-भाग, @ प्रतीक (\"पर\" के रूप में उच्चारित), और डोमेन नाम। लोकल-पार्ट को @ सिंबल से पहले और डोमेन नेम को @ सिंबल के बाद रखा जाता है। </span><span style=\"font-family: Palanquin Dark;\">रेमंड सैमुअल टॉमलिंसन</span><span style=\"font-family: Palanquin Dark;\"> ने ARPANET सिस्टम पर पहला ईमेल बनाया।</span></p>",
+                    correct: "d",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "17",
+                    section: "31",
+                    question_en: " <p>1</span><span style=\"font-family:Palanquin Dark\">7.</span><span style=\"font-family:Palanquin Dark\"> Which of the following tools can be used to apply the font color and size of a text to multiple pieces of text in MS-Word?</span></p>",
+                    question_hi: " <p>1</span><span style=\"font-family:Palanquin Dark\">7.</span><span style=\"font-family:Palanquin Dark\"> MS-Word में टेक्स्ट के कई टुकड़ों पर टेक्स्ट के फॉन्ट कलर और साइज को लागू करने के लिए निम्नलिखित में से कौन सा टूल इस्तेमाल किया जा सकता है?</span></p>",
+                    options_en: [" <p> Eraser</span></p>", " <p> Format Painter</span></p>", 
+                                " <p> Show/Hide button</span></p>", " <p> Replace</span></p>"],
+                    options_hi: [" <p> Eraser</span></p>", " <p> Format Painter</span></p>",
+                                " <p> Show/Hide button</span></p>", " <p> Replace</span></p>"],
+                    solution_en: " <p>17.(b) </span><span style=\"font-family:Palanquin Dark\">The</span><span style=\"font-family:Palanquin Dark\"> Format Painter tool</span><span style=\"font-family:Palanquin Dark\"> is used to copy and paste character and paragraph formats to existing text. This tool is on the Home tab of the Microsoft Word Ribbon. </span></p>",
+                    solution_hi: " <p>17.(b) </span><span style=\"font-family:Palanquin Dark\">फॉर्मेट पेंटर टूल का इस्तेमाल मौजूदा टेक्स्ट में कैरेक्टर और पैराग्राफ फॉर्मेट को कॉपी और पेस्ट करने के लिए किया जाता है। यह टूल माइक्रोसॉफ्ट वर्ड रिबन के होम टैब पर है।</span></p>",
+                    correct: "b",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "18",
+                    section: "31",
+                    question_en: " <p>1</span><span style=\"font-family:Palanquin Dark\">8.</span><span style=\"font-family:Palanquin Dark\"> What is the value of the following MS-Excel formula?</span></p> <p><span style=\"font-family:Palanquin Dark\">=MOD(11, 3)</span></p>",
+                    question_hi: " <p>1</span><span style=\"font-family:Palanquin Dark\">8. </span><span style=\"font-family:Palanquin Dark\">निम्नलिखित MS-Excel फार्मूला का मान क्या है?</span></p> <p><span style=\"font-family:Palanquin Dark\">=MOD(11, 3)</span></p>",
+                    options_en: [" <p> 2</span></p>", " <p> 4</span></p>", 
+                                " <p> 3</span></p>", " <p> 5</span></p>"],
+                    options_hi: [" <p> 2</span></p>", " <p> 4</span></p>",
+                                " <p> 3</span></p>", " <p> 5</span></p>"],
+                    solution_en: " <p>18.(a) </span><span style=\"font-family:Palanquin Dark\">The Excel MOD function returns the remainder of two numbers after division. For example, MOD(11,3) = 2. The result of MOD carries the same sign as the divisor.</span></p>",
+                    solution_hi: " <p>1</span><span style=\"font-family:Palanquin Dark\">8.(a) एक्सेल MOD फ़ंक्शन विभाजन के बाद शेष दो संख्याओं को लौटाता है। उदाहरण के लिए, MOD(11,3) = 2. MOD के परिणाम में भाजक ( divisor ) के समान चिह्न ( sign ) होता है।</span></p>",
+                    correct: "a",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "19",
+                    section: "31",
+                    question_en: "<p>1<span style=\"font-family: Palanquin Dark;\">9.</span><span style=\"font-family: Palanquin Dark;\"> Which of the following steps can be performed to edit the content of a cell in an MS-Excel </span><span style=\"font-family: Palanquin Dark;\">worksheet?</span></p>",
+                    question_hi: " <p>1</span><span style=\"font-family:Palanquin Dark\">9. </span><span style=\"font-family:Palanquin Dark\">MS-Excel वर्कशीट में सेल की कंटेंट को एडिट करने के लिए निम्नलिखित में से कौन सा कदम उठाया जा सकता है?</span></p>",
+                    options_en: ["<p>Left-click on the cell once</p>", "<p>Right-click on the cell</p>", 
+                                "<p>Double-click on the cell</p>", "<p>Select the cell and press ENTER key</p>"],
+                    options_hi: [" <p> एक बार सेल पर बायाँ-क्लिक करें</span></p>", " <p> सेल पर राइट-क्लिक करें</span></p>",
+                                " <p> सेल पर डबल-क्लिक करें</span></p>", " <p> सेल का चयन करें और एंटर कुंजी ( key )  दबाएं</span></p>"],
+                    solution_en: "<p>19.(c) <span style=\"font-family: Palanquin Dark;\">Click the cell that contains the data that you want to edit, and then click anywhere in the formula bar. Click the cell that contains the data that you want to edit, and then press F2.</span></p>\r\n<p><span style=\"font-family: Palanquin Dark;\">A cell can be edited through Press the F2 key or Click the formula bar or Double click the cell.</span></p>",
+                    solution_hi: " <p>19.(c) </span><span style=\"font-family:Palanquin Dark\">उस </span><span style=\"font-family:Palanquin Dark\">सेल</span><span style=\"font-family:Palanquin Dark\"> पर क्लिक करें जिसमें वह डेटा है जिसे आप </span><span style=\"font-family:Palanquin Dark\">एडिट </span><span style=\"font-family:Palanquin Dark\">करना चाहते हैं, और फिर सूत्र पट्टी (फार्मूला बार) में कहीं भी क्लिक करें। उस सेल पर क्लिक करें जिसमें वह डेटा है जिसे आप </span><span style=\"font-family:Palanquin Dark\">एडिट </span><span style=\"font-family:Palanquin Dark\"> करना चाहते हैं, और फिर F2 दबाएँ।</span></p> <p><span style=\"font-family:Palanquin Dark\">एक सेल को F2 कुंजी दबाकर या फॉर्मूला बार पर क्लिक करके या सेल पर डबल क्लिक करके </span><span style=\"font-family:Palanquin Dark\">एडिट </span><span style=\"font-family:Palanquin Dark\"> किया जा सकता है।</span></p>",
+                    correct: "c",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "20",
+                    section: "misc",
+                    question_en: " <p><span style=\"font-family:Palanquin Dark\">20.</span><span style=\"font-family:Palanquin Dark\"> What is the keyboard shortcut to open a new document in MS-Word?</span></p>",
+                    question_hi: " <p><span style=\"font-family:Palanquin Dark\">20.</span><span style=\"font-family:Palanquin Dark\"> MS-Word में नया दस्तावेज़ खोलने के लिए कीबोर्ड शॉर्टकट क्या है?</span></p>",
+                    options_en: [" <p> Ctrl + N</span></p>", " <p> Ctrl + W</span></p>", 
+                                " <p> Alt + N</span></p>", " <p> Ctrl + O</span></p>"],
+                    options_hi: [" <p> Ctrl + N</span></p>", " <p> Ctrl + W</span></p>",
+                                " <p> Alt + N</span></p>", " <p> Ctrl + O</span></p>"],
+                    solution_en: " <p>20.(a)</span><span style=\"font-family:Palanquin Dark\"> </span><span style=\"font-family:Palanquin Dark\">Ctrl+N </span><span style=\"font-family:Palanquin Dark\">(Create a new document), </span></p> <p><span style=\"font-family:Palanquin Dark\">Ctrl + W</span><span style=\"font-family:Palanquin Dark\"> (Close the document),</span></p> <p><span style=\"font-family:Palanquin Dark\"> </span><span style=\"font-family:Palanquin Dark\">Alt + N</span><span style=\"font-family:Palanquin Dark\"> (Open the Insert tab to insert tables, pictures and shapes, headers, or text boxes) and </span><span style=\"font-family:Palanquin Dark\">Ctrl + O</span><span style=\"font-family:Palanquin Dark\">(Open a document).</span></p>",
+                    solution_hi: " <p>20.(a)</span><span style=\"font-family:Palanquin Dark\"> </span><span style=\"font-family:Palanquin Dark\">Ctrl+N</span><span style=\"font-family:Palanquin Dark\"> (नया डॉक्यूमेंट बनाएं), </span></p> <p><span style=\"font-family:Palanquin Dark\">Ctrl + W</span><span style=\"font-family:Palanquin Dark\"> (डॉक्यूमेंट  बंद करें),</span></p> <p><span style=\"font-family:Palanquin Dark\"> </span><span style=\"font-family:Palanquin Dark\">Alt + N (</span><span style=\"font-family:Palanquin Dark\">table </span><span style=\"font-family:Palanquin Dark\">, pictures और shape , heading , या टेक्स्ट बॉक्स सम्मिलित करने के लिए) और </span></p> <p><span style=\"font-family:Palanquin Dark\">Ctrl + O </span><span style=\"font-family:Palanquin Dark\">(डॉक्यूमेंट  खोलें)।</span></p>",
+                    correct: "a",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+            
+            // Generate question boxes
+            const boxesContainer = document.getElementById('question-boxes');
+            questions.forEach((q, index) => {
+                const box = document.createElement('div');
+                box.className = 'q-box';
+                box.textContent = index + 1;
+                box.onclick = () => showQuestion(index);
+                box.id = `box-${index}`;
+                boxesContainer.appendChild(box);
+            });
+            
+            // Show first question
+            showQuestion(0);
+            updateProgress();
+        }
+        
+        // Show a specific question
+        
+        function formatContent(text) {
+            if (!text) return '';
+            return text.replace(/<img/g, '<img style="max-width:100%;height:auto;"');
+        }
+        
+        function showQuestion(index) {
+            if (index < 0 || index >= questions.length) return;
+            
+            currentQuestion = index;
+            const question = questions[index];
+            
+            // Update question counter
+            document.getElementById('question-counter').textContent = `Question ${index + 1} of ${questions.length}`;
+            
+            // Update question boxes
+            document.querySelectorAll('.q-box').forEach(box => box.classList.remove('current'));
+            document.getElementById(`box-${index}`).classList.add('current');
+            
+            // Generate question HTML
+            let html = `
+                <div class="question-card">
+                    <div class="question-text">
+                        <div class="en">${formatContent(question.question_en)}</div>
+                        <div class="hi" style="display:none">${formatContent(question.question_hi)} </div>
+                    </div>
+                    <div class="options" id="options-container">`;
+            
+            // Add options
+            ['a', 'b', 'c', 'd'].forEach((opt, i) => {
+                let optionClass = '';
+                let isCorrectAnswer = opt === question.correct;
+                let isUserAnswer = answers[question.id] === opt;
+                
+                // When reviewing, add appropriate classes
+                if (submitted) {
+                    if (isCorrectAnswer) {
+                        optionClass += ' correct-answer';
+                    } else if (isUserAnswer && !isCorrectAnswer) {
+                        optionClass += ' incorrect';
+                    }
+                }
+                
+                html += `
+                    <div class="option-item">
+                        <input class="option-input" type="radio" name="q${index}" 
+                            id="opt-${index}-${opt}" value="${opt}" 
+                            ${isUserAnswer ? 'checked' : ''}
+                            onclick="selectAnswer('${question.id}', '${opt}')">
+                       <label class="option-label${optionClass}" for="opt-${index}-${opt}">
+                            <div class="en">${question.options_en[i]}</div>
+                            <div class="hi" style="display:none">${question.options_hi[i]}</div>
+                        </label>
+                    </div>`;
+            });
+            
+            // Add solution if submitted
+            if (submitted) {
+                const isCorrect = answers[question.id] === question.correct;
+                const resultText = answers[question.id] ? (isCorrect ? 'Correct!' : 'Incorrect!') : 'Not attempted';
+                
+                html += `
+                    <div class="solution-container">
+                        <div class="solution-title">${resultText}</div>
+                        <div class="solution-text">
+                            <div class="en">${question.solution_en}</div>
+                            <div class="hi" style="display:none">${question.solution_hi}</div>
+                        </div>
+                    </div>`;
+            }
+            
+            html += `</div></div>`;
+            
+            document.getElementById('questions-container').innerHTML = html;
+            
+            // Apply language settings
+            applyLanguage();
+            
+            // If in mobile view, close the menu
+            if (window.innerWidth < 992) {
+                toggleNav(false);
+            }
+            
+            // Add review mode class if submitted
+            if (submitted) {
+                document.getElementById('options-container').classList.add('review-mode');
+            }
+        }
+        
+        // Apply current language
+        function applyLanguage() {
+            document.querySelectorAll(`.${currentLang}`).forEach(el => el.style.display = 'block');
+            document.querySelectorAll(`.${currentLang === 'en' ? 'hi' : 'en'}`).forEach(el => el.style.display = 'none');
+            
+            // Update language button text
+            document.getElementById('lang-text').textContent = currentLang === 'en' ? 'Hi' : 'En';
+        }
+        
+        // Select an answer
+        function selectAnswer(qId, option) {
+            if (submitted) return;
+            
+            answers[qId] = option;
+            updateProgress();
+            
+            // Mark question as attempted in the navigation
+            const index = questions.findIndex(q => q.id === qId);
+            if (index >= 0) {
+                const box = document.getElementById(`box-${index}`);
+                box.classList.add('attempted');
+                box.classList.remove('unattempted');
+            }
+        }
+        
+        // Navigate to previous/next question
+        function prevQuestion() { 
+            if (currentQuestion > 0) showQuestion(currentQuestion - 1); 
+        }
+        
+        function nextQuestion() { 
+            if (currentQuestion < questions.length - 1) showQuestion(currentQuestion + 1); 
+        }
+        
+        // Switch section
+        function switchSection(sectionId) {
+            if (sectionId === 'all') {
+                showQuestion(0);
+                return;
+            }
+            
+            const section = sections[sectionId];
+            if (section) showQuestion(section.start);
+        }
+        
+        // Toggle language
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'hi' : 'en';
+            applyLanguage();
+        }
+        
+        // Toggle navigation sidebar
+        function toggleNav(show) {
+            const nav = document.getElementById('question-nav');
+            const overlay = document.getElementById('nav-overlay');
+            
+            if (show === undefined) {
+                show = !nav.classList.contains('show');
+            }
+            
+            if (show) {
+                nav.classList.add('show');
+                overlay.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            } else {
+                nav.classList.remove('show');
+                overlay.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+        }
+        
+        // Update progress
+        function updateProgress() {
+            const attempted = Object.keys(answers).length;
+            document.getElementById('attempted-count').textContent = attempted;
+        }
+        
+        // Start timer
+        function startTimer() {
+            const timerDisplay = document.getElementById('timer-display');
+            let timeLeft = totalTime;
+            
+            const timerInterval = setInterval(() => {
+                if (timeLeft <= 0 || submitted) {
+                    clearInterval(timerInterval);
+                    if (!submitted) submitTest();
+                    return;
+                }
+                
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                timeLeft--;
+            }, 1000);
+        }
+        
+        // Confirm before submitting
+        function confirmSubmit() {
+            if (submitted) return;
+            
+            const attempted = Object.keys(answers).length;
+            const remaining = questions.length - attempted;
+            
+            // Create a more modern confirmation dialog
+            const confirmHtml = `
+                <div style="text-align: center; padding: 20px;">
+                    <h4 style="margin-bottom: 16px; color: var(--dark);">Confirm Submission</h4>
+                    <p style="margin-bottom: 24px; color: var(--gray);">
+                        You have attempted ${attempted} of ${questions.length} questions.<br>
+                        ${remaining} questions are unattempted.
+                    </p>
+                    <div style="display: flex; justify-content: center; gap: 12px;">
+                        <button onclick="this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; border: 1px solid var(--light-gray); background: white; border-radius: 8px; cursor: pointer;">
+                            Cancel
+                        </button>
+                        <button onclick="submitTest(); this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer;">
+                            Submit Test
+                        </button>
+                    </div>
+                </div>`;
+            
+            // Create modal element
+            const modal = document.createElement('div');
+            modal.className = 'results-modal show';
+            modal.innerHTML = `
+                <div class="results-card" style="max-width: 400px;">
+                    <button class="cancel-btn" style="position: absolute; top: 12px; right: 12px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--gray);" onclick="this.closest('.results-modal').remove()">
+                        ×
+                    </button>
+                    ${confirmHtml}
+                </div>`;
+            
+            document.body.appendChild(modal);
+        }
+        
+        // Submit test
+        function submitTest() {
+            if (submitted) return;
+            
+            submitted = true;
+            
+            let score = 0;
+            let correctCount = 0;
+            let incorrectCount = 0;
+            let unattemptedCount = 0;
+            
+            questions.forEach((q, index) => {
+                const userAns = answers[q.id];
+                const box = document.getElementById(`box-${index}`);
+                
+                box.classList.remove('attempted');
+                
+                if (!userAns) {
+                    unattemptedCount++;
+                    box.classList.add('unattempted');
+                } else if (userAns === q.correct) {
+                    correctCount++;
+                    score += q.pos_marks;
+                    box.classList.add('correct');
+                } else {
+                    incorrectCount++;
+                    score -= q.neg_marks;
+                    box.classList.add('incorrect');
+                }
+            });
+            
+            // Update result values
+            document.getElementById('score-value').textContent = score.toFixed(2);
+            document.getElementById('correct-value').textContent = correctCount;
+            document.getElementById('incorrect-value').textContent = incorrectCount;
+            document.getElementById('unattempted-value').textContent = unattemptedCount;
+            
+            // Show the results modal
+            document.getElementById('results-modal').classList.add('show');
+            
+            // Disable submit button
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-check"></i>';
+            submitBtn.style.backgroundColor = 'var(--success)';
+            
+            // Refresh current question view to show solution
+            showQuestion(currentQuestion);
+        }
+        
+        // Review test
+        function reviewTest() {
+            document.getElementById('results-modal').classList.remove('show');
+            showQuestion(0);
+        }
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target === document.getElementById('results-modal')) {
+                document.getElementById('results-modal').classList.remove('show');
+            }
+        });
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') prevQuestion();
+            if (e.key === 'ArrowRight') nextQuestion();
+        });
+    </script>
+</body>
+</html>
