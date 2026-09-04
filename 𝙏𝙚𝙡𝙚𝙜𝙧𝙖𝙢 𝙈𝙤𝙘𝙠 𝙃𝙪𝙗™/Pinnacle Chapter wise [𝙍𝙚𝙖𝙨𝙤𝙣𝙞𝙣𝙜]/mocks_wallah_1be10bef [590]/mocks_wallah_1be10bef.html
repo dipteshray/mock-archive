@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mocks Wallah</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --primary-light: #a29bfe;
+            --primary-dark: #5649c0;
+            --secondary: #00cec9;
+            --accent: #fd79a8;
+            --success: #00b894;
+            --warning: #fdcb6e;
+            --danger: #d63031;
+            --light: #f8f9fa;
+            --dark: #2d3436;
+            --gray: #636e72;
+            --light-gray: #dfe6e9;
+            --card-bg: #ffffff;
+            --body-bg: #f5f6fa;
+            --header-bg: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            --footer-bg: #ffffff;
+            --box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            --box-shadow-sm: 0 2px 10px rgba(0,0,0,0.05);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background-color: var(--body-bg);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            color: var(--dark);
+            line-height: 1.6;
+            padding-bottom: 80px; /* Space for fixed navigation */
+            overflow-x: hidden;
+        }
+        
+        /* Header Styles */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: var(--header-bg);
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            z-index: 1000;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .header-brand {
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .header-brand i {
+            margin-right: 8px;
+            font-size: 1.2rem;
+        }
+        
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .control-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .control-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .control-btn.active {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .timer-display {
+            background: rgba(0,0,0,0.2);
+            border-radius: 18px;
+            padding: 4px 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+        
+        .timer-display i {
+            margin-right: 6px;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-top: 60px;
+            padding: 16px;
+            min-height: calc(100vh - 140px);
+        }
+        
+        .question-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--box-shadow-sm);
+            border: none;
+            transition: var(--transition);
+        }
+        
+        .question-counter {
+            font-size: 0.9rem;
+            color: var(--gray);
+            text-align: center;
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+        
+        .question-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+        
+        .option-item {
+            margin-bottom: 12px;
+            position: relative;
+        }
+        
+        .option-input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+            .question-text {
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        hyphens: auto;
+        max-width: 100%;
+    }
+
+    .question-text img,
+    .option-label img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 8px 0;
+        border-radius: 8px;
+    }
+
+    .option-label {
+        overflow: hidden;
+    }
+
+    .question-card {
+        overflow: hidden;
+    }
+        
+        .option-label {
+            display: block;
+            padding: 14px 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--light-gray);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .option-label:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .option-input:checked + .option-label {
+            border-color: var(--primary);
+            background: rgba(108, 92, 231, 0.05);
+            box-shadow: 0 0 0 1px var(--primary);
+        }
+        
+        .option-input:checked + .option-label::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--primary);
+        }
+        
+        /* When reviewing answers */
+        .review-mode .option-input:checked + .option-label.correct {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.correct::after {
+            background: var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.incorrect {
+            border-color: var(--danger);
+            background: rgba(214, 48, 49, 0.05);
+            box-shadow: 0 0 0 1px var(--danger);
+        }
+        
+        .MathJax, .mjx-chtml {
+            overflow-x: auto;
+            max-width: 100%;
+            display: inline-block;
+        }
+
+        
+        .review-mode .option-input:checked + .option-label.incorrect::after {
+            background: var(--danger);
+        }
+        
+        .review-mode .option-label.correct-answer {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-label.correct-answer::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--success);
+        }
+        
+        .solution-container {
+            margin-top: 20px;
+            padding: 16px;
+            background: rgba(108, 92, 231, 0.05);
+            border-radius: 12px;
+            border-left: 3px solid var(--primary);
+        }
+        
+        .solution-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+        
+        /* Question Navigation */
+        .question-nav {
+            position: fixed;
+            top: 60px;
+            right: 0;
+            bottom: 80px;
+            width: 100%;
+            max-width: 320px;
+            background: var(--card-bg);
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            transform: translateX(100%);
+            transition: var(--transition);
+            z-index: 900;
+            overflow-y: auto;
+            padding: 16px;
+        }
+        
+        .question-nav.show {
+            transform: translateX(0);
+        }
+        
+        .nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .nav-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+        
+        .question-stats {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .stat-badge {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        
+        .section-selector {
+            width: 100%;
+            margin-bottom: 16px;
+            border-radius: 12px;
+            padding: 10px 16px;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            font-size: 0.9rem;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 16px;
+        }
+        
+        .question-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+            gap: 8px;
+        }
+        
+        .q-box {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .q-box:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .q-box.attempted {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .q-box.correct {
+            background-color: var(--success);
+            color: white;
+            border-color: var(--success);
+        }
+        
+        .q-box.incorrect {
+            background-color: var(--danger);
+            color: white;
+            border-color: var(--danger);
+        }
+        
+        .q-box.current {
+            border: 2px solid var(--accent) !important;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .q-box.unattempted {
+            background-color: var(--gray);
+            color: white;
+            border-color: var(--gray);
+        }
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: var(--footer-bg);
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            z-index: 800;
+        }
+        
+        .nav-btn {
+            height: 48px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 20px;
+            transition: var(--transition);
+            gap: 8px;
+        }
+        
+        .nav-btn i {
+            font-size: 1rem;
+        }
+        
+        .nav-btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .nav-btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+        
+        .nav-btn-outline:hover {
+            background: rgba(108, 92, 231, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        /* Overlay when nav is open */
+        .nav-overlay {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            bottom: 80px;
+            background: rgba(0,0,0,0.5);
+            z-index: 800;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+        }
+        
+        .nav-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        /* Results Modal */
+        .results-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1100;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+            padding: 16px;
+        }
+        
+        .results-modal.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .results-card {
+            background: white;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+            transform: translateY(20px);
+            transition: var(--transition);
+        }
+        
+        .results-modal.show .results-card {
+            transform: translateY(0);
+        }
+        
+        .results-header {
+            background: var(--header-bg);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .results-title {
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .results-body {
+            padding: 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            color: white;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+        
+        .results-footer {
+            padding: 16px 20px;
+            display: flex;
+            justify-content: center;
+            border-top: 1px solid var(--light-gray);
+        }
+        
+        /* Responsive Adjustments */
+        @media (min-width: 992px) {
+            .question-nav {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-right: 320px;
+            }
+            
+            .nav-overlay {
+                display: none;
+            }
+            
+            .bottom-nav {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .question-grid {
+                grid-template-columns: repeat(auto-fill, minmax(36px, 1fr));
+                gap: 6px;
+            }
+            
+            .q-box {
+                width: 36px;
+                height: 36px;
+                font-size: 0.9rem;
+            }
+            
+            .option-label {
+                padding: 12px 14px;
+            }
+            
+            .question-text {
+                font-size: 1rem;
+            }
+            
+            .header-brand {
+                font-size: 1rem;
+            }
+            
+            .control-btn {
+                width: 32px;
+                height: 32px;
+            }
+            
+            .timer-display {
+                font-size: 0.8rem;
+                padding: 4px 10px;
+            }
+            
+            .nav-btn {
+                height: 44px;
+                padding: 0 16px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="#" class="header-brand">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Mocks Wallah</span>
+            </a>
+            
+            <div class="header-controls">
+                <!-- Timer -->
+                <div class="timer-display">
+                    <i class="far fa-clock"></i>
+                    <span id="timer-display">12:00</span>
+                </div>
+                
+                <!-- Language toggle -->
+                <button class="control-btn" id="lang-btn" onclick="toggleLanguage()">
+                    <span id="lang-text">En</span>
+                </button>
+                
+                <!-- Submit button -->
+                <button class="control-btn" id="submit-btn" onclick="confirmSubmit()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+                
+                <!-- Questions toggle for mobile -->
+                <button class="control-btn nav-toggle-btn" id="nav-toggle" onclick="toggleNav()">
+                    <i class="fas fa-th"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main content -->
+    <main class="main-content" id="main-content">
+        <div class="question-counter" id="question-counter">Question 1 of 20</div>
+        
+        <!-- Questions will be displayed here -->
+        <div id="questions-container"></div>
+    </main>
+    
+    <!-- Overlay for mobile nav -->
+    <div class="nav-overlay" id="nav-overlay" onclick="toggleNav(false)"></div>
+    
+    <!-- Question navigation sidebar -->
+    <aside class="question-nav" id="question-nav">
+        <div class="nav-header">
+            <h3 class="nav-title">Questions</h3>
+            <div class="question-stats">
+                <span class="stat-badge bg-primary" id="attempted-count">0</span>
+                <span class="stat-badge bg-gray" id="total-count">20</span>
+                <button class="control-btn d-lg-none" onclick="toggleNav(false)">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Section selector -->
+        <select class="section-selector" id="section-selector" onchange="switchSection(this.value)">
+            <option value="all">All Sections</option>
+        </select>
+        
+        <!-- Question grid -->
+        <div class="question-grid" id="question-boxes"></div>
+    </aside>
+    
+    <!-- Bottom navigation for mobile -->
+    <nav class="bottom-nav d-lg-none">
+        <button class="nav-btn nav-btn-outline" onclick="prevQuestion()">
+            <i class="fas fa-chevron-left"></i>
+            <span>Previous</span>
+        </button>
+        <button class="nav-btn nav-btn-outline" onclick="nextQuestion()">
+            <span>Next</span>
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </nav>
+    
+    <!-- Results modal -->
+    <div class="results-modal" id="results-modal">
+        <div class="results-card">
+            <div class="results-header">
+                <h3 class="results-title">Test Results</h3>
+            </div>
+            <div class="results-body">
+                <div class="stats-grid">
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark))">
+                        <div class="stat-value" id="score-value">0</div>
+                        <div class="stat-label">Score</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--success), #1b9aaa)">
+                        <div class="stat-value" id="correct-value">0</div>
+                        <div class="stat-label">Correct</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--danger), var(--accent))">
+                        <div class="stat-value" id="incorrect-value">0</div>
+                        <div class="stat-label">Incorrect</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--gray), var(--dark))">
+                        <div class="stat-value" id="unattempted-value">0</div>
+                        <div class="stat-label">Unattempted</div>
+                    </div>
+                </div>
+            </div>
+            <div class="results-footer">
+                <button class="nav-btn nav-btn-primary" onclick="reviewTest()">
+                    <i class="fas fa-search me-1"></i>
+                    <span>Review Test</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Questions data
+        const questions = [];
+        const sections = {};
+        let currentLang = "en";
+        let currentQuestion = 0;
+        let answers = {};
+        let submitted = false;
+        let totalTime = 12 * 60;
+        
+        // Initialize the test
+        window.onload = function() {
+            initializeTest();
+            startTimer();
+            
+            // If on desktop, show the question navigation by default
+            if (window.innerWidth >= 992) {
+                document.getElementById('question-nav').classList.add('show');
+                document.getElementById('main-content').classList.add('with-nav');
+            }
+        };
+        
+        // Initialize test data
+        function initializeTest() {
+            // Add sections and questions
+            
+            sections["6"] = {
+                name: "Reasoning",
+                start: 0,
+                end: 18
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="6">Reasoning</option>`;
+            
+            sections["misc"] = {
+                name: "Miscellaneous",
+                start: 19,
+                end: 19
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="misc">Miscellaneous</option>`;
+            
+            
+                questions.push({
+                    id: "1",
+                    section: "6",
+                    question_en: "<p>1. <span style=\"font-family: Cambria Math;\">Select the correct mirror image of<br></span><strong id=\"docs-internal-guid-2ea2c346-7fff-acf3-cafe-4b7903710f88\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdEtPCjTlQSb6pLqarMKltupHp4tqoFSa1lY76n04t4GbHCKUn0ruarNN1ZahVTy1PscgMFrl_8dbeceSsFUeNMbMYcOx-ptwc39bHFymez8nca4CT4FJHbTs6M5kObQ2BtaEiUIA?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"150\" height=\"96\"></strong></p>",
+                    question_hi: "<p>1.<span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">सही</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">दर्पण</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">प्रतिबिंब</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">का</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">चयन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">करें</span><span style=\"font-family: Mangal;\">।</span><span style=\"font-family: Cambria Math;\">&nbsp;<br></span><strong id=\"docs-internal-guid-06681ddf-7fff-4a86-1849-0285e65bc3dd\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdEtPCjTlQSb6pLqarMKltupHp4tqoFSa1lY76n04t4GbHCKUn0ruarNN1ZahVTy1PscgMFrl_8dbeceSsFUeNMbMYcOx-ptwc39bHFymez8nca4CT4FJHbTs6M5kObQ2BtaEiUIA?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"120\" height=\"77\"></strong></p>",
+                    options_en: ["<p><strong id=\"docs-internal-guid-b2801870-7fff-b710-fe73-b04344c623ef\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfwlAYLac8II_vN6XS9zX1osoXFYkrcx8O_rzjimbIVfwT479lUDzVFZ1akGph0p1IBB7riZ65Ts5M9nP1RMZQMY6iuwaTjl7yuwsNessPyv-9QyA6OiW79sacppydu2b-8XFVH9g?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"167\" height=\"30\"></strong></p>", "<p><strong id=\"docs-internal-guid-5993735b-7fff-c688-8978-477fcbfff042\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXd0BhQAn5eMUImkDlAhgLSRqewDjJSCFybEzPVScoBG1g2SylVjcrafm3TiaXxfyiEhDjuoeikt_OE2wfG3-LCYpMC0w7pSfwrOI7ikVhUR0cEKjHQt4wE1XEmcCzK6MKjP_7IHbQ?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"165\" height=\"30\"></strong></p>", 
+                                "<p><strong id=\"docs-internal-guid-7bd7175b-7fff-ea2d-88ed-ab31b334b374\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXd4ukCqtSCxEEc-ur2XePMtHh065Da2g7FD6Ld-u1vJXboTS9pq7pkI96_0wRQtkblQgbAaM4aYIYG3UO0ZQZWKFUplE5Oln8YaisHyr-6enSogc4kRXUbE9PeNlpmU3D2yXBWAHQ?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"167\" height=\"31\"></strong></p>", "<p><strong id=\"docs-internal-guid-0ba8bcd9-7fff-0b3a-f9ba-e9ec78d31a6a\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXetz3Ap0VYfQbcqPuBo0ad3ZTb7dbO7eGvjrfAyfMQdPWXqXzr9HVj6LajW_mG9SqA-kH1EkDuqiQtpf2v6OjiqQV2Z8aQYIhkFPZLyfllBoX1LM6mDq02-fTzhJ2IvCmSIFwyVZg?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"170\" height=\"31\"></strong></p>"],
+                    options_hi: ["<p><strong id=\"docs-internal-guid-eb87e44f-7fff-1e53-35a8-1dcfdc250e90\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfwlAYLac8II_vN6XS9zX1osoXFYkrcx8O_rzjimbIVfwT479lUDzVFZ1akGph0p1IBB7riZ65Ts5M9nP1RMZQMY6iuwaTjl7yuwsNessPyv-9QyA6OiW79sacppydu2b-8XFVH9g?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"167\" height=\"30\"></strong></p>", "<p><strong id=\"docs-internal-guid-e6124b10-7fff-32d6-b6ec-cb8467d04ce1\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXd0BhQAn5eMUImkDlAhgLSRqewDjJSCFybEzPVScoBG1g2SylVjcrafm3TiaXxfyiEhDjuoeikt_OE2wfG3-LCYpMC0w7pSfwrOI7ikVhUR0cEKjHQt4wE1XEmcCzK6MKjP_7IHbQ?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"165\" height=\"30\"></strong></p>",
+                                "<p><strong id=\"docs-internal-guid-d50bc9e7-7fff-42ca-4470-f321cd102a5f\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXd4ukCqtSCxEEc-ur2XePMtHh065Da2g7FD6Ld-u1vJXboTS9pq7pkI96_0wRQtkblQgbAaM4aYIYG3UO0ZQZWKFUplE5Oln8YaisHyr-6enSogc4kRXUbE9PeNlpmU3D2yXBWAHQ?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"167\" height=\"31\"></strong></p>", "<p><strong id=\"docs-internal-guid-c52b35b0-7fff-57f6-6985-ee3aefa203b0\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXetz3Ap0VYfQbcqPuBo0ad3ZTb7dbO7eGvjrfAyfMQdPWXqXzr9HVj6LajW_mG9SqA-kH1EkDuqiQtpf2v6OjiqQV2Z8aQYIhkFPZLyfllBoX1LM6mDq02-fTzhJ2IvCmSIFwyVZg?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"170\" height=\"31\"></strong></p>"],
+                    solution_en: "<p><span style=\"font-family: Cambria Math;\">1.(</span><span style=\"font-family: Cambria Math;\">b)<br></span><strong id=\"docs-internal-guid-b6281462-7fff-594b-0bc9-54a606e167c1\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdTGjPAV-QLOHDf0dcXjTgT-Jn5TKK8iLcYqA_AoRoOPCX-AnlUPg4nq4utQx21O7WAtu1QfNn2Ve2wDzhBHugPV4bx8lC0NxkWdoZ2nczAC5-IKDniekzUx_BY5HWxhT78xvXe?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"184\" height=\"69\"></strong></p>",
+                    solution_hi: "<p><span style=\"font-family: Cambria Math;\">1.(</span><span style=\"font-family: Cambria Math;\">b)<br></span><strong id=\"docs-internal-guid-b6281462-7fff-594b-0bc9-54a606e167c1\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdTGjPAV-QLOHDf0dcXjTgT-Jn5TKK8iLcYqA_AoRoOPCX-AnlUPg4nq4utQx21O7WAtu1QfNn2Ve2wDzhBHugPV4bx8lC0NxkWdoZ2nczAC5-IKDniekzUx_BY5HWxhT78xvXe?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"184\" height=\"69\"></strong></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "2",
+                    section: "6",
+                    question_en: "<p>2.<span style=\"font-family: Cambria Math;\"> Select the correct mirror image of<br></span><strong id=\"docs-internal-guid-32faa2b0-7fff-29c8-c666-d5de5a2bec22\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdFDhANjEvRhI6cB8ImlEFQOT3RWCJlV957QD_J1Stg9DnaY7e2b7IOoUHva8DCy9Wt9krcX3VuRskR4wa5cPQAVqPR8FxP7s5QHnggMb-Duw35bGadWPpL-Vi3bZxKJEY_GMP4Vw?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"133\" height=\"77\"></strong></p>",
+                    question_hi: "<p>2. <span style=\"font-family: Mangal;\">सही</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">दर्पण</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">प्रतिबिंब</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">का</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">चयन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">करें</span><span style=\"font-family: Mangal;\">।</span><br><strong id=\"docs-internal-guid-b8a45f3f-7fff-05fa-2964-a3c5d67bc9ac\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdFDhANjEvRhI6cB8ImlEFQOT3RWCJlV957QD_J1Stg9DnaY7e2b7IOoUHva8DCy9Wt9krcX3VuRskR4wa5cPQAVqPR8FxP7s5QHnggMb-Duw35bGadWPpL-Vi3bZxKJEY_GMP4Vw?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"133\" height=\"77\"></strong></p>",
+                    options_en: ["<p><strong id=\"docs-internal-guid-5334236b-7fff-e931-a158-432f2b591fad\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXf94MlgRGNPu6xGQCaDhspQsWv4Ai3Oji9VBWI8wAjHAm4oDwqcmoe3_uqeznQj-qGAJBB53tOVIqN6Ph7ZeaBgkEWJpI62M1cnxK6siDV2VN9WaNMiDnBCgCUJDCeqeJTW3EkWzw?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"168\" height=\"26\"></strong></p>", "<p><strong id=\"docs-internal-guid-949be5ea-7fff-f6ae-d9fd-80322c76551a\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXd0WQlZOZNL8u74Z8IJZDwr-uB9THTD47KAOn9pWA3EZasr_P7VSikn8FOANa19_ay4n624yDidhXIj-oUhRm4oFvbX6m8cBIvYPzZWH7p54qQ33azS2EKI5eT-b7ioUSrVRqsnug?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"171\" height=\"26\"></strong></p>", 
+                                "<p><strong id=\"docs-internal-guid-d1b9a23e-7fff-0c58-1e63-2463b21023f2\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXegK5RGH7-UJrkBqaksj36BVOpF0TZ0QnGfLEg7L_kdTCgxMtT8d9Et6LZeyEspMwSkt3SnLrkP8c4-er9vqHpy3yLDyKkIZ-pYoXT3-dwXdycS0MSmy0t8GRPtRKCkZulqy0vx?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"169\" height=\"24\"></strong></p>", "<p><strong id=\"docs-internal-guid-d9ef20b3-7fff-1b43-4fac-f22eb5da3f81\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXe-M92Knhp5twpnvDHotcobu5W7tPNz4L-gWS4p0PzsZWZbmYW2V0EgQ9XvctPYFDZ5eLsn5Yt02URENvualU9nopqIV8FNK0uSSUrlt4rqndtozulWjEk6wgE5lqn7eODzBYxW9Q?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"168\" height=\"25\"></strong></p>"],
+                    options_hi: ["<p><strong id=\"docs-internal-guid-0694e173-7fff-4de5-9b23-d7e83d84733e\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXf94MlgRGNPu6xGQCaDhspQsWv4Ai3Oji9VBWI8wAjHAm4oDwqcmoe3_uqeznQj-qGAJBB53tOVIqN6Ph7ZeaBgkEWJpI62M1cnxK6siDV2VN9WaNMiDnBCgCUJDCeqeJTW3EkWzw?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"168\" height=\"26\"></strong></p>", "<p><strong id=\"docs-internal-guid-7d6e15cb-7fff-5e48-ea10-bfb3a0d60071\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXd0WQlZOZNL8u74Z8IJZDwr-uB9THTD47KAOn9pWA3EZasr_P7VSikn8FOANa19_ay4n624yDidhXIj-oUhRm4oFvbX6m8cBIvYPzZWH7p54qQ33azS2EKI5eT-b7ioUSrVRqsnug?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"171\" height=\"26\"></strong></p>",
+                                "<p><strong id=\"docs-internal-guid-1e2b7d32-7fff-6de8-2d4a-f6258256e809\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXegK5RGH7-UJrkBqaksj36BVOpF0TZ0QnGfLEg7L_kdTCgxMtT8d9Et6LZeyEspMwSkt3SnLrkP8c4-er9vqHpy3yLDyKkIZ-pYoXT3-dwXdycS0MSmy0t8GRPtRKCkZulqy0vx?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"169\" height=\"24\"></strong></p>", "<p><strong id=\"docs-internal-guid-52898bca-7fff-814a-e20e-ec1657ca67ec\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXe-M92Knhp5twpnvDHotcobu5W7tPNz4L-gWS4p0PzsZWZbmYW2V0EgQ9XvctPYFDZ5eLsn5Yt02URENvualU9nopqIV8FNK0uSSUrlt4rqndtozulWjEk6wgE5lqn7eODzBYxW9Q?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"168\" height=\"25\"></strong></p>"],
+                    solution_en: "<p><span style=\"font-family: Cambria Math;\">2.(</span><span style=\"font-family: Cambria Math;\">c)<br></span><strong id=\"docs-internal-guid-31b44dfa-7fff-9d1e-0c94-fb87eaaf3623\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXegK5RGH7-UJrkBqaksj36BVOpF0TZ0QnGfLEg7L_kdTCgxMtT8d9Et6LZeyEspMwSkt3SnLrkP8c4-er9vqHpy3yLDyKkIZ-pYoXT3-dwXdycS0MSmy0t8GRPtRKCkZulqy0vx?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"199\" height=\"28\"></strong></p>",
+                    solution_hi: "<p><span style=\"font-family: Cambria Math;\">2.(</span><span style=\"font-family: Cambria Math;\">c)<br></span><strong id=\"docs-internal-guid-31b44dfa-7fff-9d1e-0c94-fb87eaaf3623\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXegK5RGH7-UJrkBqaksj36BVOpF0TZ0QnGfLEg7L_kdTCgxMtT8d9Et6LZeyEspMwSkt3SnLrkP8c4-er9vqHpy3yLDyKkIZ-pYoXT3-dwXdycS0MSmy0t8GRPtRKCkZulqy0vx?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"199\" height=\"28\"></strong></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "3",
+                    section: "6",
+                    question_en: "<p>3.<span style=\"font-family: Cambria Math;\"> Select the correct mirror image of.</span><br><strong id=\"docs-internal-guid-99e9c605-7fff-a396-9ba8-d9d3d629a875\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXf2AtJoegy9kldRjU0q7vExQ0xL-MCCTCZW-Ws3Ibxe6-Lec5avkRuGi1SOiZtpwRAgx54pSZhAHtwOhXB2tnYpBgYy3xe___8DF_otYy_RGlgul98rmvErke_28h935kL7hK68?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"129\" height=\"81\"></strong></p>",
+                    question_hi: "<p>3.<span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">सही</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">दर्पण</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">प्रतिबिंब</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">का</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">चयन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">करें</span><span style=\"font-family: Mangal;\">।</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">।</span><br><strong id=\"docs-internal-guid-9db9541d-7fff-23b2-565b-fb5dacd08f99\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXf2AtJoegy9kldRjU0q7vExQ0xL-MCCTCZW-Ws3Ibxe6-Lec5avkRuGi1SOiZtpwRAgx54pSZhAHtwOhXB2tnYpBgYy3xe___8DF_otYy_RGlgul98rmvErke_28h935kL7hK68?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"129\" height=\"81\"></strong></p>",
+                    options_en: ["<p><strong id=\"docs-internal-guid-907c188d-7fff-b93a-5eff-e36db1065891\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdZkGyPJYJSVVbBR6M3W42B2bezHLtG6E4gvIN2F0MA8JPBFv_HW9zRisqYrDwnHAhoGHzyf9d4tVNCsK_AU7p95Q4YbC_tTEkHghWcHqJ8ttwvKYVHK_g62fpQ7dbbNzEhHG7r?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"143\" height=\"20\"></strong></p>", "<p><strong id=\"docs-internal-guid-d277485b-7fff-cfe8-e8da-0720e4abca89\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeGmogHnbcH0CmxWEIWo5iIyaS1jsIiA6rqFt-Mm7XgZ4aDpkrvxLa5M2XoQAkSDCfVUPavvPkzBXcqsPtIg4779ztLrSh9uwwyYomuMPFa-IYxYTNMyi-Uexq2rdF265rygaJr2g?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"151\" height=\"20\"></strong></p>", 
+                                "<p><strong id=\"docs-internal-guid-7aebe3e8-7fff-f296-2c78-7bf26cd9d5c1\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdXx__RZ1xzNTi0zSPA4xRkSZ4EDVY4dEnZlukD3EqUg-9V6Do3DmOAWBTFXLa20hvmeWY8cPMV9R8BG5dvD5Li1zMVNEXKyWmE2ww2p22bnGdiYz8yMBgQJUGbS3E-WG6VxvO9Xg?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"151\" height=\"20\"></strong></p>", "<p><strong id=\"docs-internal-guid-917a8433-7fff-0d17-5890-f994f2ea7ca1\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXe3nfdG7Ka3KvT0fpMFPi9fXAC1D6fXLFHU8vtKeeWnHqf4caab2jlnD-421dF3afhyv2H3Wblqtjv89dKPJzepESCUTykTlVLVUZHok8yvR8MQpcSHz-0N-wjBMXe7JlOIxfEEFw?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"149\" height=\"20\"></strong></p>"],
+                    options_hi: ["<p><strong id=\"docs-internal-guid-abe9dc60-7fff-5a5b-3ff3-4f76bc8702b8\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdZkGyPJYJSVVbBR6M3W42B2bezHLtG6E4gvIN2F0MA8JPBFv_HW9zRisqYrDwnHAhoGHzyf9d4tVNCsK_AU7p95Q4YbC_tTEkHghWcHqJ8ttwvKYVHK_g62fpQ7dbbNzEhHG7r?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"143\" height=\"20\"></strong></p>", "<p><strong id=\"docs-internal-guid-cdae97f7-7fff-71a6-a4e3-7c1a10c786a4\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeGmogHnbcH0CmxWEIWo5iIyaS1jsIiA6rqFt-Mm7XgZ4aDpkrvxLa5M2XoQAkSDCfVUPavvPkzBXcqsPtIg4779ztLrSh9uwwyYomuMPFa-IYxYTNMyi-Uexq2rdF265rygaJr2g?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"151\" height=\"20\"></strong></p>",
+                                "<p><strong id=\"docs-internal-guid-9298c161-7fff-88d1-1616-d5f95ddd7de0\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdXx__RZ1xzNTi0zSPA4xRkSZ4EDVY4dEnZlukD3EqUg-9V6Do3DmOAWBTFXLa20hvmeWY8cPMV9R8BG5dvD5Li1zMVNEXKyWmE2ww2p22bnGdiYz8yMBgQJUGbS3E-WG6VxvO9Xg?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"151\" height=\"20\"></strong></p>", "<p><strong id=\"docs-internal-guid-637a50c2-7fff-9c88-46f7-48decf363e02\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXe3nfdG7Ka3KvT0fpMFPi9fXAC1D6fXLFHU8vtKeeWnHqf4caab2jlnD-421dF3afhyv2H3Wblqtjv89dKPJzepESCUTykTlVLVUZHok8yvR8MQpcSHz-0N-wjBMXe7JlOIxfEEFw?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"149\" height=\"20\"></strong></p>"],
+                    solution_en: "<p><span style=\"font-family: Cambria Math;\">3.(</span><span style=\"font-family: Cambria Math;\">c)<br></span><strong id=\"docs-internal-guid-337c7fc7-7fff-f38c-c84d-91c5214d4bfe\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdXx__RZ1xzNTi0zSPA4xRkSZ4EDVY4dEnZlukD3EqUg-9V6Do3DmOAWBTFXLa20hvmeWY8cPMV9R8BG5dvD5Li1zMVNEXKyWmE2ww2p22bnGdiYz8yMBgQJUGbS3E-WG6VxvO9Xg?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"189\" height=\"25\"></strong></p>",
+                    solution_hi: "<p><span style=\"font-family: Cambria Math;\">3.(</span><span style=\"font-family: Cambria Math;\">c)<br></span><strong id=\"docs-internal-guid-337c7fc7-7fff-f38c-c84d-91c5214d4bfe\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdXx__RZ1xzNTi0zSPA4xRkSZ4EDVY4dEnZlukD3EqUg-9V6Do3DmOAWBTFXLa20hvmeWY8cPMV9R8BG5dvD5Li1zMVNEXKyWmE2ww2p22bnGdiYz8yMBgQJUGbS3E-WG6VxvO9Xg?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"189\" height=\"25\"></strong></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "4",
+                    section: "6",
+                    question_en: "<p>4. <span style=\"font-family: Cambria Math;\">Select the correct mirror image of</span><br><strong id=\"docs-internal-guid-14429268-7fff-dd22-6b05-fea719edca05\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcM4CzrGLVcNReILNIPJRvko2-DEcFL_8wtlG9d3YauZUYwacIIfVFufGdM5ibDTw7jedHt7DyF_sU4HfL9qONOPqBo3V1QXFeYl45S1QO1-NwW7Qf8x4XLogvqPM9nF-5fVIyl?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"106\" height=\"164\"></strong></p>",
+                    question_hi: "<p>4. <span style=\"font-family: Mangal;\">सही</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">दर्पण</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">प्रतिबिंब</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">का</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">चयन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">करें</span><span style=\"font-family: Mangal;\">।</span><br><strong id=\"docs-internal-guid-beab80ae-7fff-54b3-acc5-6aecb7581543\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcM4CzrGLVcNReILNIPJRvko2-DEcFL_8wtlG9d3YauZUYwacIIfVFufGdM5ibDTw7jedHt7DyF_sU4HfL9qONOPqBo3V1QXFeYl45S1QO1-NwW7Qf8x4XLogvqPM9nF-5fVIyl?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"94\" height=\"146\"></strong></p>",
+                    options_en: ["<p><strong id=\"docs-internal-guid-254fa7af-7fff-2a1a-8440-4f149ae89240\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcqqgzCmUdcszea_RemZLn9iJ3RvvLAmew1Hc4WOmLLUsex_VY_mh-Glvi7U-5cl2RTgt-NFfH9gECSQWJMdAlxXRUGU-Hht73YeyfR49kZI-2S1rrb69PhIstgoekc5B9u1nvD?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"84\" height=\"84\"></strong></p>", "<p><strong id=\"docs-internal-guid-88103072-7fff-6d8b-ae1f-627c398c5d8f\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXc_4EH2AnpR5-LzNp80E_EHCOTlxN4Ho4uYpHxEhn0nI3wCBZir6sTple-HQU7LMeXt6KcHyUtKx2rCnla9bxueg3I3BFX6X1ht7WZxJazf_gpGMKAWhZ7MVBdS0fY0WymWz9LlcQ?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"86\" height=\"87\"></strong></p>", 
+                                "<p><strong id=\"docs-internal-guid-6ea30f13-7fff-b3ab-ad32-3b32fa18b931\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcmX9APFxLlZCGTKtwnMVmTiqxv8zw21QHvfLOElJbg-7eekn1oHim_ebWTOhUSBUywtRmjjo0jXhUtyaPildyu6wTAahMHSlnd2Qx_w0L7bn-WtbPPcejr-mCEH7U5IkAboJlyvQ?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"84\" height=\"84\"></strong></p>", "<p><strong id=\"docs-internal-guid-f3943727-7fff-e746-3150-f42d4a548cf3\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdasm5bKczHvEQZxSQdjdBP8Zijj4-mU_Js97Nu040bAwDiJr8GI3jUV6d84OaHRmDmd8xgSA9BFfTtPk5CSq3kKt7sAAyQwemqdlHVR2X19ulZRtC6mhx_6viqT7fAlGxzXb2mzg?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"86\" height=\"88\"></strong></p>"],
+                    options_hi: ["<p><strong id=\"docs-internal-guid-37b5c2da-7fff-b3d3-e40c-0a34e8b83445\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcqqgzCmUdcszea_RemZLn9iJ3RvvLAmew1Hc4WOmLLUsex_VY_mh-Glvi7U-5cl2RTgt-NFfH9gECSQWJMdAlxXRUGU-Hht73YeyfR49kZI-2S1rrb69PhIstgoekc5B9u1nvD?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"86\" height=\"86\"></strong></p>", "<p><strong id=\"docs-internal-guid-0c04e355-7fff-e16d-8448-05de8da7fd9c\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXc_4EH2AnpR5-LzNp80E_EHCOTlxN4Ho4uYpHxEhn0nI3wCBZir6sTple-HQU7LMeXt6KcHyUtKx2rCnla9bxueg3I3BFX6X1ht7WZxJazf_gpGMKAWhZ7MVBdS0fY0WymWz9LlcQ?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"85\" height=\"87\"></strong></p>",
+                                "<p><strong id=\"docs-internal-guid-5cf6a9a5-7fff-213c-db48-2dd97d641d49\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcmX9APFxLlZCGTKtwnMVmTiqxv8zw21QHvfLOElJbg-7eekn1oHim_ebWTOhUSBUywtRmjjo0jXhUtyaPildyu6wTAahMHSlnd2Qx_w0L7bn-WtbPPcejr-mCEH7U5IkAboJlyvQ?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"86\" height=\"86\"></strong></p>", "<p><strong id=\"docs-internal-guid-10d19a1c-7fff-4698-08e2-14e0b0663d2b\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdasm5bKczHvEQZxSQdjdBP8Zijj4-mU_Js97Nu040bAwDiJr8GI3jUV6d84OaHRmDmd8xgSA9BFfTtPk5CSq3kKt7sAAyQwemqdlHVR2X19ulZRtC6mhx_6viqT7fAlGxzXb2mzg?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"85\" height=\"87\"></strong></p>\n<p><span style=\"font-family: Cambria Math;\"> </span></p>"],
+                    solution_en: "<p><span style=\"font-family: Cambria Math;\">4.(</span><span style=\"font-family: Cambria Math;\">b)</span><br><strong id=\"docs-internal-guid-8e7b6784-7fff-89b3-08c1-274fdbabee71\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXc_4EH2AnpR5-LzNp80E_EHCOTlxN4Ho4uYpHxEhn0nI3wCBZir6sTple-HQU7LMeXt6KcHyUtKx2rCnla9bxueg3I3BFX6X1ht7WZxJazf_gpGMKAWhZ7MVBdS0fY0WymWz9LlcQ?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"91\" height=\"93\"></strong></p>",
+                    solution_hi: "<p><span style=\"font-family: Cambria Math;\">4.(</span><span style=\"font-family: Cambria Math;\">b)</span><br><strong id=\"docs-internal-guid-8e7b6784-7fff-89b3-08c1-274fdbabee71\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXc_4EH2AnpR5-LzNp80E_EHCOTlxN4Ho4uYpHxEhn0nI3wCBZir6sTple-HQU7LMeXt6KcHyUtKx2rCnla9bxueg3I3BFX6X1ht7WZxJazf_gpGMKAWhZ7MVBdS0fY0WymWz9LlcQ?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"91\" height=\"93\"></strong></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "5",
+                    section: "6",
+                    question_en: "<p>5.<span style=\"font-family: Cambria Math;\"> Select the correct mirror image of.</span><br><strong id=\"docs-internal-guid-0deb127b-7fff-4fbb-b1d6-6e47c8a41da7\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdsiXEe4l70MDyO0fIFMOc4W2v566Fb_BCBfSCRUGxN07ES7z3GrEKfyNV0QpFrKQciTlNZEPfppjOVBXxBhn2WMl78oamjRd5RgVR2q6EtenBORqVRtHWoTcsAI7ETISSJDWAb?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"155\" height=\"110\"></strong></p>",
+                    question_hi: "<p>5.<span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">सही</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">दर्पण</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">प्रतिबिंब</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">का</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">चयन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">करें</span><span style=\"font-family: Mangal;\">।</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">।</span><br><strong id=\"docs-internal-guid-71718725-7fff-1f4b-8667-6cba6512541e\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdsiXEe4l70MDyO0fIFMOc4W2v566Fb_BCBfSCRUGxN07ES7z3GrEKfyNV0QpFrKQciTlNZEPfppjOVBXxBhn2WMl78oamjRd5RgVR2q6EtenBORqVRtHWoTcsAI7ETISSJDWAb?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"172\" height=\"122\"></strong></p>",
+                    options_en: ["<p><strong id=\"docs-internal-guid-ff89fbc0-7fff-004a-2d8d-d007140f0f93\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdz9pMnt5rxFlLpEeHTOm9NgIKFB-MjC-lsryLZmyPwFnGY-5_L--ClAwrBKhTQ7frTKpdGaJwGo_ooy_-4z5ZQpaZkU29BAVgJ93r3URWJRZqsRX3viv8QfpMMXnxqyGgwItvlIw?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"168\" height=\"27\"></strong></p>", "<p><strong id=\"docs-internal-guid-7f4c5852-7fff-20bf-9624-1962dea24026\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfCd-n4qw2FwiN-RW-10AXI45eu0XBRDfcjQPmFG-ukGr-W8MYqPKX33gGEAKpybF1ikehyc3YprdCaTnxk_i0a152oqBineXP6RFltjNaEQ9LaywvMcLBibfcN9ND9CEfTbcoQ?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"165\" height=\"28\"></strong></p>", 
+                                "<p><strong id=\"docs-internal-guid-74f65079-7fff-312f-16a5-d67beb9cb4bf\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdUbXSPfK3Tkeb06amlqAqzSNUm_2PBIa5FnWnb223bXzHp3S2gvo6XwGIs6ob8qHi5sQkbNr6UahVe6br8bPZTImK7YjBJLVpbToYh7zje_bPO0wlOkt0H_VkmF6W2vUdwcN_b?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"163\" height=\"26\"></strong></p>", "<p><strong id=\"docs-internal-guid-d520c0fe-7fff-3f51-1a1f-d2f412ba93eb\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdoVyKMwa85IM95B8-hbtTKglA-98VAC1LZ5MUeIo8eWKanqMaA8vJmrEA4hwop49OnaNCFm3UAfHhQ5SLieK4rEDXdobugXGR7qTNhzdRW8FcvDIWCjW_ozRiPaH13mod_2A0xeA?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"160\" height=\"25\"></strong></p>"],
+                    options_hi: ["<p><strong id=\"docs-internal-guid-0ec56e86-7fff-51e3-102c-d7da22907cd1\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdz9pMnt5rxFlLpEeHTOm9NgIKFB-MjC-lsryLZmyPwFnGY-5_L--ClAwrBKhTQ7frTKpdGaJwGo_ooy_-4z5ZQpaZkU29BAVgJ93r3URWJRZqsRX3viv8QfpMMXnxqyGgwItvlIw?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"168\" height=\"27\"></strong></p>", "<p><strong id=\"docs-internal-guid-bc478e31-7fff-6d6b-93c5-02c9de2a14a5\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfCd-n4qw2FwiN-RW-10AXI45eu0XBRDfcjQPmFG-ukGr-W8MYqPKX33gGEAKpybF1ikehyc3YprdCaTnxk_i0a152oqBineXP6RFltjNaEQ9LaywvMcLBibfcN9ND9CEfTbcoQ?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"165\" height=\"28\"></strong></p>",
+                                "<p><strong id=\"docs-internal-guid-f4dc61b7-7fff-7cc1-9a0a-40b5006a695d\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdUbXSPfK3Tkeb06amlqAqzSNUm_2PBIa5FnWnb223bXzHp3S2gvo6XwGIs6ob8qHi5sQkbNr6UahVe6br8bPZTImK7YjBJLVpbToYh7zje_bPO0wlOkt0H_VkmF6W2vUdwcN_b?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"163\" height=\"26\"></strong></p>", "<p><strong id=\"docs-internal-guid-e9f65b77-7fff-8ce1-3c5a-5a752fffdeef\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdoVyKMwa85IM95B8-hbtTKglA-98VAC1LZ5MUeIo8eWKanqMaA8vJmrEA4hwop49OnaNCFm3UAfHhQ5SLieK4rEDXdobugXGR7qTNhzdRW8FcvDIWCjW_ozRiPaH13mod_2A0xeA?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"160\" height=\"25\"></strong></p>"],
+                    solution_en: "<p><span style=\"font-family: Cambria Math;\">5.(</span><span style=\"font-family: Cambria Math;\">c)</span><br><strong id=\"docs-internal-guid-72eb2cef-7fff-aa57-89bc-5defc3949397\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfZ98mEqurwMUT2qQBwUA2_UizVG1r0paa_o0kyKwADcnP-HGX1rbo9tCUEh3T4KEZiFxzGVaH7atDj22g59Uhdh95nD-E-oVPCY_xILGFxD5PrzjTJTuXtdnoyzYJthaHa6XPQRw?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"229\" height=\"91\"></strong></p>",
+                    solution_hi: "<p><span style=\"font-family: Cambria Math;\">5.(</span><span style=\"font-family: Cambria Math;\">c)</span><br><strong id=\"docs-internal-guid-72eb2cef-7fff-aa57-89bc-5defc3949397\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfZ98mEqurwMUT2qQBwUA2_UizVG1r0paa_o0kyKwADcnP-HGX1rbo9tCUEh3T4KEZiFxzGVaH7atDj22g59Uhdh95nD-E-oVPCY_xILGFxD5PrzjTJTuXtdnoyzYJthaHa6XPQRw?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"229\" height=\"91\"></strong></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "6",
+                    section: "6",
+                    question_en: "<p>6.<span style=\"font-family: Cambria Math;\"> Select the correct mirror image of</span><br><strong id=\"docs-internal-guid-24df336e-7fff-545a-5c83-7a223a8d712f\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdAtGf4_MqORDeYOVXvyIX3S7ZYd3DlWGFY2-aFlVdybY3N7UP7B7tf1NIjqtvNYKUXvq754ldlWMNvVN5ewQWTSUJKhZJb3QtLILecy-FPHcOvy8jM9tGOlp-7P0HWZmJb-dLTMg?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"86\" height=\"150\"></strong></p>",
+                    question_hi: "<p>6.<span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">सही</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">दर्पण</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">प्रतिबिंब</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">का</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">चयन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">करें</span><span style=\"font-family: Mangal;\">।</span><br><strong id=\"docs-internal-guid-70035cac-7fff-1f92-db82-4c32e85f8288\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdAtGf4_MqORDeYOVXvyIX3S7ZYd3DlWGFY2-aFlVdybY3N7UP7B7tf1NIjqtvNYKUXvq754ldlWMNvVN5ewQWTSUJKhZJb3QtLILecy-FPHcOvy8jM9tGOlp-7P0HWZmJb-dLTMg?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"111\" height=\"193\"></strong></p>",
+                    options_en: ["<p><strong id=\"docs-internal-guid-23ab318f-7fff-8963-a186-ecee4d4bd712\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfd_G8fuR2brkOTJziMNqRBerZocMqWg9b3uwIv9tlZdaunYYJw_sO8PhL_Do4rnAZajaDFbOaO_UQ1bxqo8TV2Z-AOa2nGKzig9_7ipEwPrNw12cpoj679ooi3bKqkojX6JTrsUg?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"90\" height=\"93\"></strong></p>", "<p><strong id=\"docs-internal-guid-5c84d045-7fff-c9b0-75ee-da760471e22c\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdXAH6gor0sT3rdTZkZwp9A4QZSZybA5wE8CCfJf2vYkb9nDXWuMYw_sFtI6_jMsnoylJRpvt5pCRavp4rn79Y_Fhkwy86GCMRdtkdG4_PWqvera0L4vEvVZddKk7d9GaNZEPC8wQ?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"89\" height=\"91\"></strong></p>", 
+                                "<p><strong id=\"docs-internal-guid-e42bd6f3-7fff-0a03-6879-5fecdc7b0207\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXd7YrouZ87CqBVbrOcdbHMdcfcog2kaWkuVro4hBcBTnKHXkZjn2ArxYR20RV8JRm2uO7v3K-fPCkWI1jTawtsylrSV61cVG9l2IENwEF__igTXMEJS46Eht6lVE5yGFXeoPbyepw?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"91\" height=\"91\"></strong></p>", "<p><strong id=\"docs-internal-guid-79b113af-7fff-4c36-b390-0b28a4a5292c\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfjthMrdZZcvt3X-Ycb-oQCTZ1SHL-I20v2y--LXp6-Hj2U1rypugZdpSeMmrJkzpmFQRNfqnDyMKFtarUo9r_cI0kLuDn1VmScUD7ylcoSdY47jbfH8Rk5ADDEqPMhfJWZE54IZQ?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"91\" height=\"93\"></strong></p>"],
+                    options_hi: ["<p><strong id=\"docs-internal-guid-5862b1f9-7fff-6ce7-fbcf-2702e15b2ebd\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfd_G8fuR2brkOTJziMNqRBerZocMqWg9b3uwIv9tlZdaunYYJw_sO8PhL_Do4rnAZajaDFbOaO_UQ1bxqo8TV2Z-AOa2nGKzig9_7ipEwPrNw12cpoj679ooi3bKqkojX6JTrsUg?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"91\" height=\"94\"></strong></p>", "<p><strong id=\"docs-internal-guid-acb13e40-7fff-9184-2812-41a7c204f8e1\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdXAH6gor0sT3rdTZkZwp9A4QZSZybA5wE8CCfJf2vYkb9nDXWuMYw_sFtI6_jMsnoylJRpvt5pCRavp4rn79Y_Fhkwy86GCMRdtkdG4_PWqvera0L4vEvVZddKk7d9GaNZEPC8wQ?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"91\" height=\"93\"></strong></p>",
+                                "<p><strong id=\"docs-internal-guid-17c3d075-7fff-b93a-9551-2848c39eb4fa\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXd7YrouZ87CqBVbrOcdbHMdcfcog2kaWkuVro4hBcBTnKHXkZjn2ArxYR20RV8JRm2uO7v3K-fPCkWI1jTawtsylrSV61cVG9l2IENwEF__igTXMEJS46Eht6lVE5yGFXeoPbyepw?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"91\" height=\"91\"></strong></p>", "<p><strong id=\"docs-internal-guid-9fe83df5-7fff-d97b-3ba3-a31868478766\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfjthMrdZZcvt3X-Ycb-oQCTZ1SHL-I20v2y--LXp6-Hj2U1rypugZdpSeMmrJkzpmFQRNfqnDyMKFtarUo9r_cI0kLuDn1VmScUD7ylcoSdY47jbfH8Rk5ADDEqPMhfJWZE54IZQ?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"91\" height=\"93\"></strong></p>"],
+                    solution_en: "<pre><span style=\"font-family: Cambria Math;\">6.(</span><span style=\"font-family: Cambria Math;\">b)</span><br><strong id=\"docs-internal-guid-dd4bdc6d-7fff-fcc2-e7e9-7aa737d9483f\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdXAH6gor0sT3rdTZkZwp9A4QZSZybA5wE8CCfJf2vYkb9nDXWuMYw_sFtI6_jMsnoylJRpvt5pCRavp4rn79Y_Fhkwy86GCMRdtkdG4_PWqvera0L4vEvVZddKk7d9GaNZEPC8wQ?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"97\" height=\"99\"></strong></pre>",
+                    solution_hi: "<pre><span style=\"font-family: Cambria Math;\">6.(</span><span style=\"font-family: Cambria Math;\">b)</span><br><strong id=\"docs-internal-guid-dd4bdc6d-7fff-fcc2-e7e9-7aa737d9483f\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdXAH6gor0sT3rdTZkZwp9A4QZSZybA5wE8CCfJf2vYkb9nDXWuMYw_sFtI6_jMsnoylJRpvt5pCRavp4rn79Y_Fhkwy86GCMRdtkdG4_PWqvera0L4vEvVZddKk7d9GaNZEPC8wQ?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"97\" height=\"99\"></strong></pre>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "7",
+                    section: "6",
+                    question_en: "<p>7.<span style=\"font-family: Cambria Math;\"> Select the correct mirror image of</span><br><strong id=\"docs-internal-guid-2422d4cd-7fff-a2bd-d440-77f905be6a54\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeZJm2qAqnh9dPt8PQPE5YJXEjbf530zDRKz1xWk7RXWZU9OaT2py1f4Xlbv72qhipMePxxHsKUDV91pIIfErkr-pvRLNvPohAatu2ADyK3W0L21pKdWBBSfuURtl3-HhecWCSw3g?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"141\" height=\"82\"></strong></p>",
+                    question_hi: "<p>7. <span style=\"font-family: Mangal;\">सही</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">दर्पण</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">प्रतिबिंब</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">का</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">चयन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">करें</span><span style=\"font-family: Mangal;\">।</span><br><strong id=\"docs-internal-guid-ebdb9cc1-7fff-a773-a631-e458e2ce556f\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeZJm2qAqnh9dPt8PQPE5YJXEjbf530zDRKz1xWk7RXWZU9OaT2py1f4Xlbv72qhipMePxxHsKUDV91pIIfErkr-pvRLNvPohAatu2ADyK3W0L21pKdWBBSfuURtl3-HhecWCSw3g?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"162\" height=\"94\"></strong></p>",
+                    options_en: ["<p><strong id=\"docs-internal-guid-6c74bba8-7fff-0576-b2d2-ce58c8c7af4b\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXebWOwt0i3rz73K7HQReV1haqGtbaZEDGdEcLT7TkEkO3gX5XKVORoDQcOuc3TI7LlFfAm0Oci8_2DDIxrWFJBiJlF3B62FZPAwBD1bPT2haB-jsYCZ5ef94lp1h6w5rKuJqU-P5Q?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"168\" height=\"20\"></strong></p>", "<p><strong id=\"docs-internal-guid-59bd7638-7fff-19a7-e223-cfb829272920\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXewQyZBsVHRLqyhDI2P5OSNYQ-ENoOOBmT_j5lE7VijAYcOkThnVQ6rlvTETSO9WgDzeiLA3ECx28BaK-gjYX7p6zEu668nhaD15xCXtgwbeu_x9tGXTwH5bJV1EhjLo2Aodf_56A?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"168\" height=\"20\"></strong></p>", 
+                                "<p><strong id=\"docs-internal-guid-27852e70-7fff-2e00-3266-21c9eeb17699\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcmDi0x1dl4Q_BuLBTckEm2t4PX063_vXLF7Of4v38V1V4mfKa4UNS3oZi8pSaWkSnMAEI89AFXdEwPegwnXku_Vh-Ki4vQA_WCAurU9QFkAEk-rRyGz4PxIkad5TFr6lSND0QcIQ?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"167\" height=\"20\"></strong></p>", "<p><strong id=\"docs-internal-guid-c3682d52-7fff-428c-b41a-ee1cddc267b3\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeu0w609CJHTV7DkJXe53wh0bALWYpR5UVYRQRYNiXDZrPzBtYbWrSXCkAJQfkM9EHZODlpy22H3uPl295zFlBlhLWRD9ZqKiALzedQu1501Y2Co33s_NGUauFLV2R7cbmKgltC?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"170\" height=\"20\"></strong></p>"],
+                    options_hi: ["<p><strong id=\"docs-internal-guid-c1a5b26a-7fff-e9cf-2f07-cea81413a030\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXebWOwt0i3rz73K7HQReV1haqGtbaZEDGdEcLT7TkEkO3gX5XKVORoDQcOuc3TI7LlFfAm0Oci8_2DDIxrWFJBiJlF3B62FZPAwBD1bPT2haB-jsYCZ5ef94lp1h6w5rKuJqU-P5Q?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"168\" height=\"20\"></strong></p>", "<p><strong id=\"docs-internal-guid-85c3a92e-7fff-00ba-1df1-37ff1bb566c1\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXewQyZBsVHRLqyhDI2P5OSNYQ-ENoOOBmT_j5lE7VijAYcOkThnVQ6rlvTETSO9WgDzeiLA3ECx28BaK-gjYX7p6zEu668nhaD15xCXtgwbeu_x9tGXTwH5bJV1EhjLo2Aodf_56A?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"168\" height=\"20\"></strong></p>",
+                                "<p><strong id=\"docs-internal-guid-f7548abf-7fff-1f1c-ad2e-1658e5469c66\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcmDi0x1dl4Q_BuLBTckEm2t4PX063_vXLF7Of4v38V1V4mfKa4UNS3oZi8pSaWkSnMAEI89AFXdEwPegwnXku_Vh-Ki4vQA_WCAurU9QFkAEk-rRyGz4PxIkad5TFr6lSND0QcIQ?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"167\" height=\"20\"></strong></p>", "<p><strong id=\"docs-internal-guid-6c5a6b1e-7fff-30db-6068-299b8c174dbf\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeu0w609CJHTV7DkJXe53wh0bALWYpR5UVYRQRYNiXDZrPzBtYbWrSXCkAJQfkM9EHZODlpy22H3uPl295zFlBlhLWRD9ZqKiALzedQu1501Y2Co33s_NGUauFLV2R7cbmKgltC?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"170\" height=\"20\"></strong></p>"],
+                    solution_en: "<p><span style=\"font-family: Cambria Math;\">7.(</span><span style=\"font-family: Cambria Math;\">c)</span><br><strong id=\"docs-internal-guid-2d9ab098-7fff-5878-e06a-3653f45e01a9\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXex-H7c1Af5xs5hXjXbQmEpPIMFG8EyYyloGKzEgain1mpCvUP1Qmrni04baG3kI9DOF2bQqfKVChwQcbMWJWH3tgXwX1jax0voPyUreuyZvf_r8gesA-SsBrLWpd7FztD56iS0?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"250\" height=\"76\"></strong></p>",
+                    solution_hi: "<p><span style=\"font-family: Cambria Math;\">7.(</span><span style=\"font-family: Cambria Math;\">c)</span><br><strong id=\"docs-internal-guid-2d9ab098-7fff-5878-e06a-3653f45e01a9\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXex-H7c1Af5xs5hXjXbQmEpPIMFG8EyYyloGKzEgain1mpCvUP1Qmrni04baG3kI9DOF2bQqfKVChwQcbMWJWH3tgXwX1jax0voPyUreuyZvf_r8gesA-SsBrLWpd7FztD56iS0?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"250\" height=\"76\"></strong></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "8",
+                    section: "6",
+                    question_en: "<p>8. <span style=\"font-family: Cambria Math;\">Select the correct mirror image of</span><br><span style=\"font-family: Cambria Math;\"><strong id=\"docs-internal-guid-cbe5daf4-7fff-49b6-4703-60290c121314\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcNwcH-5ZZKuAEqQG5nAwQz0KXj4z_mF3a9P8X7dc9w5VF3CYKc3cn-lOGR2_fiUx23NLQNLB4YxPOLqXf6wt4EbfhuGWe6nOLJPFJh4RHw9sMXmLdSFs4T0bJHqWUHICIJFeAKYyN-Z4sBk9jFAYFWjv35?key=QuK1uhYJLaNP_ixqgebG1CAS\" width=\"115\" height=\"123\"></strong>&nbsp;</span></p>",
+                    question_hi: "<p>8.<span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">सही</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">दर्पण</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">प्रतिबिंब</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">का</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">चयन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">करें</span><span style=\"font-family: Mangal;\">।</span><br><span style=\"font-family: Cambria Math;\"><strong id=\"docs-internal-guid-cbe5daf4-7fff-49b6-4703-60290c121314\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcNwcH-5ZZKuAEqQG5nAwQz0KXj4z_mF3a9P8X7dc9w5VF3CYKc3cn-lOGR2_fiUx23NLQNLB4YxPOLqXf6wt4EbfhuGWe6nOLJPFJh4RHw9sMXmLdSFs4T0bJHqWUHICIJFeAKYyN-Z4sBk9jFAYFWjv35?key=QuK1uhYJLaNP_ixqgebG1CAS\" width=\"100\" height=\"107\"></strong>&nbsp;</span></p>",
+                    options_en: ["<p><strong id=\"docs-internal-guid-d893b5ec-7fff-5679-5810-af263c150124\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdseK7ZlDVYOMjwrlwYAOH94X4HVGRMFZz3luflvCRVBO_8MGDq9MfyW550fotGrRClDsIQlEQm51uzZUB_ZhM81URiKZvCgHr-DIKjNOgAsqwPgcn3vCr1Wq025o05obyt-y-QgQ?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"80\" height=\"81\"></strong></p>", "<p><strong id=\"docs-internal-guid-8ba94418-7fff-8d3b-1275-1f5cd1b78019\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdbnxczRRchoOuozObjgc4ro-GdTrkwdSJZBZ2hiLJNqB8tFyaN_Hz0RTJK33uep6H9Pg0Eg9g4qR27hOzRzE5wwUloNzs5b5RpE3KkWK9z7xZY-J4Rx4l1EAWhxr0i9oWfGFi6TQ?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"80\" height=\"84\"></strong></p>", 
+                                "<p><strong id=\"docs-internal-guid-df072c32-7fff-b8ef-8b41-bf642e312046\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfhFWxCujy5UDS1wCBIkENkiwu4C3vd6uURVhwyOmUrut0JpX2dnumjmWGA3bjsXC6cxyzQOZ4d8v0VQR9tK7qxt-uG4S81JekcCbpI27hQvn-gkHE0uFVdgjbdA6INu4ydxhhaww?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"81\" height=\"81\"></strong></p>", "<p><strong id=\"docs-internal-guid-3794f673-7fff-f142-d257-22af52cd2f5c\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXf5mAZCBilLr-qSC90ckZG_lLEF4SUxfvSy17BfQrTwh3bX-yqQ4jLsAd_I0eAg0KGAe90lrCaszJVBOoWmR_Q9WJh0IGl98E7Jw1BkhY8r9-NapV-blMmsgBQQ5kV5dsieYwN3tg?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"80\" height=\"86\"></strong></p>"],
+                    options_hi: ["<p><strong id=\"docs-internal-guid-3662ceab-7fff-7a3d-0740-e2c66cbb9b2b\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdseK7ZlDVYOMjwrlwYAOH94X4HVGRMFZz3luflvCRVBO_8MGDq9MfyW550fotGrRClDsIQlEQm51uzZUB_ZhM81URiKZvCgHr-DIKjNOgAsqwPgcn3vCr1Wq025o05obyt-y-QgQ?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"80\" height=\"81\"></strong></p>", "<p><strong id=\"docs-internal-guid-daca7511-7fff-982c-72ab-bdd9c8990a43\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdbnxczRRchoOuozObjgc4ro-GdTrkwdSJZBZ2hiLJNqB8tFyaN_Hz0RTJK33uep6H9Pg0Eg9g4qR27hOzRzE5wwUloNzs5b5RpE3KkWK9z7xZY-J4Rx4l1EAWhxr0i9oWfGFi6TQ?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"81\" height=\"85\"></strong></p>",
+                                "<p><strong id=\"docs-internal-guid-4b50d7f1-7fff-c653-a4fc-b91c43ebaa48\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfhFWxCujy5UDS1wCBIkENkiwu4C3vd6uURVhwyOmUrut0JpX2dnumjmWGA3bjsXC6cxyzQOZ4d8v0VQR9tK7qxt-uG4S81JekcCbpI27hQvn-gkHE0uFVdgjbdA6INu4ydxhhaww?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"80\" height=\"80\"></strong></p>", "<p><strong id=\"docs-internal-guid-219c9cc6-7fff-f05f-64d7-96eb6ed45908\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXf5mAZCBilLr-qSC90ckZG_lLEF4SUxfvSy17BfQrTwh3bX-yqQ4jLsAd_I0eAg0KGAe90lrCaszJVBOoWmR_Q9WJh0IGl98E7Jw1BkhY8r9-NapV-blMmsgBQQ5kV5dsieYwN3tg?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"81\" height=\"87\"></strong></p>"],
+                    solution_en: "<p><span style=\"font-family: Cambria Math;\">8.(</span><span style=\"font-family: Cambria Math;\">c)</span><br><strong id=\"docs-internal-guid-0537b766-7fff-20da-ff6f-a10c77bf5afe\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfhFWxCujy5UDS1wCBIkENkiwu4C3vd6uURVhwyOmUrut0JpX2dnumjmWGA3bjsXC6cxyzQOZ4d8v0VQR9tK7qxt-uG4S81JekcCbpI27hQvn-gkHE0uFVdgjbdA6INu4ydxhhaww?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"89\" height=\"89\"></strong></p>",
+                    solution_hi: "<p><span style=\"font-family: Cambria Math;\">8.(</span><span style=\"font-family: Cambria Math;\">c)</span><br><strong id=\"docs-internal-guid-0537b766-7fff-20da-ff6f-a10c77bf5afe\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfhFWxCujy5UDS1wCBIkENkiwu4C3vd6uURVhwyOmUrut0JpX2dnumjmWGA3bjsXC6cxyzQOZ4d8v0VQR9tK7qxt-uG4S81JekcCbpI27hQvn-gkHE0uFVdgjbdA6INu4ydxhhaww?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"89\" height=\"89\"></strong></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "9",
+                    section: "6",
+                    question_en: "<p>9.<span style=\"font-family: Cambria Math;\"> Select the correct mirror image of.</span><br><strong id=\"docs-internal-guid-c1e6f956-7fff-b67b-7b2c-a677142433da\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdLYB7B5kYMSd6QLWaXfWdbUMv0zbLNTBmRnaY9WqWlEhZ1VJD0hfnsSZJnkAdARgD5Euo9u_5fS-_KyptAWNIb196YnfODrBQ7wIjkXtv2RGAx52QJbTUZBDtLLZO9uMmuhtgaQA?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"156\" height=\"88\"></strong></p>",
+                    question_hi: "<p>9. <span style=\"font-family: Mangal;\">सही</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">दर्पण</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">प्रतिबिंब</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">का</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">चयन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">करें</span><span style=\"font-family: Mangal;\">।</span><br><strong id=\"docs-internal-guid-98216b93-7fff-7066-5815-75d4479507b9\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdLYB7B5kYMSd6QLWaXfWdbUMv0zbLNTBmRnaY9WqWlEhZ1VJD0hfnsSZJnkAdARgD5Euo9u_5fS-_KyptAWNIb196YnfODrBQ7wIjkXtv2RGAx52QJbTUZBDtLLZO9uMmuhtgaQA?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"156\" height=\"88\"></strong></p>",
+                    options_en: ["<p><strong id=\"docs-internal-guid-09170fec-7fff-f188-2e9e-be09a512d1fd\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXejEak7S7VlijUaUz8kvLj_RkHaps_aVzD5VTN-3w4gAR7V1Fky__Ji-mlPuh0FcytkGLoYITcZA9pHW5WHy7SdS5NTdLy8UgEQG48h9L4fFERY4n4P2WLD6rTg6oiVin-mMT06cg?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"174\" height=\"20\"></strong></p>", "<p><strong id=\"docs-internal-guid-45a6167b-7fff-d36d-f298-f456338a3109\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfhSKRJrdYj28W4jgR12y7ydcpyifeuLpwmi1HbfjKhRrkQWzlfrkQeHSWbxFNpC9BZFa1EDNLHSyZ8s3W5_BgbhdRGKKOGCDY8qOLPxZRaeh3ll-0dqWYO1dy9YHkogiNsPzm1vA?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"180\" height=\"20\"></strong></p>", 
+                                "<p><strong id=\"docs-internal-guid-055daba5-7fff-fc63-cf38-995d5f8157d8\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcFoKDiNQnA9CctHq4hxz87qbn-ynl1f8VRo02Vuk5h5C-0wyfZHJcd9takPVal61KhboQfwn5wX7Uepbx-9xcQkJ5Kexj7r6NHA8rNhAVveHRLZk1mNoQNH_is1MwdnLWF71XOGA?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"174\" height=\"20\"></strong></p>", "<p><strong id=\"docs-internal-guid-ff56bab9-7fff-19a9-1159-0d6958c420d6\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdrCBnpab7eqScFf-4UGm9m5yuuhisVawA49AUwnph16G-wKHJBzI1ZXfkxb1MZAt33sH5My1jpV6FE7ubLarmTPWIfOPas4HRWf3Ph_7oHJGQpIYDtLsefhMpDTJwEdfSVKbP--Q?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"180\" height=\"20\"></strong></p>"],
+                    options_hi: ["<p><strong id=\"docs-internal-guid-2327323b-7fff-a537-0bd7-fd9fa22d7bf8\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXejEak7S7VlijUaUz8kvLj_RkHaps_aVzD5VTN-3w4gAR7V1Fky__Ji-mlPuh0FcytkGLoYITcZA9pHW5WHy7SdS5NTdLy8UgEQG48h9L4fFERY4n4P2WLD6rTg6oiVin-mMT06cg?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"174\" height=\"20\"></strong></p>", "<p><strong id=\"docs-internal-guid-9177abaa-7fff-b5c6-5a77-fd4968272c1d\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfhSKRJrdYj28W4jgR12y7ydcpyifeuLpwmi1HbfjKhRrkQWzlfrkQeHSWbxFNpC9BZFa1EDNLHSyZ8s3W5_BgbhdRGKKOGCDY8qOLPxZRaeh3ll-0dqWYO1dy9YHkogiNsPzm1vA?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"180\" height=\"20\"></strong></p>",
+                                "<p><strong id=\"docs-internal-guid-8cda0042-7fff-c917-15f5-766aae12e461\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcFoKDiNQnA9CctHq4hxz87qbn-ynl1f8VRo02Vuk5h5C-0wyfZHJcd9takPVal61KhboQfwn5wX7Uepbx-9xcQkJ5Kexj7r6NHA8rNhAVveHRLZk1mNoQNH_is1MwdnLWF71XOGA?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"174\" height=\"20\"></strong></p>", "<p><strong id=\"docs-internal-guid-e836e004-7fff-f9ed-063c-3774683b52cc\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdrCBnpab7eqScFf-4UGm9m5yuuhisVawA49AUwnph16G-wKHJBzI1ZXfkxb1MZAt33sH5My1jpV6FE7ubLarmTPWIfOPas4HRWf3Ph_7oHJGQpIYDtLsefhMpDTJwEdfSVKbP--Q?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"180\" height=\"20\"></strong></p>"],
+                    solution_en: "<p><span style=\"font-family: Cambria Math;\">9.(</span><span style=\"font-family: Cambria Math;\">c)</span><br><strong id=\"docs-internal-guid-3ac4117a-7fff-2597-7eec-3096f7ea3077\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXf2h3hEoK5PwrIgPQoo9jReuyejG6nHubo93Y3f0NJ8FTVyLsUOKjrkW2wHbZXpPkfBwvHs4OUxabpssvjxoeYOAjXUYYc7moZeuq6_-A_1huFyTIqk6lNHL8gXmcpGglVYYRcW0Q?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"251\" height=\"75\"></strong></p>",
+                    solution_hi: "<p><span style=\"font-family: Cambria Math;\">9.(</span><span style=\"font-family: Cambria Math;\">c)</span><br><strong id=\"docs-internal-guid-3ac4117a-7fff-2597-7eec-3096f7ea3077\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXf2h3hEoK5PwrIgPQoo9jReuyejG6nHubo93Y3f0NJ8FTVyLsUOKjrkW2wHbZXpPkfBwvHs4OUxabpssvjxoeYOAjXUYYc7moZeuq6_-A_1huFyTIqk6lNHL8gXmcpGglVYYRcW0Q?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"244\" height=\"73\"></strong></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "10",
+                    section: "6",
+                    question_en: "<p>10<span style=\"font-family: Cambria Math;\">. </span><span style=\"font-family: Cambria Math;\">Select the correct mirror image of.</span><br><strong id=\"docs-internal-guid-0dc96dbe-7fff-fe5e-0237-819ffff566f1\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXecep7ZeYjdR7iwcingOXjpsEh2DFkQZpXqVm7CPl70rJFzt_miaVeHkSbqq3bDcoz_kHA3xdaOFchAwSPp3b3DKCSkh-Oyolsr1g7l_Jx9Jj2Ki_sL3WDpgBkFGuEzaZ5Avu7MLQ?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"145\" height=\"95\"></strong></p>",
+                    question_hi: "<p>10<span style=\"font-family: Cambria Math;\">. </span><span style=\"font-family: Mangal;\">सही</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">दर्पण</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">प्रतिबिंब</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">का</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">चयन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">करें</span><span style=\"font-family: Mangal;\">।</span><br><strong id=\"docs-internal-guid-d4c6a7a5-7fff-7d4a-8053-279897c4b043\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXecep7ZeYjdR7iwcingOXjpsEh2DFkQZpXqVm7CPl70rJFzt_miaVeHkSbqq3bDcoz_kHA3xdaOFchAwSPp3b3DKCSkh-Oyolsr1g7l_Jx9Jj2Ki_sL3WDpgBkFGuEzaZ5Avu7MLQ?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"145\" height=\"95\"></strong></p>",
+                    options_en: ["<p><strong id=\"docs-internal-guid-b8ee3d55-7fff-3123-eb03-44c8ce9b04ca\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfr73vKjLTjzS1lkwJ7thLafEb3Su-Byoxd91LrvjLADnnfmr2Hs7US3FoP2d7H763fJVvK2ASAWs97OqCCDIM1LPUucmCRA88gGKRbxyFByBF6bpUDVASIRpLNyqtFJTnZmnOFKw?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"137\" height=\"20\"></strong></p>", "<p><strong id=\"docs-internal-guid-3fca793d-7fff-43bb-e101-f7dd3664785f\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXd0X7vjPKiwLRniekfAfMEQTG2OM-QmL5HTPA-UFkmipo22F2BzAcOH7RZzRSYVEJ9Oy3-s-UO4vLRqw3vMxMvzU4120y7-jbh4XTUN8jP1b79GMCWUEoU3gItGeO5ELEQAhOSK?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"143\" height=\"20\"></strong></p>", 
+                                "<p><strong id=\"docs-internal-guid-54daac14-7fff-55d4-5587-d5b456657c70\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfASIqVB0X8nrEpbDITI7l-HpBiy8WS5xVdOt2R-hs-Q2rJKCDEK9jI2jTxWBEsZUqi3d4uUeHJSZBXhkBIpRovoXtq2KWHbNUZdU-guFEH9IhAqzMzjUp1fgoGle9mj2pvaeuWDQ?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"151\" height=\"20\"></strong></p>", "<p><strong id=\"docs-internal-guid-6f6d4a2a-7fff-66e4-ff39-ee4b3217fe8d\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXd1gxdoSsqGFkkcATkdAwAo6mGCy5M0DXU7cR1YGyBYyoE4soggocCTDuiy98llg6W3e54-Ltpyf8dNZxm_6Q22PleZBEQiplTUhaeQVZQPcfLHKYqY4fpJ2k8algATqzCk5SJgSA?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"145\" height=\"20\"></strong></p>"],
+                    options_hi: ["<p><strong id=\"docs-internal-guid-85eeab03-7fff-b861-17a5-6810be8e0662\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfr73vKjLTjzS1lkwJ7thLafEb3Su-Byoxd91LrvjLADnnfmr2Hs7US3FoP2d7H763fJVvK2ASAWs97OqCCDIM1LPUucmCRA88gGKRbxyFByBF6bpUDVASIRpLNyqtFJTnZmnOFKw?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"137\" height=\"20\"></strong></p>", "<p><strong id=\"docs-internal-guid-176620f6-7fff-d0d0-4867-4f770c5fe62b\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXd0X7vjPKiwLRniekfAfMEQTG2OM-QmL5HTPA-UFkmipo22F2BzAcOH7RZzRSYVEJ9Oy3-s-UO4vLRqw3vMxMvzU4120y7-jbh4XTUN8jP1b79GMCWUEoU3gItGeO5ELEQAhOSK?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"143\" height=\"20\"></strong></p>",
+                                "<p><strong id=\"docs-internal-guid-e207e448-7fff-e548-1c4f-47dbfd8bf64a\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfASIqVB0X8nrEpbDITI7l-HpBiy8WS5xVdOt2R-hs-Q2rJKCDEK9jI2jTxWBEsZUqi3d4uUeHJSZBXhkBIpRovoXtq2KWHbNUZdU-guFEH9IhAqzMzjUp1fgoGle9mj2pvaeuWDQ?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"151\" height=\"20\"></strong></p>", "<p><strong id=\"docs-internal-guid-1ff6cd10-7fff-f8cc-d420-ed90dc2eb6ec\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXd1gxdoSsqGFkkcATkdAwAo6mGCy5M0DXU7cR1YGyBYyoE4soggocCTDuiy98llg6W3e54-Ltpyf8dNZxm_6Q22PleZBEQiplTUhaeQVZQPcfLHKYqY4fpJ2k8algATqzCk5SJgSA?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"145\" height=\"20\"></strong></p>"],
+                    solution_en: "<p>10<span style=\"font-family: Cambria Math;\">.(a)</span><br><strong id=\"docs-internal-guid-e8ccdf2a-7fff-1f2b-279c-feb97ad6cd86\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfr73vKjLTjzS1lkwJ7thLafEb3Su-Byoxd91LrvjLADnnfmr2Hs7US3FoP2d7H763fJVvK2ASAWs97OqCCDIM1LPUucmCRA88gGKRbxyFByBF6bpUDVASIRpLNyqtFJTnZmnOFKw?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"137\" height=\"20\"></strong></p>",
+                    solution_hi: "<p>10<span style=\"font-family: Cambria Math;\">.(a)</span><br><strong id=\"docs-internal-guid-e8ccdf2a-7fff-1f2b-279c-feb97ad6cd86\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfr73vKjLTjzS1lkwJ7thLafEb3Su-Byoxd91LrvjLADnnfmr2Hs7US3FoP2d7H763fJVvK2ASAWs97OqCCDIM1LPUucmCRA88gGKRbxyFByBF6bpUDVASIRpLNyqtFJTnZmnOFKw?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"137\" height=\"20\"></strong></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "11",
+                    section: "6",
+                    question_en: "<p>11. <span style=\"font-family: Cambria Math;\">Select</span><span style=\"font-family: Cambria Math;\"> the correct mirror image of</span><br><strong id=\"docs-internal-guid-5099d766-7fff-3982-998c-f2124047094e\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeLfJ2196W_If81dcKwo_eBLZM7_ql0dRQst7g4Ad-MEOaLdL5qNFgmoOmMW9hGWOu0z_NyYTeowFmkcP5N0IeWvXtcVypjpHH0TMXEq3ZsLLtbJBT6dP_nFJjcs8rn4BO5MPpjgA?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"116\" height=\"134\"></strong></p>",
+                    question_hi: "<p>11<span style=\"font-family: Cambria Math;\">. </span><span style=\"font-family: Mangal;\">सही</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">दर्पण</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">प्रतिबिंब</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">का</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">चयन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">करें</span><span style=\"font-family: Mangal;\">।</span><br><strong id=\"docs-internal-guid-170d63f2-7fff-ac1a-58c4-f492a3ae5ada\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeLfJ2196W_If81dcKwo_eBLZM7_ql0dRQst7g4Ad-MEOaLdL5qNFgmoOmMW9hGWOu0z_NyYTeowFmkcP5N0IeWvXtcVypjpHH0TMXEq3ZsLLtbJBT6dP_nFJjcs8rn4BO5MPpjgA?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"110\" height=\"127\"></strong></p>",
+                    options_en: ["<p><strong id=\"docs-internal-guid-25f917ce-7fff-cec3-9d79-052d3944929e\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeRg4E7nsre9cW4hB5kVkEQM65wahwYd9YRvxcak0LfFqTKqXYF4D6tWEjNhsn5kc5OjLqNKu4vMrMqPHwJcwkVbTepjdYqWUgUudL7mqds72wKOnMCVDc7Mu_d16kjiNCEOej9wg?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"86\" height=\"87\"></strong></p>", "<p><strong id=\"docs-internal-guid-2dab27ca-7fff-33e7-af99-bf2aa8d9eb36\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdGTjvasHolGFoD5Cmr53Fy48zPEqXcWfSI11gA4gEwQji0m8u_N0zPrt8Ex05DediV7yM2Bz3Kx4bpv4eS7EzCfZsR0aw6WLhZKKtF-RvHOTmQbRsXBqG-cslHkapYH5VPzyFiQQ?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"86\" height=\"76\"></strong></p>", 
+                                "<p><strong id=\"docs-internal-guid-fa834277-7fff-5464-a865-65aebad9d87c\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXd4XssdLvqAuOElft9R04DVbUhO6DoTkmkivYx5nUquVbKAhZlkHDykI4PI0kT607JaswEEM9WO-esAIlrDbCxRqRDSZ6oqLSgJy435CHIKK2mCFR0MZdAu5hIPtsaGl3-jNMFrIQ?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"84\" height=\"77\"></strong></p>", "<p><strong id=\"docs-internal-guid-5c2e1dee-7fff-8069-0ba6-501d70e10a9d\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfMLbQlRSkI-KAtg6XFq5V2rdkYEN1SfrXNxawziynUG1roC2xOnBHq-5apOyteL2Fd1r8eMTDvVXbXovjqNAcTIy6_vKm0XFKgoutd1l3hllgBYP6-rrMIjGlkC5qOxeNt91Cukg?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"93\" height=\"80\"></strong></p>"],
+                    options_hi: ["<p><strong id=\"docs-internal-guid-e6584d00-7fff-ea99-c6a3-a05e1f7c677c\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeRg4E7nsre9cW4hB5kVkEQM65wahwYd9YRvxcak0LfFqTKqXYF4D6tWEjNhsn5kc5OjLqNKu4vMrMqPHwJcwkVbTepjdYqWUgUudL7mqds72wKOnMCVDc7Mu_d16kjiNCEOej9wg?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"85\" height=\"86\"></strong></p>", "<p><strong id=\"docs-internal-guid-6d1ebc54-7fff-0fcc-9b85-10e2ec0cddcd\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdGTjvasHolGFoD5Cmr53Fy48zPEqXcWfSI11gA4gEwQji0m8u_N0zPrt8Ex05DediV7yM2Bz3Kx4bpv4eS7EzCfZsR0aw6WLhZKKtF-RvHOTmQbRsXBqG-cslHkapYH5VPzyFiQQ?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"88\" height=\"78\"></strong></p>",
+                                "<p><strong id=\"docs-internal-guid-6c923e3a-7fff-453c-d2fc-fbce795f01c5\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXd4XssdLvqAuOElft9R04DVbUhO6DoTkmkivYx5nUquVbKAhZlkHDykI4PI0kT607JaswEEM9WO-esAIlrDbCxRqRDSZ6oqLSgJy435CHIKK2mCFR0MZdAu5hIPtsaGl3-jNMFrIQ?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"86\" height=\"79\"></strong></p>", "<p><strong id=\"docs-internal-guid-3aab57f6-7fff-6966-e491-1177e0861145\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfMLbQlRSkI-KAtg6XFq5V2rdkYEN1SfrXNxawziynUG1roC2xOnBHq-5apOyteL2Fd1r8eMTDvVXbXovjqNAcTIy6_vKm0XFKgoutd1l3hllgBYP6-rrMIjGlkC5qOxeNt91Cukg?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"108\" height=\"93\"></strong></p>"],
+                    solution_en: "<p>11<span style=\"font-family: Cambria Math;\">.(d)</span><br><strong id=\"docs-internal-guid-2471006e-7fff-2f8b-bd0b-bb170880eee3\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdmoFCOpofbsrB4PHYBan0vY19b_sHrJaB2-iIFVv6yKnLB6P8TO3CWeY9Wa7ZCBWiZYxwRk10JXVlZpzcQuZ69r_8ju3CZ1zDaKfLrFdsWL_9eazLScTKjm84KRn12c6LtIbka?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"205\" height=\"125\"></strong></p>",
+                    solution_hi: "<p>11<span style=\"font-family: Cambria Math;\">.(d)</span><br><strong id=\"docs-internal-guid-2471006e-7fff-2f8b-bd0b-bb170880eee3\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdmoFCOpofbsrB4PHYBan0vY19b_sHrJaB2-iIFVv6yKnLB6P8TO3CWeY9Wa7ZCBWiZYxwRk10JXVlZpzcQuZ69r_8ju3CZ1zDaKfLrFdsWL_9eazLScTKjm84KRn12c6LtIbka?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"205\" height=\"125\"></strong></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "12",
+                    section: "6",
+                    question_en: "<p>12<span style=\"font-family: Cambria Math;\">.</span><span style=\"font-family: Cambria Math;\"> Select the correct mirror image of</span><br><strong id=\"docs-internal-guid-70cb1890-7fff-d682-69c2-ca1ac0a9b5cc\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdj3NQhS29UdPPlAHDGssrz2zsgZC7yPb-ICcBVybdg796KL13YafcLPtyedm3jO304QyFlvro_e59_cCFGeTVSsmUcKb5Y_wuN1mYcBP2iPLG0D8D3BqQ-Es4q1ucLU-HzSaSThw?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"168\" height=\"103\"></strong></p>",
+                    question_hi: "<p>12<span style=\"font-family: Cambria Math;\">. </span><span style=\"font-family: Mangal;\">सही</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">दर्पण</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">प्रतिबिंब</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">का</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">चयन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">करें</span><span style=\"font-family: Mangal;\">।</span><br><strong id=\"docs-internal-guid-ab06f828-7fff-581d-61c7-eeeb8e863a38\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdj3NQhS29UdPPlAHDGssrz2zsgZC7yPb-ICcBVybdg796KL13YafcLPtyedm3jO304QyFlvro_e59_cCFGeTVSsmUcKb5Y_wuN1mYcBP2iPLG0D8D3BqQ-Es4q1ucLU-HzSaSThw?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"148\" height=\"91\"></strong></p>",
+                    options_en: ["<p><strong id=\"docs-internal-guid-46654312-7fff-84ed-1b59-c70be3d8cef2\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdLcYjZSBHwqyrTo-p7-_ZXlGxoFagRYX_vy8hn_EAhsY0h0l1MfDn_OIgJtPF2uzsK2dGWZ3F0yIkF96VYVILDCaVNSz9a9qT9EEmEUWcEAS_r2oW6P9Ud63rMK371RqSpidPQug?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"173\" height=\"25\"></strong></p>", "<p><strong id=\"docs-internal-guid-954c899e-7fff-9e36-e562-371a3b1a2bb2\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXe9gq3iZlGAHpR0dvaGXX71DNHdTlcKtkM0J25fxulPqa1OSYmD0PF1oJtQJoNHglVMANkJinsV35Hq6ofL2WROz09bnk74v8CaVOIUUxcoCKDAHD-_ko48x5Hu-WU_NgbkDLBY?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"169\" height=\"26\"></strong></p>", 
+                                "<p><strong id=\"docs-internal-guid-16351b92-7fff-b878-5ca0-d449f999940a\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfhPk1P9HVTNUzYlGBXmv9SA94parzP4i3EqfyCNQDERWXJbW4YCsLu5Z24yv1LzZ2j-UuouVqefOHZtdAWsJcUfQie5CljOBagrk2fSo0NZfsJo2BJTe7MzPKtw1uf24c01JfsTA?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"174\" height=\"25\"></strong></p>", "<p><strong id=\"docs-internal-guid-c895bc66-7fff-d032-0941-545cf5ae695e\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdcWOhisRzYj31NjoEx0iqi3u-4dbF2yG2gq987H-slaeWwtYVHbuDQQQurURNnGPUNZlSDu4EyhV4Qloo7JSunRhOPl5Y3X8LPn-RJcsnIRJR2kFZ2JQONTduZXEVPoZVHokQA?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"174\" height=\"27\"></strong></p>"],
+                    options_hi: ["<p><strong id=\"docs-internal-guid-7671d2e5-7fff-ed27-6b3a-2a6b0a1a9803\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdLcYjZSBHwqyrTo-p7-_ZXlGxoFagRYX_vy8hn_EAhsY0h0l1MfDn_OIgJtPF2uzsK2dGWZ3F0yIkF96VYVILDCaVNSz9a9qT9EEmEUWcEAS_r2oW6P9Ud63rMK371RqSpidPQug?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"173\" height=\"25\"></strong></p>", "<p><strong id=\"docs-internal-guid-c6c7c646-7fff-ffc7-fd80-e343fcd1dc4e\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXe9gq3iZlGAHpR0dvaGXX71DNHdTlcKtkM0J25fxulPqa1OSYmD0PF1oJtQJoNHglVMANkJinsV35Hq6ofL2WROz09bnk74v8CaVOIUUxcoCKDAHD-_ko48x5Hu-WU_NgbkDLBY?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"169\" height=\"26\"></strong></p>",
+                                "<p><strong id=\"docs-internal-guid-e9939341-7fff-132b-7e99-f53f21f87c43\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfhPk1P9HVTNUzYlGBXmv9SA94parzP4i3EqfyCNQDERWXJbW4YCsLu5Z24yv1LzZ2j-UuouVqefOHZtdAWsJcUfQie5CljOBagrk2fSo0NZfsJo2BJTe7MzPKtw1uf24c01JfsTA?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"174\" height=\"25\"></strong></p>", "<p><strong id=\"docs-internal-guid-f2b8302c-7fff-23e8-2e79-30e47a0db3d8\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdcWOhisRzYj31NjoEx0iqi3u-4dbF2yG2gq987H-slaeWwtYVHbuDQQQurURNnGPUNZlSDu4EyhV4Qloo7JSunRhOPl5Y3X8LPn-RJcsnIRJR2kFZ2JQONTduZXEVPoZVHokQA?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"174\" height=\"27\"></strong></p>"],
+                    solution_en: "<p>12<span style=\"font-family: Cambria Math;\">.(c)</span><br><strong id=\"docs-internal-guid-bb45ea1d-7fff-4d32-9f39-bf7be50070da\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXemdHwaCjV_pny_gOTAd8i7d00k8tRpY9bEsr8QwKHtQxoDFgOM7oAo2tn9bTUMCNN7_pDPlovt3NC1ikFdqCiogFv3gR6SylG8eia0SgY_4sNVDU0RugAVSJWiGu9R2FN8-E68?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"234\" height=\"74\"></strong></p>",
+                    solution_hi: "<p>12<span style=\"font-family: Cambria Math;\">.(c)</span><br><strong id=\"docs-internal-guid-bb45ea1d-7fff-4d32-9f39-bf7be50070da\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXemdHwaCjV_pny_gOTAd8i7d00k8tRpY9bEsr8QwKHtQxoDFgOM7oAo2tn9bTUMCNN7_pDPlovt3NC1ikFdqCiogFv3gR6SylG8eia0SgY_4sNVDU0RugAVSJWiGu9R2FN8-E68?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"234\" height=\"74\"></strong></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "13",
+                    section: "6",
+                    question_en: "<p>13<span style=\"font-family: Cambria Math;\">. </span><span style=\"font-family: Cambria Math;\">Select the correct mirror image of</span><br><strong id=\"docs-internal-guid-6e055e50-7fff-4953-74a7-450daf41c5b1\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXet9l58WXw87Yutd_ROgACRiEo1xaompXoV-kcQ_t-dQojRXnWpuMFw54TyIozUxxneIjBKKE50_M7NUDxo_-GzyFHqr14X0fz4MXn9hJIkh32ikAbPe_Z_uSuueK3RvNq3QyB6FA?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"191\" height=\"79\"></strong></p>",
+                    question_hi: "<p>13<span style=\"font-family: Cambria Math;\">.</span><span style=\"font-family: Cambria Math;\"> &nbsp;</span><span style=\"font-family: Mangal;\">सही</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">दर्पण</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">प्रतिबिंब</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">का</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">चयन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">करें</span><span style=\"font-family: Mangal;\">।</span><br><strong id=\"docs-internal-guid-956f9859-7fff-1afe-98d9-adb20dc276b2\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXet9l58WXw87Yutd_ROgACRiEo1xaompXoV-kcQ_t-dQojRXnWpuMFw54TyIozUxxneIjBKKE50_M7NUDxo_-GzyFHqr14X0fz4MXn9hJIkh32ikAbPe_Z_uSuueK3RvNq3QyB6FA?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"191\" height=\"79\"></strong></p>",
+                    options_en: ["<p><strong id=\"docs-internal-guid-29e8d993-7fff-215d-0630-ec5318c7ce54\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcFOrrivN2e5UKnlm5GCATrVORv3bb8Isj0i9QN8z_MGnGZXjHiGGdnT9eCGc6vyrCWLFf7X4Zb9fJfGBg_EYoQE2IIRBdbkuNChZ14NpdgztKhUwnz91loEPngmQGiTQJT3ZxwCg?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"251\" height=\"20\"></strong></p>", "<p><strong id=\"docs-internal-guid-c7235290-7fff-d2f9-d803-025f1865c9a3\"><strong id=\"docs-internal-guid-a92ad4a9-7fff-3839-24ea-44d850e34f7b\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXd9yXjPJpGRn5OCjiq6vPGm-xM7fLHYSsFTObc3ODdLQT8VE5UXfOR9Bw88S9e1nrH1N3ylO4SskKm0r8X5F0Vhfr3Yg2CASWMMys4yAnUFDMqXFxDF7Bp7PbShjYLNh_-9iVKA?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"251\" height=\"20\"></strong></strong></p>", 
+                                "<p><strong id=\"docs-internal-guid-06cbe4b1-7fff-e6cb-f9dc-2b8d5ca44a65\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdQDiZY2fLi0LHj3FcXXzNQZdxf4pViWtB0UbeiidigEwVYQ25kAJZGw6ptcwM8r0YQoBMqnX4ZfsHL8163EuVd4XjCYHnpq_AXfuXZ-seMV3zcEueSC8-6jaZZgo_2X-TFhkk5ZQ?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"251\" height=\"20\"></strong></p>", "<p><strong id=\"docs-internal-guid-c84658c4-7fff-fac8-e297-a735316189a8\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXev7SCdF6V1vAA9rymDp2VVBkPbdqkRK6XkCCOCFugqP7b736YbUTh3ZQ1QZ4IiiThShzqtgLmZNxr8iIoWewOtGgUZar7mpWq89V1QXSLeOCz3vjntbEsuh5_WoHqgKRSN8g6Tpw?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"251\" height=\"20\"></strong></p>"],
+                    options_hi: ["<p><strong id=\"docs-internal-guid-e7bd4cdd-7fff-4760-0d0b-3137faff1ad2\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcFOrrivN2e5UKnlm5GCATrVORv3bb8Isj0i9QN8z_MGnGZXjHiGGdnT9eCGc6vyrCWLFf7X4Zb9fJfGBg_EYoQE2IIRBdbkuNChZ14NpdgztKhUwnz91loEPngmQGiTQJT3ZxwCg?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"251\" height=\"20\"></strong></p>", "<p><strong id=\"docs-internal-guid-ded1d892-7fff-660d-99e7-80974466b1ba\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXd9yXjPJpGRn5OCjiq6vPGm-xM7fLHYSsFTObc3ODdLQT8VE5UXfOR9Bw88S9e1nrH1N3ylO4SskKm0r8X5F0Vhfr3Yg2CASWMMys4yAnUFDMqXFxDF7Bp7PbShjYLNh_-9iVKA?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"251\" height=\"20\"></strong></p>",
+                                "<p><strong id=\"docs-internal-guid-eeca5af2-7fff-7c85-b2ad-b2c67e0bd49e\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdQDiZY2fLi0LHj3FcXXzNQZdxf4pViWtB0UbeiidigEwVYQ25kAJZGw6ptcwM8r0YQoBMqnX4ZfsHL8163EuVd4XjCYHnpq_AXfuXZ-seMV3zcEueSC8-6jaZZgo_2X-TFhkk5ZQ?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"251\" height=\"20\"></strong></p>", "<p><strong id=\"docs-internal-guid-be8d7cc9-7fff-c791-59b6-5686277c9a2d\"><strong id=\"docs-internal-guid-85ea1b21-7fff-9676-13d1-2ee0ff7f5a8d\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXev7SCdF6V1vAA9rymDp2VVBkPbdqkRK6XkCCOCFugqP7b736YbUTh3ZQ1QZ4IiiThShzqtgLmZNxr8iIoWewOtGgUZar7mpWq89V1QXSLeOCz3vjntbEsuh5_WoHqgKRSN8g6Tpw?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"251\" height=\"20\"></strong></strong></p>"],
+                    solution_en: "<p>13<span style=\"font-family: Cambria Math;\">.(b)</span><br><strong id=\"docs-internal-guid-4f8249f8-7fff-b89f-ad0f-428b898a90b9\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXd9yXjPJpGRn5OCjiq6vPGm-xM7fLHYSsFTObc3ODdLQT8VE5UXfOR9Bw88S9e1nrH1N3ylO4SskKm0r8X5F0Vhfr3Yg2CASWMMys4yAnUFDMqXFxDF7Bp7PbShjYLNh_-9iVKA?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"251\" height=\"20\"></strong></p>",
+                    solution_hi: "<p>13<span style=\"font-family: Cambria Math;\">.(b)</span><br><strong id=\"docs-internal-guid-4f8249f8-7fff-b89f-ad0f-428b898a90b9\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXd9yXjPJpGRn5OCjiq6vPGm-xM7fLHYSsFTObc3ODdLQT8VE5UXfOR9Bw88S9e1nrH1N3ylO4SskKm0r8X5F0Vhfr3Yg2CASWMMys4yAnUFDMqXFxDF7Bp7PbShjYLNh_-9iVKA?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"251\" height=\"20\"></strong></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "14",
+                    section: "6",
+                    question_en: "<p>14<span style=\"font-family: Cambria Math;\">.</span><span style=\"font-family: Cambria Math;\"> Select the correct mirror image of</span><br><strong id=\"docs-internal-guid-7f85c0c2-7fff-9d30-f0b8-8e3c1ef4a9b9\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfEPauBhRCb5awX2f8JJImwQcNUBcedhTq0HGkqZezAFblw1pkXXzU862yLACOSOccJf4yfCqrXL3TKP4Mk9DphmDJe1UinYYTvSbkDkmKBcdtrL57IzvNhqOy51_A1Nz0B_7gheg?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"176\" height=\"108\"></strong></p>",
+                    question_hi: "<p>14<span style=\"font-family: Cambria Math;\">. </span><span style=\"font-family: Mangal;\">सही</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">दर्पण</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">प्रतिबिंब</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">का</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">चयन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">करें</span><span style=\"font-family: Mangal;\">।</span><br><strong id=\"docs-internal-guid-092d2595-7fff-960d-b94e-7085d69c5485\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfEPauBhRCb5awX2f8JJImwQcNUBcedhTq0HGkqZezAFblw1pkXXzU862yLACOSOccJf4yfCqrXL3TKP4Mk9DphmDJe1UinYYTvSbkDkmKBcdtrL57IzvNhqOy51_A1Nz0B_7gheg?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"178\" height=\"109\"></strong></p>",
+                    options_en: ["<p><strong id=\"docs-internal-guid-36d865c0-7fff-d5aa-0776-abbdc92cf0f7\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXe_rCpfTF3lChvD7NtFMDRr86IJW8VZGb9QPNUciHh1mwHrrkqzYPcdWINLoVO4nAYYPMx4xdTCoGXXCK4-D8mjhftN1bfSjcL9VScsCY9i12xu2iUyZ3Rs4l3t6COmUb0QuCe7?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"152\" height=\"20\"></strong></p>", "<p><strong id=\"docs-internal-guid-16399594-7fff-f7bb-4f0b-71395a925d93\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeDCbzEXQMo5DVDPlieJzJCYfFLcx7OrEIwLOqHObzaaaxjPnV0-GZpPR_PhPOYvl_bZUpmVNO85-oD5rL59SV37p1AuOhf9JoN5NLTHUoARtQ2zBYA5-T_jAWQM8NxjNYlvbd8?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"152\" height=\"20\"></strong></p>", 
+                                "<p><strong id=\"docs-internal-guid-583428d2-7fff-0c75-80fa-f2c9a6a9a476\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeHuVWvVK_8Jdp3SGPtIlkXcGZJ13Z5gaOPEa-kwIQQjpS8U92GeUXYvEJZlqalEAlZ4JvYyEGOstmVdW_LcYT_1bJQEURgCOzJ1KQ9itcGGVEcMU6eZiMUdmxu_PfYFOOTOknvHA?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"154\" height=\"21\"></strong></p>", "<p><strong id=\"docs-internal-guid-5e0f88fe-7fff-781a-acf0-e6dd76df6cf5\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcMfqPxD3v_Gm5qwfuDSnOZJm1fFQ_y5XAQtREl-wEk8iQp8wEr2x0aYFAqZM-9dlKYv9Ek-xbUS0SR1vLHEiSl_zxxDAZF1GKCNJg4ezgDO1XKuRFfbsQfQ3aW97i7VGMROmgQ?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"153\" height=\"20\"></strong></p>"],
+                    options_hi: ["<p><strong id=\"docs-internal-guid-8e5ea7ce-7fff-d036-28fd-518c2efd11b9\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXe_rCpfTF3lChvD7NtFMDRr86IJW8VZGb9QPNUciHh1mwHrrkqzYPcdWINLoVO4nAYYPMx4xdTCoGXXCK4-D8mjhftN1bfSjcL9VScsCY9i12xu2iUyZ3Rs4l3t6COmUb0QuCe7?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"152\" height=\"20\"></strong></p>", "<p><strong id=\"docs-internal-guid-cbac7fe7-7fff-e410-4884-9716bef16156\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeDCbzEXQMo5DVDPlieJzJCYfFLcx7OrEIwLOqHObzaaaxjPnV0-GZpPR_PhPOYvl_bZUpmVNO85-oD5rL59SV37p1AuOhf9JoN5NLTHUoARtQ2zBYA5-T_jAWQM8NxjNYlvbd8?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"152\" height=\"20\"></strong></p>",
+                                "<p><strong id=\"docs-internal-guid-e3293d36-7fff-00ad-835e-0db727906624\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeHuVWvVK_8Jdp3SGPtIlkXcGZJ13Z5gaOPEa-kwIQQjpS8U92GeUXYvEJZlqalEAlZ4JvYyEGOstmVdW_LcYT_1bJQEURgCOzJ1KQ9itcGGVEcMU6eZiMUdmxu_PfYFOOTOknvHA?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"153\" height=\"21\"></strong></p>", "<p><strong id=\"docs-internal-guid-395cf558-7fff-271b-7d5d-280c4f68967b\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcMfqPxD3v_Gm5qwfuDSnOZJm1fFQ_y5XAQtREl-wEk8iQp8wEr2x0aYFAqZM-9dlKYv9Ek-xbUS0SR1vLHEiSl_zxxDAZF1GKCNJg4ezgDO1XKuRFfbsQfQ3aW97i7VGMROmgQ?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"153\" height=\"20\"></strong></p>"],
+                    solution_en: "<p>14<span style=\"font-family: Cambria Math;\">.(c)</span><br><strong id=\"docs-internal-guid-98bea4b3-7fff-5032-f46c-2382734a7741\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcSND6D8NGhaEPk-qm4IjUJ5fcJzr4KVgn_GTp0Xyp5_C0uroTa5UuTdXv6ZifCOfnoIzlOH4ToTq_uipZVlLNAEiMUGL2SXETXMicUPNTt56Obhr1KAwlMo6btA0jQzVXZmkdSAQ?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"191\" height=\"65\"></strong></p>",
+                    solution_hi: "<p>14<span style=\"font-family: Cambria Math;\">.(c)</span><br><strong id=\"docs-internal-guid-98bea4b3-7fff-5032-f46c-2382734a7741\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcSND6D8NGhaEPk-qm4IjUJ5fcJzr4KVgn_GTp0Xyp5_C0uroTa5UuTdXv6ZifCOfnoIzlOH4ToTq_uipZVlLNAEiMUGL2SXETXMicUPNTt56Obhr1KAwlMo6btA0jQzVXZmkdSAQ?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"191\" height=\"65\"></strong></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "15",
+                    section: "6",
+                    question_en: "<p>15<span style=\"font-family: Cambria Math;\">. </span><span style=\"font-family: Cambria Math;\">Select the correct mirror image of.</span><br><strong id=\"docs-internal-guid-4255043f-7fff-fd64-b9ab-2d738efe6c25\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfLNr881xqO7bi9Qo7y9kZOOQc5CFc9G5sWg-DHMFacWalVuunjAGqt6tzKor9N0JczVyGhpdJtTd6TpIwoeNAyi6WQv5nioiYUntMt46LumgCLOkcum8BxbMQDNXRXOxVmGZdGVg?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"188\" height=\"86\"></strong></p>",
+                    question_hi: "<p>15<span style=\"font-family: Cambria Math;\">. </span><span style=\"font-family: Mangal;\">सही</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">दर्पण</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">प्रतिबिंब</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">का</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">चयन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">करें</span><span style=\"font-family: Mangal;\">।</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">।</span><br><strong id=\"docs-internal-guid-dd69445c-7fff-fcdd-ffe7-44ff970ab389\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfLNr881xqO7bi9Qo7y9kZOOQc5CFc9G5sWg-DHMFacWalVuunjAGqt6tzKor9N0JczVyGhpdJtTd6TpIwoeNAyi6WQv5nioiYUntMt46LumgCLOkcum8BxbMQDNXRXOxVmGZdGVg?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"173\" height=\"79\"></strong></p>",
+                    options_en: ["<p><strong id=\"docs-internal-guid-5cbe30d4-7fff-4219-4c3d-234aae8d98d2\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeGavEnUTwqfsnKOLUpeAr28q9PBCYolZIuHlAQVuuPZ_b9TNnJoExRn4gCG6Hp_LQC_XsI2HWN0T8nA53ZOnAsZArX_Iy-bZfE5Dht_yx3hNyC-W0y3odt21Ny4nxjT4yDeLu2ug?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"215\" height=\"20\"></strong></p>", "<p><strong id=\"docs-internal-guid-ae56e035-7fff-352d-a201-7837e3e304ac\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcCUTzeGm-BpZLnTCXEF2mqM8Z5GvZqtR1jaqqOiDYW0dMn2i89jwvkBTl03T00xGc0WQqMoihouiEf63IUUp-lCOKzhn-yr5X8IVYZohfPoAHOlBitwhYBDKeZHMl9L3_0G98T8g?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"215\" height=\"20\"></strong></p>", 
+                                "<p><strong id=\"docs-internal-guid-bdecaa35-7fff-87ee-e04a-4357642369cb\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfq2Pwls_XLgHkIiOa1ZIOOF2crFzAyBKM7YYHF4Tg9fCfPF1kV3Px9fEKn3ycNIr5tODnRtjIn0hLl_WKK75S2ZwijSMkPT4XQngREzkq5RNZpNBHCKsxfwW-gnUew6AXxrb8QNg?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"215\" height=\"20\"></strong></p>", "<p><strong id=\"docs-internal-guid-7b535c70-7fff-a7dd-1073-46b8d09fae72\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXe4rQTFc-nKxenm2e5JSJRMBXzwz1QH8suXGhrLv-qI_EIm7WZsrr_vuP8NfNAL_1QowgVQu4j4obcud-oT9X0cLZlzTWJGeeaivZL4mCL15gDZz_ER_OdotMtdZmDttXc432cvRQ?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"215\" height=\"20\"></strong></p>"],
+                    options_hi: ["<p><strong id=\"docs-internal-guid-6ab89351-7fff-1010-b25c-acc3a14c1e85\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeGavEnUTwqfsnKOLUpeAr28q9PBCYolZIuHlAQVuuPZ_b9TNnJoExRn4gCG6Hp_LQC_XsI2HWN0T8nA53ZOnAsZArX_Iy-bZfE5Dht_yx3hNyC-W0y3odt21Ny4nxjT4yDeLu2ug?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"215\" height=\"20\"></strong></p>", "<p><strong id=\"docs-internal-guid-c484740e-7fff-2265-39b3-291984469b7d\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcCUTzeGm-BpZLnTCXEF2mqM8Z5GvZqtR1jaqqOiDYW0dMn2i89jwvkBTl03T00xGc0WQqMoihouiEf63IUUp-lCOKzhn-yr5X8IVYZohfPoAHOlBitwhYBDKeZHMl9L3_0G98T8g?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"215\" height=\"20\"></strong></p>",
+                                "<p><strong id=\"docs-internal-guid-7e6e9705-7fff-3739-7b2a-b7f547319564\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfq2Pwls_XLgHkIiOa1ZIOOF2crFzAyBKM7YYHF4Tg9fCfPF1kV3Px9fEKn3ycNIr5tODnRtjIn0hLl_WKK75S2ZwijSMkPT4XQngREzkq5RNZpNBHCKsxfwW-gnUew6AXxrb8QNg?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"215\" height=\"20\"></strong></p>", "<p><strong id=\"docs-internal-guid-78ba905e-7fff-5467-5198-6a084d7e7e05\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXe4rQTFc-nKxenm2e5JSJRMBXzwz1QH8suXGhrLv-qI_EIm7WZsrr_vuP8NfNAL_1QowgVQu4j4obcud-oT9X0cLZlzTWJGeeaivZL4mCL15gDZz_ER_OdotMtdZmDttXc432cvRQ?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"215\" height=\"20\"></strong></p>"],
+                    solution_en: "<p>15<span style=\"font-family: Cambria Math;\">.(d)</span></p>\n<p><strong id=\"docs-internal-guid-16c9af5f-7fff-b127-27e6-84861db47644\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXc3O6mZMtYNsRTRAqAcRw8Evr9Qv6GvuEVrhprU6q5oGyrvSjZmkA5dWUVSF10IE9MAFZ1ss9PYGSz_9hwtk1BYM380JmB02eNSQxS8Uyig9nGGYOMquVXfZa2I71er7GTSoQjjFA?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"250\" height=\"61\"></strong></p>",
+                    solution_hi: "<p>15<span style=\"font-family: Cambria Math;\">.(d)</span></p>\n<p><strong id=\"docs-internal-guid-16c9af5f-7fff-b127-27e6-84861db47644\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXc3O6mZMtYNsRTRAqAcRw8Evr9Qv6GvuEVrhprU6q5oGyrvSjZmkA5dWUVSF10IE9MAFZ1ss9PYGSz_9hwtk1BYM380JmB02eNSQxS8Uyig9nGGYOMquVXfZa2I71er7GTSoQjjFA?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"234\" height=\"57\"></strong></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "16",
+                    section: "6",
+                    question_en: "<p>16<span style=\"font-family: Cambria Math;\">. </span><span style=\"font-family: Cambria Math;\">Select the correct mirror image of</span><br><strong id=\"docs-internal-guid-6694bd82-7fff-b7f0-35e0-70eff248c5a8\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXe3GjtmcgIs_5IfrXICOAjKSrM7yYbIpJCM8rWEABCB56hMcwf7jwMy_XkaNJ6GwBnxk7ggRH1od9mME9Cd6VJ7ul2n3k-ZmPZYX2-a2erndCdKruaTm_HD4tLENnDJK5BV_U-iqg?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"116\" height=\"134\"></strong></p>",
+                    question_hi: "<p>16<span style=\"font-family: Cambria Math;\">. </span><span style=\"font-family: Mangal;\">सही</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">दर्पण</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">प्रतिबिंब</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">का</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">चयन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">करें</span><span style=\"font-family: Mangal;\">।</span><br><strong id=\"docs-internal-guid-ed66fcf4-7fff-3ead-4b86-a5610c59e771\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXe3GjtmcgIs_5IfrXICOAjKSrM7yYbIpJCM8rWEABCB56hMcwf7jwMy_XkaNJ6GwBnxk7ggRH1od9mME9Cd6VJ7ul2n3k-ZmPZYX2-a2erndCdKruaTm_HD4tLENnDJK5BV_U-iqg?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"110\" height=\"127\"></strong></p>",
+                    options_en: ["<p><strong id=\"docs-internal-guid-07bb276f-7fff-44eb-fe9f-0e0b34fdaa40\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcoBSuqmjfb__ZxCfoomL7S0WHonNzsgb5MXOL7gNFqVoYY6grhaLOvfUOxtwxAwqBgchXwJ-w5_T2v3wN_h7dUUPTqGoXnpAc5UxKkRpRSw82ke-yP1eLQi_DL2GOTQyTnO74B?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"90\" height=\"89\"></strong></p>", "<p><strong id=\"docs-internal-guid-5fcca0e3-7fff-72dc-00a5-a7f02e31aecd\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeYlfavP-Q3412PXidzxr2D9msSn1JC2Vx3cB8xUm9yFV86sNJpi2WY969mFoWxxkWnpglYzObqC6M5bO2paINkbqR6p9gqO-HR_-hCt7tM9yQbhn7VxVJ72ryENm9CFkG3XAM1?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"90\" height=\"89\"></strong></p>", 
+                                "<p><strong id=\"docs-internal-guid-e769a434-7fff-966b-afc8-669b80b4ff23\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfIS1Bc7a2pwy-8l2e2KwmmyUm7OqFmqATq7FGtBq2Oeyk1odcwKykra6aEssUq1fcWJh20XjSpfwV0SZREnjMAN0U_R43DPs4gxLGH-D-DUt581FJtjzJj6UAvwWgM29qmIbiffA?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"90\" height=\"87\"></strong></p>", "<p><strong id=\"docs-internal-guid-39766023-7fff-05a7-3458-71111906fb27\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfreDBYz3inrZqBn7JWw1mvmnsM618R8lFEmgCszQtWEtYfvd0bP9e5ou27BEkK9WhEnV0gvowF56PUqYGlErANiF0RKx295uI2fI6Pd54FQ45WkD8aLpfIAqz-yE2GUY9Yv90BWQ?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"90\" height=\"90\"></strong></p>"],
+                    options_hi: ["<p><strong id=\"docs-internal-guid-ff5cb02b-7fff-90d2-be29-1b667ba10112\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcoBSuqmjfb__ZxCfoomL7S0WHonNzsgb5MXOL7gNFqVoYY6grhaLOvfUOxtwxAwqBgchXwJ-w5_T2v3wN_h7dUUPTqGoXnpAc5UxKkRpRSw82ke-yP1eLQi_DL2GOTQyTnO74B?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"90\" height=\"89\"></strong></p>", "<p><strong id=\"docs-internal-guid-c9947486-7fff-ba3d-64d7-d1a449327a89\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeYlfavP-Q3412PXidzxr2D9msSn1JC2Vx3cB8xUm9yFV86sNJpi2WY969mFoWxxkWnpglYzObqC6M5bO2paINkbqR6p9gqO-HR_-hCt7tM9yQbhn7VxVJ72ryENm9CFkG3XAM1?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"90\" height=\"89\"></strong></p>",
+                                "<p><strong id=\"docs-internal-guid-ad3711b5-7fff-06d2-c1a4-3a5acb37ad30\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfIS1Bc7a2pwy-8l2e2KwmmyUm7OqFmqATq7FGtBq2Oeyk1odcwKykra6aEssUq1fcWJh20XjSpfwV0SZREnjMAN0U_R43DPs4gxLGH-D-DUt581FJtjzJj6UAvwWgM29qmIbiffA?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"90\" height=\"87\"></strong></p>", "<p><strong id=\"docs-internal-guid-45265aeb-7fff-2cb1-47b7-eab84adc6d35\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfreDBYz3inrZqBn7JWw1mvmnsM618R8lFEmgCszQtWEtYfvd0bP9e5ou27BEkK9WhEnV0gvowF56PUqYGlErANiF0RKx295uI2fI6Pd54FQ45WkD8aLpfIAqz-yE2GUY9Yv90BWQ?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"90\" height=\"90\"></strong></p>\n<p><span style=\"font-family: Cambria Math;\"> </span></p>"],
+                    solution_en: "<p>16<span style=\"font-family: Cambria Math;\">.(b)</span><br><strong id=\"docs-internal-guid-dbf29ea5-7fff-458d-dfdd-baa63143299c\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeYlfavP-Q3412PXidzxr2D9msSn1JC2Vx3cB8xUm9yFV86sNJpi2WY969mFoWxxkWnpglYzObqC6M5bO2paINkbqR6p9gqO-HR_-hCt7tM9yQbhn7VxVJ72ryENm9CFkG3XAM1?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"95\" height=\"94\"></strong></p>",
+                    solution_hi: "<p>16<span style=\"font-family: Cambria Math;\">.(b)</span><br><strong id=\"docs-internal-guid-dbf29ea5-7fff-458d-dfdd-baa63143299c\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeYlfavP-Q3412PXidzxr2D9msSn1JC2Vx3cB8xUm9yFV86sNJpi2WY969mFoWxxkWnpglYzObqC6M5bO2paINkbqR6p9gqO-HR_-hCt7tM9yQbhn7VxVJ72ryENm9CFkG3XAM1?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"93\" height=\"92\"></strong></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "17",
+                    section: "6",
+                    question_en: "<p>17<span style=\"font-family: Cambria Math;\">.</span><span style=\"font-family: Cambria Math;\"> Select the correct mirror image of.</span><br><strong id=\"docs-internal-guid-f1cd9213-7fff-c016-7d16-74d9a8268d88\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcMTOd3Q5VJBDPbTLhCdMZd-f4b5GbEPSqm4gYmCFCn2CEnJ5XP6HBeEpHN9mn_hPIfXoZ7x0zRYtSwCQ2n6TdRrPYvWf0Qyu7O2JQN6KMPRCQly5BYVO8nOKXfn8tmZQhkRUQAzg?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"167\" height=\"101\"></strong></p>",
+                    question_hi: "<p>17<span style=\"font-family: Cambria Math;\">.</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">सही</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">दर्पण</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">प्रतिबिंब</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">का</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">चयन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">करें</span><span style=\"font-family: Mangal;\">।</span><br><strong id=\"docs-internal-guid-8eaf770f-7fff-b25d-e2a8-c0050d2dfbd2\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcMTOd3Q5VJBDPbTLhCdMZd-f4b5GbEPSqm4gYmCFCn2CEnJ5XP6HBeEpHN9mn_hPIfXoZ7x0zRYtSwCQ2n6TdRrPYvWf0Qyu7O2JQN6KMPRCQly5BYVO8nOKXfn8tmZQhkRUQAzg?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"167\" height=\"101\"></strong></p>",
+                    options_en: ["<p><strong id=\"docs-internal-guid-3a1e222e-7fff-d8c0-12cd-f9553638cdfc\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfOyg_8mBw_JtY2KLI7iOi1kcruObQo9umWMX2A8xYhm3n8v165Kjezd5H0vMBaWic4xuhzik4E-DmWTbJjgZtwu6my5gTRPMKMmy6Ta_jwiNI9fS-FtJKczEb0K3psgghz2P9tng?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"176\" height=\"27\"></strong></p>", "<p><strong id=\"docs-internal-guid-42f75628-7fff-095a-1212-e709b78cc3ca\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfjj4hAuj11bn428S3bYmliRSo4Bu3LOmiygKexFCfvA1B1_sHpeEhtrJ0pMZlsgJWXLnwD7NJnvGJLhCU-G-eL7LKT9kAabsBnt9hZT3dr0tC1Covz5YQNzMuinxhndO0ajkK0zg?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"178\" height=\"26\"></strong></p>", 
+                                "<p><strong id=\"docs-internal-guid-b7349459-7fff-5d1f-b171-4dc20d7831c3\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXe2cJg7-gEPxnDsUprJufmHZQTzu_nJn9IjekIpNUiL9z2KtlDEsWAYruAFE3N3Zwl43b4d4NGH3pIkgs_4U1dc0o4AulAKW_8oOmun6oa9SaWetnEpb-V3O2mABC0DBu1Tentr-A?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"172\" height=\"26\"></strong></p>", "<p><strong id=\"docs-internal-guid-480da2e4-7fff-8fc0-5339-2f8ed6677c74\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcRKyB3do3H7QF1CMUIVM-nXP8Is1kes_bhS_dX5NqRMyOiekwitaUoZka7S3-teZ0UfDTakkjMq3o5Lmwki7PWTlsmO622OJzeCklTmjSC25JxFv6niANGjMP9VJK3jyiMnSsiPg?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"169\" height=\"25\"></strong></p>"],
+                    options_hi: ["<p><strong id=\"docs-internal-guid-dca11b34-7fff-76f1-26b3-974b45f24581\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfOyg_8mBw_JtY2KLI7iOi1kcruObQo9umWMX2A8xYhm3n8v165Kjezd5H0vMBaWic4xuhzik4E-DmWTbJjgZtwu6my5gTRPMKMmy6Ta_jwiNI9fS-FtJKczEb0K3psgghz2P9tng?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"176\" height=\"27\"></strong></p>", "<p><strong id=\"docs-internal-guid-aad1c696-7fff-89d5-13b9-64bca89bf8ea\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfjj4hAuj11bn428S3bYmliRSo4Bu3LOmiygKexFCfvA1B1_sHpeEhtrJ0pMZlsgJWXLnwD7NJnvGJLhCU-G-eL7LKT9kAabsBnt9hZT3dr0tC1Covz5YQNzMuinxhndO0ajkK0zg?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"178\" height=\"26\"></strong></p>",
+                                "<p><strong id=\"docs-internal-guid-3a342ad0-7fff-9890-b0eb-19db43fd96f3\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXe2cJg7-gEPxnDsUprJufmHZQTzu_nJn9IjekIpNUiL9z2KtlDEsWAYruAFE3N3Zwl43b4d4NGH3pIkgs_4U1dc0o4AulAKW_8oOmun6oa9SaWetnEpb-V3O2mABC0DBu1Tentr-A?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"172\" height=\"26\"></strong></p>", "<p><strong id=\"docs-internal-guid-5cb80ee7-7fff-b1e3-526c-c8d4800fc159\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcRKyB3do3H7QF1CMUIVM-nXP8Is1kes_bhS_dX5NqRMyOiekwitaUoZka7S3-teZ0UfDTakkjMq3o5Lmwki7PWTlsmO622OJzeCklTmjSC25JxFv6niANGjMP9VJK3jyiMnSsiPg?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"169\" height=\"25\"></strong></p>"],
+                    solution_en: "<p>17<span style=\"font-family: Cambria Math;\">.(c)</span><br><strong id=\"docs-internal-guid-a95a4237-7fff-a7eb-d618-df0f8f917411\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXejamBqy7xYpm_wmQbUZxE30drFvDAYq6WFNcTx5mGxLWz7p_j-y76Y35LdsRuRQJDqE2qQZhfeIgb5ogcq3BiUg09FxwsElvoFmP3AYo69ItjpQb6T00tLr0_GjhKlmPSTB4xZOg?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"205\" height=\"66\"></strong></p>",
+                    solution_hi: "<p>17<span style=\"font-family: Cambria Math;\">.(c)</span><br><strong id=\"docs-internal-guid-a95a4237-7fff-a7eb-d618-df0f8f917411\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXejamBqy7xYpm_wmQbUZxE30drFvDAYq6WFNcTx5mGxLWz7p_j-y76Y35LdsRuRQJDqE2qQZhfeIgb5ogcq3BiUg09FxwsElvoFmP3AYo69ItjpQb6T00tLr0_GjhKlmPSTB4xZOg?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"205\" height=\"66\"></strong></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "18",
+                    section: "6",
+                    question_en: "<p>18<span style=\"font-family: Cambria Math;\">. </span><span style=\"font-family: Cambria Math;\">Select the correct mirror image of</span><br><strong id=\"docs-internal-guid-03ec9201-7fff-94f8-84aa-889f3ca67b51\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXc2auLlYtr3TqzaAoLHxkY4XCd9AZBDwS0FpSTvNE50H2jzIE6JcAiFg_DNfihAFa5hUu_bZw2FJOd1YTx2Miqha6jdyNlTjXBtc1a7dCYXwgH_VONnIcXscpRKHjW0gqKUnaJ42Q?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"168\" height=\"93\"></strong></p>",
+                    question_hi: "<p>18<span style=\"font-family: Cambria Math;\">.</span><span style=\"font-family: Cambria Math;\"> &nbsp;</span><span style=\"font-family: Mangal;\">दिए</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">गए</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">संयोजन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">की</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">सही</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">दर्पण</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">प्रतिबिंब</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">का</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">चयन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">करें</span><span style=\"font-family: Mangal;\">।</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">जब</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">दर्पण</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">को</span><span style=\"font-family: Cambria Math;\"> \'PQ\' </span><span style=\"font-family: Mangal;\">पर</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">दिखाया</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">गया</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">है</span><span style=\"font-family: Mangal;\">।</span><br><strong id=\"docs-internal-guid-15637355-7fff-9fe8-44cd-ed5bcf4de10c\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXc2auLlYtr3TqzaAoLHxkY4XCd9AZBDwS0FpSTvNE50H2jzIE6JcAiFg_DNfihAFa5hUu_bZw2FJOd1YTx2Miqha6jdyNlTjXBtc1a7dCYXwgH_VONnIcXscpRKHjW0gqKUnaJ42Q?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"144\" height=\"80\"></strong></p>",
+                    options_en: ["<p><strong id=\"docs-internal-guid-0ae9ac7a-7fff-259e-3e22-69eab50a6063\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXesUYCGIlSHTNjg0ruSNYpLi7ju2jgJkrfVfHo8HsTWCICMoodtW1jOw9weNyZuKz56Jt7WUEel-e4C9gEhsG-LOnEtm8D_0J48EGNhyOWspnLCb_4JDlhKoNIfFtiLgVvgRZmpOQ?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"188\" height=\"20\"></strong></p>", "<p><strong id=\"docs-internal-guid-5ba7247f-7fff-47b4-7b45-d9dfe47191da\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXf-YEeYHJPEpl9tBlkFqu--Cx5rN2KUIlHs2-uSN7CgouD4KDM3a9DSIB3GQO4MqcUTNC5KwCFAf5ySLyIhnnGgqoxeWROzlpvr0d9TSedtujMY_A2t4opcDvle-3_3DJqEyCAH9A?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"193\" height=\"21\"></strong></p>", 
+                                "<p><strong id=\"docs-internal-guid-d7c6499c-7fff-5c33-a8ef-e0ee6722b3ef\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfs1ma5UiGN7dJZj86p93q5DkExlb2VHfDGO22RGI0wmsvRgRhNa6_tbMrdObI4IzRsOhVyb9eYqwl9-8wAGju67qP68L1pxS2pynMQ54OPoPuLT9482p_h9paMa--SgCkMYlAZ0A?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"185\" height=\"20\"></strong></p>", "<p><strong id=\"docs-internal-guid-6ce6a16e-7fff-737b-d996-57b5228a86b0\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXf10ph-zJHUJQ2RbmnJ-mUwRnjRVBA7e0e2qL02mEjFMu1auYx2AR-bMRaQFqDO77SS71jYGhtY0Ki4LWPTX5kX0dxw2FzIMvLwqKD7mjc0zQooMVzulVIhEUR5cUqVH8pRAkifaQ?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"185\" height=\"20\"></strong></p>"],
+                    options_hi: ["<p><strong id=\"docs-internal-guid-4049d548-7fff-e9ee-ff2d-9c6d6eab744e\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXesUYCGIlSHTNjg0ruSNYpLi7ju2jgJkrfVfHo8HsTWCICMoodtW1jOw9weNyZuKz56Jt7WUEel-e4C9gEhsG-LOnEtm8D_0J48EGNhyOWspnLCb_4JDlhKoNIfFtiLgVvgRZmpOQ?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"188\" height=\"20\"></strong></p>", "<p><strong id=\"docs-internal-guid-0f206ec0-7fff-fd2b-5927-08cecdf076c3\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXf-YEeYHJPEpl9tBlkFqu--Cx5rN2KUIlHs2-uSN7CgouD4KDM3a9DSIB3GQO4MqcUTNC5KwCFAf5ySLyIhnnGgqoxeWROzlpvr0d9TSedtujMY_A2t4opcDvle-3_3DJqEyCAH9A?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"193\" height=\"21\"></strong></p>",
+                                "<p><strong id=\"docs-internal-guid-81d5900f-7fff-1d24-1f25-3e50f531e342\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfs1ma5UiGN7dJZj86p93q5DkExlb2VHfDGO22RGI0wmsvRgRhNa6_tbMrdObI4IzRsOhVyb9eYqwl9-8wAGju67qP68L1pxS2pynMQ54OPoPuLT9482p_h9paMa--SgCkMYlAZ0A?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"185\" height=\"20\"></strong></p>", "<p><strong id=\"docs-internal-guid-e8fece24-7fff-2ef2-5b33-3b3bf52d6457\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXf10ph-zJHUJQ2RbmnJ-mUwRnjRVBA7e0e2qL02mEjFMu1auYx2AR-bMRaQFqDO77SS71jYGhtY0Ki4LWPTX5kX0dxw2FzIMvLwqKD7mjc0zQooMVzulVIhEUR5cUqVH8pRAkifaQ?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"185\" height=\"20\"></strong></p>"],
+                    solution_en: "<p>18<span style=\"font-family: Cambria Math;\">.(d)</span><br><strong id=\"docs-internal-guid-82479b8b-7fff-442b-7fe1-b93a2798c305\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeat1wHxPI1O90dKnCC6U9gpGktkU5tZnWg8_tuEIppshdGk8quoSywbfUj6xXhVLPpW_CsoQyTTb4NmESB_HGf90Nb91YI6vGcqTs6kUJQph8ZEQ2CSiW0Upsm2D_CCgJQ1s6tYQ?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"226\" height=\"65\"></strong></p>",
+                    solution_hi: "<p>18<span style=\"font-family: Cambria Math;\">.(d)</span><br><strong id=\"docs-internal-guid-82479b8b-7fff-442b-7fe1-b93a2798c305\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeat1wHxPI1O90dKnCC6U9gpGktkU5tZnWg8_tuEIppshdGk8quoSywbfUj6xXhVLPpW_CsoQyTTb4NmESB_HGf90Nb91YI6vGcqTs6kUJQph8ZEQ2CSiW0Upsm2D_CCgJQ1s6tYQ?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"222\" height=\"64\"></strong></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "19",
+                    section: "6",
+                    question_en: "<p>19<span style=\"font-family: Cambria Math;\">. </span><span style=\"font-family: Cambria Math;\">Select the correct mirror image of.</span><br><strong id=\"docs-internal-guid-1b65ffd7-7fff-e191-a973-1a91b3c79427\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXf4SQlw1rrt-IljsfQ6Da1dxeaa8pR93ZNbOLazczyNI3bm_UKyzClPkcdA53LOdLRIaTmqZOuVLOkaNcipYpLtXzod0-6aQ5s0n10TJPEnx-G02JvEpF0WOsEdGqGsPAGLVb_qXg?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"171\" height=\"80\"></strong></p>",
+                    question_hi: "<p>19<span style=\"font-family: Cambria Math;\">. </span><span style=\"font-family: Mangal;\">सही</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">दर्पण</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">प्रतिबिंब</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">का</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">चयन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">करें</span><span style=\"font-family: Mangal;\">।</span><br><strong id=\"docs-internal-guid-1c7eee13-7fff-e9c6-b561-64c6ea10d210\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXf4SQlw1rrt-IljsfQ6Da1dxeaa8pR93ZNbOLazczyNI3bm_UKyzClPkcdA53LOdLRIaTmqZOuVLOkaNcipYpLtXzod0-6aQ5s0n10TJPEnx-G02JvEpF0WOsEdGqGsPAGLVb_qXg?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"188\" height=\"88\"></strong></p>",
+                    options_en: ["<p><strong id=\"docs-internal-guid-24936b59-7fff-5ccf-c363-7b43b364cf56\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdStfun3o19luvPNIuMk4wVOGtCi5j8Qjv5V3wT7dxeH7-005yticXDY4zc4d4Mz8A03_2KESJkD2MbjvZwMyLLihcIfThAfbEnWU0-ot4acDmQ6OlGVqr9ilL_ttYERqiq64rD?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"216\" height=\"21\"></strong></p>", "<p><strong id=\"docs-internal-guid-2484fe19-7fff-7f3e-b105-b3a07ecb2964\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcU71jqOTLAkfBsDCj_SosvZw0L3VC5GkWeptXRBorDsNWutS-s7q-sF84n1if707nL7vBOIVqtx2GxoznCu8FkjWgg_Hum1J_XExyARjMhNajAlxnSRBK8Z2qrwu99-EjcA198Wg?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"227\" height=\"21\"></strong></p>", 
+                                "<p><strong id=\"docs-internal-guid-b423cad0-7fff-93c0-d567-0181b3fdab36\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcGebUo9pxeak1mmYAsEnuv5SS0hTIKCd4-Lvk2pWsEDQ8Ck2z3rJ0bMVwN4MKLgquD8wHMDNKdCZyxWLSAL6dhyvDEs3A1iaNayi0882ci-91eriJ4AGBAvmfIejBTlacM2CMuuA?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"214\" height=\"20\"></strong></p>", "<p><strong id=\"docs-internal-guid-13576ee6-7fff-b8e7-cdca-c345dc614b53\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeGymMKN0xHpyAe9BHqu3tujD6WLefxRahZScYi_GyFTWDw1NqDZB4D11R4yMnuS5z8q2Sic9-VQC3HbnQxC5BGNSfZBDEWC53HbqaBNT09hi6hjC5H1rjHRifYUaZ7nOmlONan?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"215\" height=\"20\"></strong></p>"],
+                    options_hi: ["<p><strong id=\"docs-internal-guid-ae28a297-7fff-bbc6-5cad-bb02cb1e145a\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdStfun3o19luvPNIuMk4wVOGtCi5j8Qjv5V3wT7dxeH7-005yticXDY4zc4d4Mz8A03_2KESJkD2MbjvZwMyLLihcIfThAfbEnWU0-ot4acDmQ6OlGVqr9ilL_ttYERqiq64rD?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"216\" height=\"21\"></strong></p>", "<p><strong id=\"docs-internal-guid-ec9caec1-7fff-cfdf-7273-fdf3f5a7ce44\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcU71jqOTLAkfBsDCj_SosvZw0L3VC5GkWeptXRBorDsNWutS-s7q-sF84n1if707nL7vBOIVqtx2GxoznCu8FkjWgg_Hum1J_XExyARjMhNajAlxnSRBK8Z2qrwu99-EjcA198Wg?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"227\" height=\"21\"></strong></p>",
+                                "<p><strong id=\"docs-internal-guid-31cfa234-7fff-f910-0581-9a9931ec8309\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcGebUo9pxeak1mmYAsEnuv5SS0hTIKCd4-Lvk2pWsEDQ8Ck2z3rJ0bMVwN4MKLgquD8wHMDNKdCZyxWLSAL6dhyvDEs3A1iaNayi0882ci-91eriJ4AGBAvmfIejBTlacM2CMuuA?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"214\" height=\"20\"></strong></p>", "<p><strong id=\"docs-internal-guid-7b6eab6d-7fff-23e7-530c-5a7e6f95e17f\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeGymMKN0xHpyAe9BHqu3tujD6WLefxRahZScYi_GyFTWDw1NqDZB4D11R4yMnuS5z8q2Sic9-VQC3HbnQxC5BGNSfZBDEWC53HbqaBNT09hi6hjC5H1rjHRifYUaZ7nOmlONan?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"215\" height=\"20\"></strong></p>"],
+                    solution_en: "<p>19<span style=\"font-family: Cambria Math;\">.(a)</span></p>\n<p><strong id=\"docs-internal-guid-e671d0a3-7fff-29d4-247e-a6cf2f2626f3\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXc5yH2t6yZPOPOe9TAHRvXyD4Ywxo7DQ8pY-NA_ruo4xZxe3DkDhDMM3TdMjRlALeHuwu4Wuud0Wr1rTdkN5PzpqsKdJ_KDcXxvbF8SC06ca96x6Z9GssJFgS0je4FXWKi5bbg9?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"274\" height=\"69\"></strong></p>",
+                    solution_hi: "<p>19<span style=\"font-family: Cambria Math;\">.(a)</span></p>\n<p><strong id=\"docs-internal-guid-e671d0a3-7fff-29d4-247e-a6cf2f2626f3\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXc5yH2t6yZPOPOe9TAHRvXyD4Ywxo7DQ8pY-NA_ruo4xZxe3DkDhDMM3TdMjRlALeHuwu4Wuud0Wr1rTdkN5PzpqsKdJ_KDcXxvbF8SC06ca96x6Z9GssJFgS0je4FXWKi5bbg9?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"266\" height=\"67\"></strong></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "20",
+                    section: "misc",
+                    question_en: "<p>20<span style=\"font-family: Cambria Math;\">.</span><span style=\"font-family: Cambria Math;\"> Select the correct mirror image of.</span></p>\n<p><strong id=\"docs-internal-guid-be44145b-7fff-e56b-a266-a9a8495ba20d\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeA21aT2IWOFdf0-xPgUkMO_nLUIymHt7d3wGf-jVX9HU1s-orRa55Qoueih9mThhzGWLTx6cnjc_-dKJfLyZ4x9RWtkZ5n2gNT-TNTnV-ZNVRVYLydyB4k7x_bK-M7KZ-61HiVRQ?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"178\" height=\"85\"></strong></p>",
+                    question_hi: "<p>20<span style=\"font-family: Cambria Math;\">.</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">दिए</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">गए</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">संयोजन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">की</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">सही</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">दर्पण</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">प्रतिबिंब</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">का</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">चयन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">करें</span><span style=\"font-family: Mangal;\">।</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">जब</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">दर्पण</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">को</span><span style=\"font-family: Cambria Math;\"> \'PQ\' </span><span style=\"font-family: Mangal;\">पर</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">दिखाया</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">गया</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Mangal;\">है</span><span style=\"font-family: Mangal;\">।</span><br><strong id=\"docs-internal-guid-1fd0da63-7fff-53bf-9d37-e740e77903da\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeA21aT2IWOFdf0-xPgUkMO_nLUIymHt7d3wGf-jVX9HU1s-orRa55Qoueih9mThhzGWLTx6cnjc_-dKJfLyZ4x9RWtkZ5n2gNT-TNTnV-ZNVRVYLydyB4k7x_bK-M7KZ-61HiVRQ?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"188\" height=\"90\"></strong></p>",
+                    options_en: ["<p><strong id=\"docs-internal-guid-704be376-7fff-5b04-614d-abb1bd081e24\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdd3i_rKiSqKm9-_nHfOU6yaBT0I3902-NLmqs-Q43AiiROvJtIt1MRg2e8BsCydQOBxPiaC9X7y-BFwF_mkzhqSlZvz8JM_S2VG3zE2-IeDWFUnPjldkMLJVUDhx0745ZD9K8l?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"203\" height=\"22\"></strong></p>", "<p><strong id=\"docs-internal-guid-0bd65fb7-7fff-76dc-7194-e84a3da0ded4\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcE0CbIRpHnir-Bmlki6SWWm44iqreqWuHJjDJNK9lhhZ6ql11h02TsSIvHyi5w1g1blmE6FqThkFTjEayhro6jRC36_amwXv4e912VRE8zMUnmKWkv5tnc7rXNO1xGRhgLyjqd?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"212\" height=\"21\"></strong></p>", 
+                                "<p><strong id=\"docs-internal-guid-7db2cdce-7fff-a0bb-cffc-96e0c67a52be\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXd_-If5CiGS26ZSPo5VpwXrLB8XHGkkYziMYYWwTEipWkTTlv_NvHaXSh3fLKldR4G2R0G2CDNws_dQHJdKi17GTGyieLXPbr9lIB5j6jBiwKOQ1404l44Ev9BggUlW-8Uc-jCA?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"215\" height=\"20\"></strong></p>", "<p><strong id=\"docs-internal-guid-31bca950-7fff-c1f7-d3a5-799567b42702\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcdyAxhSEK_az8AvHZ-ULCNuMSdHBxAWxInD6C3Kb8kvez20fYhNpmf8DV60micZuMBDTmGYOH-1-TxLEzaTE7Rbrswx31_4lmrDWOCJRp-V41aGJBcq7SUtIWmiEcS6j4yPeIP8Q?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"217\" height=\"23\"></strong></p>"],
+                    options_hi: ["<p><strong id=\"docs-internal-guid-d9f1d91c-7fff-49c6-c0b2-7dbaa3b4392a\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdd3i_rKiSqKm9-_nHfOU6yaBT0I3902-NLmqs-Q43AiiROvJtIt1MRg2e8BsCydQOBxPiaC9X7y-BFwF_mkzhqSlZvz8JM_S2VG3zE2-IeDWFUnPjldkMLJVUDhx0745ZD9K8l?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"203\" height=\"22\"></strong></p>", "<p><strong id=\"docs-internal-guid-436815ec-7fff-5c29-3982-90c8acd4263d\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcE0CbIRpHnir-Bmlki6SWWm44iqreqWuHJjDJNK9lhhZ6ql11h02TsSIvHyi5w1g1blmE6FqThkFTjEayhro6jRC36_amwXv4e912VRE8zMUnmKWkv5tnc7rXNO1xGRhgLyjqd?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"212\" height=\"21\"></strong></p>",
+                                "<p><strong id=\"docs-internal-guid-23a79baf-7fff-12c3-7a25-6d5244ef0e94\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXd_-If5CiGS26ZSPo5VpwXrLB8XHGkkYziMYYWwTEipWkTTlv_NvHaXSh3fLKldR4G2R0G2CDNws_dQHJdKi17GTGyieLXPbr9lIB5j6jBiwKOQ1404l44Ev9BggUlW-8Uc-jCA?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"215\" height=\"20\"></strong></p>", "<p><strong id=\"docs-internal-guid-d3c4f772-7fff-24d9-1b87-4cf89f84e2d8\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcdyAxhSEK_az8AvHZ-ULCNuMSdHBxAWxInD6C3Kb8kvez20fYhNpmf8DV60micZuMBDTmGYOH-1-TxLEzaTE7Rbrswx31_4lmrDWOCJRp-V41aGJBcq7SUtIWmiEcS6j4yPeIP8Q?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"217\" height=\"23\"></strong></p>"],
+                    solution_en: "<p>20<span style=\"font-family: Cambria Math;\">.(d)</span><br><strong id=\"docs-internal-guid-034f26cd-7fff-ac54-f1bb-10f026e5ed26\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXddeYLelsRwN4cZde6Z7-OidzXTVppuxlGvh0DdoDwRrzMmVNjXDh95CxS2rFIuyslKizr-INS88KnL-2TCKYZq2qBxp92Jq0Q_TRBpwTj5nXakV1seJCK0Q7rpPdkIizPIxFLXbA?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"229\" height=\"58\"></strong></p>",
+                    solution_hi: "<p>20<span style=\"font-family: Cambria Math;\">.(d)</span><br><strong id=\"docs-internal-guid-034f26cd-7fff-ac54-f1bb-10f026e5ed26\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXddeYLelsRwN4cZde6Z7-OidzXTVppuxlGvh0DdoDwRrzMmVNjXDh95CxS2rFIuyslKizr-INS88KnL-2TCKYZq2qBxp92Jq0Q_TRBpwTj5nXakV1seJCK0Q7rpPdkIizPIxFLXbA?key=GRBw1cwSFuTNrj9BFqBk7BzM\" width=\"225\" height=\"57\"></strong></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+            
+            // Generate question boxes
+            const boxesContainer = document.getElementById('question-boxes');
+            questions.forEach((q, index) => {
+                const box = document.createElement('div');
+                box.className = 'q-box';
+                box.textContent = index + 1;
+                box.onclick = () => showQuestion(index);
+                box.id = `box-${index}`;
+                boxesContainer.appendChild(box);
+            });
+            
+            // Show first question
+            showQuestion(0);
+            updateProgress();
+        }
+        
+        // Show a specific question
+        
+        function formatContent(text) {
+            if (!text) return '';
+            return text.replace(/<img/g, '<img style="max-width:100%;height:auto;"');
+        }
+        
+        function showQuestion(index) {
+            if (index < 0 || index >= questions.length) return;
+            
+            currentQuestion = index;
+            const question = questions[index];
+            
+            // Update question counter
+            document.getElementById('question-counter').textContent = `Question ${index + 1} of ${questions.length}`;
+            
+            // Update question boxes
+            document.querySelectorAll('.q-box').forEach(box => box.classList.remove('current'));
+            document.getElementById(`box-${index}`).classList.add('current');
+            
+            // Generate question HTML
+            let html = `
+                <div class="question-card">
+                    <div class="question-text">
+                        <div class="en">${formatContent(question.question_en)}</div>
+                        <div class="hi" style="display:none">${formatContent(question.question_hi)} </div>
+                    </div>
+                    <div class="options" id="options-container">`;
+            
+            // Add options
+            ['a', 'b', 'c', 'd'].forEach((opt, i) => {
+                let optionClass = '';
+                let isCorrectAnswer = opt === question.correct;
+                let isUserAnswer = answers[question.id] === opt;
+                
+                // When reviewing, add appropriate classes
+                if (submitted) {
+                    if (isCorrectAnswer) {
+                        optionClass += ' correct-answer';
+                    } else if (isUserAnswer && !isCorrectAnswer) {
+                        optionClass += ' incorrect';
+                    }
+                }
+                
+                html += `
+                    <div class="option-item">
+                        <input class="option-input" type="radio" name="q${index}" 
+                            id="opt-${index}-${opt}" value="${opt}" 
+                            ${isUserAnswer ? 'checked' : ''}
+                            onclick="selectAnswer('${question.id}', '${opt}')">
+                       <label class="option-label${optionClass}" for="opt-${index}-${opt}">
+                            <div class="en">${question.options_en[i]}</div>
+                            <div class="hi" style="display:none">${question.options_hi[i]}</div>
+                        </label>
+                    </div>`;
+            });
+            
+            // Add solution if submitted
+            if (submitted) {
+                const isCorrect = answers[question.id] === question.correct;
+                const resultText = answers[question.id] ? (isCorrect ? 'Correct!' : 'Incorrect!') : 'Not attempted';
+                
+                html += `
+                    <div class="solution-container">
+                        <div class="solution-title">${resultText}</div>
+                        <div class="solution-text">
+                            <div class="en">${question.solution_en}</div>
+                            <div class="hi" style="display:none">${question.solution_hi}</div>
+                        </div>
+                    </div>`;
+            }
+            
+            html += `</div></div>`;
+            
+            document.getElementById('questions-container').innerHTML = html;
+            
+            // Apply language settings
+            applyLanguage();
+            
+            // If in mobile view, close the menu
+            if (window.innerWidth < 992) {
+                toggleNav(false);
+            }
+            
+            // Add review mode class if submitted
+            if (submitted) {
+                document.getElementById('options-container').classList.add('review-mode');
+            }
+        }
+        
+        // Apply current language
+        function applyLanguage() {
+            document.querySelectorAll(`.${currentLang}`).forEach(el => el.style.display = 'block');
+            document.querySelectorAll(`.${currentLang === 'en' ? 'hi' : 'en'}`).forEach(el => el.style.display = 'none');
+            
+            // Update language button text
+            document.getElementById('lang-text').textContent = currentLang === 'en' ? 'Hi' : 'En';
+        }
+        
+        // Select an answer
+        function selectAnswer(qId, option) {
+            if (submitted) return;
+            
+            answers[qId] = option;
+            updateProgress();
+            
+            // Mark question as attempted in the navigation
+            const index = questions.findIndex(q => q.id === qId);
+            if (index >= 0) {
+                const box = document.getElementById(`box-${index}`);
+                box.classList.add('attempted');
+                box.classList.remove('unattempted');
+            }
+        }
+        
+        // Navigate to previous/next question
+        function prevQuestion() { 
+            if (currentQuestion > 0) showQuestion(currentQuestion - 1); 
+        }
+        
+        function nextQuestion() { 
+            if (currentQuestion < questions.length - 1) showQuestion(currentQuestion + 1); 
+        }
+        
+        // Switch section
+        function switchSection(sectionId) {
+            if (sectionId === 'all') {
+                showQuestion(0);
+                return;
+            }
+            
+            const section = sections[sectionId];
+            if (section) showQuestion(section.start);
+        }
+        
+        // Toggle language
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'hi' : 'en';
+            applyLanguage();
+        }
+        
+        // Toggle navigation sidebar
+        function toggleNav(show) {
+            const nav = document.getElementById('question-nav');
+            const overlay = document.getElementById('nav-overlay');
+            
+            if (show === undefined) {
+                show = !nav.classList.contains('show');
+            }
+            
+            if (show) {
+                nav.classList.add('show');
+                overlay.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            } else {
+                nav.classList.remove('show');
+                overlay.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+        }
+        
+        // Update progress
+        function updateProgress() {
+            const attempted = Object.keys(answers).length;
+            document.getElementById('attempted-count').textContent = attempted;
+        }
+        
+        // Start timer
+        function startTimer() {
+            const timerDisplay = document.getElementById('timer-display');
+            let timeLeft = totalTime;
+            
+            const timerInterval = setInterval(() => {
+                if (timeLeft <= 0 || submitted) {
+                    clearInterval(timerInterval);
+                    if (!submitted) submitTest();
+                    return;
+                }
+                
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                timeLeft--;
+            }, 1000);
+        }
+        
+        // Confirm before submitting
+        function confirmSubmit() {
+            if (submitted) return;
+            
+            const attempted = Object.keys(answers).length;
+            const remaining = questions.length - attempted;
+            
+            // Create a more modern confirmation dialog
+            const confirmHtml = `
+                <div style="text-align: center; padding: 20px;">
+                    <h4 style="margin-bottom: 16px; color: var(--dark);">Confirm Submission</h4>
+                    <p style="margin-bottom: 24px; color: var(--gray);">
+                        You have attempted ${attempted} of ${questions.length} questions.<br>
+                        ${remaining} questions are unattempted.
+                    </p>
+                    <div style="display: flex; justify-content: center; gap: 12px;">
+                        <button onclick="this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; border: 1px solid var(--light-gray); background: white; border-radius: 8px; cursor: pointer;">
+                            Cancel
+                        </button>
+                        <button onclick="submitTest(); this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer;">
+                            Submit Test
+                        </button>
+                    </div>
+                </div>`;
+            
+            // Create modal element
+            const modal = document.createElement('div');
+            modal.className = 'results-modal show';
+            modal.innerHTML = `
+                <div class="results-card" style="max-width: 400px;">
+                    <button class="cancel-btn" style="position: absolute; top: 12px; right: 12px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--gray);" onclick="this.closest('.results-modal').remove()">
+                        ×
+                    </button>
+                    ${confirmHtml}
+                </div>`;
+            
+            document.body.appendChild(modal);
+        }
+        
+        // Submit test
+        function submitTest() {
+            if (submitted) return;
+            
+            submitted = true;
+            
+            let score = 0;
+            let correctCount = 0;
+            let incorrectCount = 0;
+            let unattemptedCount = 0;
+            
+            questions.forEach((q, index) => {
+                const userAns = answers[q.id];
+                const box = document.getElementById(`box-${index}`);
+                
+                box.classList.remove('attempted');
+                
+                if (!userAns) {
+                    unattemptedCount++;
+                    box.classList.add('unattempted');
+                } else if (userAns === q.correct) {
+                    correctCount++;
+                    score += q.pos_marks;
+                    box.classList.add('correct');
+                } else {
+                    incorrectCount++;
+                    score -= q.neg_marks;
+                    box.classList.add('incorrect');
+                }
+            });
+            
+            // Update result values
+            document.getElementById('score-value').textContent = score.toFixed(2);
+            document.getElementById('correct-value').textContent = correctCount;
+            document.getElementById('incorrect-value').textContent = incorrectCount;
+            document.getElementById('unattempted-value').textContent = unattemptedCount;
+            
+            // Show the results modal
+            document.getElementById('results-modal').classList.add('show');
+            
+            // Disable submit button
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-check"></i>';
+            submitBtn.style.backgroundColor = 'var(--success)';
+            
+            // Refresh current question view to show solution
+            showQuestion(currentQuestion);
+        }
+        
+        // Review test
+        function reviewTest() {
+            document.getElementById('results-modal').classList.remove('show');
+            showQuestion(0);
+        }
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target === document.getElementById('results-modal')) {
+                document.getElementById('results-modal').classList.remove('show');
+            }
+        });
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') prevQuestion();
+            if (e.key === 'ArrowRight') nextQuestion();
+        });
+    </script>
+</body>
+</html>
