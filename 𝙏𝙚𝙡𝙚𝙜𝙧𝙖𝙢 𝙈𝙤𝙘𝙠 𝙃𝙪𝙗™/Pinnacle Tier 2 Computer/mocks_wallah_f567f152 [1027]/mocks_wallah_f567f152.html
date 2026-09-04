@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mocks Wallah</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --primary-light: #a29bfe;
+            --primary-dark: #5649c0;
+            --secondary: #00cec9;
+            --accent: #fd79a8;
+            --success: #00b894;
+            --warning: #fdcb6e;
+            --danger: #d63031;
+            --light: #f8f9fa;
+            --dark: #2d3436;
+            --gray: #636e72;
+            --light-gray: #dfe6e9;
+            --card-bg: #ffffff;
+            --body-bg: #f5f6fa;
+            --header-bg: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            --footer-bg: #ffffff;
+            --box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            --box-shadow-sm: 0 2px 10px rgba(0,0,0,0.05);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background-color: var(--body-bg);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            color: var(--dark);
+            line-height: 1.6;
+            padding-bottom: 80px; /* Space for fixed navigation */
+            overflow-x: hidden;
+        }
+        
+        /* Header Styles */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: var(--header-bg);
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            z-index: 1000;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .header-brand {
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .header-brand i {
+            margin-right: 8px;
+            font-size: 1.2rem;
+        }
+        
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .control-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .control-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .control-btn.active {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .timer-display {
+            background: rgba(0,0,0,0.2);
+            border-radius: 18px;
+            padding: 4px 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+        
+        .timer-display i {
+            margin-right: 6px;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-top: 60px;
+            padding: 16px;
+            min-height: calc(100vh - 140px);
+        }
+        
+        .question-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--box-shadow-sm);
+            border: none;
+            transition: var(--transition);
+        }
+        
+        .question-counter {
+            font-size: 0.9rem;
+            color: var(--gray);
+            text-align: center;
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+        
+        .question-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+        
+        .option-item {
+            margin-bottom: 12px;
+            position: relative;
+        }
+        
+        .option-input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+            .question-text {
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        hyphens: auto;
+        max-width: 100%;
+    }
+
+    .question-text img,
+    .option-label img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 8px 0;
+        border-radius: 8px;
+    }
+
+    .option-label {
+        overflow: hidden;
+    }
+
+    .question-card {
+        overflow: hidden;
+    }
+        
+        .option-label {
+            display: block;
+            padding: 14px 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--light-gray);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .option-label:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .option-input:checked + .option-label {
+            border-color: var(--primary);
+            background: rgba(108, 92, 231, 0.05);
+            box-shadow: 0 0 0 1px var(--primary);
+        }
+        
+        .option-input:checked + .option-label::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--primary);
+        }
+        
+        /* When reviewing answers */
+        .review-mode .option-input:checked + .option-label.correct {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.correct::after {
+            background: var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.incorrect {
+            border-color: var(--danger);
+            background: rgba(214, 48, 49, 0.05);
+            box-shadow: 0 0 0 1px var(--danger);
+        }
+        
+        .MathJax, .mjx-chtml {
+            overflow-x: auto;
+            max-width: 100%;
+            display: inline-block;
+        }
+
+        
+        .review-mode .option-input:checked + .option-label.incorrect::after {
+            background: var(--danger);
+        }
+        
+        .review-mode .option-label.correct-answer {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-label.correct-answer::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--success);
+        }
+        
+        .solution-container {
+            margin-top: 20px;
+            padding: 16px;
+            background: rgba(108, 92, 231, 0.05);
+            border-radius: 12px;
+            border-left: 3px solid var(--primary);
+        }
+        
+        .solution-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+        
+        /* Question Navigation */
+        .question-nav {
+            position: fixed;
+            top: 60px;
+            right: 0;
+            bottom: 80px;
+            width: 100%;
+            max-width: 320px;
+            background: var(--card-bg);
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            transform: translateX(100%);
+            transition: var(--transition);
+            z-index: 900;
+            overflow-y: auto;
+            padding: 16px;
+        }
+        
+        .question-nav.show {
+            transform: translateX(0);
+        }
+        
+        .nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .nav-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+        
+        .question-stats {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .stat-badge {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        
+        .section-selector {
+            width: 100%;
+            margin-bottom: 16px;
+            border-radius: 12px;
+            padding: 10px 16px;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            font-size: 0.9rem;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 16px;
+        }
+        
+        .question-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+            gap: 8px;
+        }
+        
+        .q-box {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .q-box:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .q-box.attempted {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .q-box.correct {
+            background-color: var(--success);
+            color: white;
+            border-color: var(--success);
+        }
+        
+        .q-box.incorrect {
+            background-color: var(--danger);
+            color: white;
+            border-color: var(--danger);
+        }
+        
+        .q-box.current {
+            border: 2px solid var(--accent) !important;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .q-box.unattempted {
+            background-color: var(--gray);
+            color: white;
+            border-color: var(--gray);
+        }
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: var(--footer-bg);
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            z-index: 800;
+        }
+        
+        .nav-btn {
+            height: 48px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 20px;
+            transition: var(--transition);
+            gap: 8px;
+        }
+        
+        .nav-btn i {
+            font-size: 1rem;
+        }
+        
+        .nav-btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .nav-btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+        
+        .nav-btn-outline:hover {
+            background: rgba(108, 92, 231, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        /* Overlay when nav is open */
+        .nav-overlay {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            bottom: 80px;
+            background: rgba(0,0,0,0.5);
+            z-index: 800;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+        }
+        
+        .nav-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        /* Results Modal */
+        .results-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1100;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+            padding: 16px;
+        }
+        
+        .results-modal.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .results-card {
+            background: white;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+            transform: translateY(20px);
+            transition: var(--transition);
+        }
+        
+        .results-modal.show .results-card {
+            transform: translateY(0);
+        }
+        
+        .results-header {
+            background: var(--header-bg);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .results-title {
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .results-body {
+            padding: 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            color: white;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+        
+        .results-footer {
+            padding: 16px 20px;
+            display: flex;
+            justify-content: center;
+            border-top: 1px solid var(--light-gray);
+        }
+        
+        /* Responsive Adjustments */
+        @media (min-width: 992px) {
+            .question-nav {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-right: 320px;
+            }
+            
+            .nav-overlay {
+                display: none;
+            }
+            
+            .bottom-nav {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .question-grid {
+                grid-template-columns: repeat(auto-fill, minmax(36px, 1fr));
+                gap: 6px;
+            }
+            
+            .q-box {
+                width: 36px;
+                height: 36px;
+                font-size: 0.9rem;
+            }
+            
+            .option-label {
+                padding: 12px 14px;
+            }
+            
+            .question-text {
+                font-size: 1rem;
+            }
+            
+            .header-brand {
+                font-size: 1rem;
+            }
+            
+            .control-btn {
+                width: 32px;
+                height: 32px;
+            }
+            
+            .timer-display {
+                font-size: 0.8rem;
+                padding: 4px 10px;
+            }
+            
+            .nav-btn {
+                height: 44px;
+                padding: 0 16px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="#" class="header-brand">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Mocks Wallah</span>
+            </a>
+            
+            <div class="header-controls">
+                <!-- Timer -->
+                <div class="timer-display">
+                    <i class="far fa-clock"></i>
+                    <span id="timer-display">15:00</span>
+                </div>
+                
+                <!-- Language toggle -->
+                <button class="control-btn" id="lang-btn" onclick="toggleLanguage()">
+                    <span id="lang-text">En</span>
+                </button>
+                
+                <!-- Submit button -->
+                <button class="control-btn" id="submit-btn" onclick="confirmSubmit()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+                
+                <!-- Questions toggle for mobile -->
+                <button class="control-btn nav-toggle-btn" id="nav-toggle" onclick="toggleNav()">
+                    <i class="fas fa-th"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main content -->
+    <main class="main-content" id="main-content">
+        <div class="question-counter" id="question-counter">Question 1 of 20</div>
+        
+        <!-- Questions will be displayed here -->
+        <div id="questions-container"></div>
+    </main>
+    
+    <!-- Overlay for mobile nav -->
+    <div class="nav-overlay" id="nav-overlay" onclick="toggleNav(false)"></div>
+    
+    <!-- Question navigation sidebar -->
+    <aside class="question-nav" id="question-nav">
+        <div class="nav-header">
+            <h3 class="nav-title">Questions</h3>
+            <div class="question-stats">
+                <span class="stat-badge bg-primary" id="attempted-count">0</span>
+                <span class="stat-badge bg-gray" id="total-count">20</span>
+                <button class="control-btn d-lg-none" onclick="toggleNav(false)">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Section selector -->
+        <select class="section-selector" id="section-selector" onchange="switchSection(this.value)">
+            <option value="all">All Sections</option>
+        </select>
+        
+        <!-- Question grid -->
+        <div class="question-grid" id="question-boxes"></div>
+    </aside>
+    
+    <!-- Bottom navigation for mobile -->
+    <nav class="bottom-nav d-lg-none">
+        <button class="nav-btn nav-btn-outline" onclick="prevQuestion()">
+            <i class="fas fa-chevron-left"></i>
+            <span>Previous</span>
+        </button>
+        <button class="nav-btn nav-btn-outline" onclick="nextQuestion()">
+            <span>Next</span>
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </nav>
+    
+    <!-- Results modal -->
+    <div class="results-modal" id="results-modal">
+        <div class="results-card">
+            <div class="results-header">
+                <h3 class="results-title">Test Results</h3>
+            </div>
+            <div class="results-body">
+                <div class="stats-grid">
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark))">
+                        <div class="stat-value" id="score-value">0</div>
+                        <div class="stat-label">Score</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--success), #1b9aaa)">
+                        <div class="stat-value" id="correct-value">0</div>
+                        <div class="stat-label">Correct</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--danger), var(--accent))">
+                        <div class="stat-value" id="incorrect-value">0</div>
+                        <div class="stat-label">Incorrect</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--gray), var(--dark))">
+                        <div class="stat-value" id="unattempted-value">0</div>
+                        <div class="stat-label">Unattempted</div>
+                    </div>
+                </div>
+            </div>
+            <div class="results-footer">
+                <button class="nav-btn nav-btn-primary" onclick="reviewTest()">
+                    <i class="fas fa-search me-1"></i>
+                    <span>Review Test</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Questions data
+        const questions = [];
+        const sections = {};
+        let currentLang = "en";
+        let currentQuestion = 0;
+        let answers = {};
+        let submitted = false;
+        let totalTime = 15 * 60;
+        
+        // Initialize the test
+        window.onload = function() {
+            initializeTest();
+            startTimer();
+            
+            // If on desktop, show the question navigation by default
+            if (window.innerWidth >= 992) {
+                document.getElementById('question-nav').classList.add('show');
+                document.getElementById('main-content').classList.add('with-nav');
+            }
+        };
+        
+        // Initialize test data
+        function initializeTest() {
+            // Add sections and questions
+            
+            sections["31"] = {
+                name: "Computer Knowledge",
+                start: 0,
+                end: 18
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="31">Computer Knowledge</option>`;
+            
+            sections["misc"] = {
+                name: "Miscellaneous",
+                start: 19,
+                end: 19
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="misc">Miscellaneous</option>`;
+            
+            
+                questions.push({
+                    id: "1",
+                    section: "31",
+                    question_en: " <p>1.</span><span style=\"font-family:\"> Which of the following is the correct order of the four major functions of a computer?</span></p>",
+                    question_hi: " <p>1.</span><span style=\"font-family:\"> </span><span style=\"font-family:\">निम्नलिखित में से कौन</span><span style=\"font-family:\">-</span><span style=\"font-family:\">सा कंप्यूटर के चार प्रमुख फंक्शन्स का सही क्रम है</span><span style=\"font-family:\">?</span></p>",
+                    options_en: [" <p> Process, Output, Input, Storage</span></p>", " <p> Input, Process, Output, Storage</span></p>", 
+                                " <p> Process, Storage, Input, Output</span></p>", " <p> Input, Output, Process, Storage</span></p>"],
+                    options_hi: [" <p> </span><span style=\"font-family:\">प्रोसेस</span><span style=\"font-family:\">, </span><span style=\"font-family:\">आउटपुट</span><span style=\"font-family:\">, </span><span style=\"font-family:\">इनपुट</span><span style=\"font-family:\">, </span><span style=\"font-family:\">स्टोरेज</span></p>", " <p> </span><span style=\"font-family:\">इनपुट</span><span style=\"font-family:\">, </span><span style=\"font-family:\">प्रोसेस</span><span style=\"font-family:\">, </span><span style=\"font-family:\">आउटपुट</span><span style=\"font-family:\">, </span><span style=\"font-family:\">स्टोरेज</span></p>",
+                                " <p> </span><span style=\"font-family:\">प्रोसेस</span><span style=\"font-family:\">, </span><span style=\"font-family:\">स्टोरेज</span><span style=\"font-family:\">, </span><span style=\"font-family:\">इनपुट</span><span style=\"font-family:\">, </span><span style=\"font-family:\">आउटपुट</span></p>", " <p> </span><span style=\"font-family:\">इनपुट</span><span style=\"font-family:\">, </span><span style=\"font-family:\">आउटपुट</span><span style=\"font-family:\">, </span><span style=\"font-family:\">प्रोसेस</span><span style=\"font-family:\">, </span><span style=\"font-family:\">स्टोरेज</span></p>"],
+                    solution_en: " <p>1.(b) </span><span style=\"font-family:\"> Input, Process, Output, Storage is the correct order of the four major functions of a computer. Input is the act of putting information into a computer. That information is now processed in the central processing unit of the computer. After the processing has been done, the computer generates the output of that information. The output data is now stored in the computer memory</span></p>",
+                    solution_hi: " <p>1.(b) </span><span style=\"font-family:\">इनपुट</span><span style=\"font-family:\">, </span><span style=\"font-family:\">प्रोसेस</span><span style=\"font-family:\">, </span><span style=\"font-family:\">आउटपुट</span><span style=\"font-family:\">, </span><span style=\"font-family:\">स्टोरेज कंप्यूटर के चार प्रमुख फंक्शन्स का सही क्रम है।</span></p> <p><span style=\"font-family:\">इनपुट कंप्यूटर में इनफार्मेशन डालने का कार्य करता है। उस जानकारी को अब कंप्यूटर की सेंट्रल प्रोसेसिंग यूनिट </span><span style=\"font-family:\">(CPU) </span><span style=\"font-family:\">में प्रोसेस </span><span style=\"font-family:\">(process) </span><span style=\"font-family:\">किया जाता है। प्रोसेसिंग हो जाने के बाद</span><span style=\"font-family:\">, </span><span style=\"font-family:\">कंप्यूटर उस इनफार्मेशन का आउटपुट उत्पन्न </span><span style=\"font-family:\">(generate output) </span><span style=\"font-family:\">करता है। आउटपुट डेटा अब कंप्यूटर मेमोरी </span><span style=\"font-family:\">(computer memory) </span><span style=\"font-family:\">में स्टोर </span><span style=\"font-family:\">(store) </span><span style=\"font-family:\">है।</span></p> <p><span style=\"font-family:\"> </span></p>",
+                    correct: "b",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "2",
+                    section: "31",
+                    question_en: "<p>2. What should we press to move to the beginning of a line of text?</p>\n",
+                    question_hi: "<p>2. &#2335;&#2375;&#2325;&#2381;&#2360;&#2381;&#2335; &#2325;&#2368; &#2319;&#2325; &#2354;&#2366;&#2311;&#2344; &#2325;&#2368; &#2358;&#2369;&#2352;&#2369;&#2310;&#2340; &#2350;&#2375;&#2306; &#2332;&#2366;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2361;&#2350;&#2375;&#2306; &#2325;&#2381;&#2351;&#2366; &#2342;&#2348;&#2366;&#2344;&#2366; &#2330;&#2366;&#2361;&#2367;&#2319;?</p>\n",
+                    options_en: ["<p>Page up</p>\n", "<p>Shift</p>\n", 
+                                "<p>Enter</p>\n", "<p>Home</p>\n"],
+                    options_hi: ["<p><span style=\"font-weight: 400;\">&#2346;&#2375;&#2332; &#2309;&#2346; (Page up)</span></p>\n", "<p><span style=\"font-weight: 400;\">&#2358;&#2367;&#2347;&#2381;&#2335; (Shift)</span></p>\n",
+                                "<p><span style=\"font-weight: 400;\">&#2319;&#2306;&#2335;&#2352; (Enter)</span></p>\n", "<p>&#2361;&#2379;&#2350; (Home)</p>\n"],
+                    solution_en: "<p>2.(d) <strong>Home</strong> &rarr; It is used to return the cursor to the beginning of the line or the beginning of a document.</p>\r\n<p><strong>Page up</strong> &rarr; When it is pressed, the page view will be moved up one page and the cursor goes to the back page.</p>\r\n<p><strong>Shift</strong> &rarr; Shift key is used to print the symbols.</p>\r\n<p><strong>Enter</strong> &rarr; It is used to finish an entry and begin the new entry in a document.</p>\n",
+                    solution_hi: "<p>2.(d) <strong>&#2361;&#2379;&#2350;(Home)</strong> &rarr; &#2311;&#2360;&#2325;&#2366; &#2313;&#2346;&#2351;&#2379;&#2327; &#2325;&#2352;&#2381;&#2360;&#2352; &#2325;&#2379; &#2354;&#2366;&#2311;&#2344; &#2325;&#2368; &#2358;&#2369;&#2352;&#2369;&#2310;&#2340; &#2351;&#2366; &#2337;&#2377;&#2325;&#2381;&#2351;&#2370;&#2350;&#2375;&#2306;&#2335; &#2325;&#2368; &#2358;&#2369;&#2352;&#2369;&#2310;&#2340; &#2350;&#2375;&#2306; &#2357;&#2366;&#2346;&#2360; &#2354;&#2366;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404;</p>\r\n<p><strong>&#2346;&#2375;&#2332; &#2309;&#2346;(Page up)</strong> &rarr; &#2332;&#2348; &#2311;&#2360;&#2375; &#2342;&#2348;&#2366;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;, &#2340;&#2379; &#2346;&#2375;&#2332; &#2357;&#2381;&#2351;&#2370; (page view) &#2319;&#2325; &#2346;&#2375;&#2332; &#2314;&#2346;&#2352; &#2330;&#2354;&#2366; &#2332;&#2366;&#2319;&#2327;&#2366; &#2324;&#2352; &#2325;&#2352;&#2381;&#2360;&#2352; &#2346;&#2367;&#2331;&#2354;&#2375; &#2346;&#2375;&#2332; &#2346;&#2352; &#2330;&#2354;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404;</p>\r\n<p><strong>&#2358;&#2367;&#2347;&#2381;&#2335;(Shift)</strong> &rarr; &#2358;&#2367;&#2347;&#2381;&#2335; &#2325;&#2369;&#2306;&#2332;&#2368; &#2325;&#2366; &#2346;&#2381;&#2352;&#2351;&#2379;&#2327; &#2330;&#2367;&#2344;&#2381;&#2361;&#2379;&#2306; (symbols) &#2325;&#2379; &#2346;&#2381;&#2352;&#2367;&#2306;&#2335; &#2325;&#2352;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404;</p>\r\n<p><strong>&#2319;&#2306;&#2335;&#2352;(Entry)</strong> &rarr; &#2311;&#2360;&#2325;&#2366; &#2313;&#2346;&#2351;&#2379;&#2327; &#2325;&#2367;&#2360;&#2368; &#2319;&#2306;&#2335;&#2381;&#2352;&#2368; (entry) &#2325;&#2379; &#2360;&#2350;&#2366;&#2346;&#2381;&#2340; &#2325;&#2352;&#2344;&#2375; &#2324;&#2352; &#2337;&#2377;&#2325;&#2381;&#2351;&#2370;&#2350;&#2375;&#2306;&#2335; &#2350;&#2375;&#2306; &#2344;&#2312; &#2319;&#2306;&#2335;&#2381;&#2352;&#2368; &#2358;&#2369;&#2352;&#2370; &#2325;&#2352;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404;</p>\n",
+                    correct: "d",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "3",
+                    section: "31",
+                    question_en: "<p>3. Virtual memory allocates hard disk space to supplement the immediate, functional memory capacity of______</p>\n",
+                    question_hi: "<p>3. &#2357;&#2352;&#2381;&#2330;&#2369;&#2309;&#2354; &#2350;&#2375;&#2350;&#2379;&#2352;&#2368; ____ &#2325;&#2368; &#2311;&#2350;&#2368;&#2337;&#2367;&#2351;&#2375;&#2335;, &#2347;&#2306;&#2325;&#2381;&#2358;&#2344;&#2354; &#2350;&#2375;&#2350;&#2379;&#2352;&#2368; &#2325;&#2381;&#2359;&#2350;&#2340;&#2366; &#2325;&#2375; &#2360;&#2346;&#2381;&#2354;&#2368;&#2350;&#2375;&#2306;&#2335; &#2325;&#2375; &#2354;&#2367;&#2319; &#2361;&#2366;&#2352;&#2381;&#2337; &#2337;&#2367;&#2360;&#2381;&#2325; &#2360;&#2381;&#2346;&#2375;&#2360; &#2310;&#2357;&#2306;&#2335;&#2367;&#2340; &#2325;&#2352;&#2340;&#2368; &#2361;&#2376;&#2404;</p>\r\n<p>&nbsp;</p>\n",
+                    options_en: ["<p>ROM</p>\n", "<p>EPROM</p>\n", 
+                                "<p>The registers</p>\n", "<p>RAM</p>\n"],
+                    options_hi: ["<p><span style=\"font-weight: 400;\">&#2352;&#2379;&#2350; (ROM)</span></p>\n", "<p>EPROM</p>\n",
+                                "<p><span style=\"font-weight: 400;\">&#2352;&#2332;&#2367;&#2360;&#2381;&#2335;&#2352; (Register)</span></p>\n", "<p>RAM</p>\n"],
+                    solution_en: "<p>3.(d) Most operating systems support virtual memory which allocates space on the hard disk to supplement the immediate, functional memory capacity of <strong>RAM</strong>.</p>\r\n<p><strong>Read only memory(ROM)</strong> &rarr; It is also known as non-volatile memory or permanent storage. It does not lose its contents when the power is switched OFF.</p>\r\n<p><strong>Erasable Programmable ROM(EPROM)</strong> &rarr; In this data can be erased by exposure to strong ultraviolet light, then rewritten. So, it is also known as Ultraviolet Erasable Programmable ROM (UVEPROM).</p>\r\n<p><strong>The registers</strong> &rarr; A register is one of a small set of data holding places that are part of the computer processor.</p>\n",
+                    solution_hi: "<p>3.(d) &#2309;&#2343;&#2367;&#2325;&#2366;&#2306;&#2358; &#2321;&#2346;&#2352;&#2375;&#2335;&#2367;&#2306;&#2327; &#2360;&#2367;&#2360;&#2381;&#2335;&#2350; &#2357;&#2352;&#2381;&#2330;&#2369;&#2309;&#2354; &#2350;&#2375;&#2350;&#2379;&#2352;&#2368; &#2325;&#2366; &#2360;&#2346;&#2379;&#2352;&#2381;&#2335; &#2325;&#2352;&#2340;&#2375; &#2361;&#2376;&#2306; &#2332;&#2379; <strong>RAM</strong> &#2325;&#2368; &#2340;&#2340;&#2381;&#2325;&#2366;&#2354;, &#2347;&#2306;&#2325;&#2381;&#2358;&#2344;&#2354; &#2350;&#2375;&#2350;&#2379;&#2352;&#2368; &#2325;&#2381;&#2359;&#2350;&#2340;&#2366; &#2325;&#2379; &#2360;&#2346;&#2381;&#2354;&#2368;&#2350;&#2375;&#2306;&#2335; &#2325;&#2352;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2361;&#2366;&#2352;&#2381;&#2337; &#2337;&#2367;&#2360;&#2381;&#2325; &#2346;&#2352; &#2360;&#2381;&#2346;&#2375;&#2360; &#2310;&#2357;&#2306;&#2335;&#2367;&#2340; &#2325;&#2352;&#2340;&#2366; &#2361;&#2376;&#2404;</p>\r\n<p><strong>&#2352;&#2368;&#2337; &#2323;&#2344;&#2354;&#2368; &#2350;&#2375;&#2350;&#2379;&#2352;&#2368; (ROM)</strong> &rarr; &#2311;&#2360;&#2375; &#2344;&#2377;&#2344;-&#2357;&#2379;&#2354;&#2375;&#2335;&#2366;&#2311;&#2354; &#2350;&#2375;&#2350;&#2379;&#2352;&#2368; &#2351;&#2366; &#2360;&#2381;&#2341;&#2366;&#2351;&#2368; &#2360;&#2381;&#2335;&#2379;&#2352;&#2375;&#2332; &#2325;&#2375; &#2352;&#2370;&#2346; &#2350;&#2375;&#2306; &#2349;&#2368; &#2332;&#2366;&#2344;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404; &#2348;&#2367;&#2332;&#2354;&#2368; &#2348;&#2306;&#2342; &#2361;&#2379;&#2344;&#2375; &#2346;&#2352; &#2351;&#2361; &#2309;&#2346;&#2344;&#2368; &#2325;&#2306;&#2335;&#2375;&#2306;&#2335;&#2381;&#2360; &#2326;&#2379;&#2340;&#2366; &#2344;&#2361;&#2368;&#2306; &#2361;&#2376;&#2404;</p>\r\n<p><strong>Erasable Programmable ROM(EPROM)</strong> &rarr; &#2311;&#2360;&#2350;&#2375;&#2306; &#2337;&#2375;&#2335;&#2366; &#2325;&#2379; &#2360;&#2381;&#2335;&#2381;&#2352;&#2366;&#2306;&#2327; &#2309;&#2354;&#2381;&#2335;&#2381;&#2352;&#2366;&#2357;&#2366;&#2351;&#2354;&#2375;&#2335; &#2354;&#2366;&#2311;&#2335; &#2325;&#2375; &#2360;&#2306;&#2346;&#2352;&#2381;&#2325; &#2350;&#2375;&#2306; &#2310;&#2344;&#2375; &#2360;&#2375; &#2350;&#2367;&#2335;&#2366;&#2351;&#2366; &#2332;&#2366; &#2360;&#2325;&#2340;&#2366; &#2361;&#2376;, &#2347;&#2367;&#2352; &#2342;&#2379;&#2348;&#2366;&#2352;&#2366; &#2354;&#2367;&#2326;&#2366; &#2332;&#2366; &#2360;&#2325;&#2340;&#2366; &#2361;&#2376;&#2404; &#2311;&#2360;&#2354;&#2367;&#2319;, &#2311;&#2360;&#2375; Ultraviolet Erasable Programmable ROM (UVEPROM) &#2325;&#2375; &#2352;&#2370;&#2346; &#2350;&#2375;&#2306; &#2349;&#2368; &#2332;&#2366;&#2344;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404;</p>\r\n<p><strong>&#2352;&#2332;&#2367;&#2360;&#2381;&#2335;&#2352;</strong> &rarr; &#2319;&#2325; &#2352;&#2332;&#2367;&#2360;&#2381;&#2335;&#2352; &#2337;&#2375;&#2335;&#2366; &#2352;&#2326;&#2344;&#2375; &#2357;&#2366;&#2354;&#2375; &#2360;&#2381;&#2341;&#2366;&#2344;&#2379;&#2306; &#2325;&#2375; &#2319;&#2325; &#2331;&#2379;&#2335;&#2375; &#2360;&#2375; &#2360;&#2375;&#2335; &#2350;&#2375;&#2306; &#2360;&#2375; &#2319;&#2325; &#2361;&#2376; &#2332;&#2379; &#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352; &#2346;&#2381;&#2352;&#2379;&#2360;&#2375;&#2360;&#2352; &#2325;&#2366; &#2361;&#2367;&#2360;&#2381;&#2360;&#2366; &#2361;&#2376;&#2404;</p>\r\n<p>&nbsp;</p>\n",
+                    correct: "d",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "4",
+                    section: "31",
+                    question_en: "<p>4. The number system based on &lsquo;0&rsquo; and &lsquo;1&rsquo; only, is known as</p>\n",
+                    question_hi: "<p>4. &#2325;&#2375;&#2357;&#2354; \'0\' &#2324;&#2352; \'1\' &#2346;&#2352; &#2310;&#2343;&#2366;&#2352;&#2367;&#2340; &#2344;&#2306;&#2348;&#2352; &#2360;&#2367;&#2360;&#2381;&#2335;&#2350; &#2325;&#2379; ____ &#2325;&#2375; &#2352;&#2370;&#2346; &#2350;&#2375;&#2306; &#2332;&#2366;&#2344;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404;</p>\n",
+                    options_en: ["<p>hexadecimal system</p>\n", "<p>barter system</p>\n", 
+                                "<p>number system</p>\n", "<p>binary system</p>\n"],
+                    options_hi: ["<p><span style=\"font-weight: 400;\">&#2361;&#2375;&#2325;&#2381;&#2360;&#2366;&#2337;&#2375;&#2360;&#2367;&#2350;&#2354; &#2360;&#2367;&#2360;&#2381;&#2335;&#2350; (hexadecimal system)</span></p>\n", "<p><span style=\"font-weight: 400;\">&#2348;&#2366;&#2352;&#2381;&#2335;&#2352; &#2360;&#2367;&#2360;&#2381;&#2335;&#2350; (barter system)</span></p>\n",
+                                "<p><span style=\"font-weight: 400;\">&#2344;&#2306;&#2348;&#2352; &#2360;&#2367;&#2360;&#2381;&#2335;&#2350; (number system)</span></p>\n", "<p><span style=\"font-weight: 400;\">&#2348;&#2366;&#2311;&#2344;&#2352;&#2368; &#2360;&#2367;&#2360;&#2381;&#2335;&#2350; (binary system)</span></p>\n"],
+                    solution_en: "<p>4.(d) <strong>Binary system</strong> &rarr;This system is very efficient for computers, but not for humans. It contains only two unique digits 0&rsquo;s and 1&rsquo;s. It is also known as the Base 2 system.</p>\n",
+                    solution_hi: "<p>4.(d) <strong>&#2348;&#2366;&#2311;&#2344;&#2352;&#2368; &#2360;&#2367;&#2360;&#2381;&#2335;&#2350;</strong> &rarr; &#2351;&#2361; &#2360;&#2367;&#2360;&#2381;&#2335;&#2350; &#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352; &#2325;&#2375; &#2354;&#2367;&#2319; &#2348;&#2361;&#2369;&#2340; &#2325;&#2369;&#2358;&#2354; &#2361;&#2376;, &#2354;&#2375;&#2325;&#2367;&#2344; &#2311;&#2306;&#2360;&#2366;&#2344;&#2379;&#2306; &#2325;&#2375; &#2354;&#2367;&#2319; &#2344;&#2361;&#2368;&#2306;&#2404; &#2311;&#2360;&#2350;&#2375;&#2306; &#2325;&#2375;&#2357;&#2354; &#2342;&#2379; &#2351;&#2370;&#2344;&#2367;&#2325; &#2337;&#2367;&#2332;&#2367;&#2335; 0 &#2324;&#2352; 1 &#2361;&#2379;&#2340;&#2375; &#2361;&#2376;&#2306;&#2404; &#2311;&#2360;&#2375; &#2348;&#2375;&#2360; 2 &#2360;&#2367;&#2360;&#2381;&#2335;&#2350; &#2325;&#2375; &#2352;&#2370;&#2346; &#2350;&#2375;&#2306; &#2349;&#2368; &#2332;&#2366;&#2344;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404;</p>\n",
+                    correct: "d",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "5",
+                    section: "31",
+                    question_en: "<p>5. It is the set of programs that enables your computer\'s hardware device and application software to work together.</p>\n",
+                    question_hi: "<p>5. _____ &#2346;&#2381;&#2352;&#2379;&#2327;&#2381;&#2352;&#2366;&#2350; &#2325;&#2366; &#2360;&#2375;&#2335; &#2361;&#2376; &#2332;&#2379; &#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352; &#2325;&#2375; &#2361;&#2366;&#2352;&#2381;&#2337;&#2357;&#2375;&#2351;&#2352; &#2337;&#2367;&#2357;&#2366;&#2311;&#2360; &#2324;&#2352; &#2319;&#2346;&#2381;&#2354;&#2367;&#2325;&#2375;&#2358;&#2344; &#2360;&#2377;&#2347;&#2364;&#2381;&#2335;&#2357;&#2375;&#2351;&#2352; &#2325;&#2379; &#2319;&#2325; &#2360;&#2366;&#2341; &#2325;&#2366;&#2350; &#2325;&#2352;&#2344;&#2375; &#2350;&#2375;&#2306; &#2360;&#2325;&#2381;&#2359;&#2350; &#2348;&#2344;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404;</p>\n",
+                    options_en: ["<p>Management</p>\n", "<p>Processing</p>\n", 
+                                "<p>Utility</p>\n", "<p>System software</p>\n"],
+                    options_hi: ["<p>&#2350;&#2376;&#2344;&#2375;&#2332;&#2350;&#2375;&#2306;&#2335; (Management)</p>\n", "<p><span style=\"font-weight: 400;\">&nbsp;&#2346;&#2381;&#2352;&#2379;&#2360;&#2375;&#2360;&#2367;&#2306;&#2327; (Processing)</span></p>\n",
+                                "<p>&#2351;&#2370;&#2335;&#2367;&#2354;&#2367;&#2335;&#2368; (Utility)</p>\n", "<p><span style=\"font-weight: 400;\">&#2360;&#2367;&#2360;&#2381;&#2335;&#2350; &#2360;&#2377;&#2347;&#2381;&#2335;&#2357;&#2375;&#2351;&#2352; (System software)</span></p>\n"],
+                    solution_en: "<p>5.(d) System software is a type of computer program that is <strong>designed to run a computer\'s hardware and application programs.</strong></p>\r\n<p><strong>Utility software </strong>&rarr; Utility software includes all systems and programs on a computer system that maintain its functionality for e.g.antivirus software, file management tools, compression tools, disk management tools, etc.</p>\n",
+                    solution_hi: "<p>5.(d) &#2360;&#2367;&#2360;&#2381;&#2335;&#2350; &#2360;&#2377;&#2347;&#2381;&#2335;&#2357;&#2375;&#2351;&#2352; &#2319;&#2325; &#2346;&#2381;&#2352;&#2325;&#2366;&#2352; &#2325;&#2366; &#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352; &#2346;&#2381;&#2352;&#2379;&#2327;&#2381;&#2352;&#2366;&#2350; &#2361;&#2376; &#2332;&#2367;&#2360;&#2375; <strong>&#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352; &#2325;&#2375; &#2361;&#2366;&#2352;&#2381;&#2337;&#2357;&#2375;&#2351;&#2352; &#2324;&#2352; &#2319;&#2346;&#2381;&#2354;&#2367;&#2325;&#2375;&#2358;&#2344; &#2346;&#2381;&#2352;&#2379;&#2327;&#2381;&#2352;&#2366;&#2350; &#2325;&#2379; &#2330;&#2354;&#2366;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2337;&#2367;&#2332;&#2364;&#2366;&#2311;&#2344; &#2325;&#2367;&#2351;&#2366; &#2327;&#2351;&#2366; &#2361;&#2376;</strong>&#2404;</p>\r\n<p><strong>&#2351;&#2370;&#2335;&#2367;&#2354;&#2367;&#2335;&#2368; &#2360;&#2377;&#2347;&#2381;&#2335;&#2357;&#2375;&#2351;&#2352;</strong> &rarr; &#2351;&#2370;&#2335;&#2367;&#2354;&#2367;&#2335;&#2368; &#2360;&#2377;&#2347;&#2381;&#2335;&#2357;&#2375;&#2351;&#2352; &#2350;&#2375;&#2306; &#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352; &#2360;&#2367;&#2360;&#2381;&#2335;&#2350; &#2346;&#2352; &#2360;&#2349;&#2368; &#2360;&#2367;&#2360;&#2381;&#2335;&#2350; &#2324;&#2352; &#2346;&#2381;&#2352;&#2379;&#2327;&#2381;&#2352;&#2366;&#2350; &#2358;&#2366;&#2350;&#2367;&#2354; &#2361;&#2379;&#2340;&#2375; &#2361;&#2376;&#2306; &#2332;&#2379; &#2311;&#2360;&#2325;&#2368; &#2325;&#2366;&#2352;&#2381;&#2351;&#2325;&#2381;&#2359;&#2350;&#2340;&#2366; (functionality) &#2325;&#2379; &#2348;&#2344;&#2366;&#2319; &#2352;&#2326;&#2340;&#2375; &#2361;&#2376;&#2306; &#2332;&#2376;&#2360;&#2375; &#2319;&#2306;&#2335;&#2368;&#2357;&#2366;&#2351;&#2352;&#2360; &#2360;&#2377;&#2347;&#2364;&#2381;&#2335;&#2357;&#2375;&#2351;&#2352;, &#2347;&#2366;&#2311;&#2354; &#2350;&#2376;&#2344;&#2375;&#2332;&#2350;&#2375;&#2306;&#2335; &#2335;&#2370;&#2354;, &#2325;&#2350;&#2381;&#2346;&#2381;&#2352;&#2375;&#2358;&#2344; &#2335;&#2370;&#2354;, &#2337;&#2367;&#2360;&#2381;&#2325; &#2350;&#2376;&#2344;&#2375;&#2332;&#2350;&#2375;&#2306;&#2335; &#2335;&#2370;&#2354; &#2310;&#2342;&#2367;&#2404;</p>\n",
+                    correct: "d",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "6",
+                    section: "31",
+                    question_en: "<p>6. Which company introduced the first graphical user interface ?</p>\n",
+                    question_hi: "<p>6.&#2325;&#2367;&#2360; &#2325;&#2306;&#2346;&#2344;&#2368; &#2344;&#2375; &#2346;&#2361;&#2354;&#2366; &#2327;&#2381;&#2352;&#2366;&#2347;&#2367;&#2325;&#2354; &#2351;&#2370;&#2332;&#2352; &#2311;&#2306;&#2335;&#2352;&#2347;&#2375;&#2360; &#2346;&#2375;&#2358; &#2325;&#2367;&#2351;&#2366; ?</p>\n",
+                    options_en: ["<p>Apple Inc.</p>\n", "<p>Xerox Corporation</p>\n", 
+                                "<p>Microsoft</p>\n", "<p>None of these</p>\n"],
+                    options_hi: ["<p><span style=\"font-weight: 400;\">&#2319;&#2346;&#2381;&#2346;&#2354; &#2311;&#2306;&#2325;. (Apple Inc.)</span></p>\n", "<p><span style=\"font-weight: 400;\">&#2332;&#2364;&#2375;&#2352;&#2377;&#2325;&#2381;&#2360; &#2325;&#2377;&#2352;&#2381;&#2346;&#2379;&#2352;&#2375;&#2358;&#2344; (Xerox Corporation)</span></p>\n",
+                                "<p><span style=\"font-weight: 400;\">&#2350;&#2366;&#2311;&#2325;&#2381;&#2352;&#2379;&#2360;&#2377;&#2347;&#2381;&#2335; (Microsoft)</span></p>\n", "<p><span style=\"font-weight: 400;\">&#2311;&#2344;&#2350;&#2375;&#2306; &#2360;&#2375; &#2325;&#2379;&#2312; &#2344;&#2361;&#2368;&#2306; (None of these)</span></p>\n"],
+                    solution_en: "<p>6.(b) The first graphical user interface was designed by <strong>Xerox Corporation</strong> in the 1970s.</p>\n",
+                    solution_hi: "<p>6.(b) &#2346;&#2361;&#2354;&#2366; &#2327;&#2381;&#2352;&#2366;&#2347;&#2367;&#2325;&#2354; &#2351;&#2370;&#2332;&#2352; &#2311;&#2306;&#2335;&#2352;&#2347;&#2375;&#2360;(graphical user interface) 1970 &#2325;&#2375; &#2342;&#2358;&#2325; &#2350;&#2375;&#2306; <strong>&#2332;&#2364;&#2375;&#2352;&#2377;&#2325;&#2381;&#2360; &#2325;&#2377;&#2352;&#2381;&#2346;&#2379;&#2352;&#2375;&#2358;&#2344;(Xerox Corporation) </strong>&#2342;&#2381;&#2357;&#2366;&#2352;&#2366; &#2337;&#2367;&#2332;&#2364;&#2366;&#2311;&#2344; &#2325;&#2367;&#2351;&#2366; &#2327;&#2351;&#2366; &#2341;&#2366;&#2404;</p>\n",
+                    correct: "b",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "7",
+                    section: "31",
+                    question_en: "<p>7. What is the use of LISP?</p>\n",
+                    question_hi: "<p>7. LISP &#2325;&#2366; &#2313;&#2346;&#2351;&#2379;&#2327; &#2325;&#2381;&#2351;&#2366; &#2361;&#2376;?</p>\n",
+                    options_en: ["<p>GUI</p>\n", "<p>artificial intelligence</p>\n", 
+                                "<p>CUI</p>\n", "<p>optical fiber</p>\n"],
+                    options_hi: ["<p>GUI</p>\n", "<p>&#2310;&#2352;&#2381;&#2335;&#2367;&#2347;&#2368;&#2360;&#2367;&#2351;&#2354; &#2354;&#2376;&#2306;&#2327;&#2381;&#2357;&#2375;&#2332;(artificial intelligence)</p>\n",
+                                "<p>CUI</p>\n", "<p><span style=\"font-weight: 400;\">&#2321;&#2346;&#2381;&#2335;&#2367;&#2325;&#2354; &#2347;&#2366;&#2311;&#2348;&#2352;(optical fiber)</span></p>\n"],
+                    solution_en: "<p>7.(b) <strong>LISP (List Processing)</strong> is used for Artificial intelligence.</p>\n",
+                    solution_hi: "<p>7.(b) <strong>LISP (&#2354;&#2367;&#2360;&#2381;&#2335; &#2346;&#2381;&#2352;&#2379;&#2360;&#2375;&#2360;&#2367;&#2306;&#2327;)</strong> &#2325;&#2366; &#2313;&#2346;&#2351;&#2379;&#2327; &#2310;&#2352;&#2381;&#2335;&#2367;&#2347;&#2367;&#2358;&#2367;&#2351;&#2354; &#2311;&#2306;&#2335;&#2375;&#2354;&#2367;&#2332;&#2375;&#2306;&#2360;(artificial intelligence) &#2325;&#2375; &#2354;&#2367;&#2319; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404;</p>\n",
+                    correct: "b",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "8",
+                    section: "31",
+                    question_en: "<p>8. Keyboard shortcut for Cut command is_________.</p>\n",
+                    question_hi: "<p>8. &#2325;&#2335; &#2325;&#2350;&#2366;&#2306;&#2337; (Cut command) &#2325;&#2375; &#2354;&#2367;&#2319; &#2325;&#2368;&#2348;&#2379;&#2352;&#2381;&#2337; &#2358;&#2377;&#2352;&#2381;&#2335;&#2325;&#2335;_____ &#2361;&#2376;&#2404;</p>\n",
+                    options_en: ["<p>Ctrl + W</p>\n", "<p>Ctrl + Y</p>\n", 
+                                "<p>Ctrl + Z</p>\n", "<p>Ctrl + X</p>\n"],
+                    options_hi: ["<p>Ctrl + W</p>\n", "<p>Ctrl + Y</p>\n",
+                                "<p>Ctrl + Z</p>\n", "<p>Ctrl + X</p>\n"],
+                    solution_en: "<p>8.(d) <strong>Ctrl + X</strong> is used to cut selected text and save it to the clipboard ready to paste elsewhere.</p>\r\n<p><strong>Ctrl + Y</strong> is used to reverse your last Undo.</p>\r\n<p><strong>Ctrl + Z</strong> is used to undo an action.</p>\r\n<p>Pressing <strong>Ctrl + W</strong> closes the current tab.</p>\n",
+                    solution_hi: "<p>8.(d) <strong>Ctrl + X</strong> &#2325;&#2366; &#2313;&#2346;&#2351;&#2379;&#2327; &#2330;&#2351;&#2344;&#2367;&#2340; &#2335;&#2375;&#2325;&#2381;&#2360;&#2381;&#2335; &#2325;&#2379; &#2325;&#2335; (cut) &#2325;&#2352;&#2344;&#2375; &#2324;&#2352; &#2325;&#2381;&#2354;&#2367;&#2346;&#2348;&#2379;&#2352;&#2381;&#2337; (clipboard) &#2346;&#2352; &#2325;&#2361;&#2368;&#2306; &#2324;&#2352; &#2346;&#2375;&#2360;&#2381;&#2335; (paste) &#2325;&#2352;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404;</p>\r\n<p><strong>Ctrl + Y</strong> &#2325;&#2366; &#2313;&#2346;&#2351;&#2379;&#2327; &#2346;&#2367;&#2331;&#2354;&#2375; &#2346;&#2370;&#2352;&#2381;&#2357;&#2357;&#2340; (undo) &#2325;&#2379; &#2313;&#2354;&#2335;&#2344;&#2375; (reverse) &#2325;&#2375; &#2354;&#2367;&#2319; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404;</p>\r\n<p>&#2325;&#2367;&#2360;&#2368; &#2325;&#2381;&#2352;&#2367;&#2351;&#2366; &#2325;&#2379; &#2346;&#2370;&#2352;&#2381;&#2357;&#2357;&#2340; (undo) &#2325;&#2352;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; <strong>Ctrl + Z </strong>&#2325;&#2366; &#2313;&#2346;&#2351;&#2379;&#2327; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404;</p>\r\n<p><strong>Ctrl + W</strong> &#2342;&#2348;&#2366;&#2344;&#2375; &#2360;&#2375; &#2325;&#2352;&#2306;&#2335; &#2335;&#2376;&#2348; (current tab) &#2348;&#2306;&#2342; &#2361;&#2379; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404;</p>\n",
+                    correct: "d",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "9",
+                    section: "31",
+                    question_en: " <p>9.</span><span style=\"font-family:\"> _________is the extension of the paint file.</span></p>",
+                    question_hi: "<p>9._________&#2346;&#2375;&#2306;&#2335; &#2347;&#2366;&#2311;&#2354; &#2325;&#2366; &#2319;&#2325;&#2381;&#2360;&#2335;&#2375;&#2306;&#2358;&#2344; &#2361;&#2376;&#2404;</p>\n",
+                    options_en: [" <p> .png </span></p>", " <p> .jpg</span></p>", 
+                                " <p> All of these</span></p>", " <p> .bmp </span></p>"],
+                    options_hi: ["<p>.png</p>\n", "<p>.jpg</p>\n",
+                                "<p>&#2351;&#2375; &#2360;&#2348;&nbsp;</p>\n", "<p>.bmp</p>\n"],
+                    solution_en: " <p>9.(c)</span><span style=\"font-family:\"> </span><span style=\"font-family:\">The program opens and saves files in Windows bitmap (BMP), JPEG, GIF, PNG, and single-page TIFF formats.</span></p>",
+                    solution_hi: "<p>9.(c) &#2351;&#2361; &#2346;&#2381;&#2352;&#2379;&#2327;&#2381;&#2352;&#2366;&#2350; &#2357;&#2367;&#2306;&#2337;&#2379;&#2332; &#2348;&#2367;&#2335;&#2350;&#2376;&#2346; (BMP), JPEG, GIF, PNG, &#2324;&#2352; &#2360;&#2367;&#2306;&#2327;&#2354;-&#2346;&#2375;&#2332; TIFF &#2346;&#2381;&#2352;&#2366;&#2352;&#2370;&#2346;&#2379;&#2306; &#2350;&#2375;&#2306; &#2347;&#2366;&#2311;&#2354;&#2379;&#2306; &#2325;&#2379; &#2326;&#2379;&#2354;&#2340;&#2366; &#2324;&#2352; &#2360;&#2375;&#2357;(save) &#2325;&#2352;&#2340;&#2366; &#2361;&#2376;&#2404;</p>\n",
+                    correct: "c",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "10",
+                    section: "31",
+                    question_en: "<p>10. ________ is a database, organized in the form of a tree with nodes.</p>\n",
+                    question_hi: "<p>10.________ &#2319;&#2325; &#2337;&#2375;&#2335;&#2366;&#2348;&#2375;&#2360; &#2361;&#2376;, &#2332;&#2379; &#2344;&#2379;&#2337;&#2381;&#2360; &#2325;&#2375; &#2360;&#2366;&#2341; &#2335;&#2381;&#2352;&#2368; &#2325;&#2375; &#2352;&#2370;&#2346; &#2350;&#2375;&#2306; &#2357;&#2381;&#2351;&#2357;&#2360;&#2381;&#2341;&#2367;&#2340; &#2361;&#2376;.</p>\n",
+                    options_en: ["<p>Network Database</p>\n", "<p>Multiple Database</p>\n", 
+                                "<p>Relational Database</p>\n", "<p>Hierarchical Database</p>\n"],
+                    options_hi: ["<p><span style=\"font-weight: 400;\">&#2344;&#2375;&#2335;&#2357;&#2352;&#2381;&#2325; &#2337;&#2375;&#2335;&#2366;&#2348;&#2375;&#2360;(network database)</span></p>\n", "<p><span style=\"font-weight: 400;\">&nbsp;&#2350;&#2354;&#2381;&#2335;&#2368;&#2346;&#2381;&#2354; &#2337;&#2375;&#2335;&#2366;&#2348;&#2375;&#2360;(Multiple Database)</span></p>\n",
+                                "<p><span style=\"font-weight: 400;\">&#2352;&#2367;&#2354;&#2375;&#2358;&#2344;&#2354;&nbsp; &#2337;&#2375;&#2335;&#2366;&#2348;&#2375;&#2360;(Relational Database)</span></p>\n", "<p><span style=\"font-weight: 400;\">&#2361;&#2376;&#2352;&#2352;&#2381;&#2330;&#2367;&#2309;&#2354; &#2337;&#2375;&#2335;&#2366;&#2348;&#2375;&#2360;(Hierarchical Database)</span></p>\n"],
+                    solution_en: "<p>10.(d) A <strong>hierarchical database</strong> is a data model in which data is stored in the form of records and organized into a tree-like structure, or parent-child structure, in which one parent node can have many child nodes connected through links. A <strong>network database</strong> is a type of database model wherein multiple member records or files can be linked to multiple owner files and vice versa. A <strong>relational database</strong> is a type of database that stores and provides access to data points that are related to one another.A <strong>multi-model database</strong> is a management system that combines multiple database types with a single backend.</p>\n",
+                    solution_hi: "<p>10.(d) &#2319;&#2325; <strong>&#2361;&#2376;&#2352;&#2352;&#2381;&#2330;&#2367;&#2309;&#2354; &#2337;&#2375;&#2335;&#2366;&#2348;&#2375;&#2360;(hierarchical database) </strong>&#2319;&#2325; &#2337;&#2375;&#2335;&#2366; &#2350;&#2377;&#2337;&#2354; &#2361;&#2376; &#2332;&#2367;&#2360;&#2350;&#2375;&#2306; &#2337;&#2375;&#2335;&#2366; &#2325;&#2379; &#2352;&#2367;&#2325;&#2377;&#2352;&#2381;&#2337; &#2325;&#2375; &#2352;&#2370;&#2346; &#2350;&#2375;&#2306; &#2360;&#2306;&#2327;&#2381;&#2352;&#2361;&#2368;&#2340; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376; &#2324;&#2352; &#2319;&#2325; &#2346;&#2375;&#2337;&#2364; &#2332;&#2376;&#2360;&#2368; &#2360;&#2306;&#2352;&#2330;&#2344;&#2366;, &#2351;&#2366; &#2346;&#2376;&#2352;&#2375;&#2306;&#2335;-&#2330;&#2366;&#2311;&#2354;&#2381;&#2337;(parent-child) &#2360;&#2306;&#2352;&#2330;&#2344;&#2366; &#2350;&#2375;&#2306; &#2357;&#2381;&#2351;&#2357;&#2360;&#2381;&#2341;&#2367;&#2340; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;, &#2332;&#2367;&#2360;&#2350;&#2375;&#2306; &#2319;&#2325; &#2346;&#2376;&#2352;&#2375;&#2306;&#2335; &#2344;&#2379;&#2337;(parent node) &#2350;&#2375;&#2306; &#2354;&#2367;&#2306;&#2325; &#2325;&#2375; &#2350;&#2366;&#2343;&#2381;&#2351;&#2350; &#2360;&#2375; &#2332;&#2369;&#2337;&#2364;&#2375; &#2325;&#2312; &#2330;&#2366;&#2311;&#2354;&#2381;&#2337; &#2344;&#2379;&#2337;(child node) &#2361;&#2379; &#2360;&#2325;&#2340;&#2375; &#2361;&#2376;&#2306;&#2404; <strong>&#2319;&#2325; &#2344;&#2375;&#2335;&#2357;&#2352;&#2381;&#2325; &#2337;&#2375;&#2335;&#2366;&#2348;&#2375;&#2360;(network database)</strong> &#2319;&#2325; &#2346;&#2381;&#2352;&#2325;&#2366;&#2352; &#2325;&#2366; &#2337;&#2375;&#2335;&#2366;&#2348;&#2375;&#2360; &#2350;&#2377;&#2337;&#2354; &#2361;&#2376; &#2332;&#2367;&#2360;&#2350;&#2375;&#2306; &#2319;&#2325;&#2366;&#2343;&#2367;&#2325; &#2360;&#2342;&#2360;&#2381;&#2351; &#2352;&#2367;&#2325;&#2377;&#2352;&#2381;&#2337; &#2351;&#2366; &#2347;&#2364;&#2366;&#2311;&#2354;&#2375;&#2306; &#2319;&#2325;&#2366;&#2343;&#2367;&#2325; &#2350;&#2366;&#2354;&#2367;&#2325; &#2347;&#2364;&#2366;&#2311;&#2354;&#2379;&#2306; &#2360;&#2375; &#2332;&#2369;&#2337;&#2364;&#2368; &#2361;&#2379; &#2360;&#2325;&#2340;&#2368; &#2361;&#2376;&#2306; &#2324;&#2352; &#2311;&#2360;&#2325;&#2375; &#2357;&#2367;&#2346;&#2352;&#2368;&#2340;&#2404; <strong>&#2319;&#2325; &#2352;&#2367;&#2354;&#2375;&#2358;&#2344;&#2354; &#2337;&#2375;&#2335;&#2366;&#2348;&#2375;&#2360;(relational database)</strong> &#2319;&#2325; &#2346;&#2381;&#2352;&#2325;&#2366;&#2352; &#2325;&#2366; &#2337;&#2375;&#2335;&#2366;&#2348;&#2375;&#2360; &#2361;&#2376; &#2332;&#2379; &#2319;&#2325; &#2342;&#2370;&#2360;&#2352;&#2375; &#2360;&#2375; &#2360;&#2306;&#2348;&#2306;&#2343;&#2367;&#2340; &#2337;&#2375;&#2335;&#2366; &#2348;&#2367;&#2306;&#2342;&#2369;&#2323;&#2306; &#2325;&#2379; &#2360;&#2306;&#2327;&#2381;&#2352;&#2361;&#2368;&#2340; &#2325;&#2352;&#2340;&#2366; &#2361;&#2376; &#2324;&#2352; &#2313;&#2344; &#2340;&#2325; &#2346;&#2361;&#2369;&#2306;&#2330; &#2346;&#2381;&#2352;&#2342;&#2366;&#2344; &#2325;&#2352;&#2340;&#2366; &#2361;&#2376;&#2404; &#2319;&#2325; <strong>&#2350;&#2354;&#2381;&#2335;&#2368; &#2350;&#2377;&#2337;&#2354; &#2337;&#2375;&#2335;&#2366;&#2348;&#2375;&#2360; (multi-model database)</strong> &#2319;&#2325; &#2346;&#2381;&#2352;&#2348;&#2306;&#2343;&#2344; &#2346;&#2381;&#2352;&#2339;&#2366;&#2354;&#2368; &#2361;&#2376; &#2332;&#2379; &#2319;&#2325; &#2319;&#2325;&#2354; &#2348;&#2376;&#2325;&#2319;&#2306;&#2337; &#2325;&#2375; &#2360;&#2366;&#2341; &#2325;&#2312; &#2337;&#2375;&#2335;&#2366;&#2348;&#2375;&#2360; &#2346;&#2381;&#2352;&#2325;&#2366;&#2352;&#2379;&#2306; &#2325;&#2379; &#2332;&#2379;&#2337;&#2364;&#2340;&#2368; &#2361;&#2376;&#2404;</p>\n",
+                    correct: "d",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "11",
+                    section: "31",
+                    question_en: "<p>11. What you call the type of software that has self-replicating software that causes damage to files and systems?</p>\n",
+                    question_hi: "<p>11.&#2310;&#2346; &#2313;&#2360; &#2346;&#2381;&#2352;&#2325;&#2366;&#2352; &#2325;&#2375; &#2360;&#2377;&#2347;&#2364;&#2381;&#2335;&#2357;&#2375;&#2351;&#2352; &#2325;&#2379; &#2325;&#2381;&#2351;&#2366; &#2325;&#2361;&#2340;&#2375; &#2361;&#2376;&#2306; &#2332;&#2367;&#2360;&#2350;&#2375;&#2306; &#2360;&#2381;&#2357;-&#2346;&#2381;&#2352;&#2340;&#2367;&#2325;&#2371;&#2340;&#2367; &#2360;&#2377;&#2347;&#2364;&#2381;&#2335;&#2357;&#2375;&#2351;&#2352; &#2361;&#2379;&#2340;&#2366; &#2361;&#2376; &#2332;&#2379; &#2347;&#2366;&#2311;&#2354;&#2379;&#2306; &#2324;&#2352; &#2360;&#2367;&#2360;&#2381;&#2335;&#2350; &#2325;&#2379; &#2344;&#2369;&#2325;&#2360;&#2366;&#2344; &#2346;&#2361;&#2369;&#2306;&#2330;&#2366;&#2340;&#2366; &#2361;&#2376;?</p>\n",
+                    options_en: ["<p>Worms</p>\n", "<p>Trojan horses</p>\n", 
+                                "<p>Bots</p>\n", "<p>Viruses</p>\n"],
+                    options_hi: ["<p><span style=\"font-weight: 400;\">&#2357;&#2352;&#2381;&#2350;&#2381;&#2360; (Worms)</span></p>\n", "<p><span style=\"font-weight: 400;\">&#2335;&#2381;&#2352;&#2379;&#2332;&#2344; &#2361;&#2377;&#2352;&#2381;&#2360; (Trojan horses)</span></p>\n",
+                                "<p><span style=\"font-weight: 400;\">&#2348;&#2377;&#2335;&#2381;&#2360; (Bots)</span></p>\n", "<p><span style=\"font-weight: 400;\">&#2357;&#2366;&#2351;&#2352;&#2360; (Viruses)</span></p>\n"],
+                    solution_en: "<p>11.(a) A computer <strong>worm</strong> is a type of malware whose primary function is to self-replicate and infect other computers while remaining active on infected systems. <strong>Computer virus</strong>&rarr;It is a malicious piece of computer code designed to spread from device to device.<strong>Trojan horse/virus</strong>&rarr;It can be a program that purports to do one action when, in fact, it is performing a malicious action on your computer. <strong>Bots</strong>&rarr;A bot is a software program that performs automated, repetitive, predefined tasks. Bots typically imitate or replace human user behavior. Because they are automated, they operate much faster than human users.</p>\n",
+                    solution_hi: "<p>11.(a) &#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352; <strong>&#2357;&#2352;&#2381;&#2350;(worm)</strong> &#2319;&#2325; &#2346;&#2381;&#2352;&#2325;&#2366;&#2352; &#2325;&#2366; &#2350;&#2376;&#2354;&#2357;&#2375;&#2351;&#2352; &#2361;&#2376; &#2332;&#2367;&#2360;&#2325;&#2366; &#2346;&#2381;&#2352;&#2366;&#2341;&#2350;&#2367;&#2325; &#2325;&#2366;&#2352;&#2381;&#2351; &#2360;&#2306;&#2325;&#2381;&#2352;&#2350;&#2367;&#2340; &#2360;&#2367;&#2360;&#2381;&#2335;&#2350; &#2346;&#2352; &#2360;&#2325;&#2381;&#2352;&#2367;&#2351; &#2352;&#2361;&#2340;&#2375; &#2361;&#2369;&#2319; &#2309;&#2344;&#2381;&#2351; &#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352;&#2379;&#2306; &#2325;&#2379; &#2360;&#2381;&#2357;-&#2342;&#2379;&#2361;&#2352;&#2366;&#2344;&#2366; &#2324;&#2352; &#2360;&#2306;&#2325;&#2381;&#2352;&#2350;&#2367;&#2340; &#2325;&#2352;&#2344;&#2366; &#2361;&#2376;&#2404; <strong>&#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352; &#2357;&#2366;&#2351;&#2352;&#2360;(computer virus)</strong> &rarr; &#2351;&#2361; &#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352; &#2325;&#2379;&#2337; &#2325;&#2366; &#2319;&#2325; &#2342;&#2369;&#2352;&#2381;&#2349;&#2366;&#2357;&#2344;&#2366;&#2346;&#2370;&#2352;&#2381;&#2339; &#2335;&#2369;&#2325;&#2337;&#2364;&#2366;(malicious piece) &#2361;&#2376; &#2332;&#2367;&#2360;&#2375; &#2337;&#2367;&#2357;&#2366;&#2311;&#2360; &#2360;&#2375; &#2337;&#2367;&#2357;&#2366;&#2311;&#2360; &#2350;&#2375;&#2306; &#2347;&#2376;&#2354;&#2366;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2337;&#2367;&#2332;&#2364;&#2366;&#2311;&#2344; &#2325;&#2367;&#2351;&#2366; &#2327;&#2351;&#2366; &#2361;&#2376;&#2404; <strong>&#2335;&#2381;&#2352;&#2379;&#2332;&#2344;&#2361;&#2377;&#2352;&#2381;&#2360;/&#2357;&#2366;&#2351;&#2352;&#2360;(Trojan horse)</strong> &rarr; &#2351;&#2361; &#2319;&#2325; &#2320;&#2360;&#2366; &#2346;&#2381;&#2352;&#2379;&#2327;&#2381;&#2352;&#2366;&#2350; &#2361;&#2379; &#2360;&#2325;&#2340;&#2366; &#2361;&#2376; &#2332;&#2379; &#2319;&#2325; &#2325;&#2366;&#2352;&#2381;&#2351; &#2325;&#2352;&#2344;&#2375; &#2325;&#2366; &#2342;&#2366;&#2357;&#2366; &#2325;&#2352;&#2340;&#2366; &#2361;&#2376;, &#2357;&#2366;&#2360;&#2381;&#2340;&#2357; &#2350;&#2375;&#2306;, &#2351;&#2361; &#2310;&#2346;&#2325;&#2375; &#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352; &#2346;&#2352; &#2319;&#2325; &#2342;&#2369;&#2352;&#2381;&#2349;&#2366;&#2357;&#2344;&#2366;&#2346;&#2370;&#2352;&#2381;&#2339; &#2325;&#2366;&#2352;&#2381;&#2351;(malicious action) &#2325;&#2352; &#2352;&#2361;&#2366; &#2361;&#2376;&#2404; <strong>&#2348;&#2377;&#2335;&#2381;&#2360;(Bots)</strong> &rarr; &#2348;&#2377;&#2335; &#2319;&#2325; &#2360;&#2377;&#2347;&#2381;&#2335;&#2357;&#2375;&#2351;&#2352; &#2346;&#2381;&#2352;&#2379;&#2327;&#2381;&#2352;&#2366;&#2350; &#2361;&#2376; &#2332;&#2379; &#2360;&#2381;&#2357;&#2330;&#2366;&#2354;&#2367;&#2340;, &#2342;&#2379;&#2361;&#2352;&#2366;&#2319; &#2332;&#2366;&#2344;&#2375; &#2357;&#2366;&#2354;&#2375;, &#2346;&#2370;&#2352;&#2381;&#2357;&#2344;&#2367;&#2352;&#2381;&#2343;&#2366;&#2352;&#2367;&#2340; &#2325;&#2366;&#2352;&#2381;&#2351;&#2379;&#2306; &#2325;&#2379; &#2325;&#2352;&#2340;&#2366; &#2361;&#2376;&#2404; &#2348;&#2377;&#2335; &#2310;&#2350;&#2340;&#2380;&#2352; &#2346;&#2352; &#2350;&#2366;&#2344;&#2357; &#2313;&#2346;&#2351;&#2379;&#2327;&#2325;&#2352;&#2381;&#2340;&#2366; &#2357;&#2381;&#2351;&#2357;&#2361;&#2366;&#2352; &#2325;&#2368; &#2344;&#2325;&#2354; &#2325;&#2352;&#2340;&#2375; &#2361;&#2376;&#2306; &#2351;&#2366; &#2313;&#2360;&#2375; &#2348;&#2342;&#2354; &#2342;&#2375;&#2340;&#2375; &#2361;&#2376;&#2306;&#2404; &#2325;&#2381;&#2351;&#2379;&#2306;&#2325;&#2367; &#2357;&#2375; &#2360;&#2381;&#2357;&#2330;&#2366;&#2354;&#2367;&#2340; &#2361;&#2376;&#2306;, &#2357;&#2375; &#2350;&#2366;&#2344;&#2357; &#2313;&#2346;&#2351;&#2379;&#2327;&#2325;&#2352;&#2381;&#2340;&#2366;&#2323;&#2306; &#2325;&#2368; &#2340;&#2369;&#2354;&#2344;&#2366; &#2350;&#2375;&#2306; &#2348;&#2361;&#2369;&#2340; &#2340;&#2375;&#2332;&#2368; &#2360;&#2375; &#2325;&#2366;&#2350; &#2325;&#2352;&#2340;&#2375; &#2361;&#2376;&#2306;&#2404;</p>\n",
+                    correct: "a",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "12",
+                    section: "31",
+                    question_en: " <p>12.</span><span style=\"font-family:\"> Alignment buttons are available on ________ toolbar.</span></p>",
+                    question_hi: "<p>12.&#2319;&#2354;&#2366;&#2311;&#2344;&#2350;&#2375;&#2306;&#2335; &#2348;&#2335;&#2344; ________ &#2335;&#2370;&#2354;&#2348;&#2366;&#2352; &#2346;&#2352; &#2313;&#2346;&#2354;&#2348;&#2381;&#2343; &#2361;&#2376;&#2306;&#2404;</p>\n",
+                    options_en: [" <p> Standard</span></p>", " <p> Status </span></p>", 
+                                " <p> Formatting </span></p>", " <p> All of these</span></p>"],
+                    options_hi: ["<p><span style=\"font-weight: 400;\">&#2360;&#2381;&#2335;&#2376;&#2339;&#2381;&#2337;&#2352;&#2381;&#2337; (Standard)</span></p>\n", "<p><span style=\"font-weight: 400;\">&#2360;&#2381;&#2335;&#2375;&#2335;&#2360; (Status)</span></p>\n",
+                                "<p><span style=\"font-weight: 400;\">&#2347;&#2377;&#2352;&#2381;&#2350;&#2375;&#2335;&#2367;&#2306;&#2327; (Formatting)</span></p>\n", "<p><span style=\"font-weight: 400;\">&#2351;&#2375; &#2360;&#2348; (All of these)</span></p>\n"],
+                    solution_en: " <p>12.(c)</span><span style=\"font-family:\"> Alignment buttons are found on the formatting toolbar.</span></p>",
+                    solution_hi: "<p>12.(c) &#2319;&#2354;&#2366;&#2311;&#2344;&#2350;&#2375;&#2306;&#2335; &#2348;&#2335;&#2344;&#2381;&#2360;(Alignment buttons) &#2347;&#2377;&#2352;&#2381;&#2350;&#2375;&#2335;&#2367;&#2306;&#2327; &#2335;&#2370;&#2354;&#2348;&#2366;&#2352;(formatting toolbar) &#2346;&#2352; &#2346;&#2366;&#2319; &#2332;&#2366;&#2340;&#2375; &#2361;&#2376;&#2306;</p>\n",
+                    correct: "c",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "13",
+                    section: "31",
+                    question_en: "<p>13. What does MICR stand for?</p>\n",
+                    question_hi: "<p>13. MICR &#2325;&#2366; &#2325;&#2381;&#2351;&#2366; &#2309;&#2352;&#2381;&#2341; &#2361;&#2376;?</p>\n",
+                    options_en: ["<p>Magnetic Ink Character Register</p>\n", "<p>Magnetic Ink Code Reader</p>\n", 
+                                "<p>Magnetic Ink Code Register</p>\n", "<p>Magnetic Ink Character Recognition</p>\n"],
+                    options_hi: ["<p><span style=\"font-weight: 400;\">&#2350;&#2376;&#2327;&#2381;&#2344;&#2375;&#2335;&#2367;&#2325; &#2311;&#2306;&#2325; &#2325;&#2376;&#2352;&#2375;&#2325;&#2381;&#2335;&#2352; &#2352;&#2332;&#2367;&#2360;&#2381;&#2335;&#2352; (Magnetic Ink Character Register)</span></p>\n", "<p><span style=\"font-weight: 400;\">&#2350;&#2376;&#2327;&#2381;&#2344;&#2375;&#2335;&#2367;&#2325; &#2311;&#2306;&#2325; &#2325;&#2379;&#2337; &#2352;&#2368;&#2337;&#2352; (Magnetic Ink Code Reader)</span></p>\n",
+                                "<p><span style=\"font-weight: 400;\">&#2350;&#2376;&#2327;&#2381;&#2344;&#2375;&#2335;&#2367;&#2325; &#2311;&#2306;&#2325; &#2325;&#2379;&#2337; &#2352;&#2332;&#2367;&#2360;&#2381;&#2335;&#2352; (Magnetic Ink Code Register)</span></p>\n", "<p>&#2350;&#2376;&#2327;&#2381;&#2344;&#2375;&#2335;&#2367;&#2325; &#2311;&#2306;&#2325; &#2325;&#2376;&#2352;&#2375;&#2325;&#2381;&#2335;&#2352; &#2352;&#2367;&#2325;&#2327;&#2381;&#2344;&#2367;&#2358;&#2344; (Magnetic Ink Character Recognition)</p>\n"],
+                    solution_en: "<p>13.(d) MICR<strong>(Magnetic Ink Character Recognition)</strong>.MICR reads the characters by examining their shapes in a matrix form and the information is then passed on to the computer.</p>\n",
+                    solution_hi: "<p>13.(d) MICR <strong>(&#2350;&#2376;&#2327;&#2381;&#2344;&#2375;&#2335;&#2367;&#2325; &#2311;&#2306;&#2325; &#2325;&#2376;&#2352;&#2375;&#2325;&#2381;&#2335;&#2352; &#2352;&#2367;&#2325;&#2377;&#2327;&#2381;&#2344;&#2367;&#2358;&#2344;)</strong>&#2404; MICR &#2319;&#2325; &#2350;&#2376;&#2335;&#2381;&#2352;&#2367;&#2325;&#2381;&#2360; &#2325;&#2375; &#2352;&#2370;&#2346; &#2350;&#2375;&#2306; &#2313;&#2344;&#2325;&#2375; &#2310;&#2325;&#2366;&#2352; &#2325;&#2368; &#2332;&#2366;&#2306;&#2330; &#2325;&#2352;&#2325;&#2375; &#2325;&#2376;&#2352;&#2375;&#2325;&#2381;&#2335;&#2352; &#2325;&#2379; &#2346;&#2338;&#2364;&#2340;&#2366; &#2361;&#2376; &#2324;&#2352; &#2347;&#2367;&#2352; &#2332;&#2366;&#2344;&#2325;&#2366;&#2352;&#2368; &#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352; &#2346;&#2352; &#2349;&#2375;&#2332; &#2342;&#2368; &#2332;&#2366;&#2340;&#2368; &#2361;&#2376;&#2404;</p>\n",
+                    correct: "d",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "14",
+                    section: "31",
+                    question_en: "<p>14. You specify the save details of your file in the</p>\n",
+                    question_hi: "<p>14. &#2310;&#2346; &#2309;&#2346;&#2344;&#2368; &#2347;&#2364;&#2366;&#2311;&#2354; &#2325;&#2375; &#2360;&#2375;&#2357; &#2357;&#2367;&#2357;&#2352;&#2339; (save details) &#2325;&#2379; _____ &#2350;&#2375;&#2306; &#2344;&#2367;&#2352;&#2381;&#2342;&#2367;&#2359;&#2381;&#2335; &#2325;&#2352;&#2340;&#2375; &#2361;&#2376;&#2306;&#2404;</p>\n",
+                    options_en: ["<p>&ldquo;Save as a file&rdquo; dialog box</p>\n", "<p>&ldquo;Save the file as&rdquo; dialog</p>\n", 
+                                "<p>&ldquo;File save&rdquo; dialog box</p>\n", "<p>Any of &lsquo;1&rsquo; and &lsquo;2&rsquo;</p>\n"],
+                    options_hi: ["<p>\"Save as a file\" &#2337;&#2366;&#2351;&#2354;&#2377;&#2327; &#2348;&#2377;&#2325;&#2381;&#2360;</p>\n", "<p>\"Save the file as\" &#2337;&#2366;&#2351;&#2354;&#2377;&#2327;</p>\n",
+                                "<p>\"File save\" &#2337;&#2366;&#2351;&#2354;&#2377;&#2327; &#2348;&#2377;&#2325;&#2381;&#2360;</p>\n", "<p>\'1\' &#2324;&#2352; \'2\' &#2350;&#2375;&#2306; &#2360;&#2375; &#2325;&#2379;&#2312; &#2349;&#2368;</p>\n"],
+                    solution_en: "<p>14.(a) The <strong>\"Save As\"</strong> dialog box lets the user specify the drive, directory, and name of a file to save.</p>\n",
+                    solution_hi: "<p>14.(a) <strong>&ldquo;Save As&rdquo;</strong> &#2337;&#2366;&#2351;&#2354;&#2377;&#2327; &#2348;&#2377;&#2325;&#2381;&#2360; (dialog box) &#2313;&#2346;&#2351;&#2379;&#2327;&#2325;&#2352;&#2381;&#2340;&#2366; &#2325;&#2379; &#2360;&#2375;&#2357; (save) &#2325;&#2352;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2337;&#2381;&#2352;&#2366;&#2311;&#2357; (drive), &#2337;&#2366;&#2351;&#2352;&#2375;&#2325;&#2381;&#2335;&#2352;&#2368; (directory) &#2324;&#2352; &#2347;&#2364;&#2366;&#2311;&#2354; &#2325;&#2366; &#2344;&#2366;&#2350; (file name) &#2344;&#2367;&#2352;&#2381;&#2342;&#2367;&#2359;&#2381;&#2335; &#2325;&#2352;&#2344;&#2375; &#2342;&#2375;&#2340;&#2366; &#2361;&#2376;&#2404;</p>\n",
+                    correct: "a",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "15",
+                    section: "31",
+                    question_en: "<p>15. A computer virus normally attaches itself to another computer program known as a</p>\n",
+                    question_hi: "<p>15. &#2319;&#2325; &#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352; &#2357;&#2366;&#2351;&#2352;&#2360; &#2360;&#2366;&#2350;&#2366;&#2344;&#2381;&#2351; &#2352;&#2370;&#2346; &#2360;&#2375; &#2326;&#2369;&#2342; &#2325;&#2379; &#2319;&#2325; &#2309;&#2344;&#2381;&#2351; &#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352; &#2346;&#2381;&#2352;&#2379;&#2327;&#2381;&#2352;&#2366;&#2350; &#2360;&#2375; &#2332;&#2379;&#2337;&#2364;&#2340;&#2366; &#2361;&#2376; &#2332;&#2367;&#2360;&#2375; &#2325;&#2361;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;___________</p>\n",
+                    options_en: ["<p>host program</p>\n", "<p>target program</p>\n", 
+                                "<p>backdoor program</p>\n", "<p>trojan horse</p>\n"],
+                    options_hi: ["<p><span style=\"font-weight: 400;\">&#2361;&#2379;&#2360;&#2381;&#2335;&nbsp; &#2346;&#2381;&#2352;&#2379;&#2327;&#2381;&#2352;&#2366;&#2350; (host program)</span></p>\n", "<p><span style=\"font-weight: 400;\">&#2335;&#2366;&#2352;&#2327;&#2375;&#2335; &#2346;&#2381;&#2352;&#2379;&#2327;&#2381;&#2352;&#2366;&#2350; (target program)</span></p>\n",
+                                "<p>&#2348;&#2376;&#2325;&#2337;&#2379;&#2352; &#2346;&#2381;&#2352;&#2379;&#2327;&#2381;&#2352;&#2366;&#2350; (backdoor program)</p>\n", "<p><span style=\"font-weight: 400;\">&#2335;&#2381;&#2352;&#2379;&#2332;&#2344; &#2361;&#2377;&#2352;&#2381;&#2360; (trojan horse)</span></p>\n"],
+                    solution_en: "<p>15.(d) A <strong>Trojan horse/virus</strong> can be a program that purports to do one action when, in fact, it is performing a malicious action on your computer. Trojan horses can be included in software that you download for free or as attachments in email messages. <strong>Backdoor program</strong> &rarr;Backdoor programs are applications that allow cybercriminals or attackers to access computers remotely.<strong>Host program</strong>&rarr;Software that runs in a computer that provides the source of information or signals.<strong>Target program</strong>&rarr;A fully compiled or assembled program ready to be loaded into the computer.</p>\n",
+                    solution_hi: "<p>15.(d) &#2319;&#2325; <strong>&#2335;&#2381;&#2352;&#2379;&#2332;&#2344; &#2361;&#2377;&#2352;&#2381;&#2360;/&#2357;&#2366;&#2351;&#2352;&#2360;(Trojan Horse)</strong> &#2319;&#2325; &#2320;&#2360;&#2366; &#2346;&#2381;&#2352;&#2379;&#2327;&#2381;&#2352;&#2366;&#2350; &#2361;&#2379; &#2360;&#2325;&#2340;&#2366; &#2361;&#2376; &#2332;&#2379; &#2319;&#2325; &#2325;&#2366;&#2352;&#2381;&#2351; &#2325;&#2352;&#2344;&#2375; &#2325;&#2366; &#2342;&#2366;&#2357;&#2366; &#2325;&#2352;&#2340;&#2366; &#2361;&#2376;, &#2332;&#2348;&#2325;&#2367; &#2357;&#2366;&#2360;&#2381;&#2340;&#2357; &#2350;&#2375;&#2306;, &#2351;&#2361; &#2310;&#2346;&#2325;&#2375; &#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352; &#2346;&#2352; &#2319;&#2325; &#2342;&#2369;&#2352;&#2381;&#2349;&#2366;&#2357;&#2344;&#2366;&#2346;&#2370;&#2352;&#2381;&#2339; &#2325;&#2366;&#2352;&#2381;&#2351;(malicious action) &#2325;&#2352; &#2352;&#2361;&#2366; &#2361;&#2376;&#2404; &#2335;&#2381;&#2352;&#2379;&#2332;&#2344; &#2361;&#2377;&#2352;&#2381;&#2360; &#2325;&#2379; &#2360;&#2377;&#2347;&#2381;&#2335;&#2357;&#2375;&#2351;&#2352; &#2350;&#2375;&#2306; &#2358;&#2366;&#2350;&#2367;&#2354; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366; &#2360;&#2325;&#2340;&#2366; &#2361;&#2376; &#2332;&#2367;&#2360;&#2375; &#2310;&#2346; &#2350;&#2369;&#2347;&#2381;&#2340; &#2350;&#2375;&#2306; &#2337;&#2366;&#2313;&#2344;&#2354;&#2379;&#2337; &#2325;&#2352;&#2340;&#2375; &#2361;&#2376;&#2306; &#2351;&#2366; &#2312;&#2350;&#2375;&#2354; &#2360;&#2306;&#2342;&#2375;&#2358;&#2379;&#2306; &#2350;&#2375;&#2306; &#2309;&#2335;&#2376;&#2330;&#2350;&#2375;&#2306;&#2335; &#2325;&#2375; &#2352;&#2370;&#2346; &#2350;&#2375;&#2306;&#2404; <strong>&#2348;&#2376;&#2325;&#2337;&#2379;&#2352; &#2346;&#2381;&#2352;&#2379;&#2327;&#2381;&#2352;&#2366;&#2350;(backdoor program)</strong> &rarr; &#2348;&#2376;&#2325;&#2337;&#2379;&#2352; &#2346;&#2381;&#2352;&#2379;&#2327;&#2381;&#2352;&#2366;&#2350; &#2320;&#2360;&#2375; &#2319;&#2346;&#2381;&#2354;&#2367;&#2325;&#2375;&#2358;&#2344; &#2361;&#2376;&#2306; &#2332;&#2379; &#2360;&#2366;&#2311;&#2348;&#2352; &#2309;&#2346;&#2352;&#2366;&#2343;&#2367;&#2351;&#2379;&#2306; &#2351;&#2366; &#2361;&#2350;&#2354;&#2366;&#2357;&#2352;&#2379;&#2306; &#2325;&#2379; &#2342;&#2370;&#2352;&#2360;&#2381;&#2341; &#2352;&#2370;&#2346; &#2360;&#2375; &#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352; &#2340;&#2325; &#2346;&#2361;&#2369;&#2306;&#2330;&#2344;&#2375; &#2325;&#2368; &#2309;&#2344;&#2369;&#2350;&#2340;&#2367; &#2342;&#2375;&#2340;&#2375; &#2361;&#2376;&#2306;&#2404; <strong>&#2361;&#2379;&#2360;&#2381;&#2335; &#2346;&#2381;&#2352;&#2379;&#2327;&#2381;&#2352;&#2366;&#2350;(Host program) </strong>&rarr; &#2360;&#2377;&#2347;&#2364;&#2381;&#2335;&#2357;&#2375;&#2351;&#2352; &#2332;&#2379; &#2319;&#2325; &#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352; &#2350;&#2375;&#2306; &#2330;&#2354;&#2340;&#2366; &#2361;&#2376; &#2332;&#2379; &#2360;&#2370;&#2330;&#2344;&#2366; &#2351;&#2366; &#2360;&#2306;&#2325;&#2375;&#2340;&#2379;&#2306; &#2325;&#2366; &#2360;&#2381;&#2352;&#2379;&#2340; &#2346;&#2381;&#2352;&#2342;&#2366;&#2344; &#2325;&#2352;&#2340;&#2366; &#2361;&#2376;&#2404; <strong>&#2335;&#2366;&#2352;&#2327;&#2375;&#2335; &#2346;&#2381;&#2352;&#2379;&#2327;&#2381;&#2352;&#2366;&#2350;(Target program)</strong> &rarr; &#2319;&#2325; &#2346;&#2370;&#2352;&#2368; &#2340;&#2352;&#2361; &#2360;&#2375; &#2360;&#2306;&#2325;&#2354;&#2367;&#2340; &#2351;&#2366; &#2311;&#2325;&#2335;&#2381;&#2336;&#2375; &#2346;&#2381;&#2352;&#2379;&#2327;&#2381;&#2352;&#2366;&#2350; &#2350;&#2375;&#2306; &#2354;&#2379;&#2337; &#2361;&#2379;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2340;&#2376;&#2351;&#2366;&#2352; &#2360;&#2306;&#2327;&#2339;&#2325; &#2361;&#2376;&#2404;</p>\n",
+                    correct: "d",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "16",
+                    section: "31",
+                    question_en: "<p>16. The binary number 10101 is equivalent to decimal number .............</p>\n",
+                    question_hi: "<p>16. &#2348;&#2366;&#2311;&#2344;&#2352;&#2368; &#2344;&#2306;&#2348;&#2352; 10101 &#2337;&#2375;&#2360;&#2368;&#2350;&#2354; &#2344;&#2306;&#2348;&#2352; ______ &#2325;&#2375; &#2311;&#2325;&#2381;&#2357;&#2367;&#2357;&#2376;&#2354;&#2375;&#2344;&#2381;&#2335; &#2361;&#2376;&#2404;</p>\n",
+                    options_en: ["<p>21</p>\n", "<p>12</p>\n", 
+                                "<p>27</p>\n", "<p>19</p>\n"],
+                    options_hi: ["<p>21</p>\n", "<p>12</p>\n",
+                                "<p>27</p>\n", "<p>19</p>\n"],
+                    solution_en: "<p>16.(a) <strong>Step 1</strong>: Write down the binary number:</p>\r\n<p>10101</p>\r\n<p><strong>Step 2</strong>: Multiply each digit of the binary number by the corresponding power of two:</p>\r\n<p>1x24 + 0x23 + 1x22 + 0x21 + 1x20</p>\r\n<p><strong>Step 3</strong>: Solve the powers:</p>\r\n<p>1x16 + 0x8 + 1x4 + 0x2 + 1x1 = 16 + 0 + 4 + 0 + 1</p>\r\n<p><strong>Step 4</strong>: Add up the numbers written above:</p>\r\n<p>16 + 0 + 4 + 0 + 1 = 21.</p>\r\n<p>So, 21 is the decimal equivalent of the binary number 10101.</p>\n",
+                    solution_hi: "<p>16.(a) <strong>&#2360;&#2381;&#2335;&#2375;&#2346; 1</strong>: &#2348;&#2366;&#2311;&#2344;&#2352;&#2368; &#2344;&#2306;&#2348;&#2352; &#2354;&#2367;&#2326;&#2375;&#2306;:</p>\r\n<p>10101</p>\r\n<p><strong>&#2360;&#2381;&#2335;&#2375;&#2346; 2</strong>: &#2348;&#2366;&#2311;&#2344;&#2352;&#2368; &#2360;&#2306;&#2326;&#2381;&#2351;&#2366; &#2325;&#2375; &#2346;&#2381;&#2352;&#2340;&#2381;&#2351;&#2375;&#2325; &#2309;&#2306;&#2325; &#2325;&#2379; &#2342;&#2379; &#2325;&#2368; &#2325;&#2379;&#2352;&#2381;&#2352;&#2375;&#2360;&#2346;&#2379;&#2306;&#2337;&#2367;&#2306;&#2327; &#2346;&#2366;&#2357;&#2352; &#2360;&#2375; &#2327;&#2369;&#2339;&#2366; &#2325;&#2352;&#2375;&#2306;:</p>\r\n<p>1x24 + 0x23 + 1x22 + 0x21 + 1x20</p>\r\n<p><strong>&#2360;&#2381;&#2335;&#2375;&#2346; 3</strong>: &#2328;&#2366;&#2340;&#2379;&#2306; &#2325;&#2379; &#2361;&#2354; &#2325;&#2368;&#2332;&#2367;&#2319;:</p>\r\n<p>1x16 + 0x8 + 1x4 + 0x2 + 1x1 = 16 + 0 + 4 + 0 + 1</p>\r\n<p><strong>&#2360;&#2381;&#2335;&#2375;&#2346; 4</strong>: &#2314;&#2346;&#2352; &#2354;&#2367;&#2326;&#2368; &#2360;&#2306;&#2326;&#2381;&#2351;&#2366;&#2323;&#2306; &#2325;&#2379; &#2332;&#2379;&#2337;&#2364;&#2375;&#2306;:</p>\r\n<p>16 + 0 + 4 + 0 + 1 = 21.</p>\r\n<p>&#2340;&#2379;, 21 &#2348;&#2366;&#2311;&#2344;&#2352;&#2368; &#2360;&#2306;&#2326;&#2381;&#2351;&#2366; 10101 &#2325;&#2366; &#2337;&#2375;&#2360;&#2368;&#2350;&#2354; &#2311;&#2325;&#2381;&#2357;&#2367;&#2357;&#2376;&#2354;&#2375;&#2344;&#2381;&#2335; &#2361;&#2376;&#2404;</p>\n",
+                    correct: "a",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "17",
+                    section: "31",
+                    question_en: "<p>17. What do we call the term which is used for the transmission of data between two or more computers over communication links?</p>\n",
+                    question_hi: "<p>17.&#2360;&#2306;&#2330;&#2366;&#2352; &#2354;&#2367;&#2306;&#2325; &#2346;&#2352; &#2342;&#2379; &#2351;&#2366; &#2342;&#2379; &#2360;&#2375; &#2309;&#2343;&#2367;&#2325; &#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352;&#2379;&#2306; &#2325;&#2375; &#2348;&#2368;&#2330; &#2337;&#2375;&#2335;&#2366; &#2325;&#2375; &#2346;&#2381;&#2352;&#2360;&#2366;&#2352;&#2339; &#2325;&#2375; &#2354;&#2367;&#2319; &#2313;&#2346;&#2351;&#2379;&#2327; &#2325;&#2367;&#2319; &#2332;&#2366;&#2344;&#2375; &#2357;&#2366;&#2354;&#2375; &#2358;&#2348;&#2381;&#2342; &#2325;&#2379; &#2361;&#2350; &#2325;&#2381;&#2351;&#2366; &#2325;&#2361;&#2340;&#2375; &#2361;&#2376;&#2306;?</p>\n",
+                    options_en: ["<p>Data communication</p>\n", "<p>Networking</p>\n", 
+                                "<p>Communication</p>\n", "<p>Data networking</p>\n"],
+                    options_hi: ["<p><span style=\"font-weight: 400;\">&#2337;&#2375;&#2335;&#2366; &#2360;&#2306;&#2330;&#2366;&#2352; (Data communication)</span></p>\n", "<p><span style=\"font-weight: 400;\">&#2344;&#2375;&#2335;&#2357;&#2352;&#2381;&#2325;&#2367;&#2306;&#2327; (Networking)</span></p>\n",
+                                "<p><span style=\"font-weight: 400;\">&#2360;&#2306;&#2330;&#2366;&#2352; (Communication)</span></p>\n", "<p><span style=\"font-weight: 400;\">&#2337;&#2375;&#2335;&#2366; &#2344;&#2375;&#2335;&#2357;&#2352;&#2381;&#2325;&#2367;&#2306;&#2327; (Data networking)</span></p>\n"],
+                    solution_en: "<p>17.(a) Data Communication is a process of exchanging data or information In case of computer networks this exchange is done between two devices over a transmission medium.Data networking refers to systems designed to transfer data between two or more access points via the use of system controls, transmission lines and data switching.</p>\n",
+                    solution_hi: "<p>17.(a) &#2337;&#2375;&#2335;&#2366; &#2325;&#2350;&#2381;&#2351;&#2369;&#2344;&#2367;&#2325;&#2375;&#2358;&#2344; &#2337;&#2375;&#2335;&#2366; &#2351;&#2366; &#2360;&#2370;&#2330;&#2344;&#2366;&#2323;&#2306; &#2325;&#2375; &#2310;&#2342;&#2366;&#2344;-&#2346;&#2381;&#2352;&#2342;&#2366;&#2344; &#2325;&#2368; &#2319;&#2325; &#2346;&#2381;&#2352;&#2325;&#2381;&#2352;&#2367;&#2351;&#2366; &#2361;&#2376;, &#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352; &#2344;&#2375;&#2335;&#2357;&#2352;&#2381;&#2325; &#2325;&#2375; &#2350;&#2366;&#2350;&#2354;&#2375; &#2350;&#2375;&#2306; &#2351;&#2361; &#2319;&#2325;&#2381;&#2360;&#2330;&#2375;&#2306;&#2332; &#2319;&#2325; &#2335;&#2381;&#2352;&#2366;&#2306;&#2360;&#2350;&#2367;&#2358;&#2344; &#2350;&#2366;&#2343;&#2381;&#2351;&#2350; &#2346;&#2352; &#2342;&#2379; &#2313;&#2346;&#2325;&#2352;&#2339;&#2379;&#2306; &#2325;&#2375; &#2348;&#2368;&#2330; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404;&#2337;&#2375;&#2335;&#2366; &#2344;&#2375;&#2335;&#2357;&#2352;&#2381;&#2325;&#2367;&#2306;&#2327; &#2360;&#2367;&#2360;&#2381;&#2335;&#2350; &#2344;&#2367;&#2351;&#2306;&#2340;&#2381;&#2352;&#2339;, &#2335;&#2381;&#2352;&#2366;&#2306;&#2360;&#2350;&#2367;&#2358;&#2344; &#2354;&#2366;&#2311;&#2344; &#2324;&#2352; &#2337;&#2375;&#2335;&#2366; &#2360;&#2381;&#2357;&#2367;&#2330;&#2367;&#2306;&#2327;(data switching) &#2325;&#2375; &#2313;&#2346;&#2351;&#2379;&#2327; &#2325;&#2375; &#2350;&#2366;&#2343;&#2381;&#2351;&#2350; &#2360;&#2375; &#2342;&#2379; &#2351;&#2366; &#2342;&#2379; &#2360;&#2375; &#2309;&#2343;&#2367;&#2325; &#2346;&#2361;&#2369;&#2306;&#2330; &#2348;&#2367;&#2306;&#2342;&#2369;&#2323;&#2306; &#2325;&#2375; &#2348;&#2368;&#2330; &#2337;&#2375;&#2335;&#2366; &#2360;&#2381;&#2341;&#2366;&#2344;&#2366;&#2306;&#2340;&#2352;&#2367;&#2340;(transfer) &#2325;&#2352;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2337;&#2367;&#2332;&#2364;&#2366;&#2311;&#2344; &#2325;&#2368; &#2327;&#2312; &#2346;&#2381;&#2352;&#2339;&#2366;&#2354;&#2367;&#2351;&#2379;&#2306; &#2325;&#2379; &#2360;&#2306;&#2342;&#2352;&#2381;&#2349;&#2367;&#2340; &#2325;&#2352;&#2340;&#2366; &#2361;&#2376;&#2404;</p>\n",
+                    correct: "a",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "18",
+                    section: "31",
+                    question_en: "<p>18.To undo the last work, we have to use which of the following Windows shortcut keys?</p>\r\n<p>&nbsp;</p>\n",
+                    question_hi: "<p>18. &#2346;&#2367;&#2331;&#2354;&#2375; &#2325;&#2366;&#2352;&#2381;&#2351; &#2325;&#2379; &#2346;&#2370;&#2352;&#2381;&#2357;&#2357;&#2340; (undo) &#2325;&#2352;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2361;&#2350;&#2375;&#2306; &#2344;&#2367;&#2350;&#2381;&#2344; &#2350;&#2375;&#2306; &#2360;&#2375; &#2325;&#2367;&#2360; &#2357;&#2367;&#2306;&#2337;&#2379;&#2332; &#2358;&#2377;&#2352;&#2381;&#2335;&#2325;&#2335; &#2325;&#2369;&#2306;&#2332;&#2368; (Windows shortcut key) &#2325;&#2366; &#2313;&#2346;&#2351;&#2379;&#2327; &#2325;&#2352;&#2344;&#2366; &#2361;&#2379;&#2327;&#2366;?</p>\n",
+                    options_en: ["<p>Ctrl + P</p>\n", "<p>Ctrl + U</p>\n", 
+                                "<p>Ctrl + A</p>\n", "<p>Ctrl + Z</p>\n"],
+                    options_hi: ["<p>Ctrl + P</p>\n", "<p>Ctrl + U</p>\n",
+                                "<p>Ctrl + A</p>\n", "<p>Ctrl + Z</p>\n"],
+                    solution_en: "<p>18.(d) To undo the last action press <strong>Ctrl + Z</strong>.</p>\r\n<p>To print the document press <strong>Ctrl + P</strong>.</p>\r\n<p>To underline the document press <strong>Ctrl + U</strong>.</p>\r\n<p><strong>Ctrl + A </strong>used to select the entire text.</p>\n",
+                    solution_hi: "<p>18.(d) &#2346;&#2367;&#2331;&#2354;&#2368; &#2325;&#2381;&#2352;&#2367;&#2351;&#2366; &#2325;&#2379; &#2346;&#2370;&#2352;&#2381;&#2357;&#2357;&#2340; (undo) &#2325;&#2352;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; <strong>Ctrl + Z</strong> &#2342;&#2348;&#2366;&#2319;&#2306;&#2404;</p>\r\n<p>&#2337;&#2377;&#2325;&#2381;&#2351;&#2370;&#2350;&#2375;&#2306;&#2335; &#2325;&#2379; &#2346;&#2381;&#2352;&#2367;&#2306;&#2335; (print) &#2325;&#2352;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; <strong>Ctrl + P</strong> &#2342;&#2348;&#2366;&#2319;&#2306;&#2404;</p>\r\n<p>&#2337;&#2377;&#2325;&#2381;&#2351;&#2370;&#2350;&#2375;&#2306;&#2335; &#2325;&#2379; &#2309;&#2306;&#2337;&#2352;&#2354;&#2366;&#2311;&#2344; (underline) &#2325;&#2352;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; <strong>Ctrl + U</strong> &#2342;&#2348;&#2366;&#2319;&#2306;&#2404;</p>\r\n<p><strong>Ctrl + A </strong>&#2346;&#2370;&#2352;&#2375; &#2335;&#2375;&#2325;&#2381;&#2360;&#2381;&#2335; &#2325;&#2379; &#2360;&#2375;&#2354;&#2375;&#2325;&#2381;&#2335; (select) &#2325;&#2352;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2346;&#2381;&#2352;&#2351;&#2379;&#2327; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404;</p>\n",
+                    correct: "d",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "19",
+                    section: "31",
+                    question_en: " <p>19.</span><span style=\"font-family:\"> ......... are used to measure both computer memory (RAM) and storage capacity of Floppy disks, CD-ROM drives and Hard drives. </span></p>",
+                    question_hi: "<p>19. .......... &#2325;&#2366; &#2313;&#2346;&#2351;&#2379;&#2327; &#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352; &#2350;&#2375;&#2350;&#2379;&#2352;&#2368; (RAM) &#2324;&#2352; &#2347;&#2381;&#2354;&#2377;&#2346;&#2368; &#2337;&#2367;&#2360;&#2381;&#2325;, CD-ROM &#2337;&#2381;&#2352;&#2366;&#2311;&#2357; &#2324;&#2352; &#2361;&#2366;&#2352;&#2381;&#2337; &#2337;&#2381;&#2352;&#2366;&#2311;&#2357; &#2325;&#2368; &#2360;&#2381;&#2335;&#2379;&#2352;&#2375;&#2332; &#2325;&#2376;&#2346;&#2375;&#2360;&#2367;&#2335;&#2368; &#2342;&#2379;&#2344;&#2379;&#2306; &#2325;&#2379; &#2350;&#2366;&#2346;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404;</p>\n",
+                    options_en: [" <p> Bytes </span></p>", " <p> Bits</span></p>", 
+                                " <p> Octal numbers </span></p>", " <p> Hexadecimal numbers</span></p>"],
+                    options_hi: ["<p>&#2348;&#2366;&#2311;&#2335;&#2381;&#2360; (bytes)</p>\n", "<p>&#2348;&#2367;&#2335;&#2381;&#2360; (bits)</p>\n",
+                                "<p>&#2321;&#2325;&#2381;&#2335;&#2354; &#2360;&#2306;&#2326;&#2381;&#2351;&#2366;&#2319;&#2305; (octal numbers)</p>\n", "<p>&#2361;&#2375;&#2325;&#2381;&#2360;&#2366;&#2337;&#2375;&#2360;&#2367;&#2350;&#2354; &#2360;&#2306;&#2326;&#2381;&#2351;&#2366;&#2319;&#2305; (hexadecimal numbers)</p>\n"],
+                    solution_en: " <p>19.(a)</span><span style=\"font-family:\"> Storage capacity of Floppy disk,hard drives and CD-ROM are measured in BYTES like gigabytes,megabytes etc.</span></p>",
+                    solution_hi: "<p>19.(a) &#2347;&#2381;&#2354;&#2377;&#2346;&#2368; &#2337;&#2367;&#2360;&#2381;&#2325;, &#2361;&#2366;&#2352;&#2381;&#2337; &#2337;&#2381;&#2352;&#2366;&#2311;&#2357; &#2324;&#2352; CD-ROM &#2325;&#2368; &#2360;&#2381;&#2335;&#2379;&#2352;&#2375;&#2332; &#2325;&#2381;&#2359;&#2350;&#2340;&#2366; &#2325;&#2379; &#2348;&#2366;&#2311;&#2335;&#2381;&#2360;(bytes) &#2332;&#2376;&#2360;&#2375; &#2327;&#2368;&#2327;&#2366;&#2348;&#2366;&#2311;&#2335;&#2381;&#2360;(gigabytes), &#2350;&#2375;&#2327;&#2366;&#2348;&#2366;&#2311;&#2335;&#2381;&#2360;(megabytes) &#2310;&#2342;&#2367; &#2350;&#2375;&#2306; &#2350;&#2366;&#2346;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404;</p>\n",
+                    correct: "a",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "20",
+                    section: "misc",
+                    question_en: " <p>20. </span><span style=\"font-family:\">What is the responsibility of the logical unit in the CPU of a computer? </span></p>",
+                    question_hi: " <p>20</span><span style=\"font-family:\">. </span><span style=\"font-family:\">कंप्यूटर के </span><span style=\"font-family:\">CPU </span><span style=\"font-family:\">में लॉजिकल यूनिट </span><span style=\"font-family:\">(logical unit) </span><span style=\"font-family:\">की क्या उत्तरदायित्व होती है</span><span style=\"font-family:\">?</span></p>",
+                    options_en: [" <p> To produce result</span></p>", " <p> To compare numbers</span></p>", 
+                                " <p> To control flow of information</span></p>", " <p> To do Math work</span></p>"],
+                    options_hi: [" <p> </span><span style=\"font-family:\">रिजल्ट प्रोडूस करना   </span></p>", " <p> </span><span style=\"font-family:\">संख्याओं की तुलना करना</span></p>",
+                                " <p> </span><span style=\"font-family:\">इनफार्मेशन के फ्लो को कंट्रोल करना</span></p>", " <p> </span><span style=\"font-family:\">गणित का काम करना</span></p>"],
+                    solution_en: " <p>20.(b)</span><span style=\"font-family:\"> Some of the functions of the logic unit :-Logical operations (AND, NOT, OR, XOR),bit-shifting operations, comparison operations (=, <, < =, >, > =)</span></p>",
+                    solution_hi: " <p>20.(b) </span><span style=\"font-family:\">लॉजिक यूनिट के कुछ कार्य</span><span style=\"font-family:\">: - </span><span style=\"font-family:\">लॉजिकल ऑपरेशंस </span><span style=\"font-family:\">(AND, NOT, OR, XOR), </span><span style=\"font-family:\">बिट</span><span style=\"font-family:\">-</span><span style=\"font-family:\">शिफ्टिंग ऑपरेशंस</span><span style=\"font-family:\">, </span><span style=\"font-family:\">कंपेरिजन ऑपरेशंस </span><span style=\"font-family:\">(=, <, <=,>,> =)</span></p>",
+                    correct: "b",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+            
+            // Generate question boxes
+            const boxesContainer = document.getElementById('question-boxes');
+            questions.forEach((q, index) => {
+                const box = document.createElement('div');
+                box.className = 'q-box';
+                box.textContent = index + 1;
+                box.onclick = () => showQuestion(index);
+                box.id = `box-${index}`;
+                boxesContainer.appendChild(box);
+            });
+            
+            // Show first question
+            showQuestion(0);
+            updateProgress();
+        }
+        
+        // Show a specific question
+        
+        function formatContent(text) {
+            if (!text) return '';
+            return text.replace(/<img/g, '<img style="max-width:100%;height:auto;"');
+        }
+        
+        function showQuestion(index) {
+            if (index < 0 || index >= questions.length) return;
+            
+            currentQuestion = index;
+            const question = questions[index];
+            
+            // Update question counter
+            document.getElementById('question-counter').textContent = `Question ${index + 1} of ${questions.length}`;
+            
+            // Update question boxes
+            document.querySelectorAll('.q-box').forEach(box => box.classList.remove('current'));
+            document.getElementById(`box-${index}`).classList.add('current');
+            
+            // Generate question HTML
+            let html = `
+                <div class="question-card">
+                    <div class="question-text">
+                        <div class="en">${formatContent(question.question_en)}</div>
+                        <div class="hi" style="display:none">${formatContent(question.question_hi)} </div>
+                    </div>
+                    <div class="options" id="options-container">`;
+            
+            // Add options
+            ['a', 'b', 'c', 'd'].forEach((opt, i) => {
+                let optionClass = '';
+                let isCorrectAnswer = opt === question.correct;
+                let isUserAnswer = answers[question.id] === opt;
+                
+                // When reviewing, add appropriate classes
+                if (submitted) {
+                    if (isCorrectAnswer) {
+                        optionClass += ' correct-answer';
+                    } else if (isUserAnswer && !isCorrectAnswer) {
+                        optionClass += ' incorrect';
+                    }
+                }
+                
+                html += `
+                    <div class="option-item">
+                        <input class="option-input" type="radio" name="q${index}" 
+                            id="opt-${index}-${opt}" value="${opt}" 
+                            ${isUserAnswer ? 'checked' : ''}
+                            onclick="selectAnswer('${question.id}', '${opt}')">
+                       <label class="option-label${optionClass}" for="opt-${index}-${opt}">
+                            <div class="en">${question.options_en[i]}</div>
+                            <div class="hi" style="display:none">${question.options_hi[i]}</div>
+                        </label>
+                    </div>`;
+            });
+            
+            // Add solution if submitted
+            if (submitted) {
+                const isCorrect = answers[question.id] === question.correct;
+                const resultText = answers[question.id] ? (isCorrect ? 'Correct!' : 'Incorrect!') : 'Not attempted';
+                
+                html += `
+                    <div class="solution-container">
+                        <div class="solution-title">${resultText}</div>
+                        <div class="solution-text">
+                            <div class="en">${question.solution_en}</div>
+                            <div class="hi" style="display:none">${question.solution_hi}</div>
+                        </div>
+                    </div>`;
+            }
+            
+            html += `</div></div>`;
+            
+            document.getElementById('questions-container').innerHTML = html;
+            
+            // Apply language settings
+            applyLanguage();
+            
+            // If in mobile view, close the menu
+            if (window.innerWidth < 992) {
+                toggleNav(false);
+            }
+            
+            // Add review mode class if submitted
+            if (submitted) {
+                document.getElementById('options-container').classList.add('review-mode');
+            }
+        }
+        
+        // Apply current language
+        function applyLanguage() {
+            document.querySelectorAll(`.${currentLang}`).forEach(el => el.style.display = 'block');
+            document.querySelectorAll(`.${currentLang === 'en' ? 'hi' : 'en'}`).forEach(el => el.style.display = 'none');
+            
+            // Update language button text
+            document.getElementById('lang-text').textContent = currentLang === 'en' ? 'Hi' : 'En';
+        }
+        
+        // Select an answer
+        function selectAnswer(qId, option) {
+            if (submitted) return;
+            
+            answers[qId] = option;
+            updateProgress();
+            
+            // Mark question as attempted in the navigation
+            const index = questions.findIndex(q => q.id === qId);
+            if (index >= 0) {
+                const box = document.getElementById(`box-${index}`);
+                box.classList.add('attempted');
+                box.classList.remove('unattempted');
+            }
+        }
+        
+        // Navigate to previous/next question
+        function prevQuestion() { 
+            if (currentQuestion > 0) showQuestion(currentQuestion - 1); 
+        }
+        
+        function nextQuestion() { 
+            if (currentQuestion < questions.length - 1) showQuestion(currentQuestion + 1); 
+        }
+        
+        // Switch section
+        function switchSection(sectionId) {
+            if (sectionId === 'all') {
+                showQuestion(0);
+                return;
+            }
+            
+            const section = sections[sectionId];
+            if (section) showQuestion(section.start);
+        }
+        
+        // Toggle language
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'hi' : 'en';
+            applyLanguage();
+        }
+        
+        // Toggle navigation sidebar
+        function toggleNav(show) {
+            const nav = document.getElementById('question-nav');
+            const overlay = document.getElementById('nav-overlay');
+            
+            if (show === undefined) {
+                show = !nav.classList.contains('show');
+            }
+            
+            if (show) {
+                nav.classList.add('show');
+                overlay.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            } else {
+                nav.classList.remove('show');
+                overlay.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+        }
+        
+        // Update progress
+        function updateProgress() {
+            const attempted = Object.keys(answers).length;
+            document.getElementById('attempted-count').textContent = attempted;
+        }
+        
+        // Start timer
+        function startTimer() {
+            const timerDisplay = document.getElementById('timer-display');
+            let timeLeft = totalTime;
+            
+            const timerInterval = setInterval(() => {
+                if (timeLeft <= 0 || submitted) {
+                    clearInterval(timerInterval);
+                    if (!submitted) submitTest();
+                    return;
+                }
+                
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                timeLeft--;
+            }, 1000);
+        }
+        
+        // Confirm before submitting
+        function confirmSubmit() {
+            if (submitted) return;
+            
+            const attempted = Object.keys(answers).length;
+            const remaining = questions.length - attempted;
+            
+            // Create a more modern confirmation dialog
+            const confirmHtml = `
+                <div style="text-align: center; padding: 20px;">
+                    <h4 style="margin-bottom: 16px; color: var(--dark);">Confirm Submission</h4>
+                    <p style="margin-bottom: 24px; color: var(--gray);">
+                        You have attempted ${attempted} of ${questions.length} questions.<br>
+                        ${remaining} questions are unattempted.
+                    </p>
+                    <div style="display: flex; justify-content: center; gap: 12px;">
+                        <button onclick="this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; border: 1px solid var(--light-gray); background: white; border-radius: 8px; cursor: pointer;">
+                            Cancel
+                        </button>
+                        <button onclick="submitTest(); this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer;">
+                            Submit Test
+                        </button>
+                    </div>
+                </div>`;
+            
+            // Create modal element
+            const modal = document.createElement('div');
+            modal.className = 'results-modal show';
+            modal.innerHTML = `
+                <div class="results-card" style="max-width: 400px;">
+                    <button class="cancel-btn" style="position: absolute; top: 12px; right: 12px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--gray);" onclick="this.closest('.results-modal').remove()">
+                        ×
+                    </button>
+                    ${confirmHtml}
+                </div>`;
+            
+            document.body.appendChild(modal);
+        }
+        
+        // Submit test
+        function submitTest() {
+            if (submitted) return;
+            
+            submitted = true;
+            
+            let score = 0;
+            let correctCount = 0;
+            let incorrectCount = 0;
+            let unattemptedCount = 0;
+            
+            questions.forEach((q, index) => {
+                const userAns = answers[q.id];
+                const box = document.getElementById(`box-${index}`);
+                
+                box.classList.remove('attempted');
+                
+                if (!userAns) {
+                    unattemptedCount++;
+                    box.classList.add('unattempted');
+                } else if (userAns === q.correct) {
+                    correctCount++;
+                    score += q.pos_marks;
+                    box.classList.add('correct');
+                } else {
+                    incorrectCount++;
+                    score -= q.neg_marks;
+                    box.classList.add('incorrect');
+                }
+            });
+            
+            // Update result values
+            document.getElementById('score-value').textContent = score.toFixed(2);
+            document.getElementById('correct-value').textContent = correctCount;
+            document.getElementById('incorrect-value').textContent = incorrectCount;
+            document.getElementById('unattempted-value').textContent = unattemptedCount;
+            
+            // Show the results modal
+            document.getElementById('results-modal').classList.add('show');
+            
+            // Disable submit button
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-check"></i>';
+            submitBtn.style.backgroundColor = 'var(--success)';
+            
+            // Refresh current question view to show solution
+            showQuestion(currentQuestion);
+        }
+        
+        // Review test
+        function reviewTest() {
+            document.getElementById('results-modal').classList.remove('show');
+            showQuestion(0);
+        }
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target === document.getElementById('results-modal')) {
+                document.getElementById('results-modal').classList.remove('show');
+            }
+        });
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') prevQuestion();
+            if (e.key === 'ArrowRight') nextQuestion();
+        });
+    </script>
+</body>
+</html>
