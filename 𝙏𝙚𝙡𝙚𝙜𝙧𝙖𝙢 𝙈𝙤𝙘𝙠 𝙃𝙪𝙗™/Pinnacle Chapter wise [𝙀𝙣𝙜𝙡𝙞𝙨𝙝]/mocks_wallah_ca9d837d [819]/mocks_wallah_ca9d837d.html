@@ -1,0 +1,1449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mocks Wallah</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --primary-light: #a29bfe;
+            --primary-dark: #5649c0;
+            --secondary: #00cec9;
+            --accent: #fd79a8;
+            --success: #00b894;
+            --warning: #fdcb6e;
+            --danger: #d63031;
+            --light: #f8f9fa;
+            --dark: #2d3436;
+            --gray: #636e72;
+            --light-gray: #dfe6e9;
+            --card-bg: #ffffff;
+            --body-bg: #f5f6fa;
+            --header-bg: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            --footer-bg: #ffffff;
+            --box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            --box-shadow-sm: 0 2px 10px rgba(0,0,0,0.05);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background-color: var(--body-bg);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            color: var(--dark);
+            line-height: 1.6;
+            padding-bottom: 80px; /* Space for fixed navigation */
+            overflow-x: hidden;
+        }
+        
+        /* Header Styles */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: var(--header-bg);
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            z-index: 1000;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .header-brand {
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .header-brand i {
+            margin-right: 8px;
+            font-size: 1.2rem;
+        }
+        
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .control-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .control-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .control-btn.active {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .timer-display {
+            background: rgba(0,0,0,0.2);
+            border-radius: 18px;
+            padding: 4px 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+        
+        .timer-display i {
+            margin-right: 6px;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-top: 60px;
+            padding: 16px;
+            min-height: calc(100vh - 140px);
+        }
+        
+        .question-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--box-shadow-sm);
+            border: none;
+            transition: var(--transition);
+        }
+        
+        .question-counter {
+            font-size: 0.9rem;
+            color: var(--gray);
+            text-align: center;
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+        
+        .question-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+        
+        .option-item {
+            margin-bottom: 12px;
+            position: relative;
+        }
+        
+        .option-input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+            .question-text {
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        hyphens: auto;
+        max-width: 100%;
+    }
+
+    .question-text img,
+    .option-label img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 8px 0;
+        border-radius: 8px;
+    }
+
+    .option-label {
+        overflow: hidden;
+    }
+
+    .question-card {
+        overflow: hidden;
+    }
+        
+        .option-label {
+            display: block;
+            padding: 14px 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--light-gray);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .option-label:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .option-input:checked + .option-label {
+            border-color: var(--primary);
+            background: rgba(108, 92, 231, 0.05);
+            box-shadow: 0 0 0 1px var(--primary);
+        }
+        
+        .option-input:checked + .option-label::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--primary);
+        }
+        
+        /* When reviewing answers */
+        .review-mode .option-input:checked + .option-label.correct {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.correct::after {
+            background: var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.incorrect {
+            border-color: var(--danger);
+            background: rgba(214, 48, 49, 0.05);
+            box-shadow: 0 0 0 1px var(--danger);
+        }
+        
+        .MathJax, .mjx-chtml {
+            overflow-x: auto;
+            max-width: 100%;
+            display: inline-block;
+        }
+
+        
+        .review-mode .option-input:checked + .option-label.incorrect::after {
+            background: var(--danger);
+        }
+        
+        .review-mode .option-label.correct-answer {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-label.correct-answer::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--success);
+        }
+        
+        .solution-container {
+            margin-top: 20px;
+            padding: 16px;
+            background: rgba(108, 92, 231, 0.05);
+            border-radius: 12px;
+            border-left: 3px solid var(--primary);
+        }
+        
+        .solution-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+        
+        /* Question Navigation */
+        .question-nav {
+            position: fixed;
+            top: 60px;
+            right: 0;
+            bottom: 80px;
+            width: 100%;
+            max-width: 320px;
+            background: var(--card-bg);
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            transform: translateX(100%);
+            transition: var(--transition);
+            z-index: 900;
+            overflow-y: auto;
+            padding: 16px;
+        }
+        
+        .question-nav.show {
+            transform: translateX(0);
+        }
+        
+        .nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .nav-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+        
+        .question-stats {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .stat-badge {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        
+        .section-selector {
+            width: 100%;
+            margin-bottom: 16px;
+            border-radius: 12px;
+            padding: 10px 16px;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            font-size: 0.9rem;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 16px;
+        }
+        
+        .question-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+            gap: 8px;
+        }
+        
+        .q-box {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .q-box:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .q-box.attempted {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .q-box.correct {
+            background-color: var(--success);
+            color: white;
+            border-color: var(--success);
+        }
+        
+        .q-box.incorrect {
+            background-color: var(--danger);
+            color: white;
+            border-color: var(--danger);
+        }
+        
+        .q-box.current {
+            border: 2px solid var(--accent) !important;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .q-box.unattempted {
+            background-color: var(--gray);
+            color: white;
+            border-color: var(--gray);
+        }
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: var(--footer-bg);
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            z-index: 800;
+        }
+        
+        .nav-btn {
+            height: 48px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 20px;
+            transition: var(--transition);
+            gap: 8px;
+        }
+        
+        .nav-btn i {
+            font-size: 1rem;
+        }
+        
+        .nav-btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .nav-btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+        
+        .nav-btn-outline:hover {
+            background: rgba(108, 92, 231, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        /* Overlay when nav is open */
+        .nav-overlay {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            bottom: 80px;
+            background: rgba(0,0,0,0.5);
+            z-index: 800;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+        }
+        
+        .nav-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        /* Results Modal */
+        .results-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1100;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+            padding: 16px;
+        }
+        
+        .results-modal.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .results-card {
+            background: white;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+            transform: translateY(20px);
+            transition: var(--transition);
+        }
+        
+        .results-modal.show .results-card {
+            transform: translateY(0);
+        }
+        
+        .results-header {
+            background: var(--header-bg);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .results-title {
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .results-body {
+            padding: 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            color: white;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+        
+        .results-footer {
+            padding: 16px 20px;
+            display: flex;
+            justify-content: center;
+            border-top: 1px solid var(--light-gray);
+        }
+        
+        /* Responsive Adjustments */
+        @media (min-width: 992px) {
+            .question-nav {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-right: 320px;
+            }
+            
+            .nav-overlay {
+                display: none;
+            }
+            
+            .bottom-nav {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .question-grid {
+                grid-template-columns: repeat(auto-fill, minmax(36px, 1fr));
+                gap: 6px;
+            }
+            
+            .q-box {
+                width: 36px;
+                height: 36px;
+                font-size: 0.9rem;
+            }
+            
+            .option-label {
+                padding: 12px 14px;
+            }
+            
+            .question-text {
+                font-size: 1rem;
+            }
+            
+            .header-brand {
+                font-size: 1rem;
+            }
+            
+            .control-btn {
+                width: 32px;
+                height: 32px;
+            }
+            
+            .timer-display {
+                font-size: 0.8rem;
+                padding: 4px 10px;
+            }
+            
+            .nav-btn {
+                height: 44px;
+                padding: 0 16px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="#" class="header-brand">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Mocks Wallah</span>
+            </a>
+            
+            <div class="header-controls">
+                <!-- Timer -->
+                <div class="timer-display">
+                    <i class="far fa-clock"></i>
+                    <span id="timer-display">11:00</span>
+                </div>
+                
+                <!-- Language toggle -->
+                <button class="control-btn" id="lang-btn" onclick="toggleLanguage()">
+                    <span id="lang-text">En</span>
+                </button>
+                
+                <!-- Submit button -->
+                <button class="control-btn" id="submit-btn" onclick="confirmSubmit()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+                
+                <!-- Questions toggle for mobile -->
+                <button class="control-btn nav-toggle-btn" id="nav-toggle" onclick="toggleNav()">
+                    <i class="fas fa-th"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main content -->
+    <main class="main-content" id="main-content">
+        <div class="question-counter" id="question-counter">Question 1 of 23</div>
+        
+        <!-- Questions will be displayed here -->
+        <div id="questions-container"></div>
+    </main>
+    
+    <!-- Overlay for mobile nav -->
+    <div class="nav-overlay" id="nav-overlay" onclick="toggleNav(false)"></div>
+    
+    <!-- Question navigation sidebar -->
+    <aside class="question-nav" id="question-nav">
+        <div class="nav-header">
+            <h3 class="nav-title">Questions</h3>
+            <div class="question-stats">
+                <span class="stat-badge bg-primary" id="attempted-count">0</span>
+                <span class="stat-badge bg-gray" id="total-count">23</span>
+                <button class="control-btn d-lg-none" onclick="toggleNav(false)">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Section selector -->
+        <select class="section-selector" id="section-selector" onchange="switchSection(this.value)">
+            <option value="all">All Sections</option>
+        </select>
+        
+        <!-- Question grid -->
+        <div class="question-grid" id="question-boxes"></div>
+    </aside>
+    
+    <!-- Bottom navigation for mobile -->
+    <nav class="bottom-nav d-lg-none">
+        <button class="nav-btn nav-btn-outline" onclick="prevQuestion()">
+            <i class="fas fa-chevron-left"></i>
+            <span>Previous</span>
+        </button>
+        <button class="nav-btn nav-btn-outline" onclick="nextQuestion()">
+            <span>Next</span>
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </nav>
+    
+    <!-- Results modal -->
+    <div class="results-modal" id="results-modal">
+        <div class="results-card">
+            <div class="results-header">
+                <h3 class="results-title">Test Results</h3>
+            </div>
+            <div class="results-body">
+                <div class="stats-grid">
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark))">
+                        <div class="stat-value" id="score-value">0</div>
+                        <div class="stat-label">Score</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--success), #1b9aaa)">
+                        <div class="stat-value" id="correct-value">0</div>
+                        <div class="stat-label">Correct</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--danger), var(--accent))">
+                        <div class="stat-value" id="incorrect-value">0</div>
+                        <div class="stat-label">Incorrect</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--gray), var(--dark))">
+                        <div class="stat-value" id="unattempted-value">0</div>
+                        <div class="stat-label">Unattempted</div>
+                    </div>
+                </div>
+            </div>
+            <div class="results-footer">
+                <button class="nav-btn nav-btn-primary" onclick="reviewTest()">
+                    <i class="fas fa-search me-1"></i>
+                    <span>Review Test</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Questions data
+        const questions = [];
+        const sections = {};
+        let currentLang = "en";
+        let currentQuestion = 0;
+        let answers = {};
+        let submitted = false;
+        let totalTime = 11 * 60;
+        
+        // Initialize the test
+        window.onload = function() {
+            initializeTest();
+            startTimer();
+            
+            // If on desktop, show the question navigation by default
+            if (window.innerWidth >= 992) {
+                document.getElementById('question-nav').classList.add('show');
+                document.getElementById('main-content').classList.add('with-nav');
+            }
+        };
+        
+        // Initialize test data
+        function initializeTest() {
+            // Add sections and questions
+            
+            sections["7"] = {
+                name: "English",
+                start: 0,
+                end: 21
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="7">English</option>`;
+            
+            sections["misc"] = {
+                name: "Miscellaneous",
+                start: 22,
+                end: 22
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="misc">Miscellaneous</option>`;
+            
+            
+                questions.push({
+                    id: "1",
+                    section: "7",
+                    question_en: "<p>1. Select the option that will improve the underlined part of the given sentence. In case no improvement is needed, select \'No improvement required\'.<br>They each listened carefully to what <span style=\"text-decoration: underline;\"><strong>each other</strong></span> said.</p>",
+                    question_hi: "<p>1. Select the option that will improve the underlined part of the given sentence. In case no improvement is needed, select \'No improvement required\'.<br>They each listened carefully to what <span style=\"text-decoration: underline;\"><strong>each other</strong></span> said.</p>",
+                    options_en: ["<p>each another</p>", "<p>No improvement required</p>", 
+                                "<p>the other</p>", "<p>one another</p>"],
+                    options_hi: ["<p>each another</p>", "<p>No improvement required</p>",
+                                "<p>the other</p>", "<p>one another</p>"],
+                    solution_en: "<p>1.(c) the other. <br>We will remove &lsquo;each&rsquo; to grammatically correct the given sentence. Hence, &lsquo;the other&rsquo; is the most appropriate answer.</p>",
+                    solution_hi: "<p>1.(c) the other. <br>दिए गए sentence को grammatically सही करने के लिए &lsquo;each&rsquo; को remove कर दिया जाएगा। अतः, the other&rsquo; सबसे उपयुक्त उत्तर है।</p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "2",
+                    section: "7",
+                    question_en: "<p>2. Select the most appropriate option that can substitute the underlined segment in the given sentence. If there is no need to substitute it, select &lsquo;No substitution required&rsquo;. <br><span style=\"text-decoration: underline;\"><strong>Such was</strong></span> his performance that the audience gave a standing ovation.</p>",
+                    question_hi: "<p>2. Select the most appropriate option that can substitute the underlined segment in the given sentence. If there is no need to substitute it, select &lsquo;No substitution required&rsquo;. <br><span style=\"text-decoration: underline;\"><strong>Such was</strong></span> his performance that the audience gave a standing ovation.</p>",
+                    options_en: ["<p>So was</p>", "<p>Much was</p>", 
+                                "<p>No substitution required</p>", "<p>Such as</p>"],
+                    options_hi: ["<p>So was</p>", "<p>Much was</p>",
+                                "<p>No substitution required</p>", "<p>Such as</p>"],
+                    solution_en: "<p>2.(c) No substitution required. <br>The sentence is grammatically correct.</p>",
+                    solution_hi: "<p>2.(c) No substitution required. <br>दिया गया sentence, grammatically सही है।</p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "3",
+                    section: "7",
+                    question_en: "<p>3. Select the most appropriate option that can substitute the underlined segment in the&nbsp;given sentence. If there is no need to substitute it, select &lsquo;No substitution required&rsquo;. <br>In the olden days, many <span style=\"text-decoration: underline;\"><strong>people use to think</strong></span> that the earth was flat.</p>",
+                    question_hi: "<p>3. Select the most appropriate option that can substitute the underlined segment in the&nbsp;given sentence. If there is no need to substitute it, select &lsquo;No substitution required&rsquo;. <br>In the olden days, many <span style=\"text-decoration: underline;\"><strong>people use to think</strong></span> that the earth was flat.</p>",
+                    options_en: ["<p>people used to think</p>", "<p>people were used to think</p>", 
+                                "<p>people were thinking</p>", "<p>No substitution required</p>"],
+                    options_hi: ["<p>people used to think</p>", "<p>people were used to think</p>",
+                                "<p>people were thinking</p>", "<p>No substitution required</p>"],
+                    solution_en: "<p>3.(a) people used to think.<br>The given sentence is in the past tense so the verb must be used in its past form(used) and not in the present form(use). Hence, &lsquo;people used to think&rsquo; is the most appropriate answer.</p>",
+                    solution_hi: "<p>3.(a) people used to think.<br>दिया गया sentence, simple past tense में है, इसलिए इसमें verb भी past form(used) में होनी चाहिए, न कि present form(use) में। अतः, &lsquo;people used to think&rsquo; सबसे उपयुक्त उत्तर है।</p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "4",
+                    section: "7",
+                    question_en: "<p>4. Select the most appropriate option that can substitute the underlined segment in the given sentence. If there is no need to substitute it, select &lsquo;No substitution required&rsquo;.<br>The dress <span style=\"text-decoration: underline;\"><strong>may pleasantly</strong></span> be delivered to us at the earliest.</p>",
+                    question_hi: "<p>4. Select the most appropriate option that can substitute the underlined segment in the given sentence. If there is no need to substitute it, select &lsquo;No substitution required&rsquo;.<br>The dress <span style=\"text-decoration: underline;\"><strong>may pleasantly</strong></span> be delivered to us at the earliest.</p>",
+                    options_en: ["<p>No substitution required</p>", "<p>may kindly</p>", 
+                                "<p>might kindly</p>", "<p>must pleasantly</p>"],
+                    options_hi: ["<p>No substitution required</p>", "<p>may kindly</p>",
+                                "<p>might kindly</p>", "<p>must pleasantly</p>"],
+                    solution_en: "<p>4.(b) may kindly.<br>We will replace &lsquo;pleasantly&rsquo; with &lsquo;kindly&rsquo; to grammatically correct the given sentence. Hence, &lsquo;may kindly&rsquo; is the most appropriate answer.</p>",
+                    solution_hi: "<p>4.(b) may kindly.<br>दिए गए sentence को grammatically सही बनाने के लिए &lsquo;pleasantly&rsquo; के स्थान पर &lsquo;kindly&rsquo; का प्रयोग किया जाएगा। अतः, &lsquo;may kindly&rsquo; सबसे उपयुक्त उत्तर है।</p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "5",
+                    section: "7",
+                    question_en: "<p>5. Select the option that will improve the underlined part of the given sentence. In case no improvement is needed, select \'No improvement required\'.<br><strong><span style=\"text-decoration: underline;\">Since setting up</span></strong>, the charity has raised a million dollars.</p>",
+                    question_hi: "<p>5. Select the option that will improve the underlined part of the given sentence. In case no improvement is needed, select \'No improvement required\'.<br><strong><span style=\"text-decoration: underline;\">Since setting up</span></strong>, the charity has raised a million dollars.</p>",
+                    options_en: ["<p>Since being set up</p>", "<p>From setting up</p>", 
+                                "<p>Since setting</p>", "<p>No improvement required</p>"],
+                    options_hi: ["<p>Since being set up</p>", "<p>From setting up</p>",
+                                "<p>Since setting</p>", "<p>No improvement required</p>"],
+                    solution_en: "<p>5.(a) Since being set up.<br>The initial part of the given sentence is incomplete as it requires a gerund(being). Hence, &lsquo;since being set up&rsquo; is the most appropriate answer.</p>",
+                    solution_hi: "<p>5.(a) Since being set up.<br>दिए गए sentence का initial part, incomplete है क्योंकि इसमें एक gerund(being) की आवश्यकता है। अतः, &lsquo;since being set up&rsquo; सबसे उपयुक्त उत्तर है।</p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "6",
+                    section: "7",
+                    question_en: "<p>6. Select the most appropriate option that can substitute the underlined segment in the given sentence. If there is no need to substitute it, select &lsquo;No substitution required&rsquo;<br>I can&rsquo;t <span style=\"text-decoration: underline;\"><strong>make out</strong></span> my mind about taking a vacation in winter.</p>",
+                    question_hi: "<p>6. Select the most appropriate option that can substitute the underlined segment in the given sentence. If there is no need to substitute it, select &lsquo;No substitution required&rsquo;<br>I can&rsquo;t <span style=\"text-decoration: underline;\"><strong>make out</strong></span> my mind about taking a vacation in winter.</p>",
+                    options_en: ["<p>make up</p>", "<p>made out</p>", 
+                                "<p>No substitution required</p>", "<p>Make on</p>"],
+                    options_hi: ["<p>make up</p>", "<p>made out</p>",
+                                "<p>No substitution required</p>", "<p>Make on</p>"],
+                    solution_en: "<p>6.(a) make up.<br>&lsquo;Make up one&rsquo;s mind&rsquo; is a phrase that means to make a decision. Similarly in the given sentence, the narrator is unable to decide about taking a vacation. Hence, &lsquo;make up&rsquo; is the most appropriate answer.</p>",
+                    solution_hi: "<p>6.(a) make up.<br>&lsquo;Make up one&rsquo;s mind&rsquo; एक phrase है जिसका अर्थ है निर्णय लेना। इसी तरह दिए गए sentence में, कथावाचक अवकाश लेने के बारे में निर्णय नहीं ले पा रहा है। अतः, &lsquo;make up&rsquo; सबसे उपयुक्त उत्तर है।</p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "7",
+                    section: "7",
+                    question_en: "<p>7. Select the most appropriate option to substitute the underlined segment in the given sentence. If there is no need to substitute it, select &lsquo;No substitution required&rsquo;. <br>Hardly had <span style=\"text-decoration: underline;\"><strong>we get in but</strong></span> the train started</p>",
+                    question_hi: "<p>7. Select the most appropriate option to substitute the underlined segment in the given sentence. If there is no need to substitute it, select &lsquo;No substitution required&rsquo;. <br>Hardly had <span style=\"text-decoration: underline;\"><strong>we get in but</strong></span> the train started</p>",
+                    options_en: ["<p>we get in than</p>", "<p>No substitution required</p>", 
+                                "<p>we got in before</p>", "<p>we got in when</p>"],
+                    options_hi: ["<p>we get in than</p>", "<p>No substitution required</p>",
+                                "<p>we got in before</p>", "<p>we got in when</p>"],
+                    solution_en: "<p>7.(d) we got in when.<br>&ldquo;Hardly&hellip;&hellip;..when&rdquo; is a fixed conjunction pair. Hence, &lsquo;we got in when&rsquo; is the most appropriate answer.</p>",
+                    solution_hi: "<p>7.(d) we got in when.<br>&ldquo;Hardly&hellip;&hellip;..when&rdquo; एक fixed conjunction pair है। अतः, &lsquo;we got in when&rsquo; सबसे उपयुक्त उत्तर है।</p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "8",
+                    section: "7",
+                    question_en: "<p>8. Select the most appropriate option that can substitute the underlined segment in the given sentence. If there is no need to substitute it, select &lsquo;No substitution required&rsquo;. <br><span style=\"text-decoration: underline;\"><strong>As I am hearing</strong></span> the lecture it reminded me of a book I had read two years ago.</p>",
+                    question_hi: "<p>8. Select the most appropriate option that can substitute the underlined segment in the given sentence. If there is no need to substitute it, select &lsquo;No substitution required&rsquo;. <br><span style=\"text-decoration: underline;\"><strong>As I am hearing</strong></span> the lecture it reminded me of a book I had read two years ago.</p>",
+                    options_en: ["<p>As I have heard</p>", "<p>When I hear</p>", 
+                                "<p>As I heard</p>", "<p>No substitution required</p>"],
+                    options_hi: ["<p>As I have heard</p>", "<p>When I hear</p>",
+                                "<p>As I heard</p>", "<p>No substitution required</p>"],
+                    solution_en: "<p>8.(c) As I heard.<br>The given sentence is in the past tense so the verb must be used in its past form(heard) and not in the present continuous form(hearing). Hence, &lsquo;As I heard&rsquo; is the most appropriate answer.</p>",
+                    solution_hi: "<p>8.(c) As I heard.<br>दिया गया sentence, past tense में है, इसलिए इसमें verb भी past form(heard) में होनी चाहिए, न कि present continuous form(hearing) में। अतः, &lsquo;As I heard&rsquo; सबसे उपयुक्त उत्तर है।</p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "9",
+                    section: "7",
+                    question_en: "<p>9. Select the most appropriate option to substitute the underlined segment in the given sentence. If there is no need to substitute it, select &lsquo;No substitution required&rsquo;. <br>This is one of the most remarkable cases <span style=\"text-decoration: underline;\"><strong>of all others</strong>.</span></p>",
+                    question_hi: "<p>9. Select the most appropriate option to substitute the underlined segment in the given sentence. If there is no need to substitute it, select &lsquo;No substitution required&rsquo;. <br>This is one of the most remarkable cases <span style=\"text-decoration: underline;\"><strong>of all others</strong>.</span></p>",
+                    options_en: ["<p>No substitution required</p>", "<p>of all</p>", 
+                                "<p>of other all</p>", "<p>all of others</p>"],
+                    options_hi: ["<p>No substitution required</p>", "<p>of all</p>",
+                                "<p>of other all</p>", "<p>all of others</p>"],
+                    solution_en: "<p>9.(b) of all.<br>We will remove &lsquo;others&rsquo; because it is irrelevant to use &lsquo;others&rsquo; after &lsquo;all&rsquo; in the grammatical context of the given sentence. Hence, &lsquo;of all&rsquo; is the most appropriate answer.</p>",
+                    solution_hi: "<p>9.(b) of all.<br>&lsquo;Others&rsquo; को remove कर दिया जाएगा, क्योंकि दिए गए sentence के grammatical context में &lsquo;all&rsquo; के बाद &lsquo;others&rsquo; का प्रयोग करना irrelevant है। अतः, &lsquo;of all&rsquo; सबसे उपयुक्त उत्तर है।</p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "10",
+                    section: "7",
+                    question_en: "<p>10. Select the option that will improve the underlined part of the given sentence . In case no improvement is needed, select \'No improvement required\'. <br>There are <span style=\"text-decoration: underline;\"><strong>a bit nice</strong></span> shops in the town centre.</p>",
+                    question_hi: "<p>10. Select the option that will improve the underlined part of the given sentence . In case no improvement is needed, select \'No improvement required\'. <br>There are <span style=\"text-decoration: underline;\"><strong>a bit nice</strong></span> shops in the town centre.</p>",
+                    options_en: ["<p>a bit nicer</p>", "<p>far more nicer</p>", 
+                                "<p>No improvement required</p>", "<p>far nicer</p>"],
+                    options_hi: ["<p>a bit nicer</p>", "<p>far more nicer</p>",
+                                "<p>No improvement required</p>", "<p>far nicer</p>"],
+                    solution_en: "<p>10.(d) far nicer.<br>We cannot use the article &lsquo;a&rsquo; before shops(plural) &amp; we cannot write &lsquo;more&rsquo; with a comparative degree &lsquo;nicer&rsquo;. Hence, &lsquo;far nicer&rsquo; is the most appropriate answer.</p>",
+                    solution_hi: "<p>10.(d) far nicer.<br>Shops (plural) से पहले, हम article &lsquo;a&rsquo; का प्रयोग नहीं कर सकते तथा हम comparative degree &lsquo;nicer&rsquo; के साथ &lsquo;more&rsquo; का प्रयोग नहीं कर सकते हैं। अतः, &lsquo;far nicer&rsquo; सबसे उपयुक्त उत्तर है।</p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "11",
+                    section: "7",
+                    question_en: "<p>11. Select the most appropriate option to substitute the underlined segment in the given sentence. If there is no need to substitute it, select &lsquo;No substitution required&rsquo;<br><span style=\"text-decoration: underline;\"><strong>Would you have been</strong></span> so kind as to close the window?</p>",
+                    question_hi: "<p>11. Select the most appropriate option to substitute the underlined segment in the given sentence. If there is no need to substitute it, select &lsquo;No substitution required&rsquo;<br><span style=\"text-decoration: underline;\"><strong>Would you have been</strong></span> so kind as to close the window?</p>",
+                    options_en: ["<p>No substitution required</p>", "<p>Would you be</p>", 
+                                "<p>Would you being</p>", "<p>Will you been</p>"],
+                    options_hi: ["<p>No substitution required</p>", "<p>Would you be</p>",
+                                "<p>Would you being</p>", "<p>Will you been</p>"],
+                    solution_en: "<p>11.(b) Would you be.<br>We generally use the modal verb &lsquo;would&rsquo; when we want to politely request someone for something. Similarly in the given sentence, someone is asking politely to close the window. Hence, &lsquo;Would you be&rsquo; is the most appropriate answer.</p>",
+                    solution_hi: "<p>11.(b) Would you be.<br>हम आमतौर modal verb &lsquo;would&rsquo; का प्रयोग किसी से politely, request करने के लिए करते हैं। इसी प्रकार दिए गए sentence में, कोई व्यक्ति विनम्रतापूर्वक (politely) खिड़की बंद करने के लिए कह रहा है। अतः, &lsquo;Would you be&rsquo; सबसे उपयुक्त उत्तर है।</p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "12",
+                    section: "7",
+                    question_en: "<p>12. Select the most appropriate option to substitute the underlined segment in the given sentence. If there is no need to substitute it, select option &lsquo;No substitution required&rsquo;. <br>Often it makes one wonder at the sights <span style=\"text-decoration: underline;\"><strong>you see</strong></span>.</p>",
+                    question_hi: "<p>12. Select the most appropriate option to substitute the underlined segment in the given sentence. If there is no need to substitute it, select option &lsquo;No substitution required&rsquo;. <br>Often it makes one wonder at the sights <span style=\"text-decoration: underline;\"><strong>you see</strong></span>.</p>",
+                    options_en: ["<p>one sees</p>", "<p>one see</p>", 
+                                "<p>you saw</p>", "<p>No substitution required</p>"],
+                    options_hi: ["<p>one sees</p>", "<p>one see</p>",
+                                "<p>you saw</p>", "<p>No substitution required</p>"],
+                    solution_en: "<p>12.(a) one sees.<br>\'One\' is a singular indefinite pronoun and its subject and object forms are the same. In the given sentence, \'one\' has already been used as an object, so we will have to use \'one\' as the subject of the verb \'see\'. Hence, \'one sees\' is the most appropriate answer.</p>",
+                    solution_hi: "<p>12.(a) one sees.<br>\'One\' एक singular indefinite pronoun है,और इसके subject और object, form same ही होते हैं। दिए गए sentence में, \'one\' का प्रयोग पहले ही object के form में किया जा चुका है, इसलिए हमें verb \'see\' के subject के रूप में भी \'one\' का ही प्रयोग करना होगा। अतः, \'one sees\' सबसे उपयुक्त उत्तर है।</p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "13",
+                    section: "7",
+                    question_en: "<p>13. Select the most appropriate option to substitute the underlined segment in the given sentence. If there is no need to substitute it, select &lsquo;No substitution required&rsquo;. <br>It is quite difficult to <span style=\"text-decoration: underline;\"><strong>make on</strong></span> what this doctor writes.</p>",
+                    question_hi: "<p>13. Select the most appropriate option to substitute the underlined segment in the given sentence. If there is no need to substitute it, select &lsquo;No substitution required&rsquo;. <br>It is quite difficult to <span style=\"text-decoration: underline;\"><strong>make on</strong></span> what this doctor writes.</p>",
+                    options_en: ["<p>make out</p>", "<p>make in</p>", 
+                                "<p>No substitution required</p>", "<p>made on</p>"],
+                    options_hi: ["<p>make out</p>", "<p>make in</p>",
+                                "<p>No substitution required</p>", "<p>made on</p>"],
+                    solution_en: "<p>13.(a) make out.<br>&lsquo;Make out&rsquo; means to see, hear or understand something with difficulty. The given sentence states that it is difficult to understand what this doctor writes. Hence, &lsquo;make out&rsquo; is the most appropriate answer.</p>",
+                    solution_hi: "<p>13.(a) make out.<br>&lsquo;Make out&rsquo; का अर्थ है किसी चीज़ को कठिनाई से देखना, सुनना या समझना। दिए गए sentence में कहा गया है कि यह समझना मुश्किल है कि यह doctor क्या लिखता है। अतः, &lsquo;make out&rsquo; सबसे उपयुक्त उत्तर है।</p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "14",
+                    section: "7",
+                    question_en: "<p>14. Select the most appropriate option to substitute the underlined segment in the given&nbsp;sentence. If there is no need to substitute it, select &lsquo;No substitution required&rsquo;.<br>If Vinay has the book why <span style=\"text-decoration: underline;\"><strong>he is not giving you?</strong></span></p>",
+                    question_hi: "<p>14. Select the most appropriate option to substitute the underlined segment in the given&nbsp;sentence. If there is no need to substitute it, select &lsquo;No substitution required&rsquo;.<br>If Vinay has the book why <span style=\"text-decoration: underline;\"><strong>he is not giving you?</strong></span></p>",
+                    options_en: ["<p>he not giving it to you</p>", "<p>is he not giving it to you</p>", 
+                                "<p>he is not gave to you</p>", "<p>No substitution required</p>"],
+                    options_hi: ["<p>he not giving it to you</p>", "<p>is he not giving it to you</p>",
+                                "<p>he is not gave to you</p>", "<p>No substitution required</p>"],
+                    solution_en: "<p>14.(b) is he not giving it to you. <br>&ldquo;<span style=\"text-decoration: underline;\">Wh-word(why, when, where) + Verb + Subject</span>&rdquo; is grammatically the correct structure for the given <span style=\"text-decoration: underline;\">interrogative sentence</span>(in which a question is asked). Hence, &lsquo;Why is(verb) he(Subject) not giving it to you&rsquo; is the most appropriate answer</p>",
+                    solution_hi: "<p>14.(b) is he not giving it to you. <br>&ldquo;Wh-word(why, when, where) + Verb + Subject&rdquo; दिए गए interrogative sentence के लिए सही grammatical structure है (जिसमें question पूछा गया है)। अतः, &lsquo;Why is(verb) he(Subject) not giving it to you&rsquo; सबसे उपयुक्त उत्तर है।</p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "15",
+                    section: "7",
+                    question_en: "<p>15. Select the most appropriate option that can substitute the underlined segment in the given sentence. If there is no need to substitute it, select &lsquo;No substitution required&rsquo;. <br><span style=\"text-decoration: underline;\"><strong>Whom was the person</strong></span> that you wanted me to contact there?</p>",
+                    question_hi: "<p>15. Select the most appropriate option that can substitute the underlined segment in the given sentence. If there is no need to substitute it, select &lsquo;No substitution required&rsquo;. <br><span style=\"text-decoration: underline;\"><strong>Whom was the person</strong></span> that you wanted me to contact there?</p>",
+                    options_en: ["<p>No substitution required</p>", "<p>Who is the person</p>", 
+                                "<p>Whom is the person</p>", "<p>Whom were the persons</p>"],
+                    options_hi: ["<p>No substitution required</p>", "<p>Who is the person</p>",
+                                "<p>Whom is the person</p>", "<p>Whom were the persons</p>"],
+                    solution_en: "<p>15.(b) Who is the person.<br>If the relative pronoun is followed by a &lsquo;verb&rsquo;, then the relative pronoun must be &lsquo;Who&rsquo; and if it is followed by a &lsquo;noun or pronoun&rsquo;, then the relative pronoun must be &lsquo;Whom&rsquo;. Similarly, in the given sentence, the relative pronoun is followed by a &lsquo;verb(was)&rsquo;. Hence, &lsquo;Who is the person&rsquo; is the most appropriate answer.</p>",
+                    solution_hi: "<p>15.(b) Who is the person.<br>यदि relative pronoun के बाद कोई &lsquo;verb&rsquo; आता है, तो relative pronoun &lsquo;Who&rsquo; का प्रयोग होगा, और यदि इसके बाद &lsquo;noun&rsquo; या &lsquo;pronoun&rsquo; आता है, तो relative pronoun &lsquo;Whom&rsquo; का प्रयोग होगा। इसी तरह, दिए गए sentence में, relative pronoun के बाद &lsquo;verb (was)&rsquo; का प्रयोग है। अतः, &lsquo;Who is the person&rsquo; सबसे उपयुक्त उत्तर है।</p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "16",
+                    section: "7",
+                    question_en: "<p>16. Select the option that will improve the underlined part of the given sentence. In case no improvement is needed, select \'No improvement\'. <br>You are <span style=\"text-decoration: underline;\"><strong>so far the bright</strong></span> student in the class.</p>",
+                    question_hi: "<p>16. Select the option that will improve the underlined part of the given sentence. In case no improvement is needed, select \'No improvement\'. <br>You are <span style=\"text-decoration: underline;\"><strong>so far the bright</strong></span> student in the class.</p>",
+                    options_en: ["<p>No improvement</p>", "<p>by so far the brighter</p>", 
+                                "<p>by far the brightest</p>", "<p>so far most bright</p>"],
+                    options_hi: ["<p>No improvement</p>", "<p>by so far the brighter</p>",
+                                "<p>by far the brightest</p>", "<p>so far most bright</p>"],
+                    solution_en: "<p>16.(c) by far the brightest. <br>&lsquo;Superlative adjective&rsquo; denotes the form of an adjective or adverb that expresses the highest or a very high degree of quality of a thing, person, etc. For example, best, worst, greatest, lowest, etc. However, we always place the definite article &lsquo;the&rsquo; before any superlative adjective. Similarly, in the given sentence, &lsquo;brightest&rsquo; will be the superlative degree. Hence, &lsquo;by far the brightest&rsquo; is the most appropriate answer.</p>",
+                    solution_hi: "<p>16.(c) by far the brightest. <br>\'Superlative adjective\' किसी adjective या adverb के उस रूप को दर्शाता है जो किसी वस्तु, व्यक्ति, आदि के गुण (quality) की highest या very high degree को व्यक्त करता है। उदाहरण - best, worst, greatest, lowest आदि। हालाँकि, हम हमेशा किसी भी superlative adjective से पहले definite article &lsquo;the&rsquo; का प्रयोग करते हैं। इसी प्रकार, दिए गए sentence में, &lsquo;brightest&rsquo; एक superlative degree है। अतः, &lsquo;by far the brightest&rsquo; सबसे उपयुक्त उत्तर है।</p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "17",
+                    section: "7",
+                    question_en: "<p>17. Select the option that will improve the underlined part of the given sentence. In case no improvement is needed, select \'No improvement\'. <br>We had to undergo <strong><span style=\"text-decoration: underline;\">a great many difficulties</span></strong>.</p>",
+                    question_hi: "<p>17. Select the option that will improve the underlined part of the given sentence. In case no improvement is needed, select \'No improvement\'. <br>We had to undergo <strong><span style=\"text-decoration: underline;\">a great many difficulties</span></strong>.</p>",
+                    options_en: ["<p>No improvement</p>", "<p>a great many difficulty</p>", 
+                                "<p>great many difficulties</p>", "<p>much great difficulties</p>"],
+                    options_hi: ["<p>No improvement</p>", "<p>a great many difficulty</p>",
+                                "<p>great many difficulties</p>", "<p>much great difficulties</p>"],
+                    solution_en: "<p>17.(a) No improvement. <br>The sentence is grammatically correct.</p>",
+                    solution_hi: "<p>17.(a) No improvement. <br>दिया गया sentence, grammatically सही है।</p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "18",
+                    section: "7",
+                    question_en: "<p>18. Select the most appropriate option that can substitute the underlined segment in the given sentence. If there is no need to substitute it, select &lsquo;No substitution required&rsquo;. <br>As it was getting late Lata <span style=\"text-decoration: underline;\"><strong>leave the party</strong></span> midway.</p>",
+                    question_hi: "<p>18. Select the most appropriate option that can substitute the underlined segment in the given sentence. If there is no need to substitute it, select &lsquo;No substitution required&rsquo;. <br>As it was getting late Lata <span style=\"text-decoration: underline;\"><strong>leave the party</strong></span> midway.</p>",
+                    options_en: ["<p>is left the party</p>", "<p>leaving the party</p>", 
+                                "<p>No substitution required</p>", "<p>left the party</p>"],
+                    options_hi: ["<p>is left the party</p>", "<p>leaving the party</p>",
+                                "<p>No substitution required</p>", "<p>left the party</p>"],
+                    solution_en: "<p>18.(d) left the party.<br>The given sentence is in the simple past tense so the verb must be used in its simple past form(left) and not in the present form(leave). Hence, &lsquo;left the party&rsquo; is the most appropriate answer.</p>",
+                    solution_hi: "<p>19.(d) left the party.<br>दिया गया sentence, simple past tense में है, इसलिए इसमें, verb भी simple past form(left) में होनी चाहिए, न कि present form(leave) में। अतः, &lsquo;left the party&rsquo; सबसे उपयुक्त उत्तर है।</p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "19",
+                    section: "7",
+                    question_en: "<p>19. Select the option that will improve the underlined part of the given sentence. In case no improvement is needed, select \'No improvement required\'. <br>I don&rsquo;t fancy <span style=\"text-decoration: underline;\"><strong>to go out</strong></span> this evening.</p>",
+                    question_hi: "<p>19. Select the option that will improve the underlined part of the given sentence. In case no improvement is needed, select \'No improvement required\'. <br>I don&rsquo;t fancy <span style=\"text-decoration: underline;\"><strong>to go out</strong></span> this evening.</p>",
+                    options_en: ["<p>to going outside</p>", "<p>No improvement required</p>", 
+                                "<p>to be going out</p>", "<p>going out</p>"],
+                    options_hi: ["<p>to going outside</p>", "<p>No improvement required</p>",
+                                "<p>to be going out</p>", "<p>going out</p>"],
+                    solution_en: "<p>19.(d) going out. <br>The sentence will have a bare infinitive(without the preposition &lsquo;to&rsquo;). Hence, &lsquo;going out&rsquo; is the most appropriate answer.</p>",
+                    solution_hi: "<p>19.(d) going out. <br>दिए गए Sentence में एक bare infinitive (preposition &lsquo;to&rsquo; के बिना) है। अतः, &lsquo;going out&rsquo; सबसे उपयुक्त उत्तर है।</p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "20",
+                    section: "7",
+                    question_en: "<p>20. Select the most appropriate option that can substitute the underlined segment in the&nbsp;given sentence. If there is no need to substitute it, select &lsquo;No substitution required&rsquo;.<br>The authorities <span style=\"text-decoration: underline;\"><strong>are assured</strong></span> the people that they will look into the matter.</p>",
+                    question_hi: "<p>20. Select the most appropriate option that can substitute the underlined segment in the&nbsp;given sentence. If there is no need to substitute it, select &lsquo;No substitution required&rsquo;.<br>The authorities <span style=\"text-decoration: underline;\"><strong>are assured</strong></span> the people that they will look into the matter.</p>",
+                    options_en: ["<p>has assured</p>", "<p>have assured</p>", 
+                                "<p>have been assured</p>", "<p>No substitution required</p>"],
+                    options_hi: ["<p>has assured</p>", "<p>have assured</p>",
+                                "<p>have been assured</p>", "<p>No substitution required</p>"],
+                    solution_en: "<p>20.(b) have assured. <br>The first part of the given sentence must be in the present perfect tense so the verb must be used in its present perfect form(have) and not in the simple present form(are). Hence, &lsquo;have assured&rsquo; is the most appropriate answer.</p>",
+                    solution_hi: "<p>20.(b) have assured. <br>दिए गए sentence का first part &lsquo;present perfect tense&rsquo; ​​में होना चाहिए, इसलिए verb का प्रयोग उसके present perfect form(have) में किया जाना चाहिए, न कि simple present form(are) में। अतः, &lsquo;have sure&rsquo; सबसे उपयुक्त उत्तर है।</p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "21",
+                    section: "7",
+                    question_en: "<p>21. Select the most appropriate option to substitute the underlined segment in the given sentence. If there is no need to substitute it, select &lsquo;No substitution required&rsquo;.<br>I wish I <span style=\"text-decoration: underline;\"><strong>were listening</strong></span> to my parents.</p>",
+                    question_hi: "<p>21. Select the most appropriate option to substitute the underlined segment in the given sentence. If there is no need to substitute it, select &lsquo;No substitution required&rsquo;.<br>I wish I <span style=\"text-decoration: underline;\"><strong>were listening</strong></span> to my parents.</p>",
+                    options_en: ["<p>am listening</p>", "<p>have listened</p>", 
+                                "<p>No substitution required</p>", "<p>had listened</p>"],
+                    options_hi: ["<p>am listening</p>", "<p>have listened</p>",
+                                "<p>No substitution required</p>", "<p>had listened</p>"],
+                    solution_en: "<p>21.(d) had listened.<br>&ldquo;I wish + Past/Past Perfect Tense&rdquo; is grammatically the correct structure for the given sentence. Hence, &lsquo;had listened&rsquo; is the most appropriate answer.</p>",
+                    solution_hi: "<p>21.(d) had listened.<br>&ldquo;I wish + Past/Past Perfect Tense&rdquo; दिए गए sentence के लिए grammatically सही structure है। अतः, &lsquo;had listened&rsquo; सबसे उपयुक्त उत्तर है।</p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "22",
+                    section: "7",
+                    question_en: "<p>22. Select the most appropriate option that can substitute the underlined segment in the given sentence. If there is no need to substitute it, select &lsquo;No substitution required&rsquo;. <br>The investigation <span style=\"text-decoration: underline;\"><strong>revealed that both of they</strong></span> had given false information to obtain the certificates.</p>",
+                    question_hi: "<p>22. Select the most appropriate option that can substitute the underlined segment in the given sentence. If there is no need to substitute it, select &lsquo;No substitution required&rsquo;. <br>The investigation <span style=\"text-decoration: underline;\"><strong>revealed that both of they</strong></span> had given false information to obtain the certificates.</p>",
+                    options_en: ["<p>No substitution required</p>", "<p>reveal that them both</p>", 
+                                "<p>reveals that how they both</p>", "<p>revealed that both of them</p>"],
+                    options_hi: ["<p>No substitution required</p>", "<p>reveal that them both</p>",
+                                "<p>reveals that how they both</p>", "<p>revealed that both of them</p>"],
+                    solution_en: "<p>22.(d) revealed that both of them. <br>We use both &lsquo;they&rsquo; &amp; &lsquo;them&rsquo; as third-person plural pronouns. However, &lsquo;they&rsquo; is a subject pronoun and &lsquo;them&rsquo; is an object pronoun. Similarly in the given sentence, we need an object pronoun. Hence, &lsquo;revealed that both of them&rsquo; is the most appropriate answer.</p>",
+                    solution_hi: "<p>22.(d) revealed that both of them. <br>हम &lsquo;they&rsquo; एवं &lsquo;them&rsquo; दोनों का प्रयोग third-person plural pronouns के रूप में करते हैं। हालाँकि, &lsquo;they&rsquo; एक subject pronoun और &lsquo;them&rsquo; एक object pronoun है। इसी तरह, दिए गए sentence में, हमें एक object pronoun की आवश्यकता है। अतः, &lsquo;revealed that both of them&rsquo; सबसे उपयुक्त उत्तर है।</p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "23",
+                    section: "misc",
+                    question_en: "<p>23. Select the most appropriate option that can substitute the underlined segment in the given sentence. If there is no need to substitute it, select &lsquo;No substitution required&rsquo;. <br>While the online class was going on, they <span style=\"text-decoration: underline;\"><strong>had to keep their cameras on</strong></span>.</p>",
+                    question_hi: "<p>23. Select the most appropriate option that can substitute the underlined segment in the given sentence. If there is no need to substitute it, select &lsquo;No substitution required&rsquo;. <br>While the online class was going on, they <span style=\"text-decoration: underline;\"><strong>had to keep their cameras on</strong></span>.</p>",
+                    options_en: ["<p>No substitution required</p>", "<p>have kept their cameras on</p>", 
+                                "<p>are keeping their camera on</p>", "<p>had keep the camera on</p>"],
+                    options_hi: ["<p>No substitution required</p>", "<p>have kept their cameras on</p>",
+                                "<p>are keeping their camera on</p>", "<p>had keep the camera on</p>"],
+                    solution_en: "<p>23.(a) No substitution required. <br>The sentence is grammatically correct.</p>",
+                    solution_hi: "<p>23.(a) No substitution required. <br>दिया गया sentence, grammatically सही है।</p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+            
+            // Generate question boxes
+            const boxesContainer = document.getElementById('question-boxes');
+            questions.forEach((q, index) => {
+                const box = document.createElement('div');
+                box.className = 'q-box';
+                box.textContent = index + 1;
+                box.onclick = () => showQuestion(index);
+                box.id = `box-${index}`;
+                boxesContainer.appendChild(box);
+            });
+            
+            // Show first question
+            showQuestion(0);
+            updateProgress();
+        }
+        
+        // Show a specific question
+        
+        function formatContent(text) {
+            if (!text) return '';
+            return text.replace(/<img/g, '<img style="max-width:100%;height:auto;"');
+        }
+        
+        function showQuestion(index) {
+            if (index < 0 || index >= questions.length) return;
+            
+            currentQuestion = index;
+            const question = questions[index];
+            
+            // Update question counter
+            document.getElementById('question-counter').textContent = `Question ${index + 1} of ${questions.length}`;
+            
+            // Update question boxes
+            document.querySelectorAll('.q-box').forEach(box => box.classList.remove('current'));
+            document.getElementById(`box-${index}`).classList.add('current');
+            
+            // Generate question HTML
+            let html = `
+                <div class="question-card">
+                    <div class="question-text">
+                        <div class="en">${formatContent(question.question_en)}</div>
+                        <div class="hi" style="display:none">${formatContent(question.question_hi)} </div>
+                    </div>
+                    <div class="options" id="options-container">`;
+            
+            // Add options
+            ['a', 'b', 'c', 'd'].forEach((opt, i) => {
+                let optionClass = '';
+                let isCorrectAnswer = opt === question.correct;
+                let isUserAnswer = answers[question.id] === opt;
+                
+                // When reviewing, add appropriate classes
+                if (submitted) {
+                    if (isCorrectAnswer) {
+                        optionClass += ' correct-answer';
+                    } else if (isUserAnswer && !isCorrectAnswer) {
+                        optionClass += ' incorrect';
+                    }
+                }
+                
+                html += `
+                    <div class="option-item">
+                        <input class="option-input" type="radio" name="q${index}" 
+                            id="opt-${index}-${opt}" value="${opt}" 
+                            ${isUserAnswer ? 'checked' : ''}
+                            onclick="selectAnswer('${question.id}', '${opt}')">
+                       <label class="option-label${optionClass}" for="opt-${index}-${opt}">
+                            <div class="en">${question.options_en[i]}</div>
+                            <div class="hi" style="display:none">${question.options_hi[i]}</div>
+                        </label>
+                    </div>`;
+            });
+            
+            // Add solution if submitted
+            if (submitted) {
+                const isCorrect = answers[question.id] === question.correct;
+                const resultText = answers[question.id] ? (isCorrect ? 'Correct!' : 'Incorrect!') : 'Not attempted';
+                
+                html += `
+                    <div class="solution-container">
+                        <div class="solution-title">${resultText}</div>
+                        <div class="solution-text">
+                            <div class="en">${question.solution_en}</div>
+                            <div class="hi" style="display:none">${question.solution_hi}</div>
+                        </div>
+                    </div>`;
+            }
+            
+            html += `</div></div>`;
+            
+            document.getElementById('questions-container').innerHTML = html;
+            
+            // Apply language settings
+            applyLanguage();
+            
+            // If in mobile view, close the menu
+            if (window.innerWidth < 992) {
+                toggleNav(false);
+            }
+            
+            // Add review mode class if submitted
+            if (submitted) {
+                document.getElementById('options-container').classList.add('review-mode');
+            }
+        }
+        
+        // Apply current language
+        function applyLanguage() {
+            document.querySelectorAll(`.${currentLang}`).forEach(el => el.style.display = 'block');
+            document.querySelectorAll(`.${currentLang === 'en' ? 'hi' : 'en'}`).forEach(el => el.style.display = 'none');
+            
+            // Update language button text
+            document.getElementById('lang-text').textContent = currentLang === 'en' ? 'Hi' : 'En';
+        }
+        
+        // Select an answer
+        function selectAnswer(qId, option) {
+            if (submitted) return;
+            
+            answers[qId] = option;
+            updateProgress();
+            
+            // Mark question as attempted in the navigation
+            const index = questions.findIndex(q => q.id === qId);
+            if (index >= 0) {
+                const box = document.getElementById(`box-${index}`);
+                box.classList.add('attempted');
+                box.classList.remove('unattempted');
+            }
+        }
+        
+        // Navigate to previous/next question
+        function prevQuestion() { 
+            if (currentQuestion > 0) showQuestion(currentQuestion - 1); 
+        }
+        
+        function nextQuestion() { 
+            if (currentQuestion < questions.length - 1) showQuestion(currentQuestion + 1); 
+        }
+        
+        // Switch section
+        function switchSection(sectionId) {
+            if (sectionId === 'all') {
+                showQuestion(0);
+                return;
+            }
+            
+            const section = sections[sectionId];
+            if (section) showQuestion(section.start);
+        }
+        
+        // Toggle language
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'hi' : 'en';
+            applyLanguage();
+        }
+        
+        // Toggle navigation sidebar
+        function toggleNav(show) {
+            const nav = document.getElementById('question-nav');
+            const overlay = document.getElementById('nav-overlay');
+            
+            if (show === undefined) {
+                show = !nav.classList.contains('show');
+            }
+            
+            if (show) {
+                nav.classList.add('show');
+                overlay.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            } else {
+                nav.classList.remove('show');
+                overlay.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+        }
+        
+        // Update progress
+        function updateProgress() {
+            const attempted = Object.keys(answers).length;
+            document.getElementById('attempted-count').textContent = attempted;
+        }
+        
+        // Start timer
+        function startTimer() {
+            const timerDisplay = document.getElementById('timer-display');
+            let timeLeft = totalTime;
+            
+            const timerInterval = setInterval(() => {
+                if (timeLeft <= 0 || submitted) {
+                    clearInterval(timerInterval);
+                    if (!submitted) submitTest();
+                    return;
+                }
+                
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                timeLeft--;
+            }, 1000);
+        }
+        
+        // Confirm before submitting
+        function confirmSubmit() {
+            if (submitted) return;
+            
+            const attempted = Object.keys(answers).length;
+            const remaining = questions.length - attempted;
+            
+            // Create a more modern confirmation dialog
+            const confirmHtml = `
+                <div style="text-align: center; padding: 20px;">
+                    <h4 style="margin-bottom: 16px; color: var(--dark);">Confirm Submission</h4>
+                    <p style="margin-bottom: 24px; color: var(--gray);">
+                        You have attempted ${attempted} of ${questions.length} questions.<br>
+                        ${remaining} questions are unattempted.
+                    </p>
+                    <div style="display: flex; justify-content: center; gap: 12px;">
+                        <button onclick="this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; border: 1px solid var(--light-gray); background: white; border-radius: 8px; cursor: pointer;">
+                            Cancel
+                        </button>
+                        <button onclick="submitTest(); this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer;">
+                            Submit Test
+                        </button>
+                    </div>
+                </div>`;
+            
+            // Create modal element
+            const modal = document.createElement('div');
+            modal.className = 'results-modal show';
+            modal.innerHTML = `
+                <div class="results-card" style="max-width: 400px;">
+                    <button class="cancel-btn" style="position: absolute; top: 12px; right: 12px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--gray);" onclick="this.closest('.results-modal').remove()">
+                        ×
+                    </button>
+                    ${confirmHtml}
+                </div>`;
+            
+            document.body.appendChild(modal);
+        }
+        
+        // Submit test
+        function submitTest() {
+            if (submitted) return;
+            
+            submitted = true;
+            
+            let score = 0;
+            let correctCount = 0;
+            let incorrectCount = 0;
+            let unattemptedCount = 0;
+            
+            questions.forEach((q, index) => {
+                const userAns = answers[q.id];
+                const box = document.getElementById(`box-${index}`);
+                
+                box.classList.remove('attempted');
+                
+                if (!userAns) {
+                    unattemptedCount++;
+                    box.classList.add('unattempted');
+                } else if (userAns === q.correct) {
+                    correctCount++;
+                    score += q.pos_marks;
+                    box.classList.add('correct');
+                } else {
+                    incorrectCount++;
+                    score -= q.neg_marks;
+                    box.classList.add('incorrect');
+                }
+            });
+            
+            // Update result values
+            document.getElementById('score-value').textContent = score.toFixed(2);
+            document.getElementById('correct-value').textContent = correctCount;
+            document.getElementById('incorrect-value').textContent = incorrectCount;
+            document.getElementById('unattempted-value').textContent = unattemptedCount;
+            
+            // Show the results modal
+            document.getElementById('results-modal').classList.add('show');
+            
+            // Disable submit button
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-check"></i>';
+            submitBtn.style.backgroundColor = 'var(--success)';
+            
+            // Refresh current question view to show solution
+            showQuestion(currentQuestion);
+        }
+        
+        // Review test
+        function reviewTest() {
+            document.getElementById('results-modal').classList.remove('show');
+            showQuestion(0);
+        }
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target === document.getElementById('results-modal')) {
+                document.getElementById('results-modal').classList.remove('show');
+            }
+        });
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') prevQuestion();
+            if (e.key === 'ArrowRight') nextQuestion();
+        });
+    </script>
+</body>
+</html>
