@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mocks Wallah</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --primary-light: #a29bfe;
+            --primary-dark: #5649c0;
+            --secondary: #00cec9;
+            --accent: #fd79a8;
+            --success: #00b894;
+            --warning: #fdcb6e;
+            --danger: #d63031;
+            --light: #f8f9fa;
+            --dark: #2d3436;
+            --gray: #636e72;
+            --light-gray: #dfe6e9;
+            --card-bg: #ffffff;
+            --body-bg: #f5f6fa;
+            --header-bg: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            --footer-bg: #ffffff;
+            --box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            --box-shadow-sm: 0 2px 10px rgba(0,0,0,0.05);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background-color: var(--body-bg);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            color: var(--dark);
+            line-height: 1.6;
+            padding-bottom: 80px; /* Space for fixed navigation */
+            overflow-x: hidden;
+        }
+        
+        /* Header Styles */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: var(--header-bg);
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            z-index: 1000;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .header-brand {
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .header-brand i {
+            margin-right: 8px;
+            font-size: 1.2rem;
+        }
+        
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .control-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .control-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .control-btn.active {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .timer-display {
+            background: rgba(0,0,0,0.2);
+            border-radius: 18px;
+            padding: 4px 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+        
+        .timer-display i {
+            margin-right: 6px;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-top: 60px;
+            padding: 16px;
+            min-height: calc(100vh - 140px);
+        }
+        
+        .question-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--box-shadow-sm);
+            border: none;
+            transition: var(--transition);
+        }
+        
+        .question-counter {
+            font-size: 0.9rem;
+            color: var(--gray);
+            text-align: center;
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+        
+        .question-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+        
+        .option-item {
+            margin-bottom: 12px;
+            position: relative;
+        }
+        
+        .option-input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+            .question-text {
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        hyphens: auto;
+        max-width: 100%;
+    }
+
+    .question-text img,
+    .option-label img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 8px 0;
+        border-radius: 8px;
+    }
+
+    .option-label {
+        overflow: hidden;
+    }
+
+    .question-card {
+        overflow: hidden;
+    }
+        
+        .option-label {
+            display: block;
+            padding: 14px 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--light-gray);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .option-label:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .option-input:checked + .option-label {
+            border-color: var(--primary);
+            background: rgba(108, 92, 231, 0.05);
+            box-shadow: 0 0 0 1px var(--primary);
+        }
+        
+        .option-input:checked + .option-label::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--primary);
+        }
+        
+        /* When reviewing answers */
+        .review-mode .option-input:checked + .option-label.correct {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.correct::after {
+            background: var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.incorrect {
+            border-color: var(--danger);
+            background: rgba(214, 48, 49, 0.05);
+            box-shadow: 0 0 0 1px var(--danger);
+        }
+        
+        .MathJax, .mjx-chtml {
+            overflow-x: auto;
+            max-width: 100%;
+            display: inline-block;
+        }
+
+        
+        .review-mode .option-input:checked + .option-label.incorrect::after {
+            background: var(--danger);
+        }
+        
+        .review-mode .option-label.correct-answer {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-label.correct-answer::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--success);
+        }
+        
+        .solution-container {
+            margin-top: 20px;
+            padding: 16px;
+            background: rgba(108, 92, 231, 0.05);
+            border-radius: 12px;
+            border-left: 3px solid var(--primary);
+        }
+        
+        .solution-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+        
+        /* Question Navigation */
+        .question-nav {
+            position: fixed;
+            top: 60px;
+            right: 0;
+            bottom: 80px;
+            width: 100%;
+            max-width: 320px;
+            background: var(--card-bg);
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            transform: translateX(100%);
+            transition: var(--transition);
+            z-index: 900;
+            overflow-y: auto;
+            padding: 16px;
+        }
+        
+        .question-nav.show {
+            transform: translateX(0);
+        }
+        
+        .nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .nav-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+        
+        .question-stats {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .stat-badge {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        
+        .section-selector {
+            width: 100%;
+            margin-bottom: 16px;
+            border-radius: 12px;
+            padding: 10px 16px;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            font-size: 0.9rem;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 16px;
+        }
+        
+        .question-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+            gap: 8px;
+        }
+        
+        .q-box {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .q-box:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .q-box.attempted {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .q-box.correct {
+            background-color: var(--success);
+            color: white;
+            border-color: var(--success);
+        }
+        
+        .q-box.incorrect {
+            background-color: var(--danger);
+            color: white;
+            border-color: var(--danger);
+        }
+        
+        .q-box.current {
+            border: 2px solid var(--accent) !important;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .q-box.unattempted {
+            background-color: var(--gray);
+            color: white;
+            border-color: var(--gray);
+        }
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: var(--footer-bg);
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            z-index: 800;
+        }
+        
+        .nav-btn {
+            height: 48px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 20px;
+            transition: var(--transition);
+            gap: 8px;
+        }
+        
+        .nav-btn i {
+            font-size: 1rem;
+        }
+        
+        .nav-btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .nav-btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+        
+        .nav-btn-outline:hover {
+            background: rgba(108, 92, 231, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        /* Overlay when nav is open */
+        .nav-overlay {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            bottom: 80px;
+            background: rgba(0,0,0,0.5);
+            z-index: 800;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+        }
+        
+        .nav-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        /* Results Modal */
+        .results-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1100;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+            padding: 16px;
+        }
+        
+        .results-modal.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .results-card {
+            background: white;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+            transform: translateY(20px);
+            transition: var(--transition);
+        }
+        
+        .results-modal.show .results-card {
+            transform: translateY(0);
+        }
+        
+        .results-header {
+            background: var(--header-bg);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .results-title {
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .results-body {
+            padding: 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            color: white;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+        
+        .results-footer {
+            padding: 16px 20px;
+            display: flex;
+            justify-content: center;
+            border-top: 1px solid var(--light-gray);
+        }
+        
+        /* Responsive Adjustments */
+        @media (min-width: 992px) {
+            .question-nav {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-right: 320px;
+            }
+            
+            .nav-overlay {
+                display: none;
+            }
+            
+            .bottom-nav {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .question-grid {
+                grid-template-columns: repeat(auto-fill, minmax(36px, 1fr));
+                gap: 6px;
+            }
+            
+            .q-box {
+                width: 36px;
+                height: 36px;
+                font-size: 0.9rem;
+            }
+            
+            .option-label {
+                padding: 12px 14px;
+            }
+            
+            .question-text {
+                font-size: 1rem;
+            }
+            
+            .header-brand {
+                font-size: 1rem;
+            }
+            
+            .control-btn {
+                width: 32px;
+                height: 32px;
+            }
+            
+            .timer-display {
+                font-size: 0.8rem;
+                padding: 4px 10px;
+            }
+            
+            .nav-btn {
+                height: 44px;
+                padding: 0 16px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="#" class="header-brand">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Mocks Wallah</span>
+            </a>
+            
+            <div class="header-controls">
+                <!-- Timer -->
+                <div class="timer-display">
+                    <i class="far fa-clock"></i>
+                    <span id="timer-display">12:00</span>
+                </div>
+                
+                <!-- Language toggle -->
+                <button class="control-btn" id="lang-btn" onclick="toggleLanguage()">
+                    <span id="lang-text">En</span>
+                </button>
+                
+                <!-- Submit button -->
+                <button class="control-btn" id="submit-btn" onclick="confirmSubmit()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+                
+                <!-- Questions toggle for mobile -->
+                <button class="control-btn nav-toggle-btn" id="nav-toggle" onclick="toggleNav()">
+                    <i class="fas fa-th"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main content -->
+    <main class="main-content" id="main-content">
+        <div class="question-counter" id="question-counter">Question 1 of 20</div>
+        
+        <!-- Questions will be displayed here -->
+        <div id="questions-container"></div>
+    </main>
+    
+    <!-- Overlay for mobile nav -->
+    <div class="nav-overlay" id="nav-overlay" onclick="toggleNav(false)"></div>
+    
+    <!-- Question navigation sidebar -->
+    <aside class="question-nav" id="question-nav">
+        <div class="nav-header">
+            <h3 class="nav-title">Questions</h3>
+            <div class="question-stats">
+                <span class="stat-badge bg-primary" id="attempted-count">0</span>
+                <span class="stat-badge bg-gray" id="total-count">20</span>
+                <button class="control-btn d-lg-none" onclick="toggleNav(false)">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Section selector -->
+        <select class="section-selector" id="section-selector" onchange="switchSection(this.value)">
+            <option value="all">All Sections</option>
+        </select>
+        
+        <!-- Question grid -->
+        <div class="question-grid" id="question-boxes"></div>
+    </aside>
+    
+    <!-- Bottom navigation for mobile -->
+    <nav class="bottom-nav d-lg-none">
+        <button class="nav-btn nav-btn-outline" onclick="prevQuestion()">
+            <i class="fas fa-chevron-left"></i>
+            <span>Previous</span>
+        </button>
+        <button class="nav-btn nav-btn-outline" onclick="nextQuestion()">
+            <span>Next</span>
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </nav>
+    
+    <!-- Results modal -->
+    <div class="results-modal" id="results-modal">
+        <div class="results-card">
+            <div class="results-header">
+                <h3 class="results-title">Test Results</h3>
+            </div>
+            <div class="results-body">
+                <div class="stats-grid">
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark))">
+                        <div class="stat-value" id="score-value">0</div>
+                        <div class="stat-label">Score</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--success), #1b9aaa)">
+                        <div class="stat-value" id="correct-value">0</div>
+                        <div class="stat-label">Correct</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--danger), var(--accent))">
+                        <div class="stat-value" id="incorrect-value">0</div>
+                        <div class="stat-label">Incorrect</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--gray), var(--dark))">
+                        <div class="stat-value" id="unattempted-value">0</div>
+                        <div class="stat-label">Unattempted</div>
+                    </div>
+                </div>
+            </div>
+            <div class="results-footer">
+                <button class="nav-btn nav-btn-primary" onclick="reviewTest()">
+                    <i class="fas fa-search me-1"></i>
+                    <span>Review Test</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Questions data
+        const questions = [];
+        const sections = {};
+        let currentLang = "en";
+        let currentQuestion = 0;
+        let answers = {};
+        let submitted = false;
+        let totalTime = 12 * 60;
+        
+        // Initialize the test
+        window.onload = function() {
+            initializeTest();
+            startTimer();
+            
+            // If on desktop, show the question navigation by default
+            if (window.innerWidth >= 992) {
+                document.getElementById('question-nav').classList.add('show');
+                document.getElementById('main-content').classList.add('with-nav');
+            }
+        };
+        
+        // Initialize test data
+        function initializeTest() {
+            // Add sections and questions
+            
+            sections["6"] = {
+                name: "Reasoning",
+                start: 0,
+                end: 18
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="6">Reasoning</option>`;
+            
+            sections["misc"] = {
+                name: "Miscellaneous",
+                start: 19,
+                end: 19
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="misc">Miscellaneous</option>`;
+            
+            
+                questions.push({
+                    id: "1",
+                    section: "6",
+                    question_en: "<p>1.<span style=\"font-family: Roboto;\"> </span><span style=\"font-family: Roboto;\">Select the options figure embedded in the given figure as its part (rotation is not allowed).</span><br><strong id=\"docs-internal-guid-aa947d12-7fff-7ad8-fe7a-6668decd8f29\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdJHzn_RqAmY8C7kUyWg7mnradK4KLtXRzIlvMrd1P6rpKabpNQgT9ikozkdF69IgkqTCLASmQeXx44i0UMyx3rJpKGvyPoQwUK_iHT4IQV67vz56hWi8gxsRxtLd3Gnfu0R0TILRmDeBolM89nVz7BvJs?key=nm0fdVz07vs5dXgnlGVjFy5b\" width=\"108\" height=\"107\"></strong></p>",
+                    question_hi: "<p><strong>1.</strong><span style=\"font-weight: 400;\"> </span><span style=\"font-weight: 400;\">उस विकल्प आकृति का चयन करें जो दी गई आकृति में उसके भाग के रूप में सन्निहित है (घूर्णन की अनुमति नहीं है)।</span><br><strong id=\"docs-internal-guid-6b1d5a68-7fff-3fdf-222f-0e66a3e9a686\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdJHzn_RqAmY8C7kUyWg7mnradK4KLtXRzIlvMrd1P6rpKabpNQgT9ikozkdF69IgkqTCLASmQeXx44i0UMyx3rJpKGvyPoQwUK_iHT4IQV67vz56hWi8gxsRxtLd3Gnfu0R0TILRmDeBolM89nVz7BvJs?key=nm0fdVz07vs5dXgnlGVjFy5b\" width=\"108\" height=\"107\"></strong></p>",
+                    options_en: ["<p><strong id=\"docs-internal-guid-2829897b-7fff-a93f-59af-547eb388f684\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXehk5pGzZH8uyWqGgW0tg-wSXTMunZhVdyPairhJ5BFj8XyuyZDYvIgyQ0j2mpsW2gKP0AWiNR5LNAwrnqcDtOTvl0qwbO3MbD3cl-Yy-70LvX2RLe_TVzJPVo4_rDc3g8A5RAAbI1hVye1Lu_M6FoD_NE2?key=nm0fdVz07vs5dXgnlGVjFy5b\" width=\"82\" height=\"86\"></strong></p>", "<p><strong id=\"docs-internal-guid-70d5956b-7fff-c47e-9088-e194c2ebc1bd\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdEzD5r1HOIz7eYRFhv_wwaSibeH5JmxMYMPFTgJZj0v7EiDnm165OBG6oJRdBaRDf9X6g3zsJQSKKKD4noMuIC5XTpuxHuIJ9Wos9c-iGd7Xm6WMS2yJPzLppGcDJHwYt8T4nl6trShhz8QQ37d0JT2CX_?key=nm0fdVz07vs5dXgnlGVjFy5b\" width=\"55\" height=\"57\"></strong></p>", 
+                                "<p><strong id=\"docs-internal-guid-b530e035-7fff-e0f6-694a-feb40a3aee4b\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcNEvZFwE5Eiac3gFxGhQEC3y5I7lmqgX4Lf3nppZNa6cheveJxUahLPmqAufW0vIcHqplZEIMyJgsmXDi14DqMiZa3xgtrbMcdaEZ3ynE17kvVKgjmte9XMtIObdkyqFU03IiYQFBoIZdFHROpZzCLVkOS?key=nm0fdVz07vs5dXgnlGVjFy5b\" width=\"32\" height=\"61\"></strong></p>", "<p><strong id=\"docs-internal-guid-7cbf42cd-7fff-04b6-6bcd-17d25eb95b9a\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcHDux4I7YjNq7dveNczqeam8jfscJKr2wKAjQwpfZ8RE7eUtXW_dLel6lsuikOn3mJx0bpXzBuJJOuTDw6W6ydFvThTPEu8y-mNAebtlas9uiSopzfstBXtvb2L35YAgZuQnZJc6nZC-fQ_MTAjqEYrYk_?key=nm0fdVz07vs5dXgnlGVjFy5b\" width=\"34\" height=\"59\"></strong></p>"],
+                    options_hi: ["<p><strong id=\"docs-internal-guid-c2462fa9-7fff-6e1d-055f-b6445722d357\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXehk5pGzZH8uyWqGgW0tg-wSXTMunZhVdyPairhJ5BFj8XyuyZDYvIgyQ0j2mpsW2gKP0AWiNR5LNAwrnqcDtOTvl0qwbO3MbD3cl-Yy-70LvX2RLe_TVzJPVo4_rDc3g8A5RAAbI1hVye1Lu_M6FoD_NE2?key=nm0fdVz07vs5dXgnlGVjFy5b\" width=\"82\" height=\"86\"></strong></p>", "<p><strong id=\"docs-internal-guid-09cd5e65-7fff-88b4-2ce4-714ad5e62d21\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdEzD5r1HOIz7eYRFhv_wwaSibeH5JmxMYMPFTgJZj0v7EiDnm165OBG6oJRdBaRDf9X6g3zsJQSKKKD4noMuIC5XTpuxHuIJ9Wos9c-iGd7Xm6WMS2yJPzLppGcDJHwYt8T4nl6trShhz8QQ37d0JT2CX_?key=nm0fdVz07vs5dXgnlGVjFy5b\" width=\"55\" height=\"57\"></strong></p>",
+                                "<p><strong id=\"docs-internal-guid-61322364-7fff-a788-bb9e-ede06847eb74\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcNEvZFwE5Eiac3gFxGhQEC3y5I7lmqgX4Lf3nppZNa6cheveJxUahLPmqAufW0vIcHqplZEIMyJgsmXDi14DqMiZa3xgtrbMcdaEZ3ynE17kvVKgjmte9XMtIObdkyqFU03IiYQFBoIZdFHROpZzCLVkOS?key=nm0fdVz07vs5dXgnlGVjFy5b\" width=\"32\" height=\"61\"></strong></p>", "<p><strong id=\"docs-internal-guid-9c30d149-7fff-c945-506f-17865407dbed\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcHDux4I7YjNq7dveNczqeam8jfscJKr2wKAjQwpfZ8RE7eUtXW_dLel6lsuikOn3mJx0bpXzBuJJOuTDw6W6ydFvThTPEu8y-mNAebtlas9uiSopzfstBXtvb2L35YAgZuQnZJc6nZC-fQ_MTAjqEYrYk_?key=nm0fdVz07vs5dXgnlGVjFy5b\" width=\"34\" height=\"59\"></strong></p>"],
+                    solution_en: "<p>1.(a)<br><strong id=\"docs-internal-guid-c26dae6c-7fff-e88c-c7a5-b64ce138d373\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXehk5pGzZH8uyWqGgW0tg-wSXTMunZhVdyPairhJ5BFj8XyuyZDYvIgyQ0j2mpsW2gKP0AWiNR5LNAwrnqcDtOTvl0qwbO3MbD3cl-Yy-70LvX2RLe_TVzJPVo4_rDc3g8A5RAAbI1hVye1Lu_M6FoD_NE2?key=nm0fdVz07vs5dXgnlGVjFy5b\" width=\"82\" height=\"86\"></strong></p>",
+                    solution_hi: "<p>1.(a)<br><strong id=\"docs-internal-guid-c26dae6c-7fff-e88c-c7a5-b64ce138d373\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXehk5pGzZH8uyWqGgW0tg-wSXTMunZhVdyPairhJ5BFj8XyuyZDYvIgyQ0j2mpsW2gKP0AWiNR5LNAwrnqcDtOTvl0qwbO3MbD3cl-Yy-70LvX2RLe_TVzJPVo4_rDc3g8A5RAAbI1hVye1Lu_M6FoD_NE2?key=nm0fdVz07vs5dXgnlGVjFy5b\" width=\"82\" height=\"86\"></strong></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "2",
+                    section: "6",
+                    question_en: "<p>2. <span style=\"font-family: Roboto;\">Select the options figure embedded in the given figure as its part (rotation is not allowed).</span><br><span style=\"font-family: Roboto;\"> </span><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image71.png\" width=\"103\" height=\"92\"></p>",
+                    question_hi: "<p>2. <span style=\"font-family: Palanquin;\">उस विकल्प आकृति का चयन करें जो दी गई आकृति में उसके भाग के रूप में सन्निहित है (घूर्णन की अनुमति नहीं है)।</span><br><span style=\"font-family: Roboto;\"> </span><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image71.png\" width=\"100\" height=\"90\"></p>",
+                    options_en: ["<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image28.png\" width=\"62\" height=\"44\"><span style=\"font-family: Roboto;\"> </span><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image93.png\" width=\"74\" height=\"80\"></p>", 
+                                "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image79.png\" width=\"55\" height=\"84\"></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image59.png\" width=\"43\" height=\"120\"></p>"],
+                    options_hi: ["<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image28.png\" width=\"75\" height=\"53\"><span style=\"font-family: Roboto;\"> </span><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image93.png\" width=\"86\" height=\"93\"></p>",
+                                "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image79.png\" width=\"57\" height=\"87\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image59.png\" width=\"43\" height=\"120\"></p>"],
+                    solution_en: "<p>2.(a)<br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image28.png\"></p>",
+                    solution_hi: "<p>2.(a)<br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image28.png\"></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "3",
+                    section: "6",
+                    question_en: "<p>3. <span style=\"font-family: Roboto;\">Select the options figure embedded in the given figure as its part (rotation is not allowed).</span><br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image73.png\"></p>",
+                    question_hi: "<p>3. <span style=\"font-family: Palanquin;\">उस विकल्प आकृति का चयन करें जो दी गई आकृति में उसके भाग के रूप में सन्निहित है (घूर्णन की अनुमति नहीं है)।</span><br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image73.png\"></p>",
+                    options_en: ["<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image45.png\" width=\"87\" height=\"50\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image20.png\" width=\"90\" height=\"52\"></p>", 
+                                "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image5.png\" width=\"80\" height=\"46\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image42.png\" width=\"88\" height=\"51\"><span style=\"font-family: Roboto;\"> </span></p>"],
+                    options_hi: ["<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image45.png\" width=\"94\" height=\"54\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image20.png\" width=\"92\" height=\"53\"></p>",
+                                "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image5.png\" width=\"93\" height=\"54\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image42.png\" width=\"93\" height=\"54\"></p>"],
+                    solution_en: "<p>3.(d)<br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image42.png\" width=\"111\" height=\"64\"></p>",
+                    solution_hi: "<p>3.(d)<br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image42.png\" width=\"111\" height=\"64\"></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "4",
+                    section: "6",
+                    question_en: "<p>4. <span style=\"font-family: Roboto;\">Select the options figure embedded in the given figure as its part (rotation is not allowed).</span><br><span style=\"font-family: Roboto;\"> </span><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image84.png\" width=\"99\" height=\"89\"></p>",
+                    question_hi: "<p>4. <span style=\"font-family: Palanquin;\">उस विकल्प आकृति का चयन करें जो दी गई आकृति में उसके भाग के रूप में सन्निहित है (घूर्णन की अनुमति नहीं है)।</span></p>\n<p><span style=\"font-family: Roboto;\"> </span><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image84.png\" width=\"91\" height=\"82\"></p>",
+                    options_en: ["<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image48.png\" width=\"78\" height=\"72\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image99.png\" width=\"91\" height=\"78\"></p>", 
+                                "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image95.png\" width=\"92\" height=\"65\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image32.png\" width=\"79\" height=\"77\"></p>"],
+                    options_hi: ["<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image48.png\" width=\"90\" height=\"83\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image99.png\" width=\"90\" height=\"77\"></p>",
+                                "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image95.png\" width=\"97\" height=\"69\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image32.png\" width=\"81\" height=\"79\"></p>"],
+                    solution_en: "<p>4.(a)<br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image48.png\"></p>",
+                    solution_hi: "<p>4.(a)<br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image48.png\"></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "5",
+                    section: "6",
+                    question_en: "<p>5. <span style=\"font-family: Roboto;\">Select the options figure embedded in the given figure as its part (rotation is not allowed).</span><br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image102.png\"></p>",
+                    question_hi: "<p>5. <span style=\"font-family: Palanquin;\">उस विकल्प आकृति का चयन करें जो दी गई आकृति में उसके भाग के रूप में सन्निहित है (घूर्णन की अनुमति नहीं है)।</span><br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image102.png\"></p>",
+                    options_en: ["<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image38.png\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image14.png\"></p>", 
+                                "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image64.png\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image70.png\"></p>"],
+                    options_hi: ["<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image38.png\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image14.png\"></p>",
+                                "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image64.png\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image70.png\"></p>"],
+                    solution_en: "<p>5.(c)<br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image64.png\"></p>",
+                    solution_hi: "<p>5.(c)<br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image64.png\"></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "6",
+                    section: "6",
+                    question_en: "<p>6.<span style=\"font-family: Roboto;\"> </span><span style=\"font-family: Roboto;\">Select the options figure embedded in the given figure as its part (rotation is not allowed).</span><br><span style=\"font-family: Roboto;\"> </span><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image89.png\" width=\"112\" height=\"114\"></p>",
+                    question_hi: "<p>6.<span style=\"font-family: Roboto;\"> </span><span style=\"font-family: Palanquin;\">उस विकल्प आकृति का चयन करें जो दी गई आकृति में उसके भाग के रूप में सन्निहित है (घूर्णन की अनुमति नहीं है)।</span><br><span style=\"font-family: Roboto;\"> </span><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image89.png\" width=\"102\" height=\"103\"></p>",
+                    options_en: ["<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image2.png\" width=\"101\" height=\"100\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image29.png\" width=\"100\" height=\"99\"></p>", 
+                                "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image34.png\" width=\"102\" height=\"101\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image87.png\" width=\"100\" height=\"99\"></p>"],
+                    options_hi: ["<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image2.png\" width=\"100\" height=\"99\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image29.png\" width=\"100\" height=\"99\"></p>",
+                                "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image34.png\" width=\"100\" height=\"99\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image87.png\" width=\"101\" height=\"100\"></p>"],
+                    solution_en: "<p>6.(a)</p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image2.png\" width=\"102\" height=\"101\"></p>",
+                    solution_hi: "<p>6.(a)</p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image2.png\" width=\"100\" height=\"99\"></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "7",
+                    section: "6",
+                    question_en: "<p>7. <span style=\"font-family: Roboto;\">Select the options figure embedded in the given figure as its part (rotation is not allowed).</span><br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image50.png\"></p>",
+                    question_hi: "<p>7. <span style=\"font-family: Palanquin;\">उस विकल्प आकृति का चयन करें जो दी गई आकृति में उसके भाग के रूप में सन्निहित है (घूर्णन की अनुमति नहीं है)।</span><br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image50.png\"></p>",
+                    options_en: ["<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image4.png\" width=\"97\" height=\"76\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image76.png\" width=\"96\" height=\"82\"></p>", 
+                                "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image77.png\" width=\"97\" height=\"84\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image30.png\" width=\"100\" height=\"87\"></p>"],
+                    options_hi: ["<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image4.png\" width=\"98\" height=\"77\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image76.png\" width=\"97\" height=\"83\"></p>",
+                                "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image77.png\" width=\"98\" height=\"85\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image30.png\" width=\"97\" height=\"85\"></p>"],
+                    solution_en: "<p>7.(d)<br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image30.png\" width=\"96\" height=\"84\"></p>",
+                    solution_hi: "<p>7.(d)<br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image30.png\" width=\"101\" height=\"88\"></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "8",
+                    section: "6",
+                    question_en: "<p>8.<span style=\"font-family: Roboto;\"> </span><span style=\"font-family: Roboto;\">Select the options figure embedded in the given figure as its part (rotation is not allowed).</span><br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image90.png\" width=\"115\" height=\"69\"></p>",
+                    question_hi: "<p>8.<span style=\"font-family: Roboto;\"> </span><span style=\"font-family: Palanquin;\">उस विकल्प आकृति का चयन करें जो दी गई आकृति में उसके भाग के रूप में सन्निहित है (घूर्णन की अनुमति नहीं है)।</span><br><strong id=\"docs-internal-guid-0502048e-7fff-6534-8219-9129aa860b8d\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXc3tdAt4dculo7Jni_J01LVw7W2_6Y_HGL2sD_uuX-fqzF6GJ4KCIbLxvrjWG4l-yAL5799JVN1xOrJ6GBCeyGm7BPmSmSuhHodjNqv0wTddf9C0iFsaEkiNBzJdwV8dIDVs4HTP30DNqCuhflLgsRd0go?key=nm0fdVz07vs5dXgnlGVjFy5b\" width=\"127\" height=\"76\"></strong></p>",
+                    options_en: ["<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image81.png\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image49.png\"></p>", 
+                                "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image68.png\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image60.png\"><span style=\"font-family: Roboto;\"> </span></p>"],
+                    options_hi: ["<p><strong id=\"docs-internal-guid-a8f31204-7fff-91e9-9dff-903757a5bb75\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXc456CBrSQewZxUlkk_dT4reMAEcPQ8uiTG0ixXjYaIlgX9iex1yjZz09P0oCX-Wj0C6cJXgjhhM20ehy4Rus-Gp_pZNpTV9tNZaZFHxyd5ry4-LaQ4A4zIDtl8Y4CtIKde1tAuaQbX1JG1QEn61OZZB65k?key=nm0fdVz07vs5dXgnlGVjFy5b\" width=\"100\" height=\"85\"></strong></p>", "<p><strong id=\"docs-internal-guid-232de8f9-7fff-af3b-a5ed-f3b9d1c7e3bd\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXer5oKcIQbHd707QrMYcn9nt0oc5RL7Uk1WT3YBFSWK9sIAR1d00-dsG1urOFm7hT_XgIsvYcv0FPbLv2_8H7nOxs2uNoKWKDwslY1c-21FASWD0vlyd6dalwY3Kf0PjZmak2WNOO6knCY7UgJWYGxmvjsI?key=nm0fdVz07vs5dXgnlGVjFy5b\" width=\"99\" height=\"55\"></strong></p>",
+                                "<p><strong id=\"docs-internal-guid-0a7bec90-7fff-c8c3-ea44-9aaa3f2b3839\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcj7nFkcjtNCB09RE-pfVEfrolw96qEIpBYnf8KmXbIebLCm4R8cxP5nIIbwT1LGpc8DOa7P9JuJrPpphkir-xnB1jodhBnotgo6zECIQ0Y64ss3zqY7YzdQdiYMtk3cXe7aEjyVMDD7GrXiL9kB5BB_TA?key=nm0fdVz07vs5dXgnlGVjFy5b\" width=\"99\" height=\"77\"></strong></p>", "<p><strong id=\"docs-internal-guid-c021ab7d-7fff-e388-c5c1-ba7a0529742b\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdtj_MISDY6DCMDGn0zgqfkx6lMZ1DVUFSz40u0D3-D6eeWpgha7X7jquDfY12fL3ml-f8yi8mH2UfEkyMoEpD0CvjN6dZMdDF5QSTt2-Szf9gx7Cc_X7ysd0-9mCoKQD1OuQdi9yUt8rlOnf5B2lYxOucP?key=nm0fdVz07vs5dXgnlGVjFy5b\" width=\"99\" height=\"60\"></strong></p>"],
+                    solution_en: "<p>8.(d)<br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image60.png\"></p>",
+                    solution_hi: "<p>8.(d)<br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image60.png\"></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "9",
+                    section: "6",
+                    question_en: "<p>9.<span style=\"font-family: Roboto;\"> </span><span style=\"font-family: Roboto;\">Select the options figure embedded in the given figure as its part (rotation is not allowed).</span><br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image15.png\"></p>",
+                    question_hi: "<p>9.<span style=\"font-family: Roboto;\"> </span><span style=\"font-family: Palanquin;\">उस विकल्प आकृति का चयन करें जो दी गई आकृति में उसके भाग के रूप में सन्निहित है (घूर्णन की अनुमति नहीं है)।</span><br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image15.png\"></p>",
+                    options_en: ["<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image92.png\" width=\"101\" height=\"89\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image6.png\" width=\"95\" height=\"86\"></p>", 
+                                "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image88.png\" width=\"95\" height=\"86\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image101.png\" width=\"95\" height=\"83\"></p>"],
+                    options_hi: ["<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image92.png\" width=\"96\" height=\"84\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image6.png\" width=\"101\" height=\"92\"></p>",
+                                "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image88.png\" width=\"97\" height=\"87\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image101.png\" width=\"99\" height=\"86\"></p>"],
+                    solution_en: "<p>9.(b)<br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image6.png\" width=\"97\" height=\"88\"></p>",
+                    solution_hi: "<p>9.(b)<br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image6.png\" width=\"97\" height=\"88\"></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "10",
+                    section: "6",
+                    question_en: "<p>10. <span style=\"font-family: Roboto;\">Select the options figure embedded in the given figure as its part (rotation is not allowed).</span><br><span style=\"font-family: Roboto;\"> </span><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image85.png\"></p>",
+                    question_hi: "<p>10. <span style=\"font-family: Palanquin;\">उस विकल्प आकृति का चयन करें जो दी गई आकृति में उसके भाग के रूप में सन्निहित है (घूर्णन की अनुमति नहीं है)।</span><br><span style=\"font-family: Roboto;\"> </span><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image85.png\"></p>",
+                    options_en: ["<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image55.png\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image19.png\"></p>", 
+                                "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image13.png\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image69.png\"></p>"],
+                    options_hi: ["<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image55.png\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image19.png\"></p>",
+                                "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image13.png\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image69.png\"></p>"],
+                    solution_en: "<p>10.(b)<br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image19.png\"></p>",
+                    solution_hi: "<p>10.(b)<br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image19.png\"></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "11",
+                    section: "6",
+                    question_en: "<p>11.<span style=\"font-family: Roboto;\"> </span><span style=\"font-family: Roboto;\">Select the options figure embedded in the given figure as its part (rotation is not allowed).</span><br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image80.png\"></p>",
+                    question_hi: "<p>11. <span style=\"font-family: Palanquin;\">उस विकल्प आकृति का चयन करें जो दी गई आकृति में उसके भाग के रूप में सन्निहित है (घूर्णन की अनुमति नहीं है)।</span><br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image80.png\"></p>",
+                    options_en: ["<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image51.png\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image75.png\"></p>", 
+                                "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image10.png\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image100.png\"></p>"],
+                    options_hi: ["<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image51.png\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image75.png\"></p>",
+                                "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image10.png\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image100.png\"></p>"],
+                    solution_en: "<p>11.(b)<br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image75.png\"></p>",
+                    solution_hi: "<p>11.(b)<br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image75.png\"></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "12",
+                    section: "6",
+                    question_en: "<p>12. <span style=\"font-family: Roboto;\">Select the options figure embedded in the given figure as its part (rotation is not allowed).</span><br><span style=\"font-family: Roboto;\"> </span><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image62.png\"></p>",
+                    question_hi: "<p>12. <span style=\"font-family: Palanquin;\">उस विकल्प आकृति का चयन करें जो दी गई आकृति में उसके भाग के रूप में सन्निहित है (घूर्णन की अनुमति नहीं है)।</span><br><strong id=\"docs-internal-guid-0a876ded-7fff-8ed3-34c7-015f2a89a989\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXd2nWjxolzkBN6BWf_3iNNcpPphT2w7fGd2_nbltnsA4Hrq-RcJ_evYssgRZjF9g3zwdI9a6iCL82-UKqV7PVDh185D18fOHNKRPBk9MEoGEwtIHD-gg4BmfepoK3BYodsK0SvWJEbYs9GQi9BoElEXdZA?key=nm0fdVz07vs5dXgnlGVjFy5b\" width=\"90\" height=\"90\"></strong></p>",
+                    options_en: ["<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image61.png\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image83.png\"></p>", 
+                                "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image22.png\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image67.png\"></p>"],
+                    options_hi: ["<p><strong id=\"docs-internal-guid-5e7babea-7fff-b8e9-a831-011d86757e04\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcy8j5C8QJpBOroO42ENgXaEntIStym8HMFuGe1KKwnxzYxNHUa1YE3n355cZl1__LGdO_kZs-b2S2SDFqELXdwbM0UB3SnIDy9y3ciyz-SKwoeWyPtu-NADgHw_k2YeKDXLeFrPdMX-d-1hE3iGWdjGXjI?key=nm0fdVz07vs5dXgnlGVjFy5b\" width=\"40\" height=\"70\"></strong></p>", "<p><strong id=\"docs-internal-guid-74bf634a-7fff-d54f-a002-6febc7518059\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeAJzXz1PBkGnNlbWRAQ1TPvmi0KGjqVgZpt0YEJpBpuMIRA8XRCZVCJ2vGNjZrEe91bXgzMrtqwYl9eeHZNPcUOcDa8MTC8mRo7DBpPdoY9a_IqEavBEUmhq6oF0vuZ58z4IEZzhOrSzKGwdjFTxsse6N5?key=nm0fdVz07vs5dXgnlGVjFy5b\" width=\"50\" height=\"75\"></strong></p>",
+                                "<p><strong id=\"docs-internal-guid-3e0e76e9-7fff-fd48-75af-74d5eaa67799\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeAJllutP1jo7X6dGZ1SMe7Rzsv34NSAvq1Uv9ZQBGlR9OsVoz3grkQxjEIbZyEVG0J0P2J16iZe_DBkLm-pCosJjRwuXCnoy0xCt72VrXAKd6cpISIZe4Fh3AWkrmOPegowrmFSdWfpxFSWBSze8HtcGcE?key=nm0fdVz07vs5dXgnlGVjFy5b\" width=\"65\" height=\"78\"></strong></p>", "<p><strong id=\"docs-internal-guid-c5134b5b-7fff-1bd6-75d2-6e92820fe712\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeQXA8qBTJy-RaWKlomRiTdISE8puissdvYwysFxfrwlN1i6UENegnJml40Rhmo78At7FyRoUN-khBCQ_Pd9al9PZTVWdE6gy9GTdcANZOiY4q8lE612XKCsfOzw-vWQ5nnNKnjvQ-RO--Nu3FNGIoFlnul?key=nm0fdVz07vs5dXgnlGVjFy5b\" width=\"52\" height=\"98\"></strong></p>"],
+                    solution_en: "<p>12.(a)<br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image61.png\"></p>",
+                    solution_hi: "<p>12.(a)<br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image61.png\"></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "13",
+                    section: "6",
+                    question_en: "<p>13. <span style=\"font-family: Roboto;\">Select the options figure embedded in the given figure as its part (rotation is not allowed).</span><br><span style=\"font-family: Roboto;\"> </span><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image46.png\"><br><br></p>",
+                    question_hi: "<p>13. <span style=\"font-family: Palanquin;\">उस विकल्प आकृति का चयन करें जो दी गई आकृति में उसके भाग के रूप में सन्निहित है (घूर्णन की अनुमति नहीं है)।</span><br><strong id=\"docs-internal-guid-20782e8c-7fff-9381-7a0e-30b7cd45bbac\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfkjDkSF24aq1KdOYSAfGwGgHmFGSrZ94NH_8wbJE--Vq4waVQzSWdbAHcuMPK7R8_Lz6hgg9ARVG8kyz0RdOEfYSip9MmIQ2yma0RuPahKm927VShtbMd4LnutPcz1u_lzU9if3z-9MIjgYTTGPKxHKhA?key=nm0fdVz07vs5dXgnlGVjFy5b\" width=\"100\" height=\"82\"></strong><br><br></p>",
+                    options_en: ["<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image54.png\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image9.png\"></p>", 
+                                "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image97.png\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image16.png\"></p>"],
+                    options_hi: ["<p><strong id=\"docs-internal-guid-feefe3ce-7fff-adb6-1625-60ca1500bce1\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdJmQEfpvebeK-fQDZoqOhIbYD3P4UHnBdQsmu7MfzPKkqjcsEk5hkPxL9EKKmqVnCDH57wHbnPn8I4oEwpU5-AnfsyIyhjX6tvDYVzb9yxp84r3CH3asU8OKa7PLgiWm4Jb2veA6dQOyAPfcmzIrHAqMkJ?key=nm0fdVz07vs5dXgnlGVjFy5b\" width=\"100\" height=\"92\"></strong></p>", "<p><strong id=\"docs-internal-guid-2ce01bd9-7fff-dd5f-d8b8-36721865ff6f\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeHoyEOeHOVO0kFt5TMgkxs0or7PP07WF-qkiDwPgZa4i8wn2Y4nUcMcWBUE9zFgGGQMV-QQOtxgreKSB1O5MgF4rMXGvAjAAIg1TGM7h8GhQcvldSBctTX-eL1oWpwjm4olTt1FD9soV7kbz7GE9XrIP7_?key=nm0fdVz07vs5dXgnlGVjFy5b\" width=\"100\" height=\"92\"></strong></p>",
+                                "<p><strong id=\"docs-internal-guid-c3e8447c-7fff-f690-2952-09045cdb2d8e\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcja6CcnAYeeCfDRa8unkjjZsNszizGiRUNkcOYPyhvazS5NeUxEkb_ohgqZcAicpXmgPNa1A4tPOSBQtKhb7mmsWlUG0S9yTOjj3B8RIoqwqRBZwU0DSUs9UjOhiuiSxgykT-crauIOYowDsqN8uwxoCc?key=nm0fdVz07vs5dXgnlGVjFy5b\" width=\"100\" height=\"92\"></strong></p>", "<p><strong id=\"docs-internal-guid-8b7bb55b-7fff-135f-8e07-0b98a6e2d445\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXej5KjUrcoiqE6VXolND9R22H5xyhJuPZPYmKVO6mmvtY51gZMtFUJr78IkjGgtXrK7vYGGptVl2dPZX-842mGeW-Q1u-frCbGS0n2A7Ca7c0GHoCEUBvGm7IwbhQqabVUTtnY3wQSVCEL2TGAbQWJQ4LKt?key=nm0fdVz07vs5dXgnlGVjFy5b\" width=\"100\" height=\"92\"></strong></p>"],
+                    solution_en: "<p>13.(b) <span style=\"font-family: Roboto;\">Question figure is hidden in</span><br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image9.png\"></p>",
+                    solution_hi: "<p>13.(b) <span style=\"font-weight: 400;\">प्रश्न आकृति छिपी हुई है</span><br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image9.png\"></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "14",
+                    section: "6",
+                    question_en: "<p>14. <span style=\"font-family: Roboto;\">Select the options figure embedded in the given figure as its part (rotation is not allowed).</span><br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image7.png\" width=\"85\" height=\"105\"></p>",
+                    question_hi: "<p>14. <span style=\"font-family: Palanquin;\">उस विकल्प आकृति का चयन करें जो दी गई आकृति में उसके भाग के रूप में सन्निहित है (घूर्णन की अनुमति नहीं है)।</span><br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image7.png\" width=\"99\" height=\"122\"></p>",
+                    options_en: ["<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image31.png\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image8.png\"></p>", 
+                                "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image91.png\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image47.png\"></p>"],
+                    options_hi: ["<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image31.png\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image8.png\"></p>",
+                                "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image91.png\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image47.png\"></p>"],
+                    solution_en: "<p>14.(b)<br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image8.png\"></p>",
+                    solution_hi: "<p>14.(b)<br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image8.png\"></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "15",
+                    section: "6",
+                    question_en: "<p>15. <span style=\"font-family: Roboto;\">Select the options figure embedded in the given figure as its part (rotation is not allowed).</span><br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image40.png\"></p>",
+                    question_hi: "<p>15. <span style=\"font-family: Palanquin;\">उस विकल्प आकृति का चयन करें जो दी गई आकृति में उसके भाग के रूप में सन्निहित है (घूर्णन की अनुमति नहीं है)।</span><br><strong id=\"docs-internal-guid-846c266a-7fff-2ed9-4758-afeebddbd65a\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXem14fFC0zlJXMidFf1Vxt4ObwHt35r89qNz9yPZPjpybvbGJEywLlYCVtpKxg1bJg9ffDWpARa8c2QO0UcJURm5sLM5fbmAUiFZc9uNYeim7IyUxgYJEaC4MZjf5FkUBXLWhe3B99eRhNgizT3sTMBVLzs?key=nm0fdVz07vs5dXgnlGVjFy5b\" width=\"100\" height=\"77\"></strong></p>",
+                    options_en: ["<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image33.png\" width=\"93\" height=\"110\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image96.png\" width=\"93\" height=\"110\"></p>", 
+                                "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image44.png\" width=\"93\" height=\"110\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image3.png\" width=\"93\" height=\"110\"></p>"],
+                    options_hi: ["<p><strong id=\"docs-internal-guid-4c0ee268-7fff-61ed-3845-bd409efd1519\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdOi1aFi39PSFBBYa7j6KElvsYO8ct7h06z3pLPZkcf-zhHMVyQ-OdOSTH24QHhyuZWu7xuVxRmEF70qQlJUmFbhf8p4ueqh-_I3ZMNxki6yJi9MSCiaynZl8eGW3k9Flwx3VQPA-OFZ3kMIXUnC5_FKaQl?key=nm0fdVz07vs5dXgnlGVjFy5b\" width=\"93\" height=\"110\"></strong></p>", "<p><strong id=\"docs-internal-guid-8611b28f-7fff-7f65-4d89-3c337c767ae6\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcoc4hq-jJM6fmnX7UfWLMFcVz_tiIIstOro1GGwxwDOr5RLpwFIo1sxOHmoP_sv-6Gyb-LtQUDyxxh7R_pSLpScxBHMSoav_VuJliW6lOalHmFXY1hExJSAF_KB5GnKnEGH8m-QhoW7J21DK0x63j65Z_W?key=nm0fdVz07vs5dXgnlGVjFy5b\" width=\"93\" height=\"110\"></strong></p>",
+                                "<p><strong id=\"docs-internal-guid-7aa99de0-7fff-9d38-4b45-0dffb280552c\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXf5KhaCOQm2P_NSspJpdCJUBcyZavmU9OrM8e7ewZelu4ciQZK4otlZhWVUenoyIW0OpabhyrdQBjZu7_cOLylhbacZ58MWIc-L-65D0oaXLPu8hl5sBXhHmfwEIUkVzCeqd7hORdA-kurhLk6f2gbgQ5w5?key=nm0fdVz07vs5dXgnlGVjFy5b\" width=\"93\" height=\"110\"></strong></p>", "<p><strong id=\"docs-internal-guid-f516fd5d-7fff-b981-9a13-b42058f1a900\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeD4ll9ybWcXkYT3quusP00U7r583mn8l6-2iqPa20j--ZtxdaxbjfOlydSdJUKHg1fzp2h_sP8Jxi4i9YXS4LavlQsuz9u-aMrkc6uBL5-q8QZpYLF1buw21DPdR-ZdVyI1cRe1eUMlb_5CI4mBzVGDP4?key=nm0fdVz07vs5dXgnlGVjFy5b\" width=\"93\" height=\"110\"></strong></p>"],
+                    solution_en: "<p>15.(a) <span style=\"font-family: Roboto;\">The asked figure is hidden in</span><br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image33.png\" width=\"93\" height=\"110\"></p>",
+                    solution_hi: "<p>15.(a) <span style=\"font-family: Roboto;\"><span style=\"font-weight: 400;\">पूछा गया चित्र में छिपा है</span></span><br><span style=\"font-family: Roboto;\">&nbsp;<img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image33.png\" width=\"93\" height=\"110\"></span></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "16",
+                    section: "6",
+                    question_en: "<p>16. <span style=\"font-family: Roboto;\">Select the options figure embedded in the given figure as its part (rotation is not allowed).</span><br><span style=\"font-family: Roboto;\"> </span><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image23.png\"></p>",
+                    question_hi: "<p>16. <span style=\"font-family: Palanquin;\">उस विकल्प आकृति का चयन करें जो दी गई आकृति में उसके भाग के रूप में सन्निहित है (घूर्णन की अनुमति नहीं है)।</span><br><span style=\"font-family: Roboto;\"> </span><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image23.png\"></p>",
+                    options_en: ["<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image37.png\" width=\"104\" height=\"74\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image27.png\" width=\"104\" height=\"74\"></p>", 
+                                "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image66.png\" width=\"104\" height=\"74\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image78.png\" width=\"104\" height=\"74\"></p>"],
+                    options_hi: ["<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image37.png\" width=\"104\" height=\"74\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image27.png\" width=\"104\" height=\"74\"></p>",
+                                "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image66.png\" width=\"104\" height=\"74\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image78.png\" width=\"104\" height=\"74\"></p>"],
+                    solution_en: "<p>16.(a)<br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image37.png\" width=\"104\" height=\"74\"></p>",
+                    solution_hi: "<p>16.(a)<br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image37.png\" width=\"104\" height=\"74\"></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "17",
+                    section: "6",
+                    question_en: "<p>17. <span style=\"font-family: Roboto;\">Select the options figure embedded in the given figure as its part (rotation is not allowed).</span><br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image74.png\" width=\"154\" height=\"84\"></p>",
+                    question_hi: "<p>17. <span style=\"font-family: Palanquin;\">उस विकल्प आकृति का चयन करें जो दी गई आकृति में उसके भाग के रूप में सन्निहित है (घूर्णन की अनुमति नहीं है)।</span><br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image74.png\" width=\"165\" height=\"90\"></p>",
+                    options_en: ["<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image17.png\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image56.png\"></p>", 
+                                "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image12.png\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image98.png\"></p>"],
+                    options_hi: ["<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image17.png\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image56.png\"></p>",
+                                "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image12.png\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image98.png\"></p>"],
+                    solution_en: "<p>17.(b)<br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image56.png\"></p>",
+                    solution_hi: "<p>17.(b)<br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image56.png\"></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "18",
+                    section: "6",
+                    question_en: "<p>18. <span style=\"font-family: Roboto;\">Select the options figure embedded in the given figure as its part (rotation is not allowed).</span><br><strong id=\"docs-internal-guid-c7098338-7fff-7a91-9486-a919ec0720aa\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXe3_bT2xVsLICUWq3S9mlEu0lu3K2zEAuvk5XsnGOOrT2ajkd6lKjxMzSFVAKfpaoIYY08o5zEtQwMWiQQ8K2d4L62CBVyUGafiY7Sb_B329hExOC7KXjwGL4MK7uHopShCVvv4Ug?key=howH181FjeFLsiP1hGtkdndG\" width=\"47\" height=\"72\"></strong></p>",
+                    question_hi: "<p>18.<span style=\"font-family: Roboto;\"> </span><span style=\"font-family: Palanquin;\">उस विकल्प आकृति का चयन करें जो दी गई आकृति में उसके भाग के रूप में सन्निहित है (घूर्णन की अनुमति नहीं है)।</span><br><strong id=\"docs-internal-guid-c7098338-7fff-7a91-9486-a919ec0720aa\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXe3_bT2xVsLICUWq3S9mlEu0lu3K2zEAuvk5XsnGOOrT2ajkd6lKjxMzSFVAKfpaoIYY08o5zEtQwMWiQQ8K2d4L62CBVyUGafiY7Sb_B329hExOC7KXjwGL4MK7uHopShCVvv4Ug?key=howH181FjeFLsiP1hGtkdndG\" width=\"47\" height=\"72\"></strong></p>",
+                    options_en: ["<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image11.png\" width=\"109\" height=\"97\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image94.png\" width=\"109\" height=\"97\"></p>", 
+                                "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image52.png\" width=\"109\" height=\"97\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image39.png\" width=\"109\" height=\"97\"></p>"],
+                    options_hi: ["<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image11.png\" width=\"109\" height=\"97\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image94.png\" width=\"109\" height=\"97\"></p>",
+                                "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image52.png\" width=\"109\" height=\"97\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image39.png\" width=\"109\" height=\"97\"></p>"],
+                    solution_en: "<p>18.(a)<br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image11.png\" width=\"109\" height=\"97\"></p>",
+                    solution_hi: "<p>18.(a)<br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image11.png\" width=\"109\" height=\"97\"></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "19",
+                    section: "6",
+                    question_en: "<p>19. <span style=\"font-family: Roboto;\">Select the options figure embedded in the given figure as its part (rotation is not allowed).</span><br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image24.png\"></p>",
+                    question_hi: "<p>19. <span style=\"font-family: Palanquin;\">उस विकल्प आकृति का चयन करें जो दी गई आकृति में उसके भाग के रूप में सन्निहित है (घूर्णन की अनुमति नहीं है)।</span><br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image24.png\"></p>",
+                    options_en: ["<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image63.png\" width=\"86\" height=\"75\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image18.png\" width=\"86\" height=\"75\"></p>", 
+                                "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image65.png\" width=\"86\" height=\"75\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image43.png\" width=\"86\" height=\"75\"></p>"],
+                    options_hi: ["<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image63.png\" width=\"86\" height=\"75\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image18.png\" width=\"86\" height=\"75\"></p>",
+                                "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image65.png\" width=\"86\" height=\"75\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image43.png\" width=\"86\" height=\"75\"></p>"],
+                    solution_en: "<p>19.(a)<br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image63.png\" width=\"86\" height=\"75\"></p>",
+                    solution_hi: "<p>19.(a)<br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image63.png\" width=\"86\" height=\"75\"></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "20",
+                    section: "misc",
+                    question_en: "<p>20. <span style=\"font-family: Roboto;\">Select the options figure embedded in the given figure as its part (rotation is not allowed).</span><br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image35.png\"></p>",
+                    question_hi: "<p>20. <span style=\"font-family: Palanquin;\">उस विकल्प आकृति का चयन करें जो दी गई आकृति में उसके भाग के रूप में सन्निहित है (घूर्णन की अनुमति नहीं है)।&nbsp;</span><br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image35.png\" width=\"95\" height=\"66\"></p>",
+                    options_en: ["<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image72.png\" width=\"87\" height=\"75\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image21.png\" width=\"87\" height=\"75\"></p>", 
+                                "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image57.png\" width=\"87\" height=\"75\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image58.png\" width=\"87\" height=\"75\"></p>"],
+                    options_hi: ["<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image72.png\" width=\"87\" height=\"75\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image21.png\" width=\"87\" height=\"75\"></p>",
+                                "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image57.png\" width=\"87\" height=\"75\"><span style=\"font-family: Roboto;\"> </span></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image58.png\" width=\"87\" height=\"75\"></p>"],
+                    solution_en: "<p>20.(b)<br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image21.png\" width=\"87\" height=\"75\"></p>",
+                    solution_hi: "<p>20.(b)<br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1666781653/word/media/image21.png\" width=\"87\" height=\"75\"></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+            
+            // Generate question boxes
+            const boxesContainer = document.getElementById('question-boxes');
+            questions.forEach((q, index) => {
+                const box = document.createElement('div');
+                box.className = 'q-box';
+                box.textContent = index + 1;
+                box.onclick = () => showQuestion(index);
+                box.id = `box-${index}`;
+                boxesContainer.appendChild(box);
+            });
+            
+            // Show first question
+            showQuestion(0);
+            updateProgress();
+        }
+        
+        // Show a specific question
+        
+        function formatContent(text) {
+            if (!text) return '';
+            return text.replace(/<img/g, '<img style="max-width:100%;height:auto;"');
+        }
+        
+        function showQuestion(index) {
+            if (index < 0 || index >= questions.length) return;
+            
+            currentQuestion = index;
+            const question = questions[index];
+            
+            // Update question counter
+            document.getElementById('question-counter').textContent = `Question ${index + 1} of ${questions.length}`;
+            
+            // Update question boxes
+            document.querySelectorAll('.q-box').forEach(box => box.classList.remove('current'));
+            document.getElementById(`box-${index}`).classList.add('current');
+            
+            // Generate question HTML
+            let html = `
+                <div class="question-card">
+                    <div class="question-text">
+                        <div class="en">${formatContent(question.question_en)}</div>
+                        <div class="hi" style="display:none">${formatContent(question.question_hi)} </div>
+                    </div>
+                    <div class="options" id="options-container">`;
+            
+            // Add options
+            ['a', 'b', 'c', 'd'].forEach((opt, i) => {
+                let optionClass = '';
+                let isCorrectAnswer = opt === question.correct;
+                let isUserAnswer = answers[question.id] === opt;
+                
+                // When reviewing, add appropriate classes
+                if (submitted) {
+                    if (isCorrectAnswer) {
+                        optionClass += ' correct-answer';
+                    } else if (isUserAnswer && !isCorrectAnswer) {
+                        optionClass += ' incorrect';
+                    }
+                }
+                
+                html += `
+                    <div class="option-item">
+                        <input class="option-input" type="radio" name="q${index}" 
+                            id="opt-${index}-${opt}" value="${opt}" 
+                            ${isUserAnswer ? 'checked' : ''}
+                            onclick="selectAnswer('${question.id}', '${opt}')">
+                       <label class="option-label${optionClass}" for="opt-${index}-${opt}">
+                            <div class="en">${question.options_en[i]}</div>
+                            <div class="hi" style="display:none">${question.options_hi[i]}</div>
+                        </label>
+                    </div>`;
+            });
+            
+            // Add solution if submitted
+            if (submitted) {
+                const isCorrect = answers[question.id] === question.correct;
+                const resultText = answers[question.id] ? (isCorrect ? 'Correct!' : 'Incorrect!') : 'Not attempted';
+                
+                html += `
+                    <div class="solution-container">
+                        <div class="solution-title">${resultText}</div>
+                        <div class="solution-text">
+                            <div class="en">${question.solution_en}</div>
+                            <div class="hi" style="display:none">${question.solution_hi}</div>
+                        </div>
+                    </div>`;
+            }
+            
+            html += `</div></div>`;
+            
+            document.getElementById('questions-container').innerHTML = html;
+            
+            // Apply language settings
+            applyLanguage();
+            
+            // If in mobile view, close the menu
+            if (window.innerWidth < 992) {
+                toggleNav(false);
+            }
+            
+            // Add review mode class if submitted
+            if (submitted) {
+                document.getElementById('options-container').classList.add('review-mode');
+            }
+        }
+        
+        // Apply current language
+        function applyLanguage() {
+            document.querySelectorAll(`.${currentLang}`).forEach(el => el.style.display = 'block');
+            document.querySelectorAll(`.${currentLang === 'en' ? 'hi' : 'en'}`).forEach(el => el.style.display = 'none');
+            
+            // Update language button text
+            document.getElementById('lang-text').textContent = currentLang === 'en' ? 'Hi' : 'En';
+        }
+        
+        // Select an answer
+        function selectAnswer(qId, option) {
+            if (submitted) return;
+            
+            answers[qId] = option;
+            updateProgress();
+            
+            // Mark question as attempted in the navigation
+            const index = questions.findIndex(q => q.id === qId);
+            if (index >= 0) {
+                const box = document.getElementById(`box-${index}`);
+                box.classList.add('attempted');
+                box.classList.remove('unattempted');
+            }
+        }
+        
+        // Navigate to previous/next question
+        function prevQuestion() { 
+            if (currentQuestion > 0) showQuestion(currentQuestion - 1); 
+        }
+        
+        function nextQuestion() { 
+            if (currentQuestion < questions.length - 1) showQuestion(currentQuestion + 1); 
+        }
+        
+        // Switch section
+        function switchSection(sectionId) {
+            if (sectionId === 'all') {
+                showQuestion(0);
+                return;
+            }
+            
+            const section = sections[sectionId];
+            if (section) showQuestion(section.start);
+        }
+        
+        // Toggle language
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'hi' : 'en';
+            applyLanguage();
+        }
+        
+        // Toggle navigation sidebar
+        function toggleNav(show) {
+            const nav = document.getElementById('question-nav');
+            const overlay = document.getElementById('nav-overlay');
+            
+            if (show === undefined) {
+                show = !nav.classList.contains('show');
+            }
+            
+            if (show) {
+                nav.classList.add('show');
+                overlay.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            } else {
+                nav.classList.remove('show');
+                overlay.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+        }
+        
+        // Update progress
+        function updateProgress() {
+            const attempted = Object.keys(answers).length;
+            document.getElementById('attempted-count').textContent = attempted;
+        }
+        
+        // Start timer
+        function startTimer() {
+            const timerDisplay = document.getElementById('timer-display');
+            let timeLeft = totalTime;
+            
+            const timerInterval = setInterval(() => {
+                if (timeLeft <= 0 || submitted) {
+                    clearInterval(timerInterval);
+                    if (!submitted) submitTest();
+                    return;
+                }
+                
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                timeLeft--;
+            }, 1000);
+        }
+        
+        // Confirm before submitting
+        function confirmSubmit() {
+            if (submitted) return;
+            
+            const attempted = Object.keys(answers).length;
+            const remaining = questions.length - attempted;
+            
+            // Create a more modern confirmation dialog
+            const confirmHtml = `
+                <div style="text-align: center; padding: 20px;">
+                    <h4 style="margin-bottom: 16px; color: var(--dark);">Confirm Submission</h4>
+                    <p style="margin-bottom: 24px; color: var(--gray);">
+                        You have attempted ${attempted} of ${questions.length} questions.<br>
+                        ${remaining} questions are unattempted.
+                    </p>
+                    <div style="display: flex; justify-content: center; gap: 12px;">
+                        <button onclick="this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; border: 1px solid var(--light-gray); background: white; border-radius: 8px; cursor: pointer;">
+                            Cancel
+                        </button>
+                        <button onclick="submitTest(); this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer;">
+                            Submit Test
+                        </button>
+                    </div>
+                </div>`;
+            
+            // Create modal element
+            const modal = document.createElement('div');
+            modal.className = 'results-modal show';
+            modal.innerHTML = `
+                <div class="results-card" style="max-width: 400px;">
+                    <button class="cancel-btn" style="position: absolute; top: 12px; right: 12px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--gray);" onclick="this.closest('.results-modal').remove()">
+                        ×
+                    </button>
+                    ${confirmHtml}
+                </div>`;
+            
+            document.body.appendChild(modal);
+        }
+        
+        // Submit test
+        function submitTest() {
+            if (submitted) return;
+            
+            submitted = true;
+            
+            let score = 0;
+            let correctCount = 0;
+            let incorrectCount = 0;
+            let unattemptedCount = 0;
+            
+            questions.forEach((q, index) => {
+                const userAns = answers[q.id];
+                const box = document.getElementById(`box-${index}`);
+                
+                box.classList.remove('attempted');
+                
+                if (!userAns) {
+                    unattemptedCount++;
+                    box.classList.add('unattempted');
+                } else if (userAns === q.correct) {
+                    correctCount++;
+                    score += q.pos_marks;
+                    box.classList.add('correct');
+                } else {
+                    incorrectCount++;
+                    score -= q.neg_marks;
+                    box.classList.add('incorrect');
+                }
+            });
+            
+            // Update result values
+            document.getElementById('score-value').textContent = score.toFixed(2);
+            document.getElementById('correct-value').textContent = correctCount;
+            document.getElementById('incorrect-value').textContent = incorrectCount;
+            document.getElementById('unattempted-value').textContent = unattemptedCount;
+            
+            // Show the results modal
+            document.getElementById('results-modal').classList.add('show');
+            
+            // Disable submit button
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-check"></i>';
+            submitBtn.style.backgroundColor = 'var(--success)';
+            
+            // Refresh current question view to show solution
+            showQuestion(currentQuestion);
+        }
+        
+        // Review test
+        function reviewTest() {
+            document.getElementById('results-modal').classList.remove('show');
+            showQuestion(0);
+        }
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target === document.getElementById('results-modal')) {
+                document.getElementById('results-modal').classList.remove('show');
+            }
+        });
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') prevQuestion();
+            if (e.key === 'ArrowRight') nextQuestion();
+        });
+    </script>
+</body>
+</html>
