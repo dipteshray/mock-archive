@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mocks Wallah</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --primary-light: #a29bfe;
+            --primary-dark: #5649c0;
+            --secondary: #00cec9;
+            --accent: #fd79a8;
+            --success: #00b894;
+            --warning: #fdcb6e;
+            --danger: #d63031;
+            --light: #f8f9fa;
+            --dark: #2d3436;
+            --gray: #636e72;
+            --light-gray: #dfe6e9;
+            --card-bg: #ffffff;
+            --body-bg: #f5f6fa;
+            --header-bg: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            --footer-bg: #ffffff;
+            --box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            --box-shadow-sm: 0 2px 10px rgba(0,0,0,0.05);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background-color: var(--body-bg);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            color: var(--dark);
+            line-height: 1.6;
+            padding-bottom: 80px; /* Space for fixed navigation */
+            overflow-x: hidden;
+        }
+        
+        /* Header Styles */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: var(--header-bg);
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            z-index: 1000;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .header-brand {
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .header-brand i {
+            margin-right: 8px;
+            font-size: 1.2rem;
+        }
+        
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .control-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .control-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .control-btn.active {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .timer-display {
+            background: rgba(0,0,0,0.2);
+            border-radius: 18px;
+            padding: 4px 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+        
+        .timer-display i {
+            margin-right: 6px;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-top: 60px;
+            padding: 16px;
+            min-height: calc(100vh - 140px);
+        }
+        
+        .question-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--box-shadow-sm);
+            border: none;
+            transition: var(--transition);
+        }
+        
+        .question-counter {
+            font-size: 0.9rem;
+            color: var(--gray);
+            text-align: center;
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+        
+        .question-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+        
+        .option-item {
+            margin-bottom: 12px;
+            position: relative;
+        }
+        
+        .option-input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+            .question-text {
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        hyphens: auto;
+        max-width: 100%;
+    }
+
+    .question-text img,
+    .option-label img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 8px 0;
+        border-radius: 8px;
+    }
+
+    .option-label {
+        overflow: hidden;
+    }
+
+    .question-card {
+        overflow: hidden;
+    }
+        
+        .option-label {
+            display: block;
+            padding: 14px 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--light-gray);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .option-label:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .option-input:checked + .option-label {
+            border-color: var(--primary);
+            background: rgba(108, 92, 231, 0.05);
+            box-shadow: 0 0 0 1px var(--primary);
+        }
+        
+        .option-input:checked + .option-label::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--primary);
+        }
+        
+        /* When reviewing answers */
+        .review-mode .option-input:checked + .option-label.correct {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.correct::after {
+            background: var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.incorrect {
+            border-color: var(--danger);
+            background: rgba(214, 48, 49, 0.05);
+            box-shadow: 0 0 0 1px var(--danger);
+        }
+        
+        .MathJax, .mjx-chtml {
+            overflow-x: auto;
+            max-width: 100%;
+            display: inline-block;
+        }
+
+        
+        .review-mode .option-input:checked + .option-label.incorrect::after {
+            background: var(--danger);
+        }
+        
+        .review-mode .option-label.correct-answer {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-label.correct-answer::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--success);
+        }
+        
+        .solution-container {
+            margin-top: 20px;
+            padding: 16px;
+            background: rgba(108, 92, 231, 0.05);
+            border-radius: 12px;
+            border-left: 3px solid var(--primary);
+        }
+        
+        .solution-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+        
+        /* Question Navigation */
+        .question-nav {
+            position: fixed;
+            top: 60px;
+            right: 0;
+            bottom: 80px;
+            width: 100%;
+            max-width: 320px;
+            background: var(--card-bg);
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            transform: translateX(100%);
+            transition: var(--transition);
+            z-index: 900;
+            overflow-y: auto;
+            padding: 16px;
+        }
+        
+        .question-nav.show {
+            transform: translateX(0);
+        }
+        
+        .nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .nav-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+        
+        .question-stats {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .stat-badge {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        
+        .section-selector {
+            width: 100%;
+            margin-bottom: 16px;
+            border-radius: 12px;
+            padding: 10px 16px;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            font-size: 0.9rem;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 16px;
+        }
+        
+        .question-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+            gap: 8px;
+        }
+        
+        .q-box {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .q-box:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .q-box.attempted {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .q-box.correct {
+            background-color: var(--success);
+            color: white;
+            border-color: var(--success);
+        }
+        
+        .q-box.incorrect {
+            background-color: var(--danger);
+            color: white;
+            border-color: var(--danger);
+        }
+        
+        .q-box.current {
+            border: 2px solid var(--accent) !important;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .q-box.unattempted {
+            background-color: var(--gray);
+            color: white;
+            border-color: var(--gray);
+        }
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: var(--footer-bg);
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            z-index: 800;
+        }
+        
+        .nav-btn {
+            height: 48px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 20px;
+            transition: var(--transition);
+            gap: 8px;
+        }
+        
+        .nav-btn i {
+            font-size: 1rem;
+        }
+        
+        .nav-btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .nav-btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+        
+        .nav-btn-outline:hover {
+            background: rgba(108, 92, 231, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        /* Overlay when nav is open */
+        .nav-overlay {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            bottom: 80px;
+            background: rgba(0,0,0,0.5);
+            z-index: 800;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+        }
+        
+        .nav-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        /* Results Modal */
+        .results-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1100;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+            padding: 16px;
+        }
+        
+        .results-modal.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .results-card {
+            background: white;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+            transform: translateY(20px);
+            transition: var(--transition);
+        }
+        
+        .results-modal.show .results-card {
+            transform: translateY(0);
+        }
+        
+        .results-header {
+            background: var(--header-bg);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .results-title {
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .results-body {
+            padding: 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            color: white;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+        
+        .results-footer {
+            padding: 16px 20px;
+            display: flex;
+            justify-content: center;
+            border-top: 1px solid var(--light-gray);
+        }
+        
+        /* Responsive Adjustments */
+        @media (min-width: 992px) {
+            .question-nav {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-right: 320px;
+            }
+            
+            .nav-overlay {
+                display: none;
+            }
+            
+            .bottom-nav {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .question-grid {
+                grid-template-columns: repeat(auto-fill, minmax(36px, 1fr));
+                gap: 6px;
+            }
+            
+            .q-box {
+                width: 36px;
+                height: 36px;
+                font-size: 0.9rem;
+            }
+            
+            .option-label {
+                padding: 12px 14px;
+            }
+            
+            .question-text {
+                font-size: 1rem;
+            }
+            
+            .header-brand {
+                font-size: 1rem;
+            }
+            
+            .control-btn {
+                width: 32px;
+                height: 32px;
+            }
+            
+            .timer-display {
+                font-size: 0.8rem;
+                padding: 4px 10px;
+            }
+            
+            .nav-btn {
+                height: 44px;
+                padding: 0 16px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="#" class="header-brand">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Mocks Wallah</span>
+            </a>
+            
+            <div class="header-controls">
+                <!-- Timer -->
+                <div class="timer-display">
+                    <i class="far fa-clock"></i>
+                    <span id="timer-display">6:00</span>
+                </div>
+                
+                <!-- Language toggle -->
+                <button class="control-btn" id="lang-btn" onclick="toggleLanguage()">
+                    <span id="lang-text">En</span>
+                </button>
+                
+                <!-- Submit button -->
+                <button class="control-btn" id="submit-btn" onclick="confirmSubmit()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+                
+                <!-- Questions toggle for mobile -->
+                <button class="control-btn nav-toggle-btn" id="nav-toggle" onclick="toggleNav()">
+                    <i class="fas fa-th"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main content -->
+    <main class="main-content" id="main-content">
+        <div class="question-counter" id="question-counter">Question 1 of 17</div>
+        
+        <!-- Questions will be displayed here -->
+        <div id="questions-container"></div>
+    </main>
+    
+    <!-- Overlay for mobile nav -->
+    <div class="nav-overlay" id="nav-overlay" onclick="toggleNav(false)"></div>
+    
+    <!-- Question navigation sidebar -->
+    <aside class="question-nav" id="question-nav">
+        <div class="nav-header">
+            <h3 class="nav-title">Questions</h3>
+            <div class="question-stats">
+                <span class="stat-badge bg-primary" id="attempted-count">0</span>
+                <span class="stat-badge bg-gray" id="total-count">17</span>
+                <button class="control-btn d-lg-none" onclick="toggleNav(false)">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Section selector -->
+        <select class="section-selector" id="section-selector" onchange="switchSection(this.value)">
+            <option value="all">All Sections</option>
+        </select>
+        
+        <!-- Question grid -->
+        <div class="question-grid" id="question-boxes"></div>
+    </aside>
+    
+    <!-- Bottom navigation for mobile -->
+    <nav class="bottom-nav d-lg-none">
+        <button class="nav-btn nav-btn-outline" onclick="prevQuestion()">
+            <i class="fas fa-chevron-left"></i>
+            <span>Previous</span>
+        </button>
+        <button class="nav-btn nav-btn-outline" onclick="nextQuestion()">
+            <span>Next</span>
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </nav>
+    
+    <!-- Results modal -->
+    <div class="results-modal" id="results-modal">
+        <div class="results-card">
+            <div class="results-header">
+                <h3 class="results-title">Test Results</h3>
+            </div>
+            <div class="results-body">
+                <div class="stats-grid">
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark))">
+                        <div class="stat-value" id="score-value">0</div>
+                        <div class="stat-label">Score</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--success), #1b9aaa)">
+                        <div class="stat-value" id="correct-value">0</div>
+                        <div class="stat-label">Correct</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--danger), var(--accent))">
+                        <div class="stat-value" id="incorrect-value">0</div>
+                        <div class="stat-label">Incorrect</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--gray), var(--dark))">
+                        <div class="stat-value" id="unattempted-value">0</div>
+                        <div class="stat-label">Unattempted</div>
+                    </div>
+                </div>
+            </div>
+            <div class="results-footer">
+                <button class="nav-btn nav-btn-primary" onclick="reviewTest()">
+                    <i class="fas fa-search me-1"></i>
+                    <span>Review Test</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Questions data
+        const questions = [];
+        const sections = {};
+        let currentLang = "en";
+        let currentQuestion = 0;
+        let answers = {};
+        let submitted = false;
+        let totalTime = 6 * 60;
+        
+        // Initialize the test
+        window.onload = function() {
+            initializeTest();
+            startTimer();
+            
+            // If on desktop, show the question navigation by default
+            if (window.innerWidth >= 992) {
+                document.getElementById('question-nav').classList.add('show');
+                document.getElementById('main-content').classList.add('with-nav');
+            }
+        };
+        
+        // Initialize test data
+        function initializeTest() {
+            // Add sections and questions
+            
+            sections["8"] = {
+                name: "GK",
+                start: 0,
+                end: 15
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="8">GK</option>`;
+            
+            sections["misc"] = {
+                name: "Miscellaneous",
+                start: 16,
+                end: 16
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="misc">Miscellaneous</option>`;
+            
+            
+                questions.push({
+                    id: "1",
+                    section: "8",
+                    question_en: "<p><span style=\"font-family: Cambria Math;\">1</span><span style=\"font-family: Cambria Math;\">. </span><span style=\"font-family: Cambria Math;\">Which of the following Acts introduced federal features and provincial autonomy in the The legislature and also made provisions for the distribution of legislative powers between the Centre and the provinces?<br></span></p>",
+                    question_hi: "<p><span style=\"font-family: Cambria Math;\">1</span><span style=\"font-family: Cambria Math;\">. </span><span style=\"font-family: Aparajita;\">निम्नलिखित</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">से</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">किस</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अधिनियम</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">ने</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">विधायिका</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संघीय</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">विशेषताओं</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">और</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">प्रांतीय</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">स्वायत्तता</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">की</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">शुरुआत</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">की</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">और</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">केंद्र</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">और</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">प्रांतों</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">बीच</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">विधायी</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">शक्तियों</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">वितरण</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">प्रावधान</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">भी</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">किया</span><span style=\"font-family: Cambria Math;\">&nbsp;</span><span style=\"font-family: Cambria Math;\"><br></span></p>",
+                    options_en: ["<p>The Government of India Act, <span style=\"font-family: Cambria Math;\">1858 </span></p>", "<p>The Government of India Act, <span style=\"font-family: Cambria Math;\">1935</span></p>", 
+                                "<p>The Government of India Act, <span style=\"font-family: Cambria Math;\">1919 </span></p>", "<p>Indian Councils Act, <span style=\"font-family: Cambria Math;\">1909</span></p>"],
+                    options_hi: ["<p><span style=\"font-family: Aparajita;\">भारत</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">सरकार</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अधिनियम</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Cambria Math;\">1858 </span></p>", "<p><span style=\"font-family: Aparajita;\">भारत</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">सरकार</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अधिनियम</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Cambria Math;\">1935 </span></p>",
+                                "<p><span style=\"font-family: Aparajita;\">भारत</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">सरकार</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अधिनियम</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Cambria Math;\">1919 </span></p>", "<p><span style=\"font-family: Aparajita;\">भारतीय</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">परिषद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अधिनियम</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Cambria Math;\">1909 </span></p>"],
+                    solution_en: "<p><span style=\"font-family: Cambria Math;\">1</span><span style=\"font-family: Cambria Math;\">.(b) </span><strong><span style=\"font-family: Cambria Math;\">The </span><span style=\"font-family: Cambria Math;\">Government of India Act, </span><span style=\"font-family: Cambria Math;\">1935</span></strong><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">introduced federal features and provincial autonomy in the legislature and also made provisions for the distribution of legislative powers between the centre and the provinces.</span></p>",
+                    solution_hi: "<p><span style=\"font-family: Cambria Math;\">1</span><span style=\"font-family: Cambria Math;\">.(b)</span><strong><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">भारत</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">सरकार</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अधिनियम</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Cambria Math;\">1935</span></strong><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">ने</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">विधायिका</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संघीय</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">विशेषताओं</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">और</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">प्रांतीय</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">स्वायत्तता</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">की</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">शुरुआत</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">की</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">और</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">केंद्र</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">और</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">प्रांतों</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">बीच</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">विधायी</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">शक्तियों</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">वितरण</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">प्रावधान</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">भी</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">किए।</span></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "2",
+                    section: "8",
+                    question_en: "<p><span style=\"font-family: Cambria Math;\">2</span><span style=\"font-family: Cambria Math;\">.</span><span style=\"font-family: Cambria Math;\">The total membership of the Constituent Assembly was </span><span style=\"font-family: Cambria Math;\">389</span><span style=\"font-family: Cambria Math;\">, of which ______ were representatives of princely states.</span></p>",
+                    question_hi: "<p><span style=\"font-family: Cambria Math;\">2</span><span style=\"font-family: Cambria Math;\">. </span><span style=\"font-family: Aparajita;\">संविधान</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">सभा</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">की</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">कुल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">सदस्यता</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">389 </span><span style=\"font-family: Aparajita;\">थी</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Aparajita;\">जिसमें</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">______ </span><span style=\"font-family: Aparajita;\">रियासतों</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">प्रतिनिधि</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">थे।</span><span style=\"font-family: Cambria Math;\">&nbsp;</span></p>",
+                    options_en: ["<p><span style=\"font-family: Cambria Math;\">84</span></p>", "<p><span style=\"font-family: Cambria Math;\">102 </span></p>", 
+                                "<p><span style=\"font-family: Cambria Math;\">109 </span></p>", "<p><span style=\"font-family: Cambria Math;\">93 </span></p>"],
+                    options_hi: ["<p><span style=\"font-family: Cambria Math;\">84</span></p>", "<p><span style=\"font-family: Cambria Math;\">102</span></p>",
+                                "<p><span style=\"font-family: Cambria Math;\">109</span></p>", "<p><span style=\"font-family: Cambria Math;\">93</span></p>"],
+                    solution_en: "<p><span style=\"font-family: Cambria Math;\">2</span><span style=\"font-family: Cambria Math;\">.</span><span style=\"font-family: Cambria Math;\">(d) </span><span style=\"font-family: Cambria Math;\">The total membership of the Constituent Assembly was </span><strong><span style=\"font-family: Cambria Math;\">389</span></strong><span style=\"font-family: Cambria Math;\">, of which</span><span style=\"font-family: Cambria Math;\"> </span><strong><span style=\"font-family: Cambria Math;\">292</span><span style=\"font-family: Cambria Math;\"> </span></strong><span style=\"font-family: Cambria Math;\">were representatives of the provinces,</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">93</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">represented the princely states and </span><strong><span style=\"font-family: Cambria Math;\">4</span></strong><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">were from the chief commissioner provinces of Delhi, Ajmer-Merwara, Coorg and British Baluchistan.</span></p>",
+                    solution_hi: "<p><span style=\"font-family: Cambria Math;\">2</span><span style=\"font-family: Cambria Math;\">(d) </span><span style=\"font-family: Aparajita;\">संविधान</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">सभा</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">की</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">कुल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">सदस्यता</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">389</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">थी</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Aparajita;\">जिसमें</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">से</span><span style=\"font-family: Cambria Math;\"> </span><strong><span style=\"font-family: Cambria Math;\">292 </span></strong><span style=\"font-family: Aparajita;\">प्रांतों</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">प्रतिनिधि</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">थे</span><span style=\"font-family: Cambria Math;\">,</span><span style=\"font-family: Cambria Math;\"> </span><strong><span style=\"font-family: Cambria Math;\">93</span><span style=\"font-family: Cambria Math;\"> </span></strong><span style=\"font-family: Aparajita;\">रियासतों</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">का</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">प्रतिनिधित्व</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">करते</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">थे</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">और</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">4</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">दिल्ली</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Aparajita;\">अजमेर</span><span style=\"font-family: Cambria Math;\">-</span><span style=\"font-family: Aparajita;\">मेरवाड़ा</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Aparajita;\">कूर्ग</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">और</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">ब्रिटिश</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">बलूचिस्तान</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">मुख्य</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">आयुक्त</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">प्रांतों</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">से</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">थे।</span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "3",
+                    section: "8",
+                    question_en: "<p><span style=\"font-family: Cambria Math;\">3</span><span style=\"font-family: Cambria Math;\">. </span><span style=\"font-family: Cambria Math;\">Which of the following Articles of the Constitution of India states that there will be a Vice-President of India?</span></p>",
+                    question_hi: "<p><span style=\"font-family: Cambria Math;\">3</span><span style=\"font-family: Cambria Math;\">.</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">भारत</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संविधान</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">निम्नलिखित</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">से</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">कौन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">सा</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">बताता</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">है</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">कि</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">भारत</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">का</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">एक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">उपराष्ट्रपति</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">होगा</span><span style=\"font-family: Cambria Math;\">?&nbsp;</span></p>",
+                    options_en: ["<p>Article <span style=\"font-family: Cambria Math;\">45 </span></p>", "<p>Article <span style=\"font-family: Cambria Math;\">56 </span></p>", 
+                                "<p>Article <span style=\"font-family: Cambria Math;\">75 </span></p>", "<p>Article <span style=\"font-family: Cambria Math;\">63 </span></p>"],
+                    options_hi: ["<p><span style=\"font-family: Aparajita;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">45 </span></p>", "<p><span style=\"font-family: Aparajita;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">56 </span></p>",
+                                "<p><span style=\"font-family: Aparajita;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">75 </span></p>", "<p><span style=\"font-family: Aparajita;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">63 </span></p>"],
+                    solution_en: "<p><span style=\"font-family: Cambria Math;\">3</span><span style=\"font-family: Cambria Math;\">.(d)</span><span style=\"font-family: Cambria Math;\"> </span><strong><span style=\"font-family: Cambria Math;\">Article </span><span style=\"font-family: Cambria Math;\">63</span><span style=\"font-family: Cambria Math;\"> </span></strong><span style=\"font-family: Cambria Math;\">of the Indian Constitution states that there shall be a </span><span style=\"font-family: Cambria Math;\">Vice President</span><span style=\"font-family: Cambria Math;\"> of India. The Vice President acts as President in the absence of the president due to death, resignation, impeachment, or other situations. He is also ex officio Chairperson of the Rajya Sabha.</span></p>",
+                    solution_hi: "<p><span style=\"font-family: Cambria Math;\">3</span><span style=\"font-family: Cambria Math;\">.(d)</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">भारतीय</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संविधान</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><strong><span style=\"font-family: Palanquin;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">63 </span></strong><span style=\"font-family: Aparajita;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">कहा</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">गया</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">है</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">कि</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">भारत</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">का</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">एक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">उपराष्ट्रपति</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">होगा।</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">उपराष्ट्रपति</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">मृत्यु</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Palanquin;\">इस्तीफे</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Palanquin;\">महाभियोग</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">या</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">अन्य</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">स्थितियों</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">कारण</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">राष्ट्रपति</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">की</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">अनुपस्थिति</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">राष्ट्रपति</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">रूप</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">कार्य</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">करता</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">है।</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">वे</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">राज्यसभा</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">पदेन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">सभापति</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">भी</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">हैं।</span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "4",
+                    section: "8",
+                    question_en: "<p><span style=\"font-family: Cambria Math;\">4</span><span style=\"font-family: Cambria Math;\">. </span><span style=\"font-family: Cambria Math;\">The concept of Reservation of seats for Scheduled Castes and Scheduled Tribes in The House of the People is highlighted in Article ______ of the Constitution of India.&nbsp;</span></p>",
+                    question_hi: "<p><span style=\"font-family: Cambria Math;\">4</span><span style=\"font-family: Cambria Math;\">. \'</span><span style=\"font-family: Aparajita;\">अनुसूचित</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">जातियों</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">और</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अनुसूचित</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">जनजातियों</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">लिए</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">सीटों</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">आरक्षण</span><span style=\"font-family: Cambria Math;\">\' </span><span style=\"font-family: Aparajita;\">की</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अवधारणा</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">लोक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">सभा</span><span style=\"font-family: Cambria Math;\">\' </span><span style=\"font-family: Aparajita;\">को</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">भारत</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संविधान</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">______ </span><span style=\"font-family: Aparajita;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">रेखांकित</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">किया</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">गया</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">है।</span></p>",
+                    options_en: ["<p><span style=\"font-family: Cambria Math;\">361</span><span style=\"font-family: Cambria Math;\"> </span></p>", "<p><span style=\"font-family: Cambria Math;\">345 </span></p>", 
+                                "<p><span style=\"font-family: Cambria Math;\">330 </span></p>", "<p><span style=\"font-family: Cambria Math;\">326 </span></p>"],
+                    options_hi: ["<p><span style=\"font-family: Cambria Math;\">361</span></p>", "<p><span style=\"font-family: Cambria Math;\">345</span></p>",
+                                "<p><span style=\"font-family: Cambria Math;\">330</span></p>", "<p><span style=\"font-family: Cambria Math;\">326</span></p>"],
+                    solution_en: "<p><span style=\"font-family: Cambria Math;\">4</span><span style=\"font-family: Cambria Math;\">.(c)</span><span style=\"font-family: Cambria Math;\"> The concept of </span><span style=\"font-family: Cambria Math;\">&lsquo;</span><span style=\"font-family: Cambria Math;\">Reservation of seats for Scheduled Castes and Scheduled Tribes in The House of the People</span><span style=\"font-family: Cambria Math;\">&rsquo; </span><span style=\"font-family: Cambria Math;\">is highlighted in Article </span><span style=\"font-family: Cambria Math;\">330 </span><span style=\"font-family: Cambria Math;\">of the Constitution of India.</span></p>",
+                    solution_hi: "<p><span style=\"font-family: Cambria Math;\">4</span><span style=\"font-family: Cambria Math;\">.(c)</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">भारत</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संविधान</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">330 </span><span style=\"font-family: Aparajita;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">\'</span><span style=\"font-family: Aparajita;\">जनता</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">सदन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अनुसूचित</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">जातियों</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">और</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अनुसूचित</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">जनजातियों</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">लिए</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">सीटों</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">आरक्षण</span><span style=\"font-family: Cambria Math;\">\' </span><span style=\"font-family: Aparajita;\">की</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अवधारणा</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">पर</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">प्रकाश</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">डाला</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">गया</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">है।</span></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "5",
+                    section: "8",
+                    question_en: "<p><span style=\"font-family: Cambria Math;\">5</span><span style=\"font-family: Cambria Math;\">. </span><span style=\"font-family: Cambria Math;\">Which of the following articles of the constitution of India provides for the creation of a GST Council?&nbsp;</span></p>",
+                    question_hi: "<p><span style=\"font-family: Cambria Math;\">5</span><span style=\"font-family: Cambria Math;\">.</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">भारत</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संविधान</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">निम्नलिखित</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अनुच्छेदों</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">से</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">किस</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">GST </span><span style=\"font-family: Aparajita;\">परिषद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">गठन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">का</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">प्रावधान</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">है</span><span style=\"font-family: Cambria Math;\">?&nbsp;</span></p>",
+                    options_en: ["<p>Article <span style=\"font-family: Cambria Math;\">246</span><span style=\"font-family: Cambria Math;\">A </span></p>", "<p>Article <span style=\"font-family: Cambria Math;\">279</span><span style=\"font-family: Cambria Math;\">A</span></p>", 
+                                "<p>Article <span style=\"font-family: Cambria Math;\">269</span><span style=\"font-family: Cambria Math;\">A </span></p>", "<p>Article <span style=\"font-family: Cambria Math;\">323</span><span style=\"font-family: Cambria Math;\">A</span></p>"],
+                    options_hi: ["<p><span style=\"font-family: Aparajita;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">246</span><span style=\"font-family: Cambria Math;\">A</span></p>", "<p><span style=\"font-family: Aparajita;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">279</span><span style=\"font-family: Cambria Math;\">A</span></p>",
+                                "<p><span style=\"font-family: Aparajita;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">269</span><span style=\"font-family: Cambria Math;\">A</span></p>", "<p><span style=\"font-family: Aparajita;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">323</span><span style=\"font-family: Cambria Math;\">A</span></p>"],
+                    solution_en: "<p><span style=\"font-family: Cambria Math;\">5</span><span style=\"font-family: Cambria Math;\">.(b)</span><strong><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">Article </span><span style=\"font-family: Cambria Math;\">279</span><span style=\"font-family: Cambria Math;\">A</span></strong><span style=\"font-family: Cambria Math;\"> of the Constitution of India provides for the creation of a GST Council. It empowers the president to constitute a joint forum of the central and states namely, Goods and Services Tax Council. The </span><strong><span style=\"font-family: Cambria Math;\">GST Council</span></strong><span style=\"font-family: Cambria Math;\"><strong> </strong>is a constitutional body for making recommendations to the union and state government on issues related to Goods and Service Tax.</span></p>",
+                    solution_hi: "<p><span style=\"font-family: Cambria Math;\">5</span><span style=\"font-family: Cambria Math;\">.(b)</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">भारत</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संविधान</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><strong><span style=\"font-family: Palanquin;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">279</span><span style=\"font-family: Cambria Math;\">A</span></strong><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">GST </span><span style=\"font-family: Aparajita;\">परिषद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">निर्माण</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">का</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">प्रावधान</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">है।</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">यह</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">राष्ट्रपति</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">को</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">केंद्र</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">और</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">राज्यों</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संयुक्त</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">मंच</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अर्थात्</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">माल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">और</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">सेवा</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">कर</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">परिषद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">का</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">गठन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">करने</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">का</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अधिकार</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">देता</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">है।</span><span style=\"font-family: Cambria Math;\"> </span><strong><span style=\"font-family: Cambria Math;\">GST </span><span style=\"font-family: Aparajita;\">परिषद</span></strong><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">वस्तु</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">और</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">सेवा</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">कर</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">से</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संबंधित</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">मुद्दों</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">पर</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">केंद्र</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">और</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">राज्य</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">सरकार</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">को</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">सिफारिशें</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">करने</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">लिए</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">एक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संवैधानिक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">निकाय</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">है।</span></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "6",
+                    section: "8",
+                    question_en: "<p><span style=\"font-family: Cambria Math;\">6</span><span style=\"font-family: Cambria Math;\">.</span><span style=\"font-family: Cambria Math;\"> Article </span><span style=\"font-family: Cambria Math;\">21</span><span style=\"font-family: Cambria Math;\">A of the Constitution of India provides Right to ______.&nbsp;</span></p>",
+                    question_hi: "<p><span style=\"font-family: Cambria Math;\">6</span><span style=\"font-family: Cambria Math;\">.</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">भारत</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संविधान</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">का</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">21</span><span style=\"font-family: Cambria Math;\">A ______ </span><span style=\"font-family: Aparajita;\">का</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अधिकार</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">प्रदान</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">करता</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">है।</span><span style=\"font-family: Cambria Math;\">&nbsp;</span></p>",
+                    options_en: ["<p>Education</p>", "<p>Privacy</p>", 
+                                "<p>Equality</p>", "<p>Work</p>"],
+                    options_hi: ["<p><span style=\"font-family: Aparajita;\">शिक्षा</span><span style=\"font-family: Cambria Math;\"> </span></p>", "<p><span style=\"font-family: Aparajita;\">गोपनीयता</span></p>",
+                                "<p><span style=\"font-family: Aparajita;\">समानता</span></p>", "<p><span style=\"font-family: Aparajita;\">कार्य</span></p>"],
+                    solution_en: "<p><span style=\"font-family: Cambria Math;\">6</span><span style=\"font-family: Cambria Math;\">.(a)</span><span style=\"font-family: Cambria Math;\"> Under </span><strong><span style=\"font-family: Cambria Math;\">Article </span><span style=\"font-family: Cambria Math;\">21</span><span style=\"font-family: Cambria Math;\">-A</span></strong><span style=\"font-family: Cambria Math;\">, a provision of free and compulsory education is provided to all children in the age group of six to fourteen years as a Fundamental Right. </span></p>",
+                    solution_hi: "<p><span style=\"font-family: Cambria Math;\">6</span><span style=\"font-family: Cambria Math;\">.(a) </span><strong><span style=\"font-family: Aparajita;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">21</span><span style=\"font-family: Cambria Math;\">-A</span><span style=\"font-family: Cambria Math;\"> </span></strong><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">तहत</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Aparajita;\">मौलिक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अधिकार</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">रूप</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">छह</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">से</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">चौदह</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">वर्ष</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">की</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">आयु</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">सभी</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">बच्चों</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">को</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">नि</span><span style=\"font-family: Cambria Math;\">:</span><span style=\"font-family: Aparajita;\">शुल्क</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">और</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अनिवार्य</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">शिक्षा</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">का</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">प्रावधान</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">है।</span></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "7",
+                    section: "8",
+                    question_en: "<p><span style=\"font-family: Cambria Math;\">7</span><span style=\"font-family: Cambria Math;\">.</span><span style=\"font-family: Cambria Math;\"> Which of the following Articles of the Constitution of India adopted Hindi in Devanagari script as the official language of the Union?&nbsp;</span></p>",
+                    question_hi: "<p><span style=\"font-family: Cambria Math;\">7</span><span style=\"font-family: Cambria Math;\">.</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">भारत</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संविधान</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">निम्नलिखित</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">से</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">किस</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">ने</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">देवनागरी</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">लिपि</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">हिंदी</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">को</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संघ</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">की</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">आधिकारिक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">भाषा</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">रूप</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अपनाया</span><span style=\"font-family: Cambria Math;\">?&nbsp;</span></p>",
+                    options_en: ["<p><span style=\"font-weight: 400;\">Article 343 (1)</span></p>", "<p>Article <span style=\"font-family: Cambria Math;\">231 </span></p>", 
+                                "<p>Article <span style=\"font-family: Cambria Math;\">108 </span></p>", "<p>Article <span style=\"font-family: Cambria Math;\">123 </span></p>"],
+                    options_hi: ["<p><span style=\"font-family: Aparajita;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">343 </span><span style=\"font-family: Cambria Math;\">(</span><span style=\"font-family: Cambria Math;\">1</span><span style=\"font-family: Cambria Math;\">) </span></p>", "<p><span style=\"font-family: Aparajita;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">231</span></p>",
+                                "<p><span style=\"font-family: Aparajita;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">108</span><span style=\"font-family: Cambria Math;\"> </span></p>", "<p><span style=\"font-family: Aparajita;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">123</span></p>"],
+                    solution_en: "<p><span style=\"font-family: Cambria Math;\">7</span><span style=\"font-family: Cambria Math;\">.(a)</span><strong><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">Article </span><span style=\"font-family: Cambria Math;\">343 </span><span style=\"font-family: Cambria Math;\">(</span><span style=\"font-family: Cambria Math;\">1</span><span style=\"font-family: Cambria Math;\">)</span></strong><span style=\"font-family: Cambria Math;\"><strong> </strong>of the Constitution of India adopted Hindi in Devanagari script as the official language of the Union.</span></p>",
+                    solution_hi: "<p><span style=\"font-family: Cambria Math;\">7</span><span style=\"font-family: Cambria Math;\">.(a) </span><span style=\"font-family: Aparajita;\">भारत</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संविधान</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><strong><span style=\"font-family: Palanquin;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">343 </span><span style=\"font-family: Cambria Math;\">(</span><span style=\"font-family: Cambria Math;\">1</span><span style=\"font-family: Cambria Math;\">) </span></strong><span style=\"font-family: Aparajita;\">ने</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">देवनागरी</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">लिपि</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">हिंदी</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">को</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संघ</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">की</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">आधिकारिक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">भाषा</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">रूप</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अपनाया।</span></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "8",
+                    section: "8",
+                    question_en: "<p><span style=\"font-family: Cambria Math;\">8</span><span style=\"font-family: Cambria Math;\">.</span><span style=\"font-family: Cambria Math;\"> Which Article of the Constitution of India deals with the \'Pardoning Power of the Governor\'?&nbsp;</span></p>",
+                    question_hi: "<p><span style=\"font-family: Cambria Math;\">8</span><span style=\"font-family: Cambria Math;\">.</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">भारत</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संविधान</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">का</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">कौन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">सा</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">\'</span><span style=\"font-family: Aparajita;\">राज्यपाल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">की</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">क्षमादान</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">शक्ति</span><span style=\"font-family: Cambria Math;\">\' </span><span style=\"font-family: Aparajita;\">से</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संबंधित</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">है</span><span style=\"font-family: Cambria Math;\">?&nbsp;</span></p>",
+                    options_en: ["<p>Article <span style=\"font-family: Cambria Math;\">150 </span></p>", "<p>Article <span style=\"font-family: Cambria Math;\">173 </span></p>", 
+                                "<p>Article <span style=\"font-family: Cambria Math;\">189 </span></p>", "<p>Article <span style=\"font-family: Cambria Math;\">161 </span></p>"],
+                    options_hi: ["<p><span style=\"font-family: Aparajita;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">150</span></p>", "<p><span style=\"font-family: Aparajita;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">173</span></p>",
+                                "<p><span style=\"font-family: Aparajita;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">189</span></p>", "<p><span style=\"font-family: Aparajita;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">161</span></p>"],
+                    solution_en: "<p><span style=\"font-family: Cambria Math;\">8</span><span style=\"font-family: Cambria Math;\">.(d)</span><span style=\"font-family: Cambria Math;\"> </span><strong><span style=\"font-family: Cambria Math;\">Article </span><span style=\"font-family: Cambria Math;\">161</span><span style=\"font-family: Cambria Math;\"> </span></strong><span style=\"font-family: Cambria Math;\">grants the governor, the power to grant pardons, reprieves, respites or remissions of punishment or to suspend, remit or commute the sentence. The governor can do so for any person convicted of any offence against any law relating to a matter to which the executive power of the state extends.</span></p>",
+                    solution_hi: "<p><span style=\"font-family: Cambria Math;\">8</span><span style=\"font-family: Cambria Math;\">.(d)</span><span style=\"font-family: Cambria Math;\"> </span><strong><span style=\"font-family: Aparajita;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">161</span><span style=\"font-family: Cambria Math;\"> </span></strong><span style=\"font-family: Aparajita;\">राज्यपाल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">को</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">क्षमादान</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">देने</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Aparajita;\">राहत</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">देने</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Aparajita;\">राहत</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">देने</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">या</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">सजा</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">छूट</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">देने</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">या</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">सजा</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">को</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">निलंबित</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">करने</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Aparajita;\">हटाने</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">या</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">कम</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">करने</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">की</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">शक्ति</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">प्रदान</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">करता</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">है।</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">राज्यपाल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">किसी</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">भी</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">ऐसे</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">मामले</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">से</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संबंधित</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">किसी</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">भी</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">कानून</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">खिलाफ</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">किसी</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अपराध</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">लिए</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">दोषी</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">ठहराए</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">गए</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">किसी</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">भी</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">व्यक्ति</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">लिए</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">ऐसा</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">कर</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">सकता</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">है</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Aparajita;\">जिस</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">पर</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">राज्य</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">की</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">कार्यकारी</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">शक्ति</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">का</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">विस्तार</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">होता</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">है।</span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "9",
+                    section: "8",
+                    question_en: "<p><span style=\"font-family: Cambria Math;\">9</span><span style=\"font-family: Cambria Math;\">.</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">According to which of the following Articles of the Constitution of India shall a Money Bill NOT be introduced in the Council of States?&nbsp;</span></p>",
+                    question_hi: "<p><span style=\"font-family: Cambria Math;\">9</span><span style=\"font-family: Cambria Math;\">. </span><span style=\"font-family: Aparajita;\">भारत</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संविधान</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">निम्नलिखित</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">से</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">किस</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अनुसार</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">धन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">विधेयक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">को</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">राज्यों</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">की</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">परिषद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">पेश</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">नहीं</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">किया</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">जाएगा</span><span style=\"font-family: Cambria Math;\">?</span></p>",
+                    options_en: ["<p>Article <span style=\"font-family: Cambria Math;\">109</span></p>", "<p>Article <span style=\"font-family: Cambria Math;\">354 </span></p>", 
+                                "<p>Article <span style=\"font-family: Cambria Math;\">298 </span></p>", "<p>Article <span style=\"font-family: Cambria Math;\">193 </span></p>"],
+                    options_hi: ["<p><span style=\"font-family: Aparajita;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">109</span></p>", "<p><span style=\"font-family: Aparajita;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">354</span></p>",
+                                "<p><span style=\"font-family: Aparajita;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">298</span></p>", "<p><span style=\"font-family: Aparajita;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">193</span></p>"],
+                    solution_en: "<p><span style=\"font-family: Cambria Math;\">9</span><span style=\"font-family: Cambria Math;\">.(a)</span><span style=\"font-family: Cambria Math;\"> </span><strong><span style=\"font-family: Cambria Math;\">Article </span><span style=\"font-family: Cambria Math;\">109</span><span style=\"font-family: Cambria Math;\"> </span></strong><span style=\"font-family: Cambria Math;\">of the Constitution of India states that a Money Bill can NOT be introduced in the Council of States.</span></p>",
+                    solution_hi: "<p><span style=\"font-family: Cambria Math;\">9</span><span style=\"font-family: Cambria Math;\">.(a)</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">भारत</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संविधान</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><strong><span style=\"font-family: Palanquin;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span></strong><span style=\"font-family: Cambria Math;\"><strong>109</strong> </span><span style=\"font-family: Aparajita;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">कहा</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">गया</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">है</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">कि</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">धन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">विधेयक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">को</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">राज्यों</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">की</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">परिषद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">पेश</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">नहीं</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">किया</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">जा</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">सकता</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">है।</span></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "10",
+                    section: "8",
+                    question_en: "<p><span style=\"font-family: Cambria Math;\">10</span><span style=\"font-family: Cambria Math;\">. </span><span style=\"font-family: Cambria Math;\">As per Article ______ of the Constitution of India, English is the official language for all the high courts in the country.&nbsp;</span></p>",
+                    question_hi: "<p><span style=\"font-family: Cambria Math;\">10</span><span style=\"font-family: Cambria Math;\">. </span><span style=\"font-family: Aparajita;\">भारत</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संविधान</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">______ </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अनुसार</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Aparajita;\">अंग्रेजी</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">देश</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">सभी</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">उच्च</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">न्यायालयों</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">की</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">आधिकारिक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">भाषा</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">है।</span><span style=\"font-family: Cambria Math;\">&nbsp;</span></p>",
+                    options_en: ["<p><span style=\"font-family: Cambria Math;\">329 </span><span style=\"font-family: Cambria Math;\">(</span><span style=\"font-family: Cambria Math;\">1</span><span style=\"font-family: Cambria Math;\">) </span></p>", "<p><span style=\"font-family: Cambria Math;\">336 </span><span style=\"font-family: Cambria Math;\">(</span><span style=\"font-family: Cambria Math;\">1</span><span style=\"font-family: Cambria Math;\">) </span></p>", 
+                                "<p><span style=\"font-family: Cambria Math;\">315 </span><span style=\"font-family: Cambria Math;\">(</span><span style=\"font-family: Cambria Math;\">1</span><span style=\"font-family: Cambria Math;\">)</span></p>", "<p><span style=\"font-family: Cambria Math;\">348 </span><span style=\"font-family: Cambria Math;\">(</span><span style=\"font-family: Cambria Math;\">1</span><span style=\"font-family: Cambria Math;\">) </span></p>"],
+                    options_hi: ["<p><span style=\"font-weight: 400;\">329 (1) </span></p>", "<p><span style=\"font-weight: 400;\">336 (1) </span></p>",
+                                "<p><span style=\"font-weight: 400;\">315 (1)</span></p>", "<p><span style=\"font-weight: 400;\">348 (1)</span></p>"],
+                    solution_en: "<p><span style=\"font-family: Cambria Math;\">10.(d) As per<strong> </strong><strong>Article 348 (1)</strong> of the Constitution of India, English is the official language for all the high courts in the country.</span></p>",
+                    solution_hi: "<p><span style=\"font-family: Cambria Math;\">10</span><span style=\"font-family: Cambria Math;\">.(d)</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">भारत</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संविधान</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><strong><span style=\"font-family: Palanquin;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">348</span><span style=\"font-family: Cambria Math;\">(</span><span style=\"font-family: Cambria Math;\">1</span><span style=\"font-family: Cambria Math;\">)</span></strong><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अनुसार</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Aparajita;\">अंग्रेजी</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">देश</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">सभी</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">उच्च</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">न्यायालयों</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">की</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">आधिकारिक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">भाषा</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">है।</span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "11",
+                    section: "8",
+                    question_en: "<p><span style=\"font-family: Cambria Math;\">11</span><span style=\"font-family: Cambria Math;\">. </span><span style=\"font-family: Cambria Math;\">Which of the following Articles of the Constitution of India defines for a separate secretarial staff for each House of the Parliament?&nbsp;</span></p>",
+                    question_hi: "<p><span style=\"font-family: Cambria Math;\">11</span><span style=\"font-family: Cambria Math;\">.</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">भारत</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संविधान</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">निम्नलिखित</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">से</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">कौन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">सा</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संसद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">प्रत्येक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">सदन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">लिए</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">एक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अलग</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">सचिवीय</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">स्टाफ</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">लिए</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">परिभाषित</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">करता</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">है</span><span style=\"font-family: Cambria Math;\">?&nbsp;</span></p>",
+                    options_en: ["<p>Article <span style=\"font-family: Cambria Math;\">98</span><span style=\"font-family: Cambria Math;\"> </span></p>", "<p>Article <span style=\"font-family: Cambria Math;\">123 </span></p>", 
+                                "<p>Article <span style=\"font-family: Cambria Math;\">155 </span></p>", "<p>Article <span style=\"font-family: Cambria Math;\">34 </span></p>"],
+                    options_hi: ["<p><span style=\"font-family: Aparajita;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">98</span></p>", "<p><span style=\"font-family: Aparajita;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">123</span></p>",
+                                "<p><span style=\"font-family: Aparajita;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">155</span></p>", "<p><span style=\"font-family: Aparajita;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">34</span></p>"],
+                    solution_en: "<p><span style=\"font-family: Cambria Math;\">11</span><span style=\"font-family: Cambria Math;\">.(a)</span><span style=\"font-family: Cambria Math;\"> </span><strong><span style=\"font-family: Cambria Math;\">Article </span><span style=\"font-family: Cambria Math;\">98</span><span style=\"font-family: Cambria Math;\"> </span></strong><span style=\"font-family: Cambria Math;\">of the Constitution of India defines a separate secretarial staff for each House of the Parliament.</span></p>",
+                    solution_hi: "<p><span style=\"font-family: Cambria Math;\">11</span><span style=\"font-family: Cambria Math;\">.(a)</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">भारत</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संविधान</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><strong><span style=\"font-family: Palanquin;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">98</span><span style=\"font-family: Cambria Math;\"> </span></strong><span style=\"font-family: Aparajita;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संसद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">प्रत्येक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">सदन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">लिए</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">एक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अलग</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">सचिवीय</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">स्टाफ</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">को</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">परिभाषित</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">किया</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">गया</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">है।</span></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "12",
+                    section: "8",
+                    question_en: "<p><span style=\"font-family: Cambria Math;\">12</span><span style=\"font-family: Cambria Math;\">. </span><span style=\"font-family: Cambria Math;\">Which Schedule of the Indian Constitution demarcates the powers of the Union and the States, that is Union List, State List and Concurrent List?&nbsp;</span></p>",
+                    question_hi: "<p><span style=\"font-family: Cambria Math;\">12</span><span style=\"font-family: Cambria Math;\">.</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">भारतीय</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संविधान</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">की</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">कौन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">सी</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अनुसूची</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संघ</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">और</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">राज्यों</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">की</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">शक्तियों</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">का</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">सीमांकन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">करती</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">है</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Aparajita;\">अर्थात</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संघ</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">सूची</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Aparajita;\">राज्य</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">सूची</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">और</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">समवर्ती</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">सूची</span><span style=\"font-family: Cambria Math;\">?&nbsp;</span></p>",
+                    options_en: ["<p>Fourth Schedule</p>", "<p>First Schedule</p>", 
+                                "<p>Seventh Schedule</p>", "<p>Third Schedule</p>"],
+                    options_hi: ["<p><span style=\"font-family: Aparajita;\">&nbsp;चौथी</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अनुसूची</span></p>", "<p><span style=\"font-family: Aparajita;\">पहली</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अनुसूची</span></p>",
+                                "<p><span style=\"font-family: Aparajita;\">सातवीं</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अनुसूची</span></p>", "<p><span style=\"font-family: Aparajita;\">तीसरी</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अनुसूची</span></p>"],
+                    solution_en: "<p><span style=\"font-family: Cambria Math;\">12</span><span style=\"font-family: Cambria Math;\">.(c) <strong>Seventh Schedule</strong></span><span style=\"font-family: Cambria Math;\"><strong> </strong>of the Indian Constitution demarcates the powers of the Union and the States i.e. Union List, State List and Concurrent List. Centre and state both have the right to make a law on topics described in the concurrent list.</span></p>",
+                    solution_hi: "<p><span style=\"font-family: Cambria Math;\">12</span><span style=\"font-family: Cambria Math;\">.(c)</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">भारतीय</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संविधान</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">की</span><span style=\"font-family: Cambria Math;\"> </span><strong><span style=\"font-family: Palanquin;\">सातवीं</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">अनुसूची</span><span style=\"font-family: Cambria Math;\"> </span></strong><span style=\"font-family: Palanquin;\">संघ</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">और</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">राज्यों</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">की</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">शक्तियों</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">यानी</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">संघ</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">सूची</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Palanquin;\">राज्य</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">सूची</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">और</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">समवर्ती</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">सूची</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">का</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">सीमांकन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">करती</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">है।</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">समवर्ती</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">सूची</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">वर्णित</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">विषयों</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">पर</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">केंद्र</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">और</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">राज्य</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">दोनों</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">को</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">कानून</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">बनाने</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">का</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">अधिकार</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">है।</span></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "13",
+                    section: "8",
+                    question_en: "<p><span style=\"font-family: Cambria Math;\">13</span><span style=\"font-family: Cambria Math;\">.</span><span style=\"font-family: Cambria Math;\"> According to which of the following Articles of the Constitution of India shall a Money Bill not be introduced in a Legislative Council?</span></p>",
+                    question_hi: "<p><span style=\"font-family: Cambria Math;\">13</span><span style=\"font-family: Cambria Math;\">.</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">भारत</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संविधान</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">निम्नलिखित</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">से</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">किस</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अनुसार</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">धन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">विधेयक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">को</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">विधान</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">परिषद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">पेश</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">नहीं</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">किया</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">जाना</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">चाहिए</span><span style=\"font-family: Cambria Math;\">?&nbsp;</span></p>",
+                    options_en: ["<p>Article <span style=\"font-family: Cambria Math;\">333 </span></p>", "<p>Article <span style=\"font-family: Cambria Math;\">198 </span></p>", 
+                                "<p>Article <span style=\"font-family: Cambria Math;\">451 </span></p>", "<p>Article <span style=\"font-family: Cambria Math;\">189 </span></p>"],
+                    options_hi: ["<p><span style=\"font-family: Aparajita;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">333</span></p>", "<p><span style=\"font-family: Aparajita;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">198</span></p>",
+                                "<p><span style=\"font-family: Aparajita;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">451</span></p>", "<p><span style=\"font-family: Aparajita;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">189</span></p>"],
+                    solution_en: "<p><span style=\"font-family: Cambria Math;\">13</span><span style=\"font-family: Cambria Math;\">.(b) </span><span style=\"font-family: Cambria Math;\">According to </span><strong><span style=\"font-family: Cambria Math;\">Article </span><span style=\"font-family: Cambria Math;\">198</span></strong><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">of the Constitution of India, a Money Bill shall not be introduced in a Legislative Council.</span></p>",
+                    solution_hi: "<p><span style=\"font-family: Cambria Math;\">13</span><span style=\"font-family: Cambria Math;\">.(b) </span><span style=\"font-family: Aparajita;\">भारत</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संविधान</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><strong><span style=\"font-family: Palanquin;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">198</span><span style=\"font-family: Cambria Math;\"> </span></strong><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अनुसार</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Aparajita;\">एक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">विधान</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">परिषद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">एक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">धनविधेयक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">पेश</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">नहीं</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">किया</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">जाएगा।</span></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "14",
+                    section: "8",
+                    question_en: "<p><span style=\"font-family: Cambria Math;\">14</span><span style=\"font-family: Cambria Math;\">. </span><span style=\"font-family: Cambria Math;\">According to which of the following Articles of the Constitution of India can the Parliament amend the Constitution?</span></p>",
+                    question_hi: "<p><span style=\"font-family: Cambria Math;\">14</span><span style=\"font-family: Cambria Math;\">. </span><span style=\"font-family: Aparajita;\">भारत</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संविधान</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">निम्नलिखित</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">से</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">किस</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अनुसार</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संसद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संविधान</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संशोधन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">कर</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">सकती</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">है</span><span style=\"font-family: Cambria Math;\">?</span></p>",
+                    options_en: [" <p> Article </span><span style=\"font-family:Cambria Math\">368 </span></p>", "<p>Article <span style=\"font-family: Cambria Math;\">103 </span></p>", 
+                                "<p>Article <span style=\"font-family: Cambria Math;\">129 </span></p>", "<p>Article <span style=\"font-family: Cambria Math;\">234 </span></p>"],
+                    options_hi: ["<p><span style=\"font-family: Aparajita;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">368</span></p>", "<p><span style=\"font-family: Aparajita;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">103</span></p>",
+                                "<p><span style=\"font-family: Aparajita;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">129</span></p>", "<p><span style=\"font-family: Aparajita;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">234</span></p>"],
+                    solution_en: "<p><span style=\"font-family: Cambria Math;\">14</span><span style=\"font-family: Cambria Math;\">.(a)</span><span style=\"font-family: Cambria Math;\"> According to</span><strong><span style=\"font-family: Cambria Math;\"> Article </span><span style=\"font-family: Cambria Math;\">368</span></strong><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">of the Constitution of India can the Parliament amend the Constitution. </span></p>",
+                    solution_hi: "<p><span style=\"font-family: Cambria Math;\">14</span><span style=\"font-family: Cambria Math;\">.(a) </span><span style=\"font-family: Aparajita;\">भारत</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संविधान</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><strong><span style=\"font-family: Aparajita;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">368 </span></strong><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अनुसार</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संसद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संविधान</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संशोधन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">कर</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">सकती</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">है।</span></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "15",
+                    section: "8",
+                    question_en: "<p><span style=\"font-family: Cambria Math;\">15</span><span style=\"font-family: Cambria Math;\">.</span><span style=\"font-family: Cambria Math;\"> Which of the following Articles of the Constitution of India states that there would be no tax levied or collected EXCEPT by the authority of law?&nbsp;</span></p>",
+                    question_hi: "<p><span style=\"font-family: Cambria Math;\">15</span><span style=\"font-family: Cambria Math;\">. </span><span style=\"font-family: Aparajita;\">भारत</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संविधान</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">निम्नलिखित</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">से</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">कौन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">सा</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">कहता</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">है</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">कि</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">कानून</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अधिकार</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अलावा</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">कोई</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">कर</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">नहीं</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">लगाया</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">जाएगा</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">या</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">एकत्र</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">नहीं</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">किया</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">जाएगा</span><span style=\"font-family: Cambria Math;\">?&nbsp;</span></p>",
+                    options_en: ["<p>Article <span style=\"font-family: Cambria Math;\">107 </span></p>", "<p>Article <span style=\"font-family: Cambria Math;\">123 </span></p>", 
+                                "<p>Article <span style=\"font-family: Cambria Math;\">265 </span></p>", "<p>Article <span style=\"font-family: Cambria Math;\">301 </span></p>\n<p><span style=\"font-family: Cambria Math;\"> </span></p>"],
+                    options_hi: ["<p><span style=\"font-family: Aparajita;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">107</span></p>", "<p><span style=\"font-family: Aparajita;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">123</span></p>",
+                                "<p><span style=\"font-family: Aparajita;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">265</span></p>", "<p><span style=\"font-family: Aparajita;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">301</span></p>"],
+                    solution_en: "<p><span style=\"font-family: Cambria Math;\">15</span><span style=\"font-family: Cambria Math;\">.(c)</span><strong><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">Article </span><span style=\"font-family: Cambria Math;\">265</span><span style=\"font-family: Cambria Math;\"> </span></strong><span style=\"font-family: Cambria Math;\">of the Constitution of India states that there would be no tax levied or collected EXCEPT by the authority of law. Therefore, no tax can be levied or collected in India, unless it is explicitly and clearly authorized by way of legislation. </span></p>",
+                    solution_hi: "<p><span style=\"font-family: Cambria Math;\">15</span><span style=\"font-family: Cambria Math;\">.(c)</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">भारत</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संविधान</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><strong><span style=\"font-family: Palanquin;\">अनुच्छेद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">265</span><span style=\"font-family: Cambria Math;\"> </span></strong><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अनुसार</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">कानून</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अधिकार</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अलावा</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">कोई</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">कर</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">नहीं</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">लगाया</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">जाएगा</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">या</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">एकत्र</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">नहीं</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">किया</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">जाएगा।</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">इसलिए</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Aparajita;\">भारत</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">कोई</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">भी</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">कर</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">तब</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">तक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">नहीं</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">लगाया</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">या</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">एकत्र</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">किया</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">जा</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">सकता</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">है</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Aparajita;\">जब</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">तक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">कि</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">यह</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">स्पष्ट</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">रूप</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">से</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">कानून</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">माध्यम</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">से</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अधिकृत</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">न</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">हो।</span></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "16",
+                    section: "8",
+                    question_en: "<p><span style=\"font-family: Cambria Math;\">16</span><span style=\"font-family: Cambria Math;\">. </span><span style=\"font-family: Cambria Math;\">Which of the following Amendment Acts of the Constitution of India conferred statehood to Goa and formed a new union territory comprising Daman and Diu?&nbsp;</span></p>",
+                    question_hi: "<p><span style=\"font-family: Cambria Math;\">16</span><span style=\"font-family: Cambria Math;\">. </span><span style=\"font-family: Aparajita;\">भारत</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संविधान</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">निम्नलिखित</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">से</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">किस</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संशोधन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अधिनियम</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">ने</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">गोवा</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">को</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">राज्य</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">का</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">दर्जा</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">प्रदान</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">किया</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">और</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">दमन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">और</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">दीव</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">को</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">मिलाकर</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">एक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">नया</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">केंद्र</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">शासित</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">प्रदेश</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">बनाया</span><span style=\"font-family: Cambria Math;\">?&nbsp;</span></p>",
+                    options_en: ["<p><span style=\"font-family: Cambria Math;\">23</span><span style=\"font-family: Cambria Math;\">rd Amendment Act </span></p>", "<p><span style=\"font-family: Cambria Math;\">56</span><span style=\"font-family: Cambria Math;\">th Amendment Act </span></p>", 
+                                "<p><span style=\"font-family: Cambria Math;\">67</span><span style=\"font-family: Cambria Math;\">th Amendment Act </span></p>", "<p><span style=\"font-family: Cambria Math;\">45</span><span style=\"font-family: Cambria Math;\">th Amendment Act </span></p>"],
+                    options_hi: ["<p><span style=\"font-family: Cambria Math;\">23 </span><span style=\"font-family: Aparajita;\">वां</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संशोधन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अधिनियम</span></p>", "<p><span style=\"font-family: Cambria Math;\">56 </span><span style=\"font-family: Aparajita;\">वां</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संशोधन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अधिनियम</span></p>",
+                                "<p><span style=\"font-family: Cambria Math;\">67 </span><span style=\"font-family: Aparajita;\">वां</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संशोधन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अधिनियम</span></p>", "<p><span style=\"font-family: Cambria Math;\">45</span><span style=\"font-family: Aparajita;\">वां</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संशोधन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अधिनियम</span></p>"],
+                    solution_en: "<p><span style=\"font-family: Cambria Math;\">16</span><span style=\"font-family: Cambria Math;\">.(b)</span><strong><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">56</span><span style=\"font-family: Cambria Math;\">th Amendment Act</span></strong><span style=\"font-family: Cambria Math;\"><strong> </strong>of the Constitution of India conferred statehood to Goa and formed a new union territory comprising Daman and Diu. Initially, Goa was a Portuguese colony, which the Indian government annexed on </span><span style=\"font-family: Cambria Math;\">19 </span><span style=\"font-family: Cambria Math;\">Dec </span><span style=\"font-family: Cambria Math;\">1961</span><span style=\"font-family: Cambria Math;\">. Later on, in </span><span style=\"font-family: Cambria Math;\">1987</span><span style=\"font-family: Cambria Math;\">, it was given the title of state by the </span><span style=\"font-family: Cambria Math;\">56 </span><span style=\"font-family: Cambria Math;\">Amendment Act of the Indian Constitution.</span></p>",
+                    solution_hi: "<p><span style=\"font-family: Cambria Math;\">16</span><span style=\"font-family: Cambria Math;\">.(b) </span><span style=\"font-family: Aparajita;\">भारत</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संविधान</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><strong><span style=\"font-family: Cambria Math;\">56 </span><span style=\"font-family: Palanquin;\">वें</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">संशोधन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">अधिनियम</span><span style=\"font-family: Cambria Math;\"> </span></strong><span style=\"font-family: Palanquin;\">ने</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">गोवा</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">को</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">राज्य</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">का</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">दर्जा</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">प्रदान</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">किया</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">और</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">दमन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">और</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">दीव</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">को</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">मिलाकर</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">एक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">नया</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">केंद्र</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">शासित</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">प्रदेश</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">बनाया।</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">प्रारंभ</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">में</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Palanquin;\">गोवा</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">एक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">पुर्तगाली</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">उपनिवेश</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">था</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Palanquin;\">जिसे</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">भारत</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">सरकार</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">ने</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">19 </span><span style=\"font-family: Palanquin;\">दिसंबर</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">1961 </span><span style=\"font-family: Aparajita;\">को</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संलग्न</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">किया</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">था।</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">बाद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">1987 </span><span style=\"font-family: Aparajita;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">इसे</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">भारतीय</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संविधान</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">56</span><span style=\"font-family: Aparajita;\">वें</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संशोधन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अधिनियम</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">द्वारा</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">राज्य</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">की</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">उपाधि</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">दी</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">गई।</span></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "17",
+                    section: "misc",
+                    question_en: "<p><span style=\"font-family: Cambria Math;\">17</span><span style=\"font-family: Cambria Math;\">.</span><span style=\"font-family: Cambria Math;\"> Through which amendment was the Tenth Schedule added to the Constitution of India?</span></p>",
+                    question_hi: "<p><span style=\"font-family: Cambria Math;\">17</span><span style=\"font-family: Cambria Math;\">. </span><span style=\"font-family: Aparajita;\">भारत</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संविधान</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">दसवीं</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">अनुसूची</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">को</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">किस</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संशोधन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">माध्यम</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">से</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">जोड़ा</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">गया</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">था</span><span style=\"font-family: Cambria Math;\">?&nbsp;</span></p>",
+                    options_en: ["<p><span style=\"font-family: Cambria Math;\">52</span><span style=\"font-family: Cambria Math;\"> </span></p>", "<p><span style=\"font-family: Cambria Math;\">53 </span></p>", 
+                                "<p><span style=\"font-family: Cambria Math;\">42 </span></p>", "<p><span style=\"font-family: Cambria Math;\">43 </span></p>"],
+                    options_hi: ["<p><span style=\"font-family: Cambria Math;\">52</span><span style=\"font-family: Aparajita;\">वें</span></p>", "<p><span style=\"font-family: Cambria Math;\">53 </span><span style=\"font-family: Aparajita;\">वां</span></p>",
+                                "<p><span style=\"font-family: Cambria Math;\">42</span><span style=\"font-family: Aparajita;\">वें</span></p>", "<p><span style=\"font-family: Cambria Math;\">43 </span><span style=\"font-family: Aparajita;\">वां</span></p>"],
+                    solution_en: "<p><span style=\"font-family: Cambria Math;\">17</span><span style=\"font-family: Cambria Math;\">.(a) </span><span style=\"font-family: Cambria Math;\">The </span><strong><span style=\"font-family: Cambria Math;\">Tenth Schedule </span></strong><span style=\"font-family: Cambria Math;\">was added to the Constitution of India through the </span><strong><span style=\"font-family: Cambria Math;\">52</span><span style=\"font-family: Cambria Math;\">nd Amendment Act </span></strong><span style=\"font-family: Cambria Math;\">of </span><span style=\"font-family: Cambria Math;\">1985</span><span style=\"font-family: Cambria Math;\">. It is also called Anti-defection law and it provides for the disqualification of the members of Parliament and the state legislatures on the ground of defection of one political party to another.</span></p>",
+                    solution_hi: "<p><span style=\"font-family: Cambria Math;\">17</span><span style=\"font-family: Cambria Math;\">.(a) </span><strong><span style=\"font-family: Cambria Math;\">1985 </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">52</span><span style=\"font-family: Aparajita;\">वें</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संशोधन</span><span style=\"font-family: Cambria Math;\"> </span></strong><span style=\"font-family: Aparajita;\">अधिनियम</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">माध्यम</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">से</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">भारत</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">संविधान</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Aparajita;\">में</span><span style=\"font-family: Cambria Math;\"> </span><strong><span style=\"font-family: Palanquin;\">दसवीं</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">अनुसूची</span></strong><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">जोड़ी</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">गई</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">थी।</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">इसे</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">दल</span><span style=\"font-family: Cambria Math;\">-</span><span style=\"font-family: Palanquin;\">बदल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">विरोधी</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">कानून</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">भी</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">कहा</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">जाता</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">है</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">और</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">यह</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">एक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">राजनीतिक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">दल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">दूसरे</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">दल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">दलबदल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">आधार</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">पर</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">संसद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">और</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">राज्य</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">विधानसभाओं</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">सदस्यों</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">की</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">अयोग्यता</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">का</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">प्रावधान</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">करता</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Palanquin;\">है।</span></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+            
+            // Generate question boxes
+            const boxesContainer = document.getElementById('question-boxes');
+            questions.forEach((q, index) => {
+                const box = document.createElement('div');
+                box.className = 'q-box';
+                box.textContent = index + 1;
+                box.onclick = () => showQuestion(index);
+                box.id = `box-${index}`;
+                boxesContainer.appendChild(box);
+            });
+            
+            // Show first question
+            showQuestion(0);
+            updateProgress();
+        }
+        
+        // Show a specific question
+        
+        function formatContent(text) {
+            if (!text) return '';
+            return text.replace(/<img/g, '<img style="max-width:100%;height:auto;"');
+        }
+        
+        function showQuestion(index) {
+            if (index < 0 || index >= questions.length) return;
+            
+            currentQuestion = index;
+            const question = questions[index];
+            
+            // Update question counter
+            document.getElementById('question-counter').textContent = `Question ${index + 1} of ${questions.length}`;
+            
+            // Update question boxes
+            document.querySelectorAll('.q-box').forEach(box => box.classList.remove('current'));
+            document.getElementById(`box-${index}`).classList.add('current');
+            
+            // Generate question HTML
+            let html = `
+                <div class="question-card">
+                    <div class="question-text">
+                        <div class="en">${formatContent(question.question_en)}</div>
+                        <div class="hi" style="display:none">${formatContent(question.question_hi)} </div>
+                    </div>
+                    <div class="options" id="options-container">`;
+            
+            // Add options
+            ['a', 'b', 'c', 'd'].forEach((opt, i) => {
+                let optionClass = '';
+                let isCorrectAnswer = opt === question.correct;
+                let isUserAnswer = answers[question.id] === opt;
+                
+                // When reviewing, add appropriate classes
+                if (submitted) {
+                    if (isCorrectAnswer) {
+                        optionClass += ' correct-answer';
+                    } else if (isUserAnswer && !isCorrectAnswer) {
+                        optionClass += ' incorrect';
+                    }
+                }
+                
+                html += `
+                    <div class="option-item">
+                        <input class="option-input" type="radio" name="q${index}" 
+                            id="opt-${index}-${opt}" value="${opt}" 
+                            ${isUserAnswer ? 'checked' : ''}
+                            onclick="selectAnswer('${question.id}', '${opt}')">
+                       <label class="option-label${optionClass}" for="opt-${index}-${opt}">
+                            <div class="en">${question.options_en[i]}</div>
+                            <div class="hi" style="display:none">${question.options_hi[i]}</div>
+                        </label>
+                    </div>`;
+            });
+            
+            // Add solution if submitted
+            if (submitted) {
+                const isCorrect = answers[question.id] === question.correct;
+                const resultText = answers[question.id] ? (isCorrect ? 'Correct!' : 'Incorrect!') : 'Not attempted';
+                
+                html += `
+                    <div class="solution-container">
+                        <div class="solution-title">${resultText}</div>
+                        <div class="solution-text">
+                            <div class="en">${question.solution_en}</div>
+                            <div class="hi" style="display:none">${question.solution_hi}</div>
+                        </div>
+                    </div>`;
+            }
+            
+            html += `</div></div>`;
+            
+            document.getElementById('questions-container').innerHTML = html;
+            
+            // Apply language settings
+            applyLanguage();
+            
+            // If in mobile view, close the menu
+            if (window.innerWidth < 992) {
+                toggleNav(false);
+            }
+            
+            // Add review mode class if submitted
+            if (submitted) {
+                document.getElementById('options-container').classList.add('review-mode');
+            }
+        }
+        
+        // Apply current language
+        function applyLanguage() {
+            document.querySelectorAll(`.${currentLang}`).forEach(el => el.style.display = 'block');
+            document.querySelectorAll(`.${currentLang === 'en' ? 'hi' : 'en'}`).forEach(el => el.style.display = 'none');
+            
+            // Update language button text
+            document.getElementById('lang-text').textContent = currentLang === 'en' ? 'Hi' : 'En';
+        }
+        
+        // Select an answer
+        function selectAnswer(qId, option) {
+            if (submitted) return;
+            
+            answers[qId] = option;
+            updateProgress();
+            
+            // Mark question as attempted in the navigation
+            const index = questions.findIndex(q => q.id === qId);
+            if (index >= 0) {
+                const box = document.getElementById(`box-${index}`);
+                box.classList.add('attempted');
+                box.classList.remove('unattempted');
+            }
+        }
+        
+        // Navigate to previous/next question
+        function prevQuestion() { 
+            if (currentQuestion > 0) showQuestion(currentQuestion - 1); 
+        }
+        
+        function nextQuestion() { 
+            if (currentQuestion < questions.length - 1) showQuestion(currentQuestion + 1); 
+        }
+        
+        // Switch section
+        function switchSection(sectionId) {
+            if (sectionId === 'all') {
+                showQuestion(0);
+                return;
+            }
+            
+            const section = sections[sectionId];
+            if (section) showQuestion(section.start);
+        }
+        
+        // Toggle language
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'hi' : 'en';
+            applyLanguage();
+        }
+        
+        // Toggle navigation sidebar
+        function toggleNav(show) {
+            const nav = document.getElementById('question-nav');
+            const overlay = document.getElementById('nav-overlay');
+            
+            if (show === undefined) {
+                show = !nav.classList.contains('show');
+            }
+            
+            if (show) {
+                nav.classList.add('show');
+                overlay.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            } else {
+                nav.classList.remove('show');
+                overlay.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+        }
+        
+        // Update progress
+        function updateProgress() {
+            const attempted = Object.keys(answers).length;
+            document.getElementById('attempted-count').textContent = attempted;
+        }
+        
+        // Start timer
+        function startTimer() {
+            const timerDisplay = document.getElementById('timer-display');
+            let timeLeft = totalTime;
+            
+            const timerInterval = setInterval(() => {
+                if (timeLeft <= 0 || submitted) {
+                    clearInterval(timerInterval);
+                    if (!submitted) submitTest();
+                    return;
+                }
+                
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                timeLeft--;
+            }, 1000);
+        }
+        
+        // Confirm before submitting
+        function confirmSubmit() {
+            if (submitted) return;
+            
+            const attempted = Object.keys(answers).length;
+            const remaining = questions.length - attempted;
+            
+            // Create a more modern confirmation dialog
+            const confirmHtml = `
+                <div style="text-align: center; padding: 20px;">
+                    <h4 style="margin-bottom: 16px; color: var(--dark);">Confirm Submission</h4>
+                    <p style="margin-bottom: 24px; color: var(--gray);">
+                        You have attempted ${attempted} of ${questions.length} questions.<br>
+                        ${remaining} questions are unattempted.
+                    </p>
+                    <div style="display: flex; justify-content: center; gap: 12px;">
+                        <button onclick="this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; border: 1px solid var(--light-gray); background: white; border-radius: 8px; cursor: pointer;">
+                            Cancel
+                        </button>
+                        <button onclick="submitTest(); this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer;">
+                            Submit Test
+                        </button>
+                    </div>
+                </div>`;
+            
+            // Create modal element
+            const modal = document.createElement('div');
+            modal.className = 'results-modal show';
+            modal.innerHTML = `
+                <div class="results-card" style="max-width: 400px;">
+                    <button class="cancel-btn" style="position: absolute; top: 12px; right: 12px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--gray);" onclick="this.closest('.results-modal').remove()">
+                        ×
+                    </button>
+                    ${confirmHtml}
+                </div>`;
+            
+            document.body.appendChild(modal);
+        }
+        
+        // Submit test
+        function submitTest() {
+            if (submitted) return;
+            
+            submitted = true;
+            
+            let score = 0;
+            let correctCount = 0;
+            let incorrectCount = 0;
+            let unattemptedCount = 0;
+            
+            questions.forEach((q, index) => {
+                const userAns = answers[q.id];
+                const box = document.getElementById(`box-${index}`);
+                
+                box.classList.remove('attempted');
+                
+                if (!userAns) {
+                    unattemptedCount++;
+                    box.classList.add('unattempted');
+                } else if (userAns === q.correct) {
+                    correctCount++;
+                    score += q.pos_marks;
+                    box.classList.add('correct');
+                } else {
+                    incorrectCount++;
+                    score -= q.neg_marks;
+                    box.classList.add('incorrect');
+                }
+            });
+            
+            // Update result values
+            document.getElementById('score-value').textContent = score.toFixed(2);
+            document.getElementById('correct-value').textContent = correctCount;
+            document.getElementById('incorrect-value').textContent = incorrectCount;
+            document.getElementById('unattempted-value').textContent = unattemptedCount;
+            
+            // Show the results modal
+            document.getElementById('results-modal').classList.add('show');
+            
+            // Disable submit button
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-check"></i>';
+            submitBtn.style.backgroundColor = 'var(--success)';
+            
+            // Refresh current question view to show solution
+            showQuestion(currentQuestion);
+        }
+        
+        // Review test
+        function reviewTest() {
+            document.getElementById('results-modal').classList.remove('show');
+            showQuestion(0);
+        }
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target === document.getElementById('results-modal')) {
+                document.getElementById('results-modal').classList.remove('show');
+            }
+        });
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') prevQuestion();
+            if (e.key === 'ArrowRight') nextQuestion();
+        });
+    </script>
+</body>
+</html>
