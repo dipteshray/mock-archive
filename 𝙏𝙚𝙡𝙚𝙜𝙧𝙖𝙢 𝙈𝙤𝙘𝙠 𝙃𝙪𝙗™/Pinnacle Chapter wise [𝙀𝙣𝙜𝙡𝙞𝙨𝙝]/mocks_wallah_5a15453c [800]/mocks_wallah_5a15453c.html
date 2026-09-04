@@ -1,0 +1,1434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mocks Wallah</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --primary-light: #a29bfe;
+            --primary-dark: #5649c0;
+            --secondary: #00cec9;
+            --accent: #fd79a8;
+            --success: #00b894;
+            --warning: #fdcb6e;
+            --danger: #d63031;
+            --light: #f8f9fa;
+            --dark: #2d3436;
+            --gray: #636e72;
+            --light-gray: #dfe6e9;
+            --card-bg: #ffffff;
+            --body-bg: #f5f6fa;
+            --header-bg: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            --footer-bg: #ffffff;
+            --box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            --box-shadow-sm: 0 2px 10px rgba(0,0,0,0.05);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background-color: var(--body-bg);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            color: var(--dark);
+            line-height: 1.6;
+            padding-bottom: 80px; /* Space for fixed navigation */
+            overflow-x: hidden;
+        }
+        
+        /* Header Styles */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: var(--header-bg);
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            z-index: 1000;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .header-brand {
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .header-brand i {
+            margin-right: 8px;
+            font-size: 1.2rem;
+        }
+        
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .control-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .control-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .control-btn.active {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .timer-display {
+            background: rgba(0,0,0,0.2);
+            border-radius: 18px;
+            padding: 4px 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+        
+        .timer-display i {
+            margin-right: 6px;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-top: 60px;
+            padding: 16px;
+            min-height: calc(100vh - 140px);
+        }
+        
+        .question-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--box-shadow-sm);
+            border: none;
+            transition: var(--transition);
+        }
+        
+        .question-counter {
+            font-size: 0.9rem;
+            color: var(--gray);
+            text-align: center;
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+        
+        .question-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+        
+        .option-item {
+            margin-bottom: 12px;
+            position: relative;
+        }
+        
+        .option-input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+            .question-text {
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        hyphens: auto;
+        max-width: 100%;
+    }
+
+    .question-text img,
+    .option-label img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 8px 0;
+        border-radius: 8px;
+    }
+
+    .option-label {
+        overflow: hidden;
+    }
+
+    .question-card {
+        overflow: hidden;
+    }
+        
+        .option-label {
+            display: block;
+            padding: 14px 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--light-gray);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .option-label:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .option-input:checked + .option-label {
+            border-color: var(--primary);
+            background: rgba(108, 92, 231, 0.05);
+            box-shadow: 0 0 0 1px var(--primary);
+        }
+        
+        .option-input:checked + .option-label::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--primary);
+        }
+        
+        /* When reviewing answers */
+        .review-mode .option-input:checked + .option-label.correct {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.correct::after {
+            background: var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.incorrect {
+            border-color: var(--danger);
+            background: rgba(214, 48, 49, 0.05);
+            box-shadow: 0 0 0 1px var(--danger);
+        }
+        
+        .MathJax, .mjx-chtml {
+            overflow-x: auto;
+            max-width: 100%;
+            display: inline-block;
+        }
+
+        
+        .review-mode .option-input:checked + .option-label.incorrect::after {
+            background: var(--danger);
+        }
+        
+        .review-mode .option-label.correct-answer {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-label.correct-answer::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--success);
+        }
+        
+        .solution-container {
+            margin-top: 20px;
+            padding: 16px;
+            background: rgba(108, 92, 231, 0.05);
+            border-radius: 12px;
+            border-left: 3px solid var(--primary);
+        }
+        
+        .solution-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+        
+        /* Question Navigation */
+        .question-nav {
+            position: fixed;
+            top: 60px;
+            right: 0;
+            bottom: 80px;
+            width: 100%;
+            max-width: 320px;
+            background: var(--card-bg);
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            transform: translateX(100%);
+            transition: var(--transition);
+            z-index: 900;
+            overflow-y: auto;
+            padding: 16px;
+        }
+        
+        .question-nav.show {
+            transform: translateX(0);
+        }
+        
+        .nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .nav-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+        
+        .question-stats {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .stat-badge {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        
+        .section-selector {
+            width: 100%;
+            margin-bottom: 16px;
+            border-radius: 12px;
+            padding: 10px 16px;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            font-size: 0.9rem;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 16px;
+        }
+        
+        .question-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+            gap: 8px;
+        }
+        
+        .q-box {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .q-box:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .q-box.attempted {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .q-box.correct {
+            background-color: var(--success);
+            color: white;
+            border-color: var(--success);
+        }
+        
+        .q-box.incorrect {
+            background-color: var(--danger);
+            color: white;
+            border-color: var(--danger);
+        }
+        
+        .q-box.current {
+            border: 2px solid var(--accent) !important;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .q-box.unattempted {
+            background-color: var(--gray);
+            color: white;
+            border-color: var(--gray);
+        }
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: var(--footer-bg);
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            z-index: 800;
+        }
+        
+        .nav-btn {
+            height: 48px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 20px;
+            transition: var(--transition);
+            gap: 8px;
+        }
+        
+        .nav-btn i {
+            font-size: 1rem;
+        }
+        
+        .nav-btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .nav-btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+        
+        .nav-btn-outline:hover {
+            background: rgba(108, 92, 231, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        /* Overlay when nav is open */
+        .nav-overlay {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            bottom: 80px;
+            background: rgba(0,0,0,0.5);
+            z-index: 800;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+        }
+        
+        .nav-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        /* Results Modal */
+        .results-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1100;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+            padding: 16px;
+        }
+        
+        .results-modal.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .results-card {
+            background: white;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+            transform: translateY(20px);
+            transition: var(--transition);
+        }
+        
+        .results-modal.show .results-card {
+            transform: translateY(0);
+        }
+        
+        .results-header {
+            background: var(--header-bg);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .results-title {
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .results-body {
+            padding: 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            color: white;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+        
+        .results-footer {
+            padding: 16px 20px;
+            display: flex;
+            justify-content: center;
+            border-top: 1px solid var(--light-gray);
+        }
+        
+        /* Responsive Adjustments */
+        @media (min-width: 992px) {
+            .question-nav {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-right: 320px;
+            }
+            
+            .nav-overlay {
+                display: none;
+            }
+            
+            .bottom-nav {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .question-grid {
+                grid-template-columns: repeat(auto-fill, minmax(36px, 1fr));
+                gap: 6px;
+            }
+            
+            .q-box {
+                width: 36px;
+                height: 36px;
+                font-size: 0.9rem;
+            }
+            
+            .option-label {
+                padding: 12px 14px;
+            }
+            
+            .question-text {
+                font-size: 1rem;
+            }
+            
+            .header-brand {
+                font-size: 1rem;
+            }
+            
+            .control-btn {
+                width: 32px;
+                height: 32px;
+            }
+            
+            .timer-display {
+                font-size: 0.8rem;
+                padding: 4px 10px;
+            }
+            
+            .nav-btn {
+                height: 44px;
+                padding: 0 16px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="#" class="header-brand">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Mocks Wallah</span>
+            </a>
+            
+            <div class="header-controls">
+                <!-- Timer -->
+                <div class="timer-display">
+                    <i class="far fa-clock"></i>
+                    <span id="timer-display">16:00</span>
+                </div>
+                
+                <!-- Language toggle -->
+                <button class="control-btn" id="lang-btn" onclick="toggleLanguage()">
+                    <span id="lang-text">En</span>
+                </button>
+                
+                <!-- Submit button -->
+                <button class="control-btn" id="submit-btn" onclick="confirmSubmit()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+                
+                <!-- Questions toggle for mobile -->
+                <button class="control-btn nav-toggle-btn" id="nav-toggle" onclick="toggleNav()">
+                    <i class="fas fa-th"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main content -->
+    <main class="main-content" id="main-content">
+        <div class="question-counter" id="question-counter">Question 1 of 22</div>
+        
+        <!-- Questions will be displayed here -->
+        <div id="questions-container"></div>
+    </main>
+    
+    <!-- Overlay for mobile nav -->
+    <div class="nav-overlay" id="nav-overlay" onclick="toggleNav(false)"></div>
+    
+    <!-- Question navigation sidebar -->
+    <aside class="question-nav" id="question-nav">
+        <div class="nav-header">
+            <h3 class="nav-title">Questions</h3>
+            <div class="question-stats">
+                <span class="stat-badge bg-primary" id="attempted-count">0</span>
+                <span class="stat-badge bg-gray" id="total-count">22</span>
+                <button class="control-btn d-lg-none" onclick="toggleNav(false)">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Section selector -->
+        <select class="section-selector" id="section-selector" onchange="switchSection(this.value)">
+            <option value="all">All Sections</option>
+        </select>
+        
+        <!-- Question grid -->
+        <div class="question-grid" id="question-boxes"></div>
+    </aside>
+    
+    <!-- Bottom navigation for mobile -->
+    <nav class="bottom-nav d-lg-none">
+        <button class="nav-btn nav-btn-outline" onclick="prevQuestion()">
+            <i class="fas fa-chevron-left"></i>
+            <span>Previous</span>
+        </button>
+        <button class="nav-btn nav-btn-outline" onclick="nextQuestion()">
+            <span>Next</span>
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </nav>
+    
+    <!-- Results modal -->
+    <div class="results-modal" id="results-modal">
+        <div class="results-card">
+            <div class="results-header">
+                <h3 class="results-title">Test Results</h3>
+            </div>
+            <div class="results-body">
+                <div class="stats-grid">
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark))">
+                        <div class="stat-value" id="score-value">0</div>
+                        <div class="stat-label">Score</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--success), #1b9aaa)">
+                        <div class="stat-value" id="correct-value">0</div>
+                        <div class="stat-label">Correct</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--danger), var(--accent))">
+                        <div class="stat-value" id="incorrect-value">0</div>
+                        <div class="stat-label">Incorrect</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--gray), var(--dark))">
+                        <div class="stat-value" id="unattempted-value">0</div>
+                        <div class="stat-label">Unattempted</div>
+                    </div>
+                </div>
+            </div>
+            <div class="results-footer">
+                <button class="nav-btn nav-btn-primary" onclick="reviewTest()">
+                    <i class="fas fa-search me-1"></i>
+                    <span>Review Test</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Questions data
+        const questions = [];
+        const sections = {};
+        let currentLang = "en";
+        let currentQuestion = 0;
+        let answers = {};
+        let submitted = false;
+        let totalTime = 16 * 60;
+        
+        // Initialize the test
+        window.onload = function() {
+            initializeTest();
+            startTimer();
+            
+            // If on desktop, show the question navigation by default
+            if (window.innerWidth >= 992) {
+                document.getElementById('question-nav').classList.add('show');
+                document.getElementById('main-content').classList.add('with-nav');
+            }
+        };
+        
+        // Initialize test data
+        function initializeTest() {
+            // Add sections and questions
+            
+            sections["7"] = {
+                name: "English",
+                start: 0,
+                end: 20
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="7">English</option>`;
+            
+            sections["misc"] = {
+                name: "Miscellaneous",
+                start: 21,
+                end: 21
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="misc">Miscellaneous</option>`;
+            
+            
+                questions.push({
+                    id: "1",
+                    section: "7",
+                    question_en: "<p>1. Sentences of a paragraph are given below in jumbled order. Arrange the sentences in the right order to form a meaningful and coherent paragraph. <br>A. They stopped at a village on the way to rest and drink water and found the entire village had gathered to watch a weightlifter who was putting on a performance. <br>B. Tenali was very impressed and exclaimed, &ldquo;You are very strong!&rdquo; <br>C. With his big arms and bulging muscles, he picked up a 200-kg bag of rice with ease. <br>D. One day Tenali Raman and his wife were on their way to Hampi.</p>",
+                    question_hi: "<p>1. Sentences of a paragraph are given below in jumbled order. Arrange the sentences in the right order to form a meaningful and coherent paragraph. <br>A. They stopped at a village on the way to rest and drink water and found the entire village had gathered to watch a weightlifter who was putting on a performance. <br>B. Tenali was very impressed and exclaimed, &ldquo;You are very strong!&rdquo; <br>C. With his big arms and bulging muscles, he picked up a 200-kg bag of rice with ease. <br>D. One day Tenali Raman and his wife were on their way to Hampi.</p>",
+                    options_en: ["<p>DACB</p>", "<p>CDAB</p>", 
+                                "<p>BDCA</p>", "<p>DBCA</p>"],
+                    options_hi: ["<p>DACB</p>", "<p>CDAB</p>",
+                                "<p>BDCA</p>", "<p>DBCA</p>"],
+                    solution_en: "<p>1.(a) DACB . <br>Sentence D will be the starting line as it contains the main idea of the parajumble i.e. Tenali Raman and his wife. However, Sentence A states that Tenali Raman and his wife stopped at a village on the way and found the entire village had gathered to watch a weightlifter who was putting on a performance. So, A will follow D. Further, Sentence C states that the weightlifter picked up a 200-kg bag of rice with his big arms and bulging muscles &amp; Sentence B states that Tenali was very impressed and said that the weightlifter was very strong. So, B will follow C. Going through the options, option (a) has the correct sequence.</p>",
+                    solution_hi: "<p>1.(a) DACB.<br>Sentence D प्रारंभिक line होगी, क्योंकि इसमें parajumble का main idea &lsquo;Tenali Raman and his wife&rsquo; शामिल हैं। हालाँकि, sentence A बताता है कि Tenali Raman और उनकी wife रास्ते में एक गाँव में रुके और पाया कि पूरा गाँव एक भारोत्तोलक (weightlifter) को देखने के लिए इकट्ठा हो गया था जो प्रदर्शन (performance) कर रहा था। इसलिए, A, D के बाद आएगा। इसके अलावा, sentence C बताता है कि उस भारोत्तोलक ने अपनी बड़ी भुजाओं (big arms) एवं उभरी हुई मांसपेशियों (bulging muscles) से 200 किग्रा. चावल की बोरी उठा ली तथा sentence B बताता है कि Tenali बहुत प्रभावित हुए और कहा कि भारोत्तोलक बहुत मजबूत था। इसलिए, B, C के बाद आएगा। Options के माध्यम से जाने पर, option (a) में सही sequence है।</p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "2",
+                    section: "7",
+                    question_en: "<p>2. Sentences of a paragraph are given below in jumbled order. Arrange the sentences in the right order to form a meaningful and coherent paragraph. <br>A. Shopkeeper: &ldquo;Here, I have packed them all.&rdquo; <br>B. Mala: &ldquo;Please give me a packet of balloons, two packets of streamers, and some candles.&rdquo; <br>C. Shopkeeper: &ldquo;Since we are offering some discount on the balloons, you need to pay only thirty rupees.&rdquo; <br>D. Mala: &ldquo;How much do I need to pay?&rdquo;</p>",
+                    question_hi: "<p>2. Sentences of a paragraph are given below in jumbled order. Arrange the sentences in the right order to form a meaningful and coherent paragraph. <br>A. Shopkeeper: &ldquo;Here, I have packed them all.&rdquo; <br>B. Mala: &ldquo;Please give me a packet of balloons, two packets of streamers, and some candles.&rdquo; <br>C. Shopkeeper: &ldquo;Since we are offering some discount on the balloons, you need to pay only thirty rupees.&rdquo; <br>D. Mala: &ldquo;How much do I need to pay?&rdquo;</p>",
+                    options_en: ["<p>CDAB</p>", "<p>ABCD</p>", 
+                                "<p>DABC</p>", "<p>BADC</p>"],
+                    options_hi: ["<p>CDAB</p>", "<p>ABCD</p>",
+                                "<p>DABC</p>", "<p>BADC</p>"],
+                    solution_en: "<p>2.(d) BADC.<br>Sentence B will be the starting line as it contains the main idea of the parajumble i.e. Mala asking for things in a shop. However, Sentence A states that the shopkeeper had packed them(things) all. So, A will follow B. Further, Sentence D states that Mala asked about the money she had to pay &amp; Sentence C states that the shopkeeper asked Mala to pay only thirty rupees as they were offering some discount. So, C will follow D. Going through the options, option (d) has the correct sequence.</p>",
+                    solution_hi: "<p>2.(d) BADC.<br>Sentence B प्रारंभिक line होगी&rsquo; क्योंकि इसमें parajumble का main idea &lsquo;Mala asking for things in a shop&rsquo; शामिल है। हालाँकि, sentence A बताता है कि shopkeeper ने उन (चीजों) सबको पैक कर दिया था। इसलिए, A, B के बाद आएगा। इसके अलावा, sentence D बताता है कि Mala ने उन पैसों के बारे में पूछा जो उसे देने थे तथा sentence C बताता है कि shopkeeper ने Mala से केवल तीस रुपये pay करने को कहा क्योंकि वह कुछ छूट दे रहा था। इसलिए, C, D के बाद आएगा। Options के माध्यम से जाने पर, option (d) में सही sequence है।</p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "3",
+                    section: "7",
+                    question_en: "<p>3. Sentences of a paragraph are given below in jumbled order. Arrange the sentences in the right order to form a meaningful and coherent paragraph. <br>A. The festival is named after the Indian Hornbill. <br>B. The Hornbill festival is the most anticipated cultural carnival of this state.<br>C. Located in Northeast India, Nagaland is a very beautiful and an ethnically diverse state. <br>D. The Hornbill is often displayed on the traditional tribal headgears worn during Naga festivals.</p>",
+                    question_hi: "<p>3. Sentences of a paragraph are given below in jumbled order. Arrange the sentences in the right order to form a meaningful and coherent paragraph. <br>A. The festival is named after the Indian Hornbill. <br>B. The Hornbill festival is the most anticipated cultural carnival of this state.<br>C. Located in Northeast India, Nagaland is a very beautiful and an ethnically diverse state. <br>D. The Hornbill is often displayed on the traditional tribal headgears worn during Naga festivals.</p>",
+                    options_en: ["<p>ABCD</p>", "<p>BCAD</p>", 
+                                "<p>ACBD</p>", "<p>CBAD</p>"],
+                    options_hi: ["<p>ABCD</p>", "<p>BCAD</p>",
+                                "<p>ACBD</p>", "<p>CBAD</p>"],
+                    solution_en: "<p>3.(d) CBAD. <br>Sentence C will be the starting line as it contains the main idea of the parajumble i.e. Nagaland. However, Sentence B states that the Hornbill festival is the most anticipated cultural carnival of this state. So, B will follow C. Further, Sentence A states that the festival is named after the Indian Hornbill &amp; Sentence D states that the Hornbill is often displayed on the traditional tribal headgears worn during Naga festivals. So, D will follow A. Going through the options, option (d) has the correct sequence.</p>",
+                    solution_hi: "<p>3.(d) CBAD. <br>Sentence C प्रारंभिक line होगी क्योंकि इसमें parajumble का main idea &lsquo;Nagaland&rsquo; निहित है। हालाँकि, वाक्य B बताता है कि Hornbill festival इस राज्य का सबसे प्रत्याशित सांस्कृतिक कार्निवल (cultural carnival) है। इसलिए, B, C के बाद आएगा। इसके अलावा, वाक्य A बताता है कि त्योहार का नाम Indian Hornbill के नाम पर रखा गया है और sentence D बताता है कि Hornbill अक्सर नागा त्योहारों के दौरान पहने जाने वाले पारंपरिक आदिवासी शिरोवस्त्रों (traditional tribal headgears) पर प्रदर्शित किया जाता है। इसलिए, D, A के बाद आएगा। Options के माध्यम से जाने पर, option (d) में सही sequence है।</p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "4",
+                    section: "7",
+                    question_en: "4. Sentences of a paragraph are given below in jumbled order. Arrange the sentences in the right order to form a meaningful and coherent paragraph. <br />A. When it was time to divide the spoils, the lion took one portion for his title as king of the forest.<br />B. He took another portion because he was a partner, and yet another because he was the strongest.<br />C. He took the last portion because an accident would befall anyone who laid a paw upon it. <br />D. Once a lion went hunting with three other beasts. ",
+                    question_hi: "4. Sentences of a paragraph are given below in jumbled order. Arrange the sentences in the right order to form a meaningful and coherent paragraph. <br />A. When it was time to divide the spoils, the lion took one portion for his title as king of the forest.<br />B. He took another portion because he was a partner, and yet another because he was the strongest.<br />C. He took the last portion because an accident would befall anyone who laid a paw upon it. <br />D. Once a lion went hunting with three other beasts. ",
+                    options_en: [" DCBA", " DABC", 
+                                " CABD", " BDCA"],
+                    options_hi: [" DCBA", " DABC",
+                                " CABD", "<p>BDCA</p>"],
+                    solution_en: "<p>4.(b) BDCA. <br>Sentence D will be the starting line as it contains the main idea of the parajumble i.e. a lion and three beasts going hunting. However, Sentence A states that when it was time to divide the spoils, the lion took one portion for his title as king of the forest. So, A will follow D. Further, Sentence B states that the lion took another portion because he was a partner, and yet another because he was the strongest &amp; Sentence C states that he took the last portion because an accident would befall anyone who laid a paw upon it. So, C will follow B. Going through the options, option (b) has the correct sequence.</p>",
+                    solution_hi: "<p>4.(b) BDCA. <br>Sentence D प्रारंभिक line होगी क्योंकि इसमें parajumble का main idea &lsquo;a lion and three beasts going hunting&rsquo; शामिल है। हालाँकि, sentence A बताता है कि जब लूट का माल बाँटने का समय आया, तो शेर ने जंगल के राजा के तौर पे अपना एक हिस्सा ले लिया। इसलिए, A, D के बाद आएगा। इसके अलावा, sentence B बताता है कि शेर ने एक और हिस्सा लिया क्योंकि वह एक भागीदार था, और फिर एक और (हिस्सा) क्योंकि वह सबसे शक्तिशाली (strongest) था तथा sentence C बताता है कि उसने आखिरी हिस्सा लिया क्योंकि जो कोई भी उस पर पंजा रखेगा, उसके साथ दुर्घटना घटित हो जाएगी। इसलिए, C, B के बाद आएगा। Options के माध्यम से जाने पर, option (b) में सही sequence है।</p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "5",
+                    section: "7",
+                    question_en: "5. Sentences of a paragraph are given below in jumbled order. Arrange the sentences in the right order to form a meaningful and coherent paragraph. <br />A. According to his hypothesis, now known as the neuron theory, each nerve cell communicates with others through contiguity rather than continuity. <br />B. The watershed of all studies of the nervous system was an observation made in 1889 by Spanish scientist Santiago Ramón y Cajal. <br />C. It has since been proved that Cajal’s theory is not universally true, but his central idea has remained an accurate guiding principle for all further study. <br />D. That is, communication between adjacent but separate cells must take place across the space and barriers separating them. ",
+                    question_hi: "5. Sentences of a paragraph are given below in jumbled order. Arrange the sentences in the right order to form a meaningful and coherent paragraph. <br />A. According to his hypothesis, now known as the neuron theory, each nerve cell communicates with others through contiguity rather than continuity. <br />B. The watershed of all studies of the nervous system was an observation made in 1889 by Spanish scientist Santiago Ramón y Cajal. <br />C. It has since been proved that Cajal’s theory is not universally true, but his central idea has remained an accurate guiding principle for all further study. <br />D. That is, communication between adjacent but separate cells must take place across the space and barriers separating them. ",
+                    options_en: [" BCDA ", " ADCB ", 
+                                " BADC ", " CDAB "],
+                    options_hi: [" BCDA ", " ADCB ",
+                                " BADC ", " CDAB "],
+                    solution_en: "5.(c) BADC.  <br />Sentence B will be the starting line as it contains the main idea of the parajumble i.e. observation made by Spanish scientist Santiago Ramón y Cajal. However, Sentence A states that according to his hypothesis, each nerve cell communicates with others through contiguity rather than continuity. So, A will follow B. Further, Sentence D states that communication between adjacent but separate cells must take place across the space and barriers separating them & Sentence C states that it has since been proved that Cajal’s theory is not universally true, but his central idea has remained an accurate guiding principle for all further study. So, C will follow D. Going through the options, option (c) has the correct sequence. ",
+                    solution_hi: "5.(c) BADC.  <br />Sentence B प्रारंभिक line होगी, क्योंकि इसमें parajumble का main idea ‘observation made by Spanish scientist Santiago Ramón y Cajal’ शामिल है। हालाँकि, sentence  A बताता है कि उनकी परिकल्पना (hypothesis) के अनुसार, प्रत्येक तंत्रिका कोशिका (nerve cell) निरंतरता (continuity) के बजाय समीपता (contiguity) के माध्यम से दूसरों के साथ संचार (communicates) करती है। इसलिए, A, B के बाद आएगा। इसके अलावा, sentence D बताता है कि आसन्न (adjacent) किंतु पृथक कोशिकाओं (cells) के बीच संचार (communication) उन्हे अलग करने वाले स्थान (spaces) एवं बाधाओं (barriers) के पार होना चाहिए, तथा sentence C बताता है कि तब से यह सिद्ध हो चुका है कि “Cajal’s theory” सार्वभौमिक (universally) रूप से सत्य नहीं है, लेकिन उनका केंद्रीय विचार (central idea) आगे के सभी अध्ययनों के लिए एक सटीक मार्गदर्शक सिद्धांत (guiding principle) बना हुआ है। इसलिए, C, D के बाद आएगा। Options के माध्यम से जाने पर, option (c) में सही sequence है।",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "6",
+                    section: "7",
+                    question_en: "<p>6. Sentences of a paragraph are given below in jumbled order. Arrange the sentences in the right order to form a meaningful and coherent paragraph. <br>A. Dad: &ldquo;Yes, tell me.&rdquo; <br>B. Laxmi: &ldquo;Dad, I need to speak to you.&rdquo; <br>C. Dad: &ldquo;I think you are still too young for it.&rdquo; <br>D. Laxmi: &ldquo;Please buy me a scooter.&rdquo;</p>",
+                    question_hi: "<p>6. Sentences of a paragraph are given below in jumbled order. Arrange the sentences in the right order to form a meaningful and coherent paragraph. <br>A. Dad: &ldquo;Yes, tell me.&rdquo; <br>B. Laxmi: &ldquo;Dad, I need to speak to you.&rdquo; <br>C. Dad: &ldquo;I think you are still too young for it.&rdquo; <br>D. Laxmi: &ldquo;Please buy me a scooter.&rdquo;</p>",
+                    options_en: ["<p>DCBA</p>", "<p>ABDC</p>", 
+                                "<p>BADC</p>", "<p>BCDA</p>"],
+                    options_hi: ["<p>DCBA</p>", "<p>ABDC</p>",
+                                "<p>BADC</p>", "<p>BCDA</p>"],
+                    solution_en: "<p>6.(c) BADC.<br>Sentence B will be the starting line as it contains the main idea of the parajumble i.e. Laxmi urges her to talk to her Dad. However, Sentence A states that the Dad replied in the affirmative(positively). So, A will follow B. Further, Sentence D states that Laxmi asked her Dad to buy her a scooter &amp; Sentence C talks about her Dad&rsquo;s reply that she was too young for it. So, C will follow D. Going through the options, option (c) has the correct sequence.</p>",
+                    solution_hi: "<p>6.(c) BADC.<br>Sentence B प्रारंभिक line होगी, क्योंकि इसमें parajumble का main idea &lsquo;Laxmi urges her to talk to her Dad&rsquo; शामिल है। हालाँकि, sentence A में कहा गया है कि पिता ने हाँ में (सकारात्मक रूप से - positively) उत्तर दिया। इसलिए, A, B के बाद आएगा। इसके अलावा, sentence D में कहा गया है कि Laxmi ने अपने पिता से उसे scooter खरीदने के लिए कहा और sentence C में उसके पिता के उत्तर के बारे में बात की गई है कि वह इसके लिए बहुत छोटी (young) है। इसलिए, C, D के बाद आएगा। Options के माध्यम से जाने पर, option (c) में सही sequence है।</p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "7",
+                    section: "7",
+                    question_en: "<p>7. Sentences of a paragraph are given below in jumbled order. Arrange the sentences in the right order to form a meaningful and coherent paragraph. <br>A. Indeed, polymers such as regenerated cellulose, which have become familiar household materials under the trade names rayon and nylon, are also made into numerous non-fibre products, ranging from cellophane envelope windows to clear plastic soft-drink bottles. <br>B. The chemical compounds from which man-made fibres are produced are known as polymers, a class of compounds characterised by long, chain-like molecules of great size and molecular weight. <br>C. As fibres, these materials are prized for their strength, toughness, resistance to heat and mildew, and ability to hold a pressed form. <br>D. Many of the polymers that constitute man-made fibres are the same as or similar to compounds that make up plastics, rubbers, adhesives and surface coatings.</p>",
+                    question_hi: "<p>7. Sentences of a paragraph are given below in jumbled order. Arrange the sentences in the right order to form a meaningful and coherent paragraph. <br>A. Indeed, polymers such as regenerated cellulose, which have become familiar household materials under the trade names rayon and nylon, are also made into numerous non-fibre products, ranging from cellophane envelope windows to clear plastic soft-drink bottles. <br>B. The chemical compounds from which man-made fibres are produced are known as polymers, a class of compounds characterised by long, chain-like molecules of great size and molecular weight. <br>C. As fibres, these materials are prized for their strength, toughness, resistance to heat and mildew, and ability to hold a pressed form. <br>D. Many of the polymers that constitute man-made fibres are the same as or similar to compounds that make up plastics, rubbers, adhesives and surface coatings.</p>",
+                    options_en: ["<p>CBAD</p>", "<p>BCDA</p>", 
+                                "<p>BDAC</p>", "<p>ACDB</p>"],
+                    options_hi: ["<p>CBAD</p>", "<p>BCDA</p>",
+                                "<p>BDAC</p>", "<p>ACDB</p>"],
+                    solution_en: "<p>7.(b) BCDA. <br>Sentence B will be the starting line as it contains the main idea of the parajumble i.e. Polymers. However, Sentence C states that as fibres, these materials are prized for their strength, toughness, resistance to heat, and mildew. So, C will follow B. Further, Sentence D states that many of the polymers that constitute man-made fibres are similar to compounds that make up plastics, rubbers, adhesives, and surface coatings &amp; Sentence A states that polymers such as regenerated cellulose, which have become familiar household materials under the trade names rayon and nylon, are also made into numerous non-fibre products. So, A will follow D. Going through the options, option (b) has the correct sequence.</p>",
+                    solution_hi: "<p>7.(b) BCDA. <br>Sentence B प्रारम्भिक line होगी, क्योंकि इसमें parajumble का main idea &lsquo;Polymers&rsquo; शामिल है। हालाँकि, sentence C बताता है कि fibre के रूप में, इन पदार्थों को उनकी strength, toughness, heat के resistance तथा mildew के लिए सराहा जाता है। इसलिए, C, B के बाद आएगा। इसके अतिरिक्त, sentence D बताता है कि man-made fibres को बनाने वाले कई polymer उन compounds के समान होते हैं जिनसे plastics, rubbers, adhesives और surface coatings बनते हैं तथा sentence A बताता है कि regenerated cellulose जैसे polymers, जो rayon और nylon जैसे व्यापारिक नामों (trade names) के तहत familiar household materials बन गए हैं, उनसे अनेक non-fibre products भी बनाए जाते हैं। इसलिए, A, D के बाद आएगा। Options के माध्यम से जाने पर, option (b) में सही sequence है।</p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "8",
+                    section: "7",
+                    question_en: "<p>8. Sentences of a paragraph are given below in jumbled order. Arrange the sentences in the right order to form a meaningful and coherent paragraph. <br>A. He was in the habit of stealing food from others. <br>B. One night, the villagers decided to teach him a lesson and kept only rotten food in their kitchen. <br>C. The culprit ended up eating the rotten food and fell sick. <br>D. Once upon a time, there lived a man in a village.</p>",
+                    question_hi: "<p>8. Sentences of a paragraph are given below in jumbled order. Arrange the sentences in the right order to form a meaningful and coherent paragraph. <br>A. He was in the habit of stealing food from others. <br>B. One night, the villagers decided to teach him a lesson and kept only rotten food in their kitchen. <br>C. The culprit ended up eating the rotten food and fell sick. <br>D. Once upon a time, there lived a man in a village.</p>",
+                    options_en: ["<p>ABDC</p>", "<p>BACD</p>", 
+                                "<p>DABC</p>", "<p>ACDB</p>"],
+                    options_hi: ["<p>ABDC</p>", "<p>BACD</p>",
+                                "<p>DABC</p>", "<p>ACDB</p>"],
+                    solution_en: "<p>8.(c) DABC.<br>Sentence D will be the starting line as it contains the main idea of the parajumble i.e. a man in a village. However, Sentence A states that the man was in the habit of stealing food from others. So, A will follow D. Further, Sentence B states that once the villagers decided to teach the man a lesson and kept only rotten food in their kitchen &amp; Sentence C states that the culprit ended up eating the rotten food and fell sick. So, C will follow B. Going through the options, option (c) has the correct sequence.</p>",
+                    solution_hi: "<p>8.(c) DABC.<br>Sentence D प्रारम्भिक line होगी क्योंकि इसमें parajumble का main idea &lsquo;a man in a village&rsquo; शामिल है। हालाँकि, sentence A बताता है कि वह आदमी दूसरों से खाना चुराने (stealing food) का आदी था। इसलिए, A, D के बाद आएगा। इसके अलावा, वाक्य B बताता है कि एक बार गाँव वालों ने उस आदमी को सबक सिखाने का फैसला किया और अपने kitchen में केवल सड़ा हुआ खाना (rotten food) रखा तथा sentence C बताता है कि दोषी (culprit) ने अंततः सड़ा हुआ खाना खा लिया और बीमार पड़ गया। इसलिए, C, B के बाद आएगा। Options, के माध्यम से जाने पर, option (c) में सही sequence है।</p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "9",
+                    section: "7",
+                    question_en: "<p>9. Sentences of a paragraph are given below in jumbled order. Arrange the sentences in the right order to form a meaningful and coherent paragraph. <br>A. There lived a foolish king in a large kingdom. <br>B. He thought that it will be a good joke. <br>C. He did not realise that what he thought of as a joke would cost him heavily. <br>D. The king once decided to throw all his ministers in prison for a day.</p>",
+                    question_hi: "<p>9. Sentences of a paragraph are given below in jumbled order. Arrange the sentences in the right order to form a meaningful and coherent paragraph. <br>A. There lived a foolish king in a large kingdom. <br>B. He thought that it will be a good joke. <br>C. He did not realise that what he thought of as a joke would cost him heavily. <br>D. The king once decided to throw all his ministers in prison for a day.</p>",
+                    options_en: ["<p>ABCD</p>", "<p>ACBD</p>", 
+                                "<p>DABC</p>", "<p>ADBC</p>"],
+                    options_hi: ["<p>ABCD</p>", "<p>ACBD</p>",
+                                "<p>DABC</p>", "<p>ADBC</p>"],
+                    solution_en: "<p>9.(d) ADBC.<br>Sentence A will be the starting line as it contains the main idea of the passage i.e. a foolish king. However, Sentence D states that the king once decided to throw all his ministers in prison for a day. So, D will follow A. Further, Sentence B states that the king thought that it will be a good joke &amp; Sentence C states that he did not realise that what he thought of as a joke would cost him heavily. So, C will follow B. Going through the options, option (d) has the correct sequence.</p>",
+                    solution_hi: "<p>9.(d) ADBC.<br>Sentence A प्रारंभिक line होगी, क्योंकि इसमें passage का main idea &lsquo;a foolish king&rsquo; शामिल है। हालाँकि, sentence D में कहा गया है कि राजा ने एक बार अपने सभी मंत्रियों (ministers) को एक दिन के लिए कारागार (prison) में डालने का फैसला किया। इसलिए, D, A के बाद आएगा। इसके अलावा, sentence B में कहा गया है कि राजा ने सोचा कि यह एक अच्छा मजाक (good joke) होगा और sentence C में कहा गया है कि उसे यह एहसास (realise) नहीं हुआ कि जिसे वह मजाक समझ रहा था, वह उसे बहुत भारी पड़ेगा। इसलिए, C, B के बाद आएगा। Options के माध्यम से जाने पर, option (d) में सही sequence है।</p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "10",
+                    section: "7",
+                    question_en: "10. Sentences of a paragraph are given below in jumbled order. Arrange the sentences in the right order to form a meaningful and coherent paragraph. <br />A. Sculpture and painting form an integral part of temple architecture. <br />B. The city is visited by thousands curious to see the temple in the form of a chariot. <br />C. The finest example of this is Konark Temple in Puri. <br />D. The chariot with immense wheels and horses is carved from stone. ",
+                    question_hi: "<p>10. Sentences of a paragraph are given below in jumbled order. Arrange the sentences in the right order to form a meaningful and coherent paragraph. <br>A. Sculpture and painting form an integral part of temple architecture. <br>B. The city is visited by thousands curious to see the temple in the form of a chariot. <br>C. The finest example of this is Konark Temple in Puri. <br>D. The chariot with immense wheels and horses is carved from stone.</p>",
+                    options_en: [" BCDA ", " BCAD ", 
+                                " ABCD ", " ACBD "],
+                    options_hi: ["<p>BCDA</p>", "<p>BCAD</p>",
+                                "<p>ABCD</p>", "<p>ACBD</p>"],
+                    solution_en: "<p>10.(d) ACBD. <br>Sentence A will be the starting line as it contains the main idea of the passage i.e. Sculpture and painting. However, Sentence C states that the finest example of sculpture and painting is Konark Temple in Puri. So, C will follow A. Further, Sentence B states that the city is visited by thousands curious to see the temple in the form of a chariot &amp; Sentence D states that the chariot with immense wheels and horses is carved from stone. So, D will follow B. Going through the options, option (d) has the correct sequence.</p>",
+                    solution_hi: "<p>10.(d) ACBD. <br>Sentence A प्रारंभिक line होगी, क्योंकि इसमें passage का main idea &lsquo;Sculpture and painting&rsquo; शामिल है। हालाँकि, sentence C बताता है कि मूर्तिकला (sculpture) और चित्रकला (painting) का सबसे उत्कृष्ट उदाहरण (finest example) &lsquo;Puri&rsquo; में &lsquo;Konark Temple&rsquo; है। इसलिए, C, A के बाद आएगा। इसके अलावा, sentence B बताता है कि हजारों लोग रथ (chariot) के रूप में बने मंदिर को देखने की उत्सुकता (curious) में शहर का दौरा (visit) करते हैं, तथा sentence D बताता है कि विशाल पहियों (immense wheels) एवं घोड़ों (horses) वाला रथ (chariot) पत्थर से तराशा गया है। इसलिए, D, B के बाद आएगा। Options के माध्यम से जाने पर, option (d) में सही sequence है।</p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "11",
+                    section: "7",
+                    question_en: "<p>11. Sentences of a paragraph are given below in jumbled order. Arrange the sentences in the right order to form a meaningful and coherent paragraph. <br>A. Information Communication Technology tools have brought in additional changes along with means of communication. <br>B. These changes have enabled man to communicate faster. <br>C. Communication has not only become faster but easier too. <br>D. The result is a more relaxed life than ever before.</p>",
+                    question_hi: "<p>11. Sentences of a paragraph are given below in jumbled order. Arrange the sentences in the right order to form a meaningful and coherent paragraph. <br>A. Information Communication Technology tools have brought in additional changes along with means of communication. <br>B. These changes have enabled man to communicate faster. <br>C. Communication has not only become faster but easier too. <br>D. The result is a more relaxed life than ever before.</p>",
+                    options_en: ["<p>ABDC</p>", "<p>CDBA</p>", 
+                                "<p>DBCA</p>", "<p>ABCD</p>"],
+                    options_hi: ["<p>ABDC</p>", "<p>CDBA</p>",
+                                "<p>DBCA</p>", "<p>ABCD</p>"],
+                    solution_en: "<p>11.(d) ABCD. <br>Sentence A will be starting line as it contains the main idea of the parajumble i.e. Information Communication Technology tools. However, Sentence B states that these changes by Information Communication Technology tools have enabled man to communicate faster. So, B will follow A. Further, Sentence C states that communication has not only become faster but easier too &amp; Sentence D states that the result is a more relaxed life than ever before. So, D will follow C. Going through the options, option d has the correct sequence.</p>",
+                    solution_hi: "<p>11.(d) ABCD. <br>Sentence A प्रारम्भिक line होगी क्योंकि इसमें parajumble का main idea &lsquo;Information Communication Technology tools&rsquo; शामिल है। हालाँकि, sentence B, बताता है कि Information Communication Technology tools द्वारा हुए इन बदलावों ने मनुष्य को तेजी से संवाद करने में सक्षम बनाया है। इसलिए, B, A के बाद आएगा। इसके अलावा, sentence C बताता है कि communication न केवल तेज हो गया है, बल्कि आसान भी हो गया है तथा sentence D बताता है कि परिणाम पहले से कहीं अधिक आरामदायक जीवन (more relaxed life) है। इसलिए, D, C के बाद आएगा। Options के माध्यम से जाने पर, option (d) में सही sequence है।</p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "12",
+                    section: "7",
+                    question_en: "12. Sentences of a paragraph are given below in jumbled order. Arrange the sentences in the right order to form a meaningful and coherent paragraph. <br />A. Inspector: “Were you sleeping when the robbers entered the bank?” <br />B. Guard: “The iron grill lock was broken and the bank looked ransacked but the robbers could not take away anything as I had returned quickly.” <br />C. Inspector: “What did you see when you came back?” <br />D. Guard: “No Sir. The bank had closed and I had just gone to relieve myself.” ",
+                    question_hi: "12. Sentences of a paragraph are given below in jumbled order. Arrange the sentences in the right order to form a meaningful and coherent paragraph. <br />A. Inspector: “Were you sleeping when the robbers entered the bank?” <br />B. Guard: “The iron grill lock was broken and the bank looked ransacked but the robbers could not take away anything as I had returned quickly.” <br />C. Inspector: “What did you see when you came back?” <br />D. Guard: “No Sir. The bank had closed and I had just gone to relieve myself.” ",
+                    options_en: [" BADC ", " ABCD ", 
+                                " CDAB ", " ADCB "],
+                    options_hi: [" BADC ", " ABCD ",
+                                " CDAB ", " ADCB "],
+                    solution_en: "12.(d) ADCB. <br />Inspecting a crime scene. However, Sentence D tells about the guard’s reply that the bank had closed and he had just gone to relieve himself. So, D will follow A. Further, Sentence C states that the Inspector asked the guard what he had seen when he came back & Sentence B talks about the guard’s reply that the iron grill lock was broken and the bank looked ransacked but the robbers could not take away anything as he had returned quickly. So, B will follow C. Going through the options, option (d) has the correct sequence. ",
+                    solution_hi: "12.(d) ADCB. <br />किसी अपराध स्थल का निरीक्षण करना। हालाँकि, sentence D, guard के जवाब के बारे में बताता है कि बैंक बंद हो चुका था और वह बस शौच के लिए गया था। इसलिए, D, A के बाद आएगा। इसके अलावा, sentence C बताता है कि Inspector ने guard से पूछा कि जब वह वापस आया तो उसने क्या देखा था तथा sentence B में guard का जवाब है कि लोहे की ग्रिल का ताला टूटा हुआ था तथा बैंक लूटा हुआ लग रहा था, लेकिन लुटेरे (robber) कुछ भी नहीं ले जा सके क्योंकि वह जल्दी लौट आया था। इसलिए, B, C के बाद आएगा। Options के माध्यम से जाने पर, option (d) में सही sequence है।",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "13",
+                    section: "7",
+                    question_en: "<p>13. Sentences of a paragraph are given below in jumbled order. Arrange the sentences in the right order to form a meaningful and coherent paragraph. <br>A. A fox, hearing the cock and thinking to make a meal of him, came and stood under the tree. <br>B. As the night passed away and the day dawned, the cock, according to his custom, set up a shrill crowing. <br>C. A dog and a cock having struck up an acquaintance, went out on their travels together. <br>D. Nightfall found them in a forest, so the cock, flying up on a tree, perched among the branches, while the dog dozed below at the foot.</p>",
+                    question_hi: "<p>13. Sentences of a paragraph are given below in jumbled order. Arrange the sentences in the right order to form a meaningful and coherent paragraph. <br>A. A fox, hearing the cock and thinking to make a meal of him, came and stood under the tree. <br>B. As the night passed away and the day dawned, the cock, according to his custom, set up a shrill crowing. <br>C. A dog and a cock having struck up an acquaintance, went out on their travels together. <br>D. Nightfall found them in a forest, so the cock, flying up on a tree, perched among the branches, while the dog dozed below at the foot.</p>",
+                    options_en: ["<p>DCAB</p>", "<p>CDBA</p>", 
+                                "<p>BCDA</p>", "<p>CABD</p>"],
+                    options_hi: ["<p>DCAB</p>", "<p>CDBA</p>",
+                                "<p>BCDA</p>", "<p>CABD</p>"],
+                    solution_en: "<p>13.(b) CDBA.<br>Sentence C will be the starting line as it contains the main idea of the parajumble i.e. a dog and a cock went out on their travels together. However, Sentence D states that nightfall found them in a forest, so the cock, flying up on a tree, perched among the branches, while the dog dozed below at the foot. So, D will follow C. Further, Sentence B states that as the night passed away and the day dawned, the cock, set up a shrill crowing &amp; Sentence A states that a fox, heard the cock and thought to make a meal of him, came and stood under the tree. So, A will follow B. Going through the options, option (b) has the correct sequence.</p>",
+                    solution_hi: "<p>13.(b) CDBA.<br>Sentence C प्रारंभिक line होगी, क्योंकि इसमें parajumble का main idea &lsquo;a dog and a cock went out on their travels together&rsquo; शामिल है। हालाँकि, sentence D बताता है कि रात होने पर वे जंगल (forest) में थे, इसलिए cock एक पेड़ पर उड़कर शाखाओं (branches) के बीच बैठ गया, जबकि dog नीचे पेड़ के पैर के पास सो गया। इसलिए, D, C के बाद आएगा। इसके अलावा, sentence B बताता है कि जैसे ही रात बीत गई और दिन निकला, मुर्गे ने तीखी आवाज़ (shrill crowing) में बाँग दी और sentence A बताता है कि एक fox ने cock की आवाज़ सुनी और उसे खाने के बारे में सोचा, वह पेड़ के नीचे आकर खड़ी हो गई। इसलिए, A, B के बाद आएगा। options के माध्यम से जाने पर, option (b) में सही sequence है।</p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "14",
+                    section: "7",
+                    question_en: "14. Sentences of a paragraph are given below in jumbled order. Arrange the sentences in the right order to form a meaningful and coherent paragraph. <br />A. Though they had never ever heard Subha utter their names, they unfailingly recognized her footsteps as she came into their shed.  <br />B. They even understood the precious moments between them as she loved and cuddled them, scolded them, and pleaded to them. <br />C. Subha did really have a close circle of friends and companions; they were Sarbasi and Panguli, the two cows living in their cow-shed. <br />D. They understood the silent, melancholy tune of her unspoken words during those moments, and the intensity of her expressions more easily than the spoken language of other humans. ",
+                    question_hi: "14. Sentences of a paragraph are given below in jumbled order. Arrange the sentences in the right order to form a meaningful and coherent paragraph. <br />A. Though they had never ever heard Subha utter their names, they unfailingly recognized her footsteps as she came into their shed.  <br />B. They even understood the precious moments between them as she loved and cuddled them, scolded them, and pleaded to them. <br />C. Subha did really have a close circle of friends and companions; they were Sarbasi and Panguli, the two cows living in their cow-shed. <br />D. They understood the silent, melancholy tune of her unspoken words during those moments, and the intensity of her expressions more easily than the spoken language of other humans. ",
+                    options_en: [" ADBC ", " DABC ", 
+                                " CADB ", " CBDA "],
+                    options_hi: [" ADBC ", " DABC ",
+                                " CADB ", " CBDA "],
+                    solution_en: "14.(c) CADB.<br />Sentence C will be the starting line as it contains the main idea of the parajumble i.e. a close circle of friends of Subha. However, Sentence A states that though her friends(the two cows) had never ever heard Subha utter their names, they unfailingly recognized her footsteps. So, A will follow C. Further, Sentence D states that her friends understood the silent, melancholy tune of her unspoken words during those moments & Sentence B states that they even understood the precious moments between them as she loved and cuddled them, scolded them, and pleaded to them. So, B will follow D. Going through the options, option (c) has the correct sequence. ",
+                    solution_hi: "14.(c) CADB.<br />Sentence C प्रारंभिक line होगी, क्योंकि इसमें parajumble का main idea ‘a close circle of friends of Subha’ शामिल है। हालाँकि, sentence A बताता है कि उसके friends (दो गायों) ने कभी भी Subha को उनके नाम लेते हुए नहीं सुना था, फिर भी वे उसके कदमों को अचूक रूप (unfailingly ) से पहचानते थे। इसलिए, A, C के बाद आएगा। इसके अलावा, sentence D बताता है कि उसके friends ने उन क्षणों (moments) के दौरान उसके अनकहे शब्दों (unspoken words) की खामोश (silent), उदासी भरी धुन (melancholy tune) को समझते थे और sentence B बताता है कि उनके बीच के कीमती पलों (precious moments) को भी समझते थे क्योंकि वह उनसे प्यार (love) करती थी और उन्हें गले लगाती थी, उन्हें डांटती थी और उनसे विनती करती थी।  इसलिए, B, D के बाद आएगा। options के माध्यम से जाने पर, option (c) में सही sequence है।",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "15",
+                    section: "7",
+                    question_en: "<p>15. Sentences of a paragraph are given below in jumbled order. Arrange the sentences in the right order to form a meaningful and coherent paragraph. <br>A. It is essential for the marketer to study the behaviour of the consumers in order to make better strategic marketing decisions. <br>B. The study of consumer behaviour is equally important for the non-profit organisations such as governmental agencies, hospitals, NGOs, charitable organisations. <br>C. Thus, by studying the consumer behaviour before and during purchase helps in production scheduling, designing, pricing, positioning, segmentation, advertising and other promotional activities. <br>D. If the marketer has complete knowledge about the consumer&rsquo;s likings or disliking, then he can predict the response of the potential customers towards his offerings.</p>",
+                    question_hi: "<p>15. Sentences of a paragraph are given below in jumbled order. Arrange the sentences in the right order to form a meaningful and coherent paragraph. <br>A. It is essential for the marketer to study the behaviour of the consumers in order to make better strategic marketing decisions. <br>B. The study of consumer behaviour is equally important for the non-profit organisations such as governmental agencies, hospitals, NGOs, charitable organisations. <br>C. Thus, by studying the consumer behaviour before and during purchase helps in production scheduling, designing, pricing, positioning, segmentation, advertising and other promotional activities. <br>D. If the marketer has complete knowledge about the consumer&rsquo;s likings or disliking, then he can predict the response of the potential customers towards his offerings.</p>",
+                    options_en: ["<p>ADCB</p>", "<p>BCAD</p>", 
+                                "<p>CDBA</p>", "<p>ACBD</p>"],
+                    options_hi: ["<p>ADCB</p>", "<p>BCAD</p>",
+                                "<p>CDBA</p>", "<p>ACBD</p>"],
+                    solution_en: "<p>15.(a) ADCB. <br>Sentence A will be the starting line as it contains the main idea of the parajumble i.e. what is essential for a marketer. However, Sentence D states that if the marketer has complete knowledge about the consumer&rsquo;s likings or disliking, then he can predict the response of the potential customers towards his offerings. So, D will follow A. Further, Sentence C states that by studying the consumer behaviour before and during purchase helps in production scheduling, designing, pricing, and other promotional activities &amp; Sentence B states that the study of consumer behaviour is equally important for non-profit organisations. So, B will follow C. Going through the options, option (a) has the correct sequence.</p>",
+                    solution_hi: "<p>15.(a) ADCB. <br>Sentence A प्रारंभिक line होगी क्योंकि इसमें parajumble का main idea &lsquo;what is essential for a marketer&rsquo; शामिल है। हालाँकि, sentence D बताता है कि यदि marketer को consumer की पसंद या नापसंद के बारे में complete knowledge हो, तो वह अपने प्रस्तावों (offerings) के प्रति संभावित ग्राहकों के response को predict कर सकता है। इसलिए, D, A के बाद आएगा। इसके अलावा, sentence C बताता है कि खरीद से पहले और उसके दौरान consumer behaviour का अध्ययन, उत्पादन समय-निर्धारण (production scheduling), डिजाइनिंग, मूल्य निर्धारण (pricing), एवं अन्य प्रचार गतिविधियों (promotional activities) में मदद करता है तथा sentence B बताता है कि consumer behaviour का अध्ययन non-profit organisations के लिए भी उतना ही महत्वपूर्ण है। इसलिए, B, C के बाद आएगा। Options के माध्यम से जाने पर, option (a) में सही sequence है।</p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "16",
+                    section: "7",
+                    question_en: "<p>16. Sentences of a paragraph are given below in jumbled order. Arrange the sentences in the right order to form a meaningful and coherent paragraph. <br>A. The mouse, however, reached his hole in safety. <br>B. A bull was bitten by a mouse, and, pained by the wound, tried to capture him. <br>C. The mouse, peeping out, crept up his flank and, again biting him, retreated to his hole. <br>D. The bull dug into the walls with his horns until, wearied, he crouched down and slept by the hole.</p>",
+                    question_hi: "<p>16. Sentences of a paragraph are given below in jumbled order. Arrange the sentences in the right order to form a meaningful and coherent paragraph. <br>A. The mouse, however, reached his hole in safety. <br>B. A bull was bitten by a mouse, and, pained by the wound, tried to capture him. <br>C. The mouse, peeping out, crept up his flank and, again biting him, retreated to his hole. <br>D. The bull dug into the walls with his horns until, wearied, he crouched down and slept by the hole.</p>",
+                    options_en: ["<p>DACB</p>", "<p>BADC</p>", 
+                                "<p>BCDA</p>", "<p>ADBC</p>"],
+                    options_hi: ["<p>DACB</p>", "<p>BADC</p>",
+                                "<p>BCDA</p>", "<p>ADBC</p>"],
+                    solution_en: "<p>16.(b) BADC. <br>Sentence B will be the starting line as it contains the main idea of the parajumble i.e. a bull bitten by a mouse. However, Sentence A states that the mouse reached his hole in safety. So, A will follow B. Further, Sentence D states that the Bull dug into the walls with his horns until wearied, he crouched down and slept by the hole &amp; Sentence C states that the mouse, peeped out, crept up his flank and, again bit him &amp; retreated to his hole. So, C will follow D. Going through the options, option (b) has the correct sequence.</p>",
+                    solution_hi: "<p>16.(b) BADC. <br>Sentence B प्रारंभिक line होगी क्योंकि इसमें parajumble का main idea &lsquo;a bull bitten by a mouse&rsquo; शामिल है। हालाँकि, sentence A बताता है कि चूहा सुरक्षित रूप से अपने बिल में पहुँच गया। इसलिए, A, B के बाद आएगा। इसके अलावा, sentence D बताता है कि बैल अपने सींगों (horns) से दीवारों को तब तक खोदता (dug) रहा जब तक वह थक नहीं गया, वह दुबक कर बैठ गया और बिल के पास ही सो गया तथा sentence C बताता है कि चूहे ने बाहर झाँका (peeped out), उसके ऊपर चढ़ा और उसे फिर से काटा और अपने बिल में चला गया। इसलिए, C, D के बाद आएगा। Options के माध्यम से जाने पर, option (b) में सही sequence है।</p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "17",
+                    section: "7",
+                    question_en: "17. Sentences of a paragraph are given below in jumbled order. Arrange the sentences in the right order to form a meaningful and coherent paragraph. <br />A. It is also a rich source of news updates around the world.  <br />B. Older people and children remain glued to it. <br />C. It has become a great source of entertainment for all. <br />D. TV has become a powerful medium these days. ",
+                    question_hi: "<p>17. Sentences of a paragraph are given below in jumbled order. Arrange the sentences in the right order to form a meaningful and coherent paragraph. <br>A. It is also a rich source of news updates around the world. <br>B. Older people and children remain glued to it. <br>C. It has become a great source of entertainment for all. <br>D. TV has become a powerful medium these days.</p>",
+                    options_en: [" DBCA ", " BDCA ", 
+                                " ACBD ", " ABCD "],
+                    options_hi: ["<p>DBCA</p>", "<p>BDCA</p>",
+                                "<p>ACBD</p>", "<p>ABCD</p>"],
+                    solution_en: "<p>17.(a) DBCA. <br>Sentence D will be the starting line as it contains the main idea of the parajumble i.e. TV. However, Sentence B states that Older people and children remain glued to the TV. So, B will follow D. Further, Sentence C states that TV has become a great source of entertainment for all &amp; Sentence A states that it is also a rich source of news updates around the world. So, A will follow C. Going through the options, option (a) has the correct sequence.</p>",
+                    solution_hi: "<p>17.(a) DBCA. <br>Sentence D प्रारंभिक line होगी, क्योंकि इसमें parajumble का main idea &lsquo;TV&rsquo; शामिल है। हालाँकि, sentence B में कहा गया है कि बुजुर्ग लोग (Older people) और बच्चे (children) TV से चिपके रहते हैं। इसलिए, B, D के बाद आएगा। इसके अलावा, sentence C में कहा गया है कि TV सभी के लिए मनोरंजन (entertainment ) का एक बड़ा स्रोत ( great source) बन गया है और sentence A में कहा गया है कि यह दुनिया (world) भर में news updates का एक समृद्ध स्रोत (rich source) भी है। इसलिए, A, C के बाद आएगा। options के माध्यम से जाने पर, option (a) में सही sequence है।</p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "18",
+                    section: "7",
+                    question_en: "<p>18. Sentences of a paragraph are given below in jumbled order. Arrange the sentences in the right order to form a meaningful and coherent paragraph. <br>A. &ldquo;Buy sweet apples, or none at all&rdquo;, he instructed his servant. <br>B. A rich man sent his servant to an orchard to buy some apples. <br>C. The servant asked, &ldquo;How am I to know that all of them are sweet if I taste just one?&rdquo; <br>D. The owner of the orchard said to the servant, &ldquo;All my apples are sweet. Try one.&rdquo;</p>",
+                    question_hi: "<p>18. Sentences of a paragraph are given below in jumbled order. Arrange the sentences in the right order to form a meaningful and coherent paragraph. <br>A. &ldquo;Buy sweet apples, or none at all&rdquo;, he instructed his servant. <br>B. A rich man sent his servant to an orchard to buy some apples. <br>C. The servant asked, &ldquo;How am I to know that all of them are sweet if I taste just one?&rdquo; <br>D. The owner of the orchard said to the servant, &ldquo;All my apples are sweet. Try one.&rdquo;</p>",
+                    options_en: ["<p>ABCD</p>", "<p>BDAC</p>", 
+                                "<p>BADC</p>", "<p>ACBD</p>"],
+                    options_hi: ["<p>ABCD</p>", "<p>BDAC</p>",
+                                "<p>BADC</p>", "<p>ACBD</p>"],
+                    solution_en: "<p>18.(c) BADC. <br>Sentence B will be the starting line as it contains the main idea of the parajumble i.e. a rich man sending his servant to an orchard. However, Sentence A states that the rich man instructed his servant to buy sweet apples. So, A will follow B. Further, Sentence D states that the owner of the orchard said to the servant that all his apples were sweet and asked him to try one &amp; Sentence C states that the servant asked the owner how he would know that all of them were sweet if he tasted just one. So, C will follow D. Going through the options, option (c) has the correct sequence.</p>",
+                    solution_hi: "<p>18.(c) BADC. <br>Sentence B प्रारंभिक line होगी, क्योंकि इसमें parajumble का main idea &lsquo;a rich man sending his servant to an orchard&rsquo; शामिल है। हालाँकि, sentence A में कहा गया है कि अमीर आदमी (rich man) ने अपने नौकर (servant) को मीठे सेब (sweet apples) खरीदने का निर्देश दिया। इसलिए, A, B के बाद आएगा। इसके अलावा, sentence D में कहा गया है कि बगीचे (orchard) के owner ने servant से कहा कि उसके सभी apples मीठे हैं एवं उसे एक apple चखने के लिए कहा और sentence C में कहा गया है कि servant ने owner से पूछा कि अगर वह सिर्फ़ एक apple चखता है तो उसे कैसे पता चलेगा कि सभी apple मीठे हैं। इसलिए, C, D के बाद आएगा। options के माध्यम से जाने पर, option (c) में सही sequence है।</p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "19",
+                    section: "7",
+                    question_en: "<p>19. Sentences of a paragraph are given below in jumbled order. Arrange the sentences in the right order to form a meaningful and coherent paragraph. <br>A. Ram introduced Shyam to everyone and then served snacks to them. <br>B. After he cut the cake, all of them danced for a long time. <br>C. When Shyam reached his house, his classmates had already arrived. <br>D. Ram invited his friend Shyam on his birthday.</p>",
+                    question_hi: "<p>19. Sentences of a paragraph are given below in jumbled order. Arrange the sentences in the right order to form a meaningful and coherent paragraph. <br>A. Ram introduced Shyam to everyone and then served snacks to them. <br>B. After he cut the cake, all of them danced for a long time. <br>C. When Shyam reached his house, his classmates had already arrived. <br>D. Ram invited his friend Shyam on his birthday.</p>",
+                    options_en: ["<p>DBAC</p>", "<p>ABCD</p>", 
+                                "<p>ACDB</p>", "<p>DCAB</p>"],
+                    options_hi: ["<p>DBAC</p>", "<p>ABCD</p>",
+                                "<p>ACDB</p>", "<p>DCAB</p>"],
+                    solution_en: "<p>19.(d) DCAB.<br>Sentence D will be the starting line as it contains the main idea of the parajumble i.e. Ram invited his friend Shyam. However, Sentence C states that when Shyam reached his house, his classmates had already arrived. So, C will follow D. Further, Sentence A states that Ram introduced Shyam to everyone and then served snacks to them &amp; Sentence B states that after he cut the cake, all of them danced for a long time. So, B will follow A. Going through the options, option (d) has the correct sequence.</p>",
+                    solution_hi: "<p>19.(d) DCAB.<br>Sentence D प्रारंभिक line होगी क्योंकि इसमें parajumble का main idea &lsquo;Ram invited his friend Shyam&rsquo; शामिल है। हालाँकि, sentence C बताता है कि जब Shyam उसके घर पहुँचा, तो उसके सहपाठी (classmates) पहले ही आ चुके थे। इसलिए, C, D के बाद आएगा। इसके अलावा, sentence A बताता है कि Ram ने Shyam का परिचय सबसे कराया और फिर उन्हें नाश्ता (snacks) परोसा तथा sentence B बताता है कि cake काटने के बाद, वे सब बहुत देर तक dance किए। इसलिए, B, A के बाद आएगा। Options के माध्यम से जाने पर, option (d) में सही sequence है।</p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "20",
+                    section: "7",
+                    question_en: "<p>20. Sentences of a paragraph are given below in jumbled order. Arrange the sentences in the right order to form a meaningful and coherent paragraph. <br>A. Shopkeeper: &ldquo;Not at all. It is hardly a two-minute walk from here.&rdquo; <br>B. Boy: &ldquo;Can you please show me the way to the post office?&rdquo; <br>C. Shopkeeper: &ldquo;Go straight from here and take a right turn.&rdquo; <br>D. Boy: &ldquo;Is it very far off from here?&rdquo;</p>",
+                    question_hi: "<p>20. Sentences of a paragraph are given below in jumbled order. Arrange the sentences in the right order to form a meaningful and coherent paragraph. <br>A. Shopkeeper: &ldquo;Not at all. It is hardly a two-minute walk from here.&rdquo; <br>B. Boy: &ldquo;Can you please show me the way to the post office?&rdquo; <br>C. Shopkeeper: &ldquo;Go straight from here and take a right turn.&rdquo; <br>D. Boy: &ldquo;Is it very far off from here?&rdquo;</p>",
+                    options_en: ["<p>CDAB</p>", "<p>DCBA</p>", 
+                                "<p>BCDA</p>", "<p>BADC</p>"],
+                    options_hi: ["<p>CDAB</p>", "<p>DCBA</p>",
+                                "<p>BCDA</p>", "<p>BADC</p>"],
+                    solution_en: "<p>20.(c) BCDA. <br>Sentence B will be the starting line as it contains the main idea of the parajumble i.e. a boy asking the way to the post office. However, Sentence C states that the shopkeeper told the boy to go straight from there and take a right turn. So, C will follow B. Further, Sentence D states that the boy asked if it was very far off from there &amp; Sentence A states that the shopkeeper replied to him that it was hardly a two-minute walk from there. So, A will follow D. Going through the options, option(c) has the correct sequence.</p>",
+                    solution_hi: "<p>20.(c) BCDA. <br>Sentence B प्रारम्भिक line होगी, क्योंकि इसमें parajumble का main idea &lsquo;a boy asking the way to the post office&rsquo; शामिल है। हालांकि, sentence C में कहा गया है कि shopkeeper ने लड़के से कहा कि वह वहाँ से सीधे जाए और दाहिने मुड़ जाए। इसलिए, C, B के बाद आएगा। आगे, sentence D में कहा गया है कि लड़के ने पूछा कि क्या वह (डाकघर) वहाँ से बहुत दूर था तथा sentence A में कहा गया है कि shopkeeper ने उसे जवाब दिया कि वह वहाँ से मुश्किल से (hardly) दो मिनट की पैदल दूरी पर था। इसलिए, A, D के बाद आएगा। Options के माध्यम से जाने पर, option (c) में सही sequence है।</p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "21",
+                    section: "7",
+                    question_en: "<p>21. Sentences of a paragraph are given below in jumbled order. Arrange the sentences in the right order to form a meaningful and coherent paragraph. <br>A. At its height, around 1,200 years ago, the city of Calakmul had a population of about 50,000 people, but the kingdom as a whole numbered more than 1.5 million. <br>B. Deep in the jungle of southern Mexico lie the ruins of a city that thrived for centuries before it was abandoned more than 1,000 years ago. <br>C. Archaeologists have uncovered 6,750 structures here&mdash;the largest is this pyramid temple, called, simply, \'Structure 2.&rsquo;<br>D. Calakmul was once one of the two duelling superpowers&ndash;along with Tikal&mdash;of the Classical Mayan civilisation.</p>",
+                    question_hi: "<p>21. Sentences of a paragraph are given below in jumbled order. Arrange the sentences in the right order to form a meaningful and coherent paragraph. <br>A. At its height, around 1,200 years ago, the city of Calakmul had a population of about 50,000 people, but the kingdom as a whole numbered more than 1.5 million. <br>B. Deep in the jungle of southern Mexico lie the ruins of a city that thrived for centuries before it was abandoned more than 1,000 years ago. <br>C. Archaeologists have uncovered 6,750 structures here&mdash;the largest is this pyramid temple, called, simply, \'Structure 2.&rsquo;<br>D. Calakmul was once one of the two duelling superpowers&ndash;along with Tikal&mdash;of the Classical Mayan civilisation.</p>",
+                    options_en: ["<p>DBCA</p>", "<p>ACDB</p>", 
+                                "<p>BCDA</p>", "<p>BDAC</p>"],
+                    options_hi: ["<p>DBCA</p>", "<p>ACDB</p>",
+                                "<p>BCDA</p>", "<p>BDAC</p>"],
+                    solution_en: "<p>21.(d) ACDB. <br>Sentence B will be the starting line as it contains the main idea of the parajumble i.e. ruins of a city in southern Mexico. However, Sentence D states that Calakmul was once one of the two dueling superpowers along with Tikal of the Classical Mayan civilisation. So, D will follow B. Further, Sentence A states that at its height, around 1,200 years ago, the city of Calakmul had a population of about 50,000 people, but the kingdom as a whole numbered more than 1.5 million &amp; Sentence C states that archaeologists have uncovered 6,750 structures here the largest is this pyramid temple, called, \'Structure 2&rsquo;. So, C will follow A. Going through the options, option (d) has the correct sequence.</p>",
+                    solution_hi: "<p>21.(d) ACDB. <br>Sentence B प्रारंभिक line होगी, क्योंकि इसमें parajumble का main idea &lsquo;ruins of a city in southern Mexico&rsquo; शामिल है। हालाँकि, sentence D बताता है कि Calakmul कभी शास्त्रीय मायान सभ्यता (Classical Mayan civilisation) के Tikal के साथ दो प्रतिद्वंद्वी महाशक्तियों में से एक था। इसलिए, D, B के बाद आएगा। इसके अलावा, sentence A बताता है कि लगभग 1,200 वर्ष पहले, Calakmul शहर की population लगभग 50,000, अपने चरम पर थी, लेकिन समग्र रूप से राज्य की संख्या 15 लाख (1.5 million) से अधिक थी तथा sentence C बताता है कि archaeologists ने यहाँ 6,750 structures का पता लगाया है, जिनमें सबसे बड़ा यह pyramid temple है, जिसे \'Structure 2&rsquo; कहा जाता है। इसलिए, C, A के बाद आएगा। Options के माध्यम से जाने पर, option (d) में सही sequence है।</p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "22",
+                    section: "misc",
+                    question_en: "<p>22. Sentences of a paragraph are given below in jumbled order. Arrange the sentences in the right order to form a meaningful and coherent paragraph. <br>A. &ldquo;I have already spent it,&rdquo; the thief replied. <br>B. &ldquo;What! I will take you to the police right now,&rdquo; Arun thundered. <br>C. &ldquo;Give me back my money,&rdquo; Arun said to the thief. <br>D. &ldquo;Sir, please have some mercy on me,&rdquo; the thief pleaded.</p>",
+                    question_hi: "<p>22. Sentences of a paragraph are given below in jumbled order. Arrange the sentences in the right order to form a meaningful and coherent paragraph. <br>A. &ldquo;I have already spent it,&rdquo; the thief replied. <br>B. &ldquo;What! I will take you to the police right now,&rdquo; Arun thundered. <br>C. &ldquo;Give me back my money,&rdquo; Arun said to the thief. <br>D. &ldquo;Sir, please have some mercy on me,&rdquo; the thief pleaded.</p>",
+                    options_en: ["<p>CABD</p>", "<p>ADBC</p>", 
+                                "<p>CBAD</p>", "<p>BCAD</p>"],
+                    options_hi: ["<p>CABD</p>", "<p>ADBC</p>",
+                                "<p>CBAD</p>", "<p>BCAD</p>"],
+                    solution_en: "<p>22.(a) CABD. <br>Sentence C will be the starting line as it contains the main idea of the parajumble i.e Arun demanding his money back. However, Sentence A states that the thief replied he had already spent the money. So, A will follow C. Further, Sentence B states that Arun thundered and said that he would take him to the police right then &amp; Sentence D states that the thief pleaded to had some mercy on him. So, D will follow B. Going through the options, option (a) has the correct sequence.</p>",
+                    solution_hi: "<p>22.(a) CABD.<br>Sentence C प्रारंभिक line होगी, क्योंकि इसमें parajumble का main idea &lsquo;Arun demanding his money back&rsquo; शामिल है। हालाँकि, sentence A में कहा गया है कि चोर (thief) ने जवाब दिया कि वह पैसे पहले ही खर्च कर चुका था। इसलिए, A, C के बाद आएगा। इसके अलावा, sentence B में कहा गया है कि Arun गरजकर (thundered) बोल कि वह उसे तुरंत police के पास ले जाएगा तथा sentence D में कहा गया है कि चोर ने उस पर कुछ दया (mercy) करने गुहार (pleaded) लगाई। इसलिए, D, B के बाद आएगा। Options के माध्यम से जाने पर, option (a) में सही sequence है।</p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+            
+            // Generate question boxes
+            const boxesContainer = document.getElementById('question-boxes');
+            questions.forEach((q, index) => {
+                const box = document.createElement('div');
+                box.className = 'q-box';
+                box.textContent = index + 1;
+                box.onclick = () => showQuestion(index);
+                box.id = `box-${index}`;
+                boxesContainer.appendChild(box);
+            });
+            
+            // Show first question
+            showQuestion(0);
+            updateProgress();
+        }
+        
+        // Show a specific question
+        
+        function formatContent(text) {
+            if (!text) return '';
+            return text.replace(/<img/g, '<img style="max-width:100%;height:auto;"');
+        }
+        
+        function showQuestion(index) {
+            if (index < 0 || index >= questions.length) return;
+            
+            currentQuestion = index;
+            const question = questions[index];
+            
+            // Update question counter
+            document.getElementById('question-counter').textContent = `Question ${index + 1} of ${questions.length}`;
+            
+            // Update question boxes
+            document.querySelectorAll('.q-box').forEach(box => box.classList.remove('current'));
+            document.getElementById(`box-${index}`).classList.add('current');
+            
+            // Generate question HTML
+            let html = `
+                <div class="question-card">
+                    <div class="question-text">
+                        <div class="en">${formatContent(question.question_en)}</div>
+                        <div class="hi" style="display:none">${formatContent(question.question_hi)} </div>
+                    </div>
+                    <div class="options" id="options-container">`;
+            
+            // Add options
+            ['a', 'b', 'c', 'd'].forEach((opt, i) => {
+                let optionClass = '';
+                let isCorrectAnswer = opt === question.correct;
+                let isUserAnswer = answers[question.id] === opt;
+                
+                // When reviewing, add appropriate classes
+                if (submitted) {
+                    if (isCorrectAnswer) {
+                        optionClass += ' correct-answer';
+                    } else if (isUserAnswer && !isCorrectAnswer) {
+                        optionClass += ' incorrect';
+                    }
+                }
+                
+                html += `
+                    <div class="option-item">
+                        <input class="option-input" type="radio" name="q${index}" 
+                            id="opt-${index}-${opt}" value="${opt}" 
+                            ${isUserAnswer ? 'checked' : ''}
+                            onclick="selectAnswer('${question.id}', '${opt}')">
+                       <label class="option-label${optionClass}" for="opt-${index}-${opt}">
+                            <div class="en">${question.options_en[i]}</div>
+                            <div class="hi" style="display:none">${question.options_hi[i]}</div>
+                        </label>
+                    </div>`;
+            });
+            
+            // Add solution if submitted
+            if (submitted) {
+                const isCorrect = answers[question.id] === question.correct;
+                const resultText = answers[question.id] ? (isCorrect ? 'Correct!' : 'Incorrect!') : 'Not attempted';
+                
+                html += `
+                    <div class="solution-container">
+                        <div class="solution-title">${resultText}</div>
+                        <div class="solution-text">
+                            <div class="en">${question.solution_en}</div>
+                            <div class="hi" style="display:none">${question.solution_hi}</div>
+                        </div>
+                    </div>`;
+            }
+            
+            html += `</div></div>`;
+            
+            document.getElementById('questions-container').innerHTML = html;
+            
+            // Apply language settings
+            applyLanguage();
+            
+            // If in mobile view, close the menu
+            if (window.innerWidth < 992) {
+                toggleNav(false);
+            }
+            
+            // Add review mode class if submitted
+            if (submitted) {
+                document.getElementById('options-container').classList.add('review-mode');
+            }
+        }
+        
+        // Apply current language
+        function applyLanguage() {
+            document.querySelectorAll(`.${currentLang}`).forEach(el => el.style.display = 'block');
+            document.querySelectorAll(`.${currentLang === 'en' ? 'hi' : 'en'}`).forEach(el => el.style.display = 'none');
+            
+            // Update language button text
+            document.getElementById('lang-text').textContent = currentLang === 'en' ? 'Hi' : 'En';
+        }
+        
+        // Select an answer
+        function selectAnswer(qId, option) {
+            if (submitted) return;
+            
+            answers[qId] = option;
+            updateProgress();
+            
+            // Mark question as attempted in the navigation
+            const index = questions.findIndex(q => q.id === qId);
+            if (index >= 0) {
+                const box = document.getElementById(`box-${index}`);
+                box.classList.add('attempted');
+                box.classList.remove('unattempted');
+            }
+        }
+        
+        // Navigate to previous/next question
+        function prevQuestion() { 
+            if (currentQuestion > 0) showQuestion(currentQuestion - 1); 
+        }
+        
+        function nextQuestion() { 
+            if (currentQuestion < questions.length - 1) showQuestion(currentQuestion + 1); 
+        }
+        
+        // Switch section
+        function switchSection(sectionId) {
+            if (sectionId === 'all') {
+                showQuestion(0);
+                return;
+            }
+            
+            const section = sections[sectionId];
+            if (section) showQuestion(section.start);
+        }
+        
+        // Toggle language
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'hi' : 'en';
+            applyLanguage();
+        }
+        
+        // Toggle navigation sidebar
+        function toggleNav(show) {
+            const nav = document.getElementById('question-nav');
+            const overlay = document.getElementById('nav-overlay');
+            
+            if (show === undefined) {
+                show = !nav.classList.contains('show');
+            }
+            
+            if (show) {
+                nav.classList.add('show');
+                overlay.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            } else {
+                nav.classList.remove('show');
+                overlay.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+        }
+        
+        // Update progress
+        function updateProgress() {
+            const attempted = Object.keys(answers).length;
+            document.getElementById('attempted-count').textContent = attempted;
+        }
+        
+        // Start timer
+        function startTimer() {
+            const timerDisplay = document.getElementById('timer-display');
+            let timeLeft = totalTime;
+            
+            const timerInterval = setInterval(() => {
+                if (timeLeft <= 0 || submitted) {
+                    clearInterval(timerInterval);
+                    if (!submitted) submitTest();
+                    return;
+                }
+                
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                timeLeft--;
+            }, 1000);
+        }
+        
+        // Confirm before submitting
+        function confirmSubmit() {
+            if (submitted) return;
+            
+            const attempted = Object.keys(answers).length;
+            const remaining = questions.length - attempted;
+            
+            // Create a more modern confirmation dialog
+            const confirmHtml = `
+                <div style="text-align: center; padding: 20px;">
+                    <h4 style="margin-bottom: 16px; color: var(--dark);">Confirm Submission</h4>
+                    <p style="margin-bottom: 24px; color: var(--gray);">
+                        You have attempted ${attempted} of ${questions.length} questions.<br>
+                        ${remaining} questions are unattempted.
+                    </p>
+                    <div style="display: flex; justify-content: center; gap: 12px;">
+                        <button onclick="this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; border: 1px solid var(--light-gray); background: white; border-radius: 8px; cursor: pointer;">
+                            Cancel
+                        </button>
+                        <button onclick="submitTest(); this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer;">
+                            Submit Test
+                        </button>
+                    </div>
+                </div>`;
+            
+            // Create modal element
+            const modal = document.createElement('div');
+            modal.className = 'results-modal show';
+            modal.innerHTML = `
+                <div class="results-card" style="max-width: 400px;">
+                    <button class="cancel-btn" style="position: absolute; top: 12px; right: 12px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--gray);" onclick="this.closest('.results-modal').remove()">
+                        ×
+                    </button>
+                    ${confirmHtml}
+                </div>`;
+            
+            document.body.appendChild(modal);
+        }
+        
+        // Submit test
+        function submitTest() {
+            if (submitted) return;
+            
+            submitted = true;
+            
+            let score = 0;
+            let correctCount = 0;
+            let incorrectCount = 0;
+            let unattemptedCount = 0;
+            
+            questions.forEach((q, index) => {
+                const userAns = answers[q.id];
+                const box = document.getElementById(`box-${index}`);
+                
+                box.classList.remove('attempted');
+                
+                if (!userAns) {
+                    unattemptedCount++;
+                    box.classList.add('unattempted');
+                } else if (userAns === q.correct) {
+                    correctCount++;
+                    score += q.pos_marks;
+                    box.classList.add('correct');
+                } else {
+                    incorrectCount++;
+                    score -= q.neg_marks;
+                    box.classList.add('incorrect');
+                }
+            });
+            
+            // Update result values
+            document.getElementById('score-value').textContent = score.toFixed(2);
+            document.getElementById('correct-value').textContent = correctCount;
+            document.getElementById('incorrect-value').textContent = incorrectCount;
+            document.getElementById('unattempted-value').textContent = unattemptedCount;
+            
+            // Show the results modal
+            document.getElementById('results-modal').classList.add('show');
+            
+            // Disable submit button
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-check"></i>';
+            submitBtn.style.backgroundColor = 'var(--success)';
+            
+            // Refresh current question view to show solution
+            showQuestion(currentQuestion);
+        }
+        
+        // Review test
+        function reviewTest() {
+            document.getElementById('results-modal').classList.remove('show');
+            showQuestion(0);
+        }
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target === document.getElementById('results-modal')) {
+                document.getElementById('results-modal').classList.remove('show');
+            }
+        });
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') prevQuestion();
+            if (e.key === 'ArrowRight') nextQuestion();
+        });
+    </script>
+</body>
+</html>
