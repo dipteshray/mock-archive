@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mocks Wallah</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --primary-light: #a29bfe;
+            --primary-dark: #5649c0;
+            --secondary: #00cec9;
+            --accent: #fd79a8;
+            --success: #00b894;
+            --warning: #fdcb6e;
+            --danger: #d63031;
+            --light: #f8f9fa;
+            --dark: #2d3436;
+            --gray: #636e72;
+            --light-gray: #dfe6e9;
+            --card-bg: #ffffff;
+            --body-bg: #f5f6fa;
+            --header-bg: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            --footer-bg: #ffffff;
+            --box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            --box-shadow-sm: 0 2px 10px rgba(0,0,0,0.05);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background-color: var(--body-bg);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            color: var(--dark);
+            line-height: 1.6;
+            padding-bottom: 80px; /* Space for fixed navigation */
+            overflow-x: hidden;
+        }
+        
+        /* Header Styles */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: var(--header-bg);
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            z-index: 1000;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .header-brand {
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .header-brand i {
+            margin-right: 8px;
+            font-size: 1.2rem;
+        }
+        
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .control-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .control-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .control-btn.active {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .timer-display {
+            background: rgba(0,0,0,0.2);
+            border-radius: 18px;
+            padding: 4px 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+        
+        .timer-display i {
+            margin-right: 6px;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-top: 60px;
+            padding: 16px;
+            min-height: calc(100vh - 140px);
+        }
+        
+        .question-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--box-shadow-sm);
+            border: none;
+            transition: var(--transition);
+        }
+        
+        .question-counter {
+            font-size: 0.9rem;
+            color: var(--gray);
+            text-align: center;
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+        
+        .question-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+        
+        .option-item {
+            margin-bottom: 12px;
+            position: relative;
+        }
+        
+        .option-input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+            .question-text {
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        hyphens: auto;
+        max-width: 100%;
+    }
+
+    .question-text img,
+    .option-label img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 8px 0;
+        border-radius: 8px;
+    }
+
+    .option-label {
+        overflow: hidden;
+    }
+
+    .question-card {
+        overflow: hidden;
+    }
+        
+        .option-label {
+            display: block;
+            padding: 14px 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--light-gray);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .option-label:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .option-input:checked + .option-label {
+            border-color: var(--primary);
+            background: rgba(108, 92, 231, 0.05);
+            box-shadow: 0 0 0 1px var(--primary);
+        }
+        
+        .option-input:checked + .option-label::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--primary);
+        }
+        
+        /* When reviewing answers */
+        .review-mode .option-input:checked + .option-label.correct {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.correct::after {
+            background: var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.incorrect {
+            border-color: var(--danger);
+            background: rgba(214, 48, 49, 0.05);
+            box-shadow: 0 0 0 1px var(--danger);
+        }
+        
+        .MathJax, .mjx-chtml {
+            overflow-x: auto;
+            max-width: 100%;
+            display: inline-block;
+        }
+
+        
+        .review-mode .option-input:checked + .option-label.incorrect::after {
+            background: var(--danger);
+        }
+        
+        .review-mode .option-label.correct-answer {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-label.correct-answer::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--success);
+        }
+        
+        .solution-container {
+            margin-top: 20px;
+            padding: 16px;
+            background: rgba(108, 92, 231, 0.05);
+            border-radius: 12px;
+            border-left: 3px solid var(--primary);
+        }
+        
+        .solution-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+        
+        /* Question Navigation */
+        .question-nav {
+            position: fixed;
+            top: 60px;
+            right: 0;
+            bottom: 80px;
+            width: 100%;
+            max-width: 320px;
+            background: var(--card-bg);
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            transform: translateX(100%);
+            transition: var(--transition);
+            z-index: 900;
+            overflow-y: auto;
+            padding: 16px;
+        }
+        
+        .question-nav.show {
+            transform: translateX(0);
+        }
+        
+        .nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .nav-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+        
+        .question-stats {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .stat-badge {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        
+        .section-selector {
+            width: 100%;
+            margin-bottom: 16px;
+            border-radius: 12px;
+            padding: 10px 16px;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            font-size: 0.9rem;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 16px;
+        }
+        
+        .question-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+            gap: 8px;
+        }
+        
+        .q-box {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .q-box:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .q-box.attempted {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .q-box.correct {
+            background-color: var(--success);
+            color: white;
+            border-color: var(--success);
+        }
+        
+        .q-box.incorrect {
+            background-color: var(--danger);
+            color: white;
+            border-color: var(--danger);
+        }
+        
+        .q-box.current {
+            border: 2px solid var(--accent) !important;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .q-box.unattempted {
+            background-color: var(--gray);
+            color: white;
+            border-color: var(--gray);
+        }
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: var(--footer-bg);
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            z-index: 800;
+        }
+        
+        .nav-btn {
+            height: 48px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 20px;
+            transition: var(--transition);
+            gap: 8px;
+        }
+        
+        .nav-btn i {
+            font-size: 1rem;
+        }
+        
+        .nav-btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .nav-btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+        
+        .nav-btn-outline:hover {
+            background: rgba(108, 92, 231, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        /* Overlay when nav is open */
+        .nav-overlay {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            bottom: 80px;
+            background: rgba(0,0,0,0.5);
+            z-index: 800;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+        }
+        
+        .nav-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        /* Results Modal */
+        .results-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1100;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+            padding: 16px;
+        }
+        
+        .results-modal.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .results-card {
+            background: white;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+            transform: translateY(20px);
+            transition: var(--transition);
+        }
+        
+        .results-modal.show .results-card {
+            transform: translateY(0);
+        }
+        
+        .results-header {
+            background: var(--header-bg);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .results-title {
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .results-body {
+            padding: 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            color: white;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+        
+        .results-footer {
+            padding: 16px 20px;
+            display: flex;
+            justify-content: center;
+            border-top: 1px solid var(--light-gray);
+        }
+        
+        /* Responsive Adjustments */
+        @media (min-width: 992px) {
+            .question-nav {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-right: 320px;
+            }
+            
+            .nav-overlay {
+                display: none;
+            }
+            
+            .bottom-nav {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .question-grid {
+                grid-template-columns: repeat(auto-fill, minmax(36px, 1fr));
+                gap: 6px;
+            }
+            
+            .q-box {
+                width: 36px;
+                height: 36px;
+                font-size: 0.9rem;
+            }
+            
+            .option-label {
+                padding: 12px 14px;
+            }
+            
+            .question-text {
+                font-size: 1rem;
+            }
+            
+            .header-brand {
+                font-size: 1rem;
+            }
+            
+            .control-btn {
+                width: 32px;
+                height: 32px;
+            }
+            
+            .timer-display {
+                font-size: 0.8rem;
+                padding: 4px 10px;
+            }
+            
+            .nav-btn {
+                height: 44px;
+                padding: 0 16px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="#" class="header-brand">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Mocks Wallah</span>
+            </a>
+            
+            <div class="header-controls">
+                <!-- Timer -->
+                <div class="timer-display">
+                    <i class="far fa-clock"></i>
+                    <span id="timer-display">6:00</span>
+                </div>
+                
+                <!-- Language toggle -->
+                <button class="control-btn" id="lang-btn" onclick="toggleLanguage()">
+                    <span id="lang-text">En</span>
+                </button>
+                
+                <!-- Submit button -->
+                <button class="control-btn" id="submit-btn" onclick="confirmSubmit()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+                
+                <!-- Questions toggle for mobile -->
+                <button class="control-btn nav-toggle-btn" id="nav-toggle" onclick="toggleNav()">
+                    <i class="fas fa-th"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main content -->
+    <main class="main-content" id="main-content">
+        <div class="question-counter" id="question-counter">Question 1 of 20</div>
+        
+        <!-- Questions will be displayed here -->
+        <div id="questions-container"></div>
+    </main>
+    
+    <!-- Overlay for mobile nav -->
+    <div class="nav-overlay" id="nav-overlay" onclick="toggleNav(false)"></div>
+    
+    <!-- Question navigation sidebar -->
+    <aside class="question-nav" id="question-nav">
+        <div class="nav-header">
+            <h3 class="nav-title">Questions</h3>
+            <div class="question-stats">
+                <span class="stat-badge bg-primary" id="attempted-count">0</span>
+                <span class="stat-badge bg-gray" id="total-count">20</span>
+                <button class="control-btn d-lg-none" onclick="toggleNav(false)">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Section selector -->
+        <select class="section-selector" id="section-selector" onchange="switchSection(this.value)">
+            <option value="all">All Sections</option>
+        </select>
+        
+        <!-- Question grid -->
+        <div class="question-grid" id="question-boxes"></div>
+    </aside>
+    
+    <!-- Bottom navigation for mobile -->
+    <nav class="bottom-nav d-lg-none">
+        <button class="nav-btn nav-btn-outline" onclick="prevQuestion()">
+            <i class="fas fa-chevron-left"></i>
+            <span>Previous</span>
+        </button>
+        <button class="nav-btn nav-btn-outline" onclick="nextQuestion()">
+            <span>Next</span>
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </nav>
+    
+    <!-- Results modal -->
+    <div class="results-modal" id="results-modal">
+        <div class="results-card">
+            <div class="results-header">
+                <h3 class="results-title">Test Results</h3>
+            </div>
+            <div class="results-body">
+                <div class="stats-grid">
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark))">
+                        <div class="stat-value" id="score-value">0</div>
+                        <div class="stat-label">Score</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--success), #1b9aaa)">
+                        <div class="stat-value" id="correct-value">0</div>
+                        <div class="stat-label">Correct</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--danger), var(--accent))">
+                        <div class="stat-value" id="incorrect-value">0</div>
+                        <div class="stat-label">Incorrect</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--gray), var(--dark))">
+                        <div class="stat-value" id="unattempted-value">0</div>
+                        <div class="stat-label">Unattempted</div>
+                    </div>
+                </div>
+            </div>
+            <div class="results-footer">
+                <button class="nav-btn nav-btn-primary" onclick="reviewTest()">
+                    <i class="fas fa-search me-1"></i>
+                    <span>Review Test</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Questions data
+        const questions = [];
+        const sections = {};
+        let currentLang = "en";
+        let currentQuestion = 0;
+        let answers = {};
+        let submitted = false;
+        let totalTime = 6 * 60;
+        
+        // Initialize the test
+        window.onload = function() {
+            initializeTest();
+            startTimer();
+            
+            // If on desktop, show the question navigation by default
+            if (window.innerWidth >= 992) {
+                document.getElementById('question-nav').classList.add('show');
+                document.getElementById('main-content').classList.add('with-nav');
+            }
+        };
+        
+        // Initialize test data
+        function initializeTest() {
+            // Add sections and questions
+            
+            sections["18"] = {
+                name: "General Awareness",
+                start: 0,
+                end: 18
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="18">General Awareness</option>`;
+            
+            sections["misc"] = {
+                name: "Miscellaneous",
+                start: 19,
+                end: 19
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="misc">Miscellaneous</option>`;
+            
+            
+                questions.push({
+                    id: "1",
+                    section: "18",
+                    question_en: "<p>1. ______ is reducing the degree or intensity of, or eliminating, pollution.</p>",
+                    question_hi: "<p>1.<span style=\"font-family: Palanquin Dark;\"> ________ प्रदूषण की डिग्री या तीव्रता को कम कर रहा है, या समाप्त कर रहा है।</span></p>",
+                    options_en: ["<p>Abatement</p>", "<p>Aerosol</p>", 
+                                "<p>Absorption</p>", "<p>Aeration</p>"],
+                    options_hi: ["<p><span style=\"font-weight: 400;\">उपशमन (Abatement)</span></p>", "<p><span style=\"font-weight: 400;\">एरोसोल (Aerosol)</span></p>",
+                                "<p><span style=\"font-weight: 400;\">अवशोषण (Absorption)</span></p>", "<p><span style=\"font-weight: 400;\">वायु संचारण (Aeration)</span></p>"],
+                    solution_en: "<p>1.(a) <strong>Abatement</strong><span style=\"font-family: Palanquin Dark;\"><strong> </strong>is reducing the degree or intensity of, or eliminating, pollution. </span><span style=\"font-family: Palanquin Dark;\">An </span><strong><span style=\"font-family: Palanquin Dark;\">aerosol </span></strong><span style=\"font-family: Palanquin Dark;\">is a suspension of fine solid particles or liquid droplets in air or another gas. </span><strong><span style=\"font-family: Palanquin Dark;\">Absorption</span></strong><span style=\"font-family: Palanquin Dark;\"><strong> </strong>is a physical or chemical phenomenon or a process in which atoms, molecules or ions enter some bulk phase &ndash; liquid or solid material.</span><span style=\"font-family: Palanquin Dark;\"> <strong>Aeration</strong></span><span style=\"font-family: Palanquin Dark;\"><strong> </strong>is the process by which air is circulated through, mixed with or dissolved in a liquid.</span></p>",
+                    solution_hi: "<p>1.(a) <strong>उपशमन (Abatement) </strong><span style=\"font-family: Palanquin Dark;\">डिग्री या तीव्रता को कम करना या प्रदूषण को खत्म करना है। एक <strong>एरोसोल </strong>हवा या किसी अन्य गैस में महीन ठोस कणों या तरल बूंदों का निलंबन है। </span><span style=\"font-family: Palanquin Dark;\"><strong>अवशोषण (Absorption)</strong> </span><span style=\"font-family: Palanquin Dark;\">एक भौतिक या रासायनिक घटना या एक प्रक्रिया है जिसमें परमाणु, अणु या आयन कुछ थोक चरण - तरल या ठोस सामग्री में प्रवेश करते हैं। </span><strong><span style=\"font-family: Palanquin Dark;\">वायु संचारण (Aeration)</span></strong><span style=\"font-family: Palanquin Dark;\"> वह प्रक्रिया है जिसके द्वारा हवा को एक तरल में मिश्रित या घुलने के माध्यम से परिचालित किया जाता है।</span></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "2",
+                    section: "18",
+                    question_en: "<p>2. <span style=\"font-family: Palanquin Dark;\">What is the name of the compound having the formula&nbsp; <math xmlns=\"http://www.w3.org/1998/Math/MathML\" class=\"wrs_chemistry\"><msub><mi>CH</mi><mn>3</mn></msub><msub><mi>CH</mi><mn>2</mn></msub><mi>OH</mi></math></span><span style=\"font-family: Palanquin Dark;\">?</span></p>",
+                    question_hi: "<p>2.<span style=\"font-family: Palanquin Dark;\"> </span><span style=\"font-family: Palanquin Dark;\"> सूत्र&nbsp; <math xmlns=\"http://www.w3.org/1998/Math/MathML\" class=\"wrs_chemistry\"><msub><mi>CH</mi><mn>3</mn></msub><msub><mi>CH</mi><mn>2</mn></msub><mi>OH</mi></math> वाले यौगिक का नाम क्या है?</span></p>",
+                    options_en: ["<p>Acetic Acid</p>", "<p>Ethanol</p>", 
+                                "<p>Methane</p>", "<p>Chloroform</p>"],
+                    options_hi: ["<p>एसिटिक एसिड</p>", "<p>इथेनॉल</p>",
+                                "<p>मीथेन</p>", "<p>क्लोरोफॉर्म</p>"],
+                    solution_en: "<p>2.(b) <strong><span style=\"font-family: Palanquin Dark;\">Ethanol (CH</span><sub><span style=\"font-family: Palanquin Dark;\">3</span></sub><span style=\"font-family: Palanquin Dark;\">CH</span><sub><span style=\"font-family: Palanquin Dark;\">2</span></sub></strong><span style=\"font-family: Palanquin Dark;\"><strong>OH)</strong>, </span><span style=\"font-family: Palanquin Dark;\">Ethanol is used in the manufacture of drugs, plastics, lacquers, polishes, plasticizers, and cosmetics. </span><strong><span style=\"font-family: Palanquin Dark;\">Acetic Acid (CH</span><sub><span style=\"font-family: Palanquin Dark;\">3</span></sub></strong><span style=\"font-family: Palanquin Dark;\"><strong>COOH)</strong>, </span><span style=\"font-family: Palanquin Dark;\"> Uses - Acetic Acid in Vinegar, Production of Vinyl Acetate Monomer, Production of Acetic Anhydride, Production of Ester, As a Solvent. </span><span style=\"font-family: Palanquin Dark;\"> <strong>Methane(CH</strong></span><strong><sub><span style=\"font-family: Palanquin Dark;\">4</span></sub><span style=\"font-family: Palanquin Dark;\">)</span></strong><span style=\"font-family: Palanquin Dark;\"> </span><span style=\"font-family: Palanquin Dark;\"> is used primarily as fuel to make heat and light.</span><span style=\"font-family: Palanquin Dark;\"> <strong>Chloroform(CHCL</strong></span><strong><sub><span style=\"font-family: Palanquin Dark;\">3</span></sub><span style=\"font-family: Palanquin Dark;\">)</span></strong><span style=\"font-family: Palanquin Dark;\"> is used as a solvent, to make other chemicals, as a fumigant .</span></p>",
+                    solution_hi: "<p>2.(b) <span style=\"font-family: Palanquin Dark;\"><strong>इथेनॉल </strong>(<strong>CH<sub>3</sub>CH<sub>2</sub></strong><strong>OH</strong></span><span style=\"font-family: Palanquin Dark;\">)</span><span style=\"font-family: Palanquin Dark;\">, इथेनॉल का उपयोग दवाओं, प्लास्टिक, लाख, पॉलिश, प्लास्टिसाइज़र और सौंदर्य प्रसाधनों के निर्माण में किया जाता है। <strong>एसिटिक एसिड</strong> </span><span style=\"font-family: Palanquin Dark;\">(<strong>CH<sub>3</sub></strong><strong>COOH</strong></span><span style=\"font-family: Palanquin Dark;\">),</span><span style=\"font-family: Palanquin Dark;\"> उपयोग - सिरका में एसिटिक एसिड, विनाइल एसीटेट मोनोमर का उत्पादन, एसिटिक एनहाइड्राइड का उत्पादन, एस्टर का उत्पादन, एक विलायक के रूप में। <strong>मीथेन </strong></span><span style=\"font-family: Palanquin Dark;\">(<strong>CH</strong><strong><sub>4</sub></strong></span><span style=\"font-family: Palanquin Dark;\">)</span><span style=\"font-family: Palanquin Dark;\"> मुख्य रूप से गर्मी और प्रकाश बनाने के लिए ईंधन के रूप में प्रयोग किया जाता है। <strong>क्लोरोफॉर्म </strong></span><span style=\"font-family: Palanquin Dark;\">(<strong>CHCL</strong><strong><sub>3</sub></strong></span><span style=\"font-family: Palanquin Dark;\">)</span><span style=\"font-family: Palanquin Dark;\"> का उपयोग विलायक के रूप में, अन्य रसायनों को फ्यूमिगेंट के रूप में करने के लिए किया जाता है।</span></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "3",
+                    section: "18",
+                    question_en: "<p>3. <span style=\"font-family: Palanquin Dark;\">Which of the following compounds in petroleum can cause corrosion to parts of </span><span style=\"font-family: Palanquin Dark;\">internal combustion engines and refineries?</span></p>",
+                    question_hi: "<p>3.<span style=\"font-family: Palanquin Dark;\"> पेट्रोलियम में निम्नलिखित में से कौन सा यौगिक आंतरिक दहन इंजन और रिफाइनरियों के कुछ हिस्सों में जंग का कारण बन सकता है?</span></p>",
+                    options_en: ["<p>Potassium</p>", "<p>Sulphur</p>", 
+                                "<p>Sodium</p>", "<p>Calcium</p>"],
+                    options_hi: ["<p>पोटेशियम</p>", "<p>सल्फर</p>",
+                                "<p>सोडियम</p>", "<p>कैल्शियम</p>"],
+                    solution_en: "<p>3.(b) <span style=\"font-family: Palanquin Dark;\">Sulphur</span><span style=\"font-family: Palanquin Dark;\"> compounds in petroleum can cause corrosion to parts of internal combustion engines and refineries. </span><strong><span style=\"font-family: Palanquin Dark;\">Sulphur</span></strong><span style=\"font-family: Palanquin Dark;\"><strong> </strong>is used in the vulcanisation of black rubber, as a fungicide and in black gunpowder. </span><strong><span style=\"font-family: Palanquin Dark;\">Potassium</span></strong><span style=\"font-family: Palanquin Dark;\"> helps regulate fluid balance, muscle contractions and nerve signals. </span><strong><span style=\"font-family: Palanquin Dark;\">Calcium</span></strong><span style=\"font-family: Palanquin Dark;\"><strong> </strong>is essential for building and maintaining healthy bones and teeth. It may also help manage blood pressure. </span><strong><span style=\"font-family: Palanquin Dark;\">Sodium</span></strong><span style=\"font-family: Palanquin Dark;\"><strong> </strong>is used as a heat exchanger in some nuclear reactors, and as a reagent in the chemicals industry. </span></p>",
+                    solution_hi: "<p>3.(b) <span style=\"font-family: Palanquin Dark;\">पेट्रोलियम में सल्फर यौगिक आंतरिक दहन इंजन और रिफाइनरियों के कुछ हिस्सों में जंग का कारण बन सकते हैं। </span><strong><span style=\"font-family: Palanquin Dark;\">सल्फर </span></strong><span style=\"font-family: Palanquin Dark;\">का उपयोग काले रबर के वल्केनाइजेशन में, कवकनाशी के रूप में और काले बारूद में किया जाता है। </span><strong><span style=\"font-family: Palanquin Dark;\">पोटेशियम </span></strong><span style=\"font-family: Palanquin Dark;\">द्रव संतुलन, मांसपेशियों के संकुचन और तंत्रिका संकेतों को विनियमित करने में मदद करता है। स्वस्थ हड्डियों और दांतों के निर्माण और रखरखाव के लिए </span><strong><span style=\"font-family: Palanquin Dark;\">कैल्शियम</span></strong><span style=\"font-family: Palanquin Dark;\"> आवश्यक है। यह रक्तचाप को प्रबंधित करने में भी मदद कर सकता है।</span><span style=\"font-family: Palanquin Dark;\"> <strong>सोडियम</strong> </span><span style=\"font-family: Palanquin Dark;\">का उपयोग कुछ परमाणु रिएक्टरों में </span><span style=\"font-family: Microsoft Yahei;\">ऊष्मा विनिमयक</span><span style=\"font-family: Palanquin Dark;\"> के रूप में और रसायन उद्योग में अभिकर्मक के रूप में किया जाता है।</span></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "4",
+                    section: "18",
+                    question_en: "<p>4. <span style=\"font-family: Palanquin Dark;\">The chemical symbol of arsenic is:</span></p>",
+                    question_hi: "<p>4. <span style=\"font-family: Palanquin Dark;\">आर्सेनिक का रासायनिक चिन्ह क्या है :</span></p>",
+                    options_en: [" <p> As</span></p>", " <p> Ar</span></p>", 
+                                " <p> Ac</span></p>", " <p> An</span></p>"],
+                    options_hi: [" <p> As</span></p>", "<p>Ar</p>",
+                                "<p>Ac</p>", "<p>An</p>"],
+                    solution_en: "<p>4.(a) <span style=\"font-family: Palanquin Dark;\">The chemical symbol of arsenic is As. Arsenic is a naturally occurring, metalloid component of the Earth\'s crust. </span></p>",
+                    solution_hi: "<p>4.(a) <span style=\"font-family: Palanquin Dark;\">आर्सेनिक का रासायनिक चिन्ह As है। आर्सेनिक पृथ्वी की भूपर्पटी का एक प्राकृतिक रूप से पाया जाने वाला मेटलॉइड घटक है।</span></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "5",
+                    section: "18",
+                    question_en: "<p>5. <span style=\"font-family: Palanquin Dark;\">Why is water fluoridation, which is the controlled adjustment of fluoride to public water supply, done?</span></p>",
+                    question_hi: "<p>5. <span style=\"font-family: Palanquin Dark;\">जल फ्लोराइडेशन, जो कि सार्वजनिक जल आपूर्ति के लिए फ्लोराइड का नियंत्रित समायोजन है, क्यों किया जाता है?</span></p>",
+                    options_en: ["<p>To prevent tooth decay</p>", "<p>To prevent eye disease</p>", 
+                                "<p>To prevent bone disease</p>", "<p>To prevent vitamin deficiency</p>"],
+                    options_hi: ["<p>दाँत क्षय को रोकने के लिए</p>", "<p>नेत्र रोग को रोकने के लिए</p>",
+                                "<p>हड्डी रोग को रोकने के लिए</p>", "<p>विटामिन की कमी को रोकने के लिए</p>"],
+                    solution_en: "<p>5.(a) <span style=\"font-family: Palanquin Dark;\">Water Fluoridation is done to prevent tooth decay which is the controlled adjustment of fluoride to public water supply. </span><span style=\"font-family: Palanquin Dark;\">Fluoride is the ionic form of fluorine. Fluoride is a natural mineral that is found in many foods and in all drinking water. Chemical Formula of Fluoride- </span><span style=\"font-family: Palanquin Dark;\">F</span><span style=\"font-family: Palanquin Dark;\">&ndash;</span><span style=\"font-family: Palanquin Dark;\">. </span></p>",
+                    solution_hi: "<p>5.(a) <span style=\"font-family: Palanquin Dark;\">दांतों की सड़न को रोकने के लिए जल फ्लोराइडेशन किया जाता है जो कि सार्वजनिक जल आपूर्ति में फ्लोराइड का नियंत्रित समायोजन है। फ्लोराइड फ्लोरीन का आयनिक रूप है। फ्लोराइड एक प्राकृतिक खनिज है जो कई खाद्य पदार्थों और सभी पीने के पानी में पाया जाता है। फ्लोराइड का रासायनिक सूत्र- F</span><span style=\"font-family: Palanquin Dark;\">&ndash;</span><span style=\"font-family: Palanquin Dark;\"> है।</span></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "6",
+                    section: "18",
+                    question_en: "<p>6.<span style=\"font-family: Palanquin Dark;\"> Which of the following is an example of monosaccharides?<br></span><span style=\"font-family: Palanquin Dark;\">A. Fructose&nbsp;<br></span><span style=\"font-family: Palanquin Dark;\">B. Sucrose <br></span><span style=\"font-family: Palanquin Dark;\">C. Starch <br></span><span style=\"font-family: Palanquin Dark;\">D. Glucose</span></p>",
+                    question_hi: "<p>6. <span style=\"font-family: Palanquin Dark;\">निम्नलिखित में से कौन मोनोसैकेराइड का उदाहरण है?<br></span><span style=\"font-family: Palanquin Dark;\">A. फ्रुक्टोज<br></span><span style=\"font-family: \'Palanquin Dark\';\">B. सुक्रोज<br></span><span style=\"font-family: Palanquin Dark;\">C. स्टार्च&nbsp;<br></span><span style=\"font-family: Palanquin Dark;\">D. ग्लूकोज</span></p>",
+                    options_en: ["<p>Only B</p>", "<p>Both A and D</p>", 
+                                "<p>Both B and C</p>", "<p>Only C</p>"],
+                    options_hi: ["<p>केवल B</p>", "<p>A और D दोनों</p>",
+                                "<p>B और C दोनों</p>", "<p>केवल C</p>"],
+                    solution_en: "<p>6.(b) <span style=\"font-family: Palanquin Dark;\"><strong>Monosaccharides</strong> </span><span style=\"font-family: Palanquin Dark;\">include glucose (dextrose), fructose, galactose, xylose and ribose. </span><strong><span style=\"font-family: Palanquin Dark;\">Oligosaccharides </span></strong><span style=\"font-family: Palanquin Dark;\">include sucrose, lactose and maltose. Starch, cellulose, and glycogen are some examples of</span><span style=\"font-family: Palanquin Dark;\"> <strong>polysaccharides</strong>.</span></p>",
+                    solution_hi: "<p>6.(b) <strong>मोनोसेकेराइड </strong><span style=\"font-family: Palanquin Dark;\">में ग्लूकोज (</span><span style=\"font-family: Palanquin Dark;\">डेक्सट्रोज</span><span style=\"font-family: Palanquin Dark;\">), फ्रुक्टोज, गैलेक्टोज, जाइलोज और राइबोज शामिल हैं। </span><strong><span style=\"font-family: Palanquin Dark;\">ओलिगोसेकेराइड</span></strong><span style=\"font-family: Palanquin Dark;\"><strong> </strong>में सुक्रोज, लैक्टोज और माल्टोज शामिल हैं। स्टार्च, सेल्युलोज और ग्लाइकोजन </span><strong><span style=\"font-family: Palanquin Dark;\">पॉलीसेकेराइड </span></strong><span style=\"font-family: Palanquin Dark;\">के कुछ उदाहरण हैं।</span></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "7",
+                    section: "18",
+                    question_en: "<p>7. <span style=\"font-family: Palanquin Dark;\">Ozone is an allotrope of ______.</span></p>",
+                    question_hi: "<p>7. <span style=\"font-family: Palanquin Dark;\">ओजोन ______ का एक अपरूप है।</span></p>",
+                    options_en: [" <p> carbon dioxide</span></p>", " <p> oxygen</span></p>", 
+                                " <p> hydrogen</span></p>", " <p> nitrogen </span></p>"],
+                    options_hi: ["<p>कार्बन डाइऑक्साइड</p>", "<p>ऑक्सीजन</p>",
+                                "<p>हाइड्रोजन</p>", "<p>नाइट्रोजन</p>"],
+                    solution_en: "<p>7.(b) <strong>Ozone (O<sub><span style=\"font-family: Palanquin Dark;\">3</span></sub><span style=\"font-family: Palanquin Dark;\">)</span></strong><span style=\"font-family: Palanquin Dark;\"> is a triatomic</span><span style=\"font-family: Palanquin Dark;\"> allotrope of oxygen</span><span style=\"font-family: Palanquin Dark;\">. </span><span style=\"font-family: Palanquin Dark;\">Ozone is a powerful oxidant (far more so than dioxygen) and has many industrial and consumer applications related to oxidation. The ozone layer lies approximately 15-40 kilometers above the Earth\'s surface, in the stratosphere.</span></p>",
+                    solution_hi: "<p>7.(b) <strong>ओजोन<span style=\"font-family: Palanquin Dark;\"> </span><span style=\"font-family: Palanquin Dark;\">(O</span><sub><span style=\"font-family: Palanquin Dark;\">3</span></sub><span style=\"font-family: Palanquin Dark;\">)</span></strong><span style=\"font-family: Palanquin Dark;\"> ऑक्सीजन का त्रिपरमाण्विक (triatomic) अपरूप है। ओजोन एक शक्तिशाली ऑक्सीडेंट (डाइऑक्साइड से कहीं अधिक) है और इसमें ऑक्सीकरण से संबंधित कई औद्योगिक और उपभोक्ता अनुप्रयोग हैं। ओजोन परत पृथ्वी की सतह से लगभग 15-40 किलोमीटर ऊपर समताप मंडल में स्थित है</span></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "8",
+                    section: "18",
+                    question_en: "<p>8.<span style=\"font-family: Palanquin Dark;\"> Urea, a commonly used nitrogen-based fertiliser, is prepared by the reaction between&nbsp; </span><span style=\"font-family: Palanquin Dark;\">ammonia and ______.&nbsp;</span></p>",
+                    question_hi: "<p>8.<span style=\"font-family: Palanquin Dark;\"> यूरिया, आमतौर पर इस्तेमाल किया जाने वाला नाइट्रोजन आधारित उर्वरक, के बीच प्रतिक्रिया द्वारा तैयार किया जाता है अमोनिया और ______।</span></p>",
+                    options_en: ["<p>carbon dioxide</p>", "<p>hydrogen</p>", 
+                                "<p>oxygen</p>", "<p>sulphur</p>"],
+                    options_hi: ["<p>कार्बन डाइऑक्साइड</p>", "<p>हाइड्रोजन</p>",
+                                "<p>ऑक्सीजन</p>", "<p>सल्फर</p>"],
+                    solution_en: "<p>8.(a) <span style=\"font-family: Palanquin Dark;\">Urea, a commonly used nitrogen-based fertilizer, is prepared by the reaction between ammonia and Carbon Dioxide. </span><span style=\"font-family: Palanquin Dark;\">Urea is widely used as a fertilizer, a feed supplement, and a starting material in the manufacture of drugs and plastics.It is used as a nitrogen-release fertilizer .</span></p>",
+                    solution_hi: "<p>8.(a)<span style=\"font-family: Palanquin Dark;\"> यूरिया, आमतौर पर इस्तेमाल किया जाने वाला नाइट्रोजन आधारित उर्वरक, अमोनिया और कार्बन डाइऑक्साइड के बीच प्रतिक्रिया से तैयार किया जाता है। यूरिया का व्यापक रूप से एक उर्वरक, एक फ़ीड पूरक, और दवाओं और प्लास्टिक के निर्माण में एक प्रारंभिक सामग्री के रूप में उपयोग किया जाता है। इसका उपयोग नाइट्रोजन-मुक्त उर्वरक के रूप में किया जाता है।</span></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "9",
+                    section: "18",
+                    question_en: "<p>9. <span style=\"font-family: Palanquin Dark;\">Acidic nature of soil is shown by high concentration of ______.&nbsp;</span></p>",
+                    question_hi: "<p>9.<span style=\"font-family: Palanquin Dark;\"> मिट्टी की अम्लीय प्रकृति को __ की उच्च सांद्रता द्वारा दर्शाया गया है।&nbsp;</span></p>",
+                    options_en: [" <p> hydrogen </span></p>", " <p> phosphorous </span></p>", 
+                                " <p> nitrogen</span></p>", " <p> oxygen </span></p>"],
+                    options_hi: ["<p>हाइड्रोजन</p>", "<p>फास्फोरस</p>",
+                                "<p>नाइट्रोजन</p>", "<p>ऑक्सीजन</p>"],
+                    solution_en: "<p>9.(a) <span style=\"font-family: Palanquin Dark;\">Acidic nature of soil is shown by high concentration of hydrogen . Hydrogen is used in the synthesis of ammonia and the manufacture of nitrogenous fertilizers. The main function of phosphorus is in the formation of bones and teeth. Nitrogen is important to the chemical industry. It is used to make fertilisers, nitric acid, nylon, dyes and explosives. </span></p>",
+                    solution_hi: "<p>9.(a) <span style=\"font-family: Palanquin Dark;\">मिट्टी की अम्लीय प्रकृति को हाइड्रोजन की उच्च सांद्रता द्वारा दर्शाया गया है। हाइड्रोजन का उपयोग अमोनिया के संश्लेषण और नाइट्रोजनयुक्त उर्वरकों के निर्माण में किया जाता है। फास्फोरस का मुख्य कार्य हड्डियों और दांतों के निर्माण में होता है। नाइट्रोजन रासायनिक उद्योग के लिए महत्वपूर्ण है। इसका उपयोग उर्वरक, नाइट्रिक एसिड, नायलॉन, रंजक और विस्फोटक बनाने के लिए किया जाता है।</span></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "10",
+                    section: "18",
+                    question_en: "<p>10.<span style=\"font-family: Palanquin Dark;\"> ______ refers to an environment in which oxygen is readily available.&nbsp;</span></p>",
+                    question_hi: "<p>10.<span style=\"font-family: Palanquin Dark;\"> ________ एक ऐसे वातावरण को संदर्भित करता है जिसमें ऑक्सीजन आसानी से उपलब्ध हो।</span></p>",
+                    options_en: ["<p>Anthropogenic</p>", "<p>Anaerobic</p>", 
+                                "<p>Aerobic</p>", "<p>Acidification</p>"],
+                    options_hi: ["<p>मानवजनित</p>", "<p>अवायवीय</p>",
+                                "<p>एरोबिक</p>", "<p>अम्लीकरण</p>"],
+                    solution_en: "<p>10.(c) <strong><span style=\"font-family: Palanquin Dark;\">Aerobic </span></strong><span style=\"font-family: Palanquin Dark;\">refers to an environment in which oxygen is readily available.</span><span style=\"font-family: Palanquin Dark;\"> <strong>Anthropogenic </strong></span><span style=\"font-family: Palanquin Dark;\">is referring to environmental change caused or influenced by people, either directly or indirectly. The word </span><span style=\"font-family: Palanquin Dark;\"><strong>anaerobic</strong> </span><span style=\"font-family: Palanquin Dark;\">indicates \"without oxygen.\" </span><strong><span style=\"font-family: Palanquin Dark;\">Acidification</span></strong><span style=\"font-family: Palanquin Dark;\"><strong> </strong>describes the process by which addition of N decreases soil pH, which can have a variety of direct and indirect effects on plant growth. </span></p>",
+                    solution_hi: "<p>10.(c) <span style=\"font-family: Palanquin Dark;\"><strong>वातापेक्षी </strong>एक ऐसे वातावरण को संदर्भित करता है जिसमें ऑक्सीजन आसानी से उपलब्ध होती है। <strong>मानवजनित </strong>लोगों के कारण या लोगों द्वारा प्रभावित पर्यावरणीय परिवर्तन का उल्लेख कर रहा है, या तो प्रत्यक्ष या अप्रत्यक्ष रूप से। शब्द <strong>अवायवीय </strong>\"ऑक्सीजन के बिना\" को इंगित करता है। <strong>अम्लीकरण </strong>उस प्रक्रिया का वर्णन करता है जिसके द्वारा एन के अलावा मिट्टी के पीएच को कम कर देता है, जो पौधे के विकास पर विभिन्न प्रकार के प्रत्यक्ष और अप्रत्यक्ष प्रभाव डाल सकता है। </span></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "11",
+                    section: "18",
+                    question_en: "<p>11.<span style=\"font-family: Palanquin Dark;\"> The salinity of ocean waters is calculated as the amount of salt (in gm) dissolved in ______ gm of seawater.</span></p>",
+                    question_hi: "<p>11.<span style=\"font-family: Palanquin Dark;\"> समुद्र के पानी की लवणता की गणना समुद्री जल के ______ ग्राम में घुले नमक (gm में) की मात्रा के रूप में की जाती है।</span></p>",
+                    options_en: ["<p>10,000</p>", "<p>1000</p>", 
+                                "<p>100</p>", "<p>10</p>"],
+                    options_hi: ["<p>10,000</p>", "<p>1000</p>",
+                                "<p>100</p>", "<p>10</p>"],
+                    solution_en: "<p>11.(b) <span style=\"font-family: Palanquin Dark;\">Salinity is the amount of dissolved salts or ions in seawater.</span><span style=\"font-family: Palanquin Dark;\"> The salinity of ocean waters is calculated as the amount of salt (in gm) dissolved in 1000 gm of seawater. </span><span style=\"font-family: Palanquin Dark;\">It is generally expressed as \'parts per thousand\' (ppt).</span></p>",
+                    solution_hi: "<p>11.(b) <span style=\"font-family: Palanquin Dark;\">लवणता समुद्री जल में घुले हुए लवण या आयनों की मात्रा है। समुद्र के पानी की लवणता की गणना 1000 ग्राम समुद्री जल में घुले नमक की मात्रा (ग्राम में) के रूप में की जाती है। इसे आम तौर पर \'पार्ट्स पर हजार\' (ppt) के रूप में व्यक्त किया जाता है।</span></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "12",
+                    section: "18",
+                    question_en: "<p>12.<span style=\"font-family: Palanquin Dark;\"> Which of the following is correctly paired?</span></p>",
+                    question_hi: "<p>12.<span style=\"font-family: Palanquin Dark;\"> निम्नलिखित में से कौन सा युग्म सही है?</span></p>",
+                    options_en: ["<p>Cyanide ion - CN&ndash;</p>", "<p>Ammonia - OH&ndash;</p>", 
+                                "<p>Bromide ion - F&ndash;</p>", "<p>Fluoride ion - Cl&ndash;</p>"],
+                    options_hi: ["<p>साइनाइड आयन (Cyanide ion) - CN&ndash;</p>", "<p>अमोनिया(Ammonia) - OH&ndash;</p>",
+                                "<p>ब्रोमाइड आयन(Bromide ion) - F&ndash;</p>", "<p>फ्लोराइड आयन(Fluoride ion) - Cl&ndash;</p>"],
+                    solution_en: "<p>12.(a) <strong><span style=\"font-family: Palanquin Dark;\">Cyanides</span></strong><span style=\"font-family: Arial Unicode MS;\"><strong> </strong>are chemical compounds which are fast acting poisons with a chemical formula CN&minus;. An </span><strong><span style=\"font-family: Arial Unicode MS;\">ammonia </span></strong><span style=\"font-family: Arial Unicode MS;\">molecule can bind another proton (H+) and become an ammonium ion, NH4+. A </span><span style=\"font-family: Arial Unicode MS;\"><strong>bromide </strong>ion</span><span style=\"font-family: Arial Unicode MS;\"> is the negatively charged form (Br&minus;) of the element bromine. </span><strong><span style=\"font-family: Arial Unicode MS;\">Fluoride</span></strong><span style=\"font-family: Arial Unicode MS;\"><strong> </strong>ion (F</span><span style=\"font-family: Arial Unicode MS;\">_</span><span style=\"font-family: Arial Unicode MS;\">) </span><span style=\"font-family: Arial Unicode MS;\">is the simplest inorganic, monatomic anion of fluorine with basic properties. </span></p>",
+                    solution_hi: "<p>12.(a) <strong>साइनाइड</strong><span style=\"font-family: Arial Unicode MS;\"><strong> </strong>रासायनिक यौगिक हैं जो एक रासायनिक सूत्र CN&minus; के साथ तेजी से काम करने वाले जहर हैं। एक </span><strong><span style=\"font-family: Palanquin Dark;\">अमोनिया </span></strong><span style=\"font-family: Palanquin Dark;\">अणु दूसरे प्रोटॉन (H) को बांध सकता है और अमोनियम आयन, </span><span style=\"font-family: Palanquin Dark;\">NH4+</span><span style=\"font-family: Palanquin Dark;\"> बन सकता है। </span><strong><span style=\"font-family: Palanquin Dark;\">ब्रोमाइड आयन</span></strong><span style=\"font-family: Arial Unicode MS;\"> ब्रोमीन तत्व का ऋणावेशित रूप (Br&minus;) है। </span><strong><span style=\"font-family: Palanquin Dark;\">फ्लोराइड </span></strong><span style=\"font-family: Palanquin Dark;\">आयन (F&ndash;) मूल गुणों के साथ फ्लोरीन का सबसे सरल अकार्बनिक, एकपरमाणुक आयन है।</span></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "13",
+                    section: "18",
+                    question_en: "<p>13.<span style=\"font-family: Palanquin Dark;\"> Which of the following is NOT a water pollutant?</span></p>",
+                    question_hi: "<p>13.<span style=\"font-family: Palanquin Dark;\"> निम्नलिखित में से कौन जल प्रदूषक नहीं है?</span></p>",
+                    options_en: ["<p>Silt</p>", "<p>Glacier</p>", 
+                                "<p>Arsenic</p>", "<p>Chromium</p>"],
+                    options_hi: ["<p>सिल्ट</p>", "<p>ग्लेशियर</p>",
+                                "<p>आर्सेनिक</p>", "<p>क्रोमियम</p>"],
+                    solution_en: "<p>13.(b) <span style=\"font-family: Palanquin Dark;\">A glacier is a persistent body of dense ice that is constantly moving under its own weight. </span><strong><span style=\"font-family: Palanquin Dark;\">Lambert Fisher Glacier(Antarctica)</span></strong><span style=\"font-family: Palanquin Dark;\"><strong> </strong>is the largest glacier in the world. Water pollutants include contamination due to domestic wastes, food processing waste,insecticides and herbicides, volatile organic compounds (VOCs), pollutants from livestock operations, heavy metals, chemical waste etc.</span></p>",
+                    solution_hi: "<p>13.(b) <span style=\"font-family: Palanquin Dark;\">ग्लेशियर घनी बर्फ का एक सतत पिंड है जो लगातार अपने वजन के नीचे घूम रहा है। </span><strong><span style=\"font-family: Palanquin Dark;\">लैम्बर्ट फिशर ग्लेशियर (अंटार्कटिका) </span></strong><span style=\"font-family: Palanquin Dark;\">दुनिया का सबसे बड़ा ग्लेशियर है। जल प्रदूषकों में घरेलू कचरे, खाद्य प्रसंस्करण अपशिष्ट, कीटनाशकों और जड़ी-बूटियों, वाष्पशील कार्बनिक यौगिकों (VOCs), पशुधन संचालन से प्रदूषक, भारी धातु, रासायनिक अपशिष्ट आदि के कारण संदूषण शामिल हैं।</span></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "14",
+                    section: "18",
+                    question_en: "<p>14. <span style=\"font-family: Palanquin Dark;\">How many electrons are there in the outermost shell of a group 16 element?&nbsp;</span></p>",
+                    question_hi: "<p>14. <span style=\"font-family: Palanquin Dark;\">&nbsp;एक समूह 16 तत्व के सबसे बाहरी कोश में कितने इलेक्ट्रॉन हैं? </span></p>",
+                    options_en: ["<p>5</p>", "<p>4</p>", 
+                                "<p>3</p>", "<p>6</p>"],
+                    options_hi: ["<p>5</p>", "<p>4</p>",
+                                "<p>3</p>", "<p>6</p>"],
+                    solution_en: "<p>14.(d) <span style=\"font-family: Palanquin Dark;\">Six electrons are there in the outermost shell of a group 16 element. Group 16 elements- </span><span style=\"font-family: Palanquin Dark;\">Oxygen, Sulfur, Selenium, Tellurium, Polonium. Dmitri Mendeleev is known as the father of the modern Periodic table. A period(7 Periods) is a horizontal row of the periodic table. &middot; A group(18 groups) is a vertical row of the periodic table.</span></p>",
+                    solution_hi: "<p>14.(d) <span style=\"font-family: Palanquin Dark;\">समूह 16 के तत्व के सबसे बाहरी कोश में छह इलेक्ट्रॉन होते हैं। समूह 16 तत्व- ऑक्सीजन, सल्फर, सेलेनियम, टेल्यूरियम, पोलोनियम। दिमित्री मेंडलीफ को आधुनिक आवर्त सारणी का जनक कहा जाता है। आवर्त (7 आवर्त) आवर्त सारणी की एक क्षैतिज पंक्ति है। एक समूह(18 समूह) आवर्त सारणी की एक ऊर्ध्वाधर पंक्ति है।</span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "15",
+                    section: "18",
+                    question_en: "<p>15. <span style=\"font-family: Palanquin Dark;\">In the flocculation method of water treatment ______ chemical is added to water.</span></p>",
+                    question_hi: "<p>15.<span style=\"font-family: Palanquin Dark;\"> जल उपचार की ऊर्णन विधि में पानी में ______ रसायन मिलाया जाता है।</span></p>",
+                    options_en: [" <p> electro-neutral</span></p>", " <p> low negatively charged </span></p>", 
+                                " <p> positively charged</span></p>", " <p> high negatively charged </span></p>"],
+                    options_hi: ["<p>विद्युत उदासीन</p>", "<p>कम ऋणात्मक आवेश</p>",
+                                "<p>धनात्मक आवेश</p>", "<p>उच्च ऋणात्मक आवेश</p>"],
+                    solution_en: "<p>15.(c) <span style=\"font-family: Palanquin Dark;\">In the flocculation method of water treatment positively charged chemicals are added to water. </span><strong><span style=\"font-family: Palanquin Dark;\">Aluminum sulfate </span></strong><span style=\"font-family: Palanquin Dark;\">or</span><span style=\"font-family: Palanquin Dark;\"> <strong>alum ((Al</strong></span><strong><sub><span style=\"font-family: Palanquin Dark;\">2</span></sub><span style=\"font-family: Palanquin Dark;\">(SO</span><span style=\"font-family: Palanquin Dark;\">4</span><span style=\"font-family: Palanquin Dark;\">)</span><sub><span style=\"font-family: Palanquin Dark;\">3</span></sub></strong><span style=\"font-family: Palanquin Dark;\"><strong>)</strong>, <strong>ferric chloride (FeCl</strong></span><strong><sub><span style=\"font-family: Palanquin Dark;\">3</span></sub><span style=\"font-family: Palanquin Dark;\">)</span></strong><span style=\"font-family: Palanquin Dark;\"> and</span><span style=\"font-family: Palanquin Dark;\"> <strong>ferric sulfate (Fe(SO</strong></span><strong><sub><span style=\"font-family: Palanquin Dark;\">4</span></sub><span style=\"font-family: Palanquin Dark;\">)</span><sub><span style=\"font-family: Palanquin Dark;\">3</span></sub><span style=\"font-family: Palanquin Dark;\">)</span></strong><span style=\"font-family: Palanquin Dark;\"> are the most widely used flocculants.</span></p>",
+                    solution_hi: "<p>15.(c) <span style=\"font-family: Palanquin Dark;\">जल उपचार की </span><span style=\"font-family: Palanquin Dark;\">ऊर्णन</span><span style=\"font-family: Palanquin Dark;\"> विधि में पानी में धनावेशित रसायन मिलाए जाते हैं।</span><span style=\"font-family: Palanquin Dark;\"> <strong>एल्युमिनियम सल्फेट</strong></span><span style=\"font-family: Palanquin Dark;\"> या </span><strong><span style=\"font-family: Palanquin Dark;\">फिटकरी</span></strong><span style=\"font-family: Palanquin Dark;\"><strong> ((Al<sub>2</sub>(SO4)<sub>3</sub>)</strong></span><span style=\"font-family: Palanquin Dark;\">, </span><strong><span style=\"font-family: Palanquin Dark;\">फेरिक क्लोराइड</span></strong><span style=\"font-family: Palanquin Dark;\"> <strong>(FeCl<sub>3</sub></strong></span><span style=\"font-family: Palanquin Dark;\"><strong>) </strong>और </span><strong><span style=\"font-family: Palanquin Dark;\">फेरिक सल्फेट</span></strong><span style=\"font-family: Palanquin Dark;\"> <strong>(Fe(SO</strong><strong><sub>4</sub>)<sub>3</sub>)</strong></span><span style=\"font-family: Palanquin Dark;\">&nbsp;सबसे व्यापक रूप से उपयोग किए जाने वाले </span><span style=\"font-family: Palanquin Dark;\">ऊर्णन</span><span style=\"font-family: Palanquin Dark;\"> हैं।</span></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "16",
+                    section: "18",
+                    question_en: "<p>16. <span style=\"font-family: Palanquin Dark;\">Nitrogen is a ______ element.</span></p>",
+                    question_hi: "<p>16. <span style=\"font-family: Palanquin Dark;\">नाइट्रोजन एक _________ तत्व है।</span></p>",
+                    options_en: [" <p> diatomic</span></p>", " <p> tetra-atomic</span></p>", 
+                                " <p> poly-atomic</span></p>", " <p> monoatomic </span></p>"],
+                    options_hi: ["<p>द्विपरमाणुक</p>", "<p>चार -परमाणुक</p>",
+                                "<p>बहु परमाणुक</p>", "<p>एकल परमाणुक</p>"],
+                    solution_en: "<p>16.(a) <span style=\"font-family: Palanquin Dark;\">There are seven </span><strong><span style=\"font-family: Palanquin Dark;\">diatomic elements</span></strong><span style=\"font-family: Palanquin Dark;\">: hydrogen, nitrogen, oxygen, fluorine, chlorine, iodine, bromine. </span><strong><span style=\"font-family: Palanquin Dark;\">Tetra-atomic</span></strong><span style=\"font-family: Palanquin Dark;\"> <strong>element</strong>- Phosphorus. Sulphur (S8​) and phosphorus (P4​) are</span><span style=\"font-family: Palanquin Dark;\"> <strong>polyatomic </strong></span><span style=\"font-family: Palanquin Dark;\"><strong>elements</strong>. </span><strong><span style=\"font-family: Palanquin Dark;\">Monoatomic </span></strong><span style=\"font-family: Palanquin Dark;\"><strong>Elements </strong>-helium (He), neon (Ne), argon (Ar), krypton (Kr), xenon (Xe), radon (Rn), oganesson (Og).</span></p>",
+                    solution_hi: "<p>16.(a) <span style=\"font-family: Palanquin Dark;\">सात </span><strong><span style=\"font-family: Palanquin Dark;\">डायटोमिक तत्व</span></strong><span style=\"font-family: Palanquin Dark;\"> हैं: हाइड्रोजन, नाइट्रोजन, ऑक्सीजन, फ्लोरीन, क्लोरीन, आयोडीन, ब्रोमीन। </span><strong><span style=\"font-family: Palanquin Dark;\">टेट्रा-परमाणु </span></strong><span style=\"font-family: Palanquin Dark;\"><strong>तत्व</strong>- फास्फोरस। सल्फर (S8) और फास्फोरस (P4) <strong>बहुपरमाणुक तत्व </strong>हैं। </span><strong><span style=\"font-family: Palanquin Dark;\">मोनोआटोमिक तत्व</span></strong><span style=\"font-family: Palanquin Dark;\"> - हीलियम (He), नियॉन (Ne), आर्गन (Ar), क्रिप्टन (Kr), क्सीनन (Xe), रेडॉन (Rn), ओगनेसन (Og)।</span></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "17",
+                    section: "18",
+                    question_en: "<p>17. <span style=\"font-family: Palanquin Dark;\">Ozone is a molecule made up of ______ oxygen atoms.&nbsp;</span></p>",
+                    question_hi: "<p>17.<span style=\"font-family: Palanquin Dark;\"> ओजोन ______ ऑक्सीजन परमाणुओं से बना एक अणु है।</span></p>",
+                    options_en: ["<p>four</p>", "<p>two</p>", 
+                                "<p>one</p>", "<p>three</p>"],
+                    options_hi: ["<p>चार</p>", "<p>दो</p>",
+                                "<p>एक</p>", "<p>तीन</p>"],
+                    solution_en: "<p>17.(d) <strong>Ozone</strong><span style=\"font-family: Palanquin Dark;\"><strong> </strong>is a molecule made up of Three oxygen atoms. </span><span style=\"font-family: Palanquin Dark;\">Ozone, or trioxygen, is an inorganic molecule with the chemical formula O</span><sub><span style=\"font-family: Palanquin Dark;\">3</span></sub><span style=\"font-family: Palanquin Dark;\">. </span><span style=\"font-family: Palanquin Dark;\">The ozone layer lies approximately 15-40 kilometers above the Earth\'s surface, in the stratosphere. </span><span style=\"font-family: Palanquin Dark;\">Every Year ozone day is celebrated on 16th September. </span><span style=\"font-family: Palanquin Dark;\">The ozone layer acts as an invisible shield and protects us from harmful ultraviolet (UV) radiation from the sun.</span></p>",
+                    solution_hi: "<p>17.(d) <strong><span style=\"font-family: Palanquin Dark;\">ओजोन</span></strong><span style=\"font-family: Palanquin Dark;\"><strong> </strong>तीन ऑक्सीजन परमाणुओं </span><span style=\"font-family: Palanquin Dark;\">से बना एक अणु है। ओजोन, या ट्राइऑक्सीजन, रासायनिक सूत्र </span><span style=\"font-family: Palanquin Dark;\">O</span><sub><span style=\"font-family: Palanquin Dark;\">3</span></sub><span style=\"font-family: Palanquin Dark;\"> के साथ एक अकार्बनिक अणु है। ओजोन परत पृथ्वी की सतह से लगभग 15-40 किलोमीटर ऊपर समताप मंडल में स्थित है। हर साल 16 सितंबर को ओजोन दिवस मनाया जाता है। ओजोन परत एक अदृश्य ढाल के रूप में कार्य करती है और हमें सूर्य से हानिकारक पराबैंगनी (UV) विकिरण से बचाती है।</span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "18",
+                    section: "18",
+                    question_en: "<p>18.<span style=\"font-family: Palanquin Dark;\"> What is the atomic mass of oxygen (expressed in &lsquo;u&rsquo;)?&nbsp;</span></p>",
+                    question_hi: "<p>18.<span style=\"font-family: Palanquin Dark;\"> ऑक्सीजन का परमाणु भार (\'u\' में व्यक्त) क्या है?</span></p>",
+                    options_en: [" <p> 24 </span></p>", " <p> 8 </span></p>", 
+                                " <p> 16 </span></p>", " <p> 32</span></p>"],
+                    options_hi: ["<p>24</p>", "<p>8</p>",
+                                "<p>16</p>", "<p>32</p>"],
+                    solution_en: "<p>18.(c) <span style=\"font-family: Palanquin Dark;\">The atomic mass of </span><strong><span style=\"font-family: Palanquin Dark;\">oxygen</span></strong><span style=\"font-family: Palanquin Dark;\"><strong> </strong>is 16 and </span><span style=\"font-family: Palanquin Dark;\">atomic number 8.</span><span style=\"font-family: Palanquin Dark;\"> </span><span style=\"font-family: Palanquin Dark;\"><strong>Joseph Priestley</strong> </span><span style=\"font-family: Palanquin Dark;\">discovered Oxygen. It is a member of the chalcogen group in the periodic table, a highly reactive nonmetal, and an oxidizing agent. Oxygen is Earth\'s most abundant element, and after hydrogen and helium, it is the third-most abundant element in the universe. </span><strong><span style=\"font-family: Palanquin Dark;\">Common uses</span></strong><span style=\"font-family: Palanquin Dark;\"> of oxygen include production of steel, plastics and textiles, brazing, welding and cutting of steels and other metals, rocket propellant, oxygen therapy, and life support systems in aircraft, submarines, spaceflight and diving.</span></p>",
+                    solution_hi: "<p>18.(c) <span style=\"font-family: Palanquin Dark;\"><strong>ऑक्सीजन </strong>का परमाणु द्रव्यमान 16 और परमाणु क्रमांक 8 है। </span><strong><span style=\"font-family: Palanquin Dark;\">जोसेफ प्रीस्टले</span></strong><span style=\"font-family: Palanquin Dark;\"> ने ऑक्सीजन की खोज की। यह आवर्त सारणी में </span><span style=\"font-family: Palanquin Dark;\">काल्कोजन</span><span style=\"font-family: Palanquin Dark;\"> </span><span style=\"font-family: Palanquin Dark;\">समूह का सदस्य है, एक अत्यधिक प्रतिक्रियाशील अधातु और एक ऑक्सीकरण एजेंट है। ऑक्सीजन पृथ्वी का सबसे प्रचुर तत्व है। हाइड्रोजन और हीलियम के बाद यह ब्रह्मांड में तीसरा सबसे प्रचुर तत्व है। ऑक्सीजन के <strong>सामान्य उपयोगों</strong> में स्टील, प्लास्टिक और वस्त्रों का उत्पादन, ब्रेज़िंग (धातुओं को आपस में जोड़ने की एक प्रक्रिया), वेल्डिंग और स्टील्स और अन्य धातुओं की कटाई, रॉकेट प्रणोदक (</span><span style=\"font-family: Palanquin Dark;\">rocket propellant)</span><span style=\"font-family: Palanquin Dark;\">, ऑक्सीजन थेरेपी, और विमान, पनडुब्बी, अंतरिक्ष उड़ान और गोताखोरी में जीवन समर्थन प्रणाली शामिल हैं।</span></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "19",
+                    section: "18",
+                    question_en: "<p>19. <span style=\"font-family: Palanquin Dark;\">How many protons are there in a lithium nucleus?</span></p>",
+                    question_hi: "<p>19.<span style=\"font-family: Palanquin Dark;\"> लिथियम नाभिक में कितने प्रोटॉन होते हैं?</span></p>",
+                    options_en: [" <p> 2</span></p>", " <p> 4</span></p>", 
+                                " <p> 5</span></p>", " <p> 3</span></p>"],
+                    options_hi: [" <p> 2</span></p>", " <p> 4</span></p>",
+                                " <p> 5</span></p>", " <p> 3</span></p>"],
+                    solution_en: "<p>19.(d) <strong><span style=\"font-family: Palanquin Dark;\">Lithium </span></strong><span style=\"font-family: Palanquin Dark;\"> </span><span style=\"font-family: Palanquin Dark;\">nucleus has 3 protons (which gives the nucleus a charge of +3, identifying it as the element Lithium) and 4 neutrons (giving it a total mass number of 7). The most important use of lithium is in rechargeable batteries for mobile phones, laptops, digital cameras and electric vehicles. Although it is a metal, it is soft enough to cut with a knife. It is so light it can float on water.</span></p>",
+                    solution_hi: "<p>19.(d) <strong><span style=\"font-family: Palanquin Dark;\">लिथियम </span></strong><span style=\"font-family: Palanquin Dark;\">नाभिक में 3 प्रोटॉन होते हैं (जो नाभिक को +3 का चार्ज देता है, इसे तत्व लिथियम के रूप में पहचानता है) और 4 न्यूट्रॉन (इसे कुल द्रव्यमान संख्या 7 देता है)। लिथियम का सबसे महत्वपूर्ण उपयोग मोबाइल फोन, लैपटॉप, डिजिटल कैमरा और इलेक्ट्रिक वाहनों के लिए रिचार्जेबल बैटरी में होता है। हालांकि यह एक धातु है, यह चाकू से काटने के लिए पर्याप्त नरम है। यह इतना हल्का है कि यह पानी पर तैर सकता है।</span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "20",
+                    section: "misc",
+                    question_en: "<p>20. <span style=\"font-family: Palanquin Dark;\">How many sodium atoms are there in one molecule of sodium peroxide?</span></p>",
+                    question_hi: "<p>20. <span style=\"font-family: Palanquin Dark;\">सोडियम पेरोक्साइड के एक अणु में कितने सोडियम परमाणु होते हैं?</span></p>",
+                    options_en: [" <p> One</span></p>", " <p> Two</span></p>", 
+                                " <p> Four</span></p>", " <p> Three </span></p>"],
+                    options_hi: [" <p> एक</span></p>", " <p> दो</span></p>",
+                                " <p> चार</span></p>", " <p> तीन</span></p>"],
+                    solution_en: "<p>20.(b) <span style=\"font-family: Palanquin Dark;\">There are two sodium atoms in one molecule of sodium peroxide (</span><span style=\"font-family: Palanquin Dark;\">Na</span><sub><span style=\"font-family: Palanquin Dark;\">2</span></sub><span style=\"font-family: Palanquin Dark;\">O</span><sub><span style=\"font-family: Palanquin Dark;\">2</span></sub><span style=\"font-family: Palanquin Dark;\">). </span><strong><span style=\"font-family: Palanquin Dark;\">Sodium Peroxide</span></strong><span style=\"font-family: Palanquin Dark;\"> is a yellowish-white powder. It is used as a bleaching agent, disinfectant, laboratory chemical, and in the production of other chemicals.</span></p>",
+                    solution_hi: "<p>20.(b) <span style=\"font-family: Palanquin Dark;\">सोडियम पेरोक्साइड (Na<sub>2</sub>O<sub>2</sub></span><span style=\"font-family: Palanquin Dark;\">) के एक अणु में दो सोडियम परमाणु होते हैं। </span><strong><span style=\"font-family: Palanquin Dark;\">सोडियम पेरोक्साइड</span></strong><span style=\"font-family: Palanquin Dark;\"> एक पीले-सफेद पाउडर है। इसका उपयोग ब्लीचिंग एजेंट, कीटाणुनाशक, प्रयोगशाला रसायन और अन्य रसायनों के उत्पादन में किया जाता है।</span></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+            
+            // Generate question boxes
+            const boxesContainer = document.getElementById('question-boxes');
+            questions.forEach((q, index) => {
+                const box = document.createElement('div');
+                box.className = 'q-box';
+                box.textContent = index + 1;
+                box.onclick = () => showQuestion(index);
+                box.id = `box-${index}`;
+                boxesContainer.appendChild(box);
+            });
+            
+            // Show first question
+            showQuestion(0);
+            updateProgress();
+        }
+        
+        // Show a specific question
+        
+        function formatContent(text) {
+            if (!text) return '';
+            return text.replace(/<img/g, '<img style="max-width:100%;height:auto;"');
+        }
+        
+        function showQuestion(index) {
+            if (index < 0 || index >= questions.length) return;
+            
+            currentQuestion = index;
+            const question = questions[index];
+            
+            // Update question counter
+            document.getElementById('question-counter').textContent = `Question ${index + 1} of ${questions.length}`;
+            
+            // Update question boxes
+            document.querySelectorAll('.q-box').forEach(box => box.classList.remove('current'));
+            document.getElementById(`box-${index}`).classList.add('current');
+            
+            // Generate question HTML
+            let html = `
+                <div class="question-card">
+                    <div class="question-text">
+                        <div class="en">${formatContent(question.question_en)}</div>
+                        <div class="hi" style="display:none">${formatContent(question.question_hi)} </div>
+                    </div>
+                    <div class="options" id="options-container">`;
+            
+            // Add options
+            ['a', 'b', 'c', 'd'].forEach((opt, i) => {
+                let optionClass = '';
+                let isCorrectAnswer = opt === question.correct;
+                let isUserAnswer = answers[question.id] === opt;
+                
+                // When reviewing, add appropriate classes
+                if (submitted) {
+                    if (isCorrectAnswer) {
+                        optionClass += ' correct-answer';
+                    } else if (isUserAnswer && !isCorrectAnswer) {
+                        optionClass += ' incorrect';
+                    }
+                }
+                
+                html += `
+                    <div class="option-item">
+                        <input class="option-input" type="radio" name="q${index}" 
+                            id="opt-${index}-${opt}" value="${opt}" 
+                            ${isUserAnswer ? 'checked' : ''}
+                            onclick="selectAnswer('${question.id}', '${opt}')">
+                       <label class="option-label${optionClass}" for="opt-${index}-${opt}">
+                            <div class="en">${question.options_en[i]}</div>
+                            <div class="hi" style="display:none">${question.options_hi[i]}</div>
+                        </label>
+                    </div>`;
+            });
+            
+            // Add solution if submitted
+            if (submitted) {
+                const isCorrect = answers[question.id] === question.correct;
+                const resultText = answers[question.id] ? (isCorrect ? 'Correct!' : 'Incorrect!') : 'Not attempted';
+                
+                html += `
+                    <div class="solution-container">
+                        <div class="solution-title">${resultText}</div>
+                        <div class="solution-text">
+                            <div class="en">${question.solution_en}</div>
+                            <div class="hi" style="display:none">${question.solution_hi}</div>
+                        </div>
+                    </div>`;
+            }
+            
+            html += `</div></div>`;
+            
+            document.getElementById('questions-container').innerHTML = html;
+            
+            // Apply language settings
+            applyLanguage();
+            
+            // If in mobile view, close the menu
+            if (window.innerWidth < 992) {
+                toggleNav(false);
+            }
+            
+            // Add review mode class if submitted
+            if (submitted) {
+                document.getElementById('options-container').classList.add('review-mode');
+            }
+        }
+        
+        // Apply current language
+        function applyLanguage() {
+            document.querySelectorAll(`.${currentLang}`).forEach(el => el.style.display = 'block');
+            document.querySelectorAll(`.${currentLang === 'en' ? 'hi' : 'en'}`).forEach(el => el.style.display = 'none');
+            
+            // Update language button text
+            document.getElementById('lang-text').textContent = currentLang === 'en' ? 'Hi' : 'En';
+        }
+        
+        // Select an answer
+        function selectAnswer(qId, option) {
+            if (submitted) return;
+            
+            answers[qId] = option;
+            updateProgress();
+            
+            // Mark question as attempted in the navigation
+            const index = questions.findIndex(q => q.id === qId);
+            if (index >= 0) {
+                const box = document.getElementById(`box-${index}`);
+                box.classList.add('attempted');
+                box.classList.remove('unattempted');
+            }
+        }
+        
+        // Navigate to previous/next question
+        function prevQuestion() { 
+            if (currentQuestion > 0) showQuestion(currentQuestion - 1); 
+        }
+        
+        function nextQuestion() { 
+            if (currentQuestion < questions.length - 1) showQuestion(currentQuestion + 1); 
+        }
+        
+        // Switch section
+        function switchSection(sectionId) {
+            if (sectionId === 'all') {
+                showQuestion(0);
+                return;
+            }
+            
+            const section = sections[sectionId];
+            if (section) showQuestion(section.start);
+        }
+        
+        // Toggle language
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'hi' : 'en';
+            applyLanguage();
+        }
+        
+        // Toggle navigation sidebar
+        function toggleNav(show) {
+            const nav = document.getElementById('question-nav');
+            const overlay = document.getElementById('nav-overlay');
+            
+            if (show === undefined) {
+                show = !nav.classList.contains('show');
+            }
+            
+            if (show) {
+                nav.classList.add('show');
+                overlay.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            } else {
+                nav.classList.remove('show');
+                overlay.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+        }
+        
+        // Update progress
+        function updateProgress() {
+            const attempted = Object.keys(answers).length;
+            document.getElementById('attempted-count').textContent = attempted;
+        }
+        
+        // Start timer
+        function startTimer() {
+            const timerDisplay = document.getElementById('timer-display');
+            let timeLeft = totalTime;
+            
+            const timerInterval = setInterval(() => {
+                if (timeLeft <= 0 || submitted) {
+                    clearInterval(timerInterval);
+                    if (!submitted) submitTest();
+                    return;
+                }
+                
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                timeLeft--;
+            }, 1000);
+        }
+        
+        // Confirm before submitting
+        function confirmSubmit() {
+            if (submitted) return;
+            
+            const attempted = Object.keys(answers).length;
+            const remaining = questions.length - attempted;
+            
+            // Create a more modern confirmation dialog
+            const confirmHtml = `
+                <div style="text-align: center; padding: 20px;">
+                    <h4 style="margin-bottom: 16px; color: var(--dark);">Confirm Submission</h4>
+                    <p style="margin-bottom: 24px; color: var(--gray);">
+                        You have attempted ${attempted} of ${questions.length} questions.<br>
+                        ${remaining} questions are unattempted.
+                    </p>
+                    <div style="display: flex; justify-content: center; gap: 12px;">
+                        <button onclick="this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; border: 1px solid var(--light-gray); background: white; border-radius: 8px; cursor: pointer;">
+                            Cancel
+                        </button>
+                        <button onclick="submitTest(); this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer;">
+                            Submit Test
+                        </button>
+                    </div>
+                </div>`;
+            
+            // Create modal element
+            const modal = document.createElement('div');
+            modal.className = 'results-modal show';
+            modal.innerHTML = `
+                <div class="results-card" style="max-width: 400px;">
+                    <button class="cancel-btn" style="position: absolute; top: 12px; right: 12px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--gray);" onclick="this.closest('.results-modal').remove()">
+                        ×
+                    </button>
+                    ${confirmHtml}
+                </div>`;
+            
+            document.body.appendChild(modal);
+        }
+        
+        // Submit test
+        function submitTest() {
+            if (submitted) return;
+            
+            submitted = true;
+            
+            let score = 0;
+            let correctCount = 0;
+            let incorrectCount = 0;
+            let unattemptedCount = 0;
+            
+            questions.forEach((q, index) => {
+                const userAns = answers[q.id];
+                const box = document.getElementById(`box-${index}`);
+                
+                box.classList.remove('attempted');
+                
+                if (!userAns) {
+                    unattemptedCount++;
+                    box.classList.add('unattempted');
+                } else if (userAns === q.correct) {
+                    correctCount++;
+                    score += q.pos_marks;
+                    box.classList.add('correct');
+                } else {
+                    incorrectCount++;
+                    score -= q.neg_marks;
+                    box.classList.add('incorrect');
+                }
+            });
+            
+            // Update result values
+            document.getElementById('score-value').textContent = score.toFixed(2);
+            document.getElementById('correct-value').textContent = correctCount;
+            document.getElementById('incorrect-value').textContent = incorrectCount;
+            document.getElementById('unattempted-value').textContent = unattemptedCount;
+            
+            // Show the results modal
+            document.getElementById('results-modal').classList.add('show');
+            
+            // Disable submit button
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-check"></i>';
+            submitBtn.style.backgroundColor = 'var(--success)';
+            
+            // Refresh current question view to show solution
+            showQuestion(currentQuestion);
+        }
+        
+        // Review test
+        function reviewTest() {
+            document.getElementById('results-modal').classList.remove('show');
+            showQuestion(0);
+        }
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target === document.getElementById('results-modal')) {
+                document.getElementById('results-modal').classList.remove('show');
+            }
+        });
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') prevQuestion();
+            if (e.key === 'ArrowRight') nextQuestion();
+        });
+    </script>
+</body>
+</html>
