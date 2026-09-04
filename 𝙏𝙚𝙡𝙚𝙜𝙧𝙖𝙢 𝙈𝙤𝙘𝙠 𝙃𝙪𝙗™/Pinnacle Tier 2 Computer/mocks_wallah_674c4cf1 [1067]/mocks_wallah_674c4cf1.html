@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mocks Wallah</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --primary-light: #a29bfe;
+            --primary-dark: #5649c0;
+            --secondary: #00cec9;
+            --accent: #fd79a8;
+            --success: #00b894;
+            --warning: #fdcb6e;
+            --danger: #d63031;
+            --light: #f8f9fa;
+            --dark: #2d3436;
+            --gray: #636e72;
+            --light-gray: #dfe6e9;
+            --card-bg: #ffffff;
+            --body-bg: #f5f6fa;
+            --header-bg: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            --footer-bg: #ffffff;
+            --box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            --box-shadow-sm: 0 2px 10px rgba(0,0,0,0.05);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background-color: var(--body-bg);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            color: var(--dark);
+            line-height: 1.6;
+            padding-bottom: 80px; /* Space for fixed navigation */
+            overflow-x: hidden;
+        }
+        
+        /* Header Styles */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: var(--header-bg);
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            z-index: 1000;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .header-brand {
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .header-brand i {
+            margin-right: 8px;
+            font-size: 1.2rem;
+        }
+        
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .control-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .control-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .control-btn.active {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .timer-display {
+            background: rgba(0,0,0,0.2);
+            border-radius: 18px;
+            padding: 4px 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+        
+        .timer-display i {
+            margin-right: 6px;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-top: 60px;
+            padding: 16px;
+            min-height: calc(100vh - 140px);
+        }
+        
+        .question-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--box-shadow-sm);
+            border: none;
+            transition: var(--transition);
+        }
+        
+        .question-counter {
+            font-size: 0.9rem;
+            color: var(--gray);
+            text-align: center;
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+        
+        .question-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+        
+        .option-item {
+            margin-bottom: 12px;
+            position: relative;
+        }
+        
+        .option-input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+            .question-text {
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        hyphens: auto;
+        max-width: 100%;
+    }
+
+    .question-text img,
+    .option-label img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 8px 0;
+        border-radius: 8px;
+    }
+
+    .option-label {
+        overflow: hidden;
+    }
+
+    .question-card {
+        overflow: hidden;
+    }
+        
+        .option-label {
+            display: block;
+            padding: 14px 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--light-gray);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .option-label:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .option-input:checked + .option-label {
+            border-color: var(--primary);
+            background: rgba(108, 92, 231, 0.05);
+            box-shadow: 0 0 0 1px var(--primary);
+        }
+        
+        .option-input:checked + .option-label::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--primary);
+        }
+        
+        /* When reviewing answers */
+        .review-mode .option-input:checked + .option-label.correct {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.correct::after {
+            background: var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.incorrect {
+            border-color: var(--danger);
+            background: rgba(214, 48, 49, 0.05);
+            box-shadow: 0 0 0 1px var(--danger);
+        }
+        
+        .MathJax, .mjx-chtml {
+            overflow-x: auto;
+            max-width: 100%;
+            display: inline-block;
+        }
+
+        
+        .review-mode .option-input:checked + .option-label.incorrect::after {
+            background: var(--danger);
+        }
+        
+        .review-mode .option-label.correct-answer {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-label.correct-answer::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--success);
+        }
+        
+        .solution-container {
+            margin-top: 20px;
+            padding: 16px;
+            background: rgba(108, 92, 231, 0.05);
+            border-radius: 12px;
+            border-left: 3px solid var(--primary);
+        }
+        
+        .solution-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+        
+        /* Question Navigation */
+        .question-nav {
+            position: fixed;
+            top: 60px;
+            right: 0;
+            bottom: 80px;
+            width: 100%;
+            max-width: 320px;
+            background: var(--card-bg);
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            transform: translateX(100%);
+            transition: var(--transition);
+            z-index: 900;
+            overflow-y: auto;
+            padding: 16px;
+        }
+        
+        .question-nav.show {
+            transform: translateX(0);
+        }
+        
+        .nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .nav-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+        
+        .question-stats {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .stat-badge {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        
+        .section-selector {
+            width: 100%;
+            margin-bottom: 16px;
+            border-radius: 12px;
+            padding: 10px 16px;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            font-size: 0.9rem;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 16px;
+        }
+        
+        .question-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+            gap: 8px;
+        }
+        
+        .q-box {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .q-box:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .q-box.attempted {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .q-box.correct {
+            background-color: var(--success);
+            color: white;
+            border-color: var(--success);
+        }
+        
+        .q-box.incorrect {
+            background-color: var(--danger);
+            color: white;
+            border-color: var(--danger);
+        }
+        
+        .q-box.current {
+            border: 2px solid var(--accent) !important;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .q-box.unattempted {
+            background-color: var(--gray);
+            color: white;
+            border-color: var(--gray);
+        }
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: var(--footer-bg);
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            z-index: 800;
+        }
+        
+        .nav-btn {
+            height: 48px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 20px;
+            transition: var(--transition);
+            gap: 8px;
+        }
+        
+        .nav-btn i {
+            font-size: 1rem;
+        }
+        
+        .nav-btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .nav-btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+        
+        .nav-btn-outline:hover {
+            background: rgba(108, 92, 231, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        /* Overlay when nav is open */
+        .nav-overlay {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            bottom: 80px;
+            background: rgba(0,0,0,0.5);
+            z-index: 800;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+        }
+        
+        .nav-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        /* Results Modal */
+        .results-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1100;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+            padding: 16px;
+        }
+        
+        .results-modal.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .results-card {
+            background: white;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+            transform: translateY(20px);
+            transition: var(--transition);
+        }
+        
+        .results-modal.show .results-card {
+            transform: translateY(0);
+        }
+        
+        .results-header {
+            background: var(--header-bg);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .results-title {
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .results-body {
+            padding: 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            color: white;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+        
+        .results-footer {
+            padding: 16px 20px;
+            display: flex;
+            justify-content: center;
+            border-top: 1px solid var(--light-gray);
+        }
+        
+        /* Responsive Adjustments */
+        @media (min-width: 992px) {
+            .question-nav {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-right: 320px;
+            }
+            
+            .nav-overlay {
+                display: none;
+            }
+            
+            .bottom-nav {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .question-grid {
+                grid-template-columns: repeat(auto-fill, minmax(36px, 1fr));
+                gap: 6px;
+            }
+            
+            .q-box {
+                width: 36px;
+                height: 36px;
+                font-size: 0.9rem;
+            }
+            
+            .option-label {
+                padding: 12px 14px;
+            }
+            
+            .question-text {
+                font-size: 1rem;
+            }
+            
+            .header-brand {
+                font-size: 1rem;
+            }
+            
+            .control-btn {
+                width: 32px;
+                height: 32px;
+            }
+            
+            .timer-display {
+                font-size: 0.8rem;
+                padding: 4px 10px;
+            }
+            
+            .nav-btn {
+                height: 44px;
+                padding: 0 16px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="#" class="header-brand">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Mocks Wallah</span>
+            </a>
+            
+            <div class="header-controls">
+                <!-- Timer -->
+                <div class="timer-display">
+                    <i class="far fa-clock"></i>
+                    <span id="timer-display">15:00</span>
+                </div>
+                
+                <!-- Language toggle -->
+                <button class="control-btn" id="lang-btn" onclick="toggleLanguage()">
+                    <span id="lang-text">En</span>
+                </button>
+                
+                <!-- Submit button -->
+                <button class="control-btn" id="submit-btn" onclick="confirmSubmit()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+                
+                <!-- Questions toggle for mobile -->
+                <button class="control-btn nav-toggle-btn" id="nav-toggle" onclick="toggleNav()">
+                    <i class="fas fa-th"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main content -->
+    <main class="main-content" id="main-content">
+        <div class="question-counter" id="question-counter">Question 1 of 20</div>
+        
+        <!-- Questions will be displayed here -->
+        <div id="questions-container"></div>
+    </main>
+    
+    <!-- Overlay for mobile nav -->
+    <div class="nav-overlay" id="nav-overlay" onclick="toggleNav(false)"></div>
+    
+    <!-- Question navigation sidebar -->
+    <aside class="question-nav" id="question-nav">
+        <div class="nav-header">
+            <h3 class="nav-title">Questions</h3>
+            <div class="question-stats">
+                <span class="stat-badge bg-primary" id="attempted-count">0</span>
+                <span class="stat-badge bg-gray" id="total-count">20</span>
+                <button class="control-btn d-lg-none" onclick="toggleNav(false)">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Section selector -->
+        <select class="section-selector" id="section-selector" onchange="switchSection(this.value)">
+            <option value="all">All Sections</option>
+        </select>
+        
+        <!-- Question grid -->
+        <div class="question-grid" id="question-boxes"></div>
+    </aside>
+    
+    <!-- Bottom navigation for mobile -->
+    <nav class="bottom-nav d-lg-none">
+        <button class="nav-btn nav-btn-outline" onclick="prevQuestion()">
+            <i class="fas fa-chevron-left"></i>
+            <span>Previous</span>
+        </button>
+        <button class="nav-btn nav-btn-outline" onclick="nextQuestion()">
+            <span>Next</span>
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </nav>
+    
+    <!-- Results modal -->
+    <div class="results-modal" id="results-modal">
+        <div class="results-card">
+            <div class="results-header">
+                <h3 class="results-title">Test Results</h3>
+            </div>
+            <div class="results-body">
+                <div class="stats-grid">
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark))">
+                        <div class="stat-value" id="score-value">0</div>
+                        <div class="stat-label">Score</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--success), #1b9aaa)">
+                        <div class="stat-value" id="correct-value">0</div>
+                        <div class="stat-label">Correct</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--danger), var(--accent))">
+                        <div class="stat-value" id="incorrect-value">0</div>
+                        <div class="stat-label">Incorrect</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--gray), var(--dark))">
+                        <div class="stat-value" id="unattempted-value">0</div>
+                        <div class="stat-label">Unattempted</div>
+                    </div>
+                </div>
+            </div>
+            <div class="results-footer">
+                <button class="nav-btn nav-btn-primary" onclick="reviewTest()">
+                    <i class="fas fa-search me-1"></i>
+                    <span>Review Test</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Questions data
+        const questions = [];
+        const sections = {};
+        let currentLang = "en";
+        let currentQuestion = 0;
+        let answers = {};
+        let submitted = false;
+        let totalTime = 15 * 60;
+        
+        // Initialize the test
+        window.onload = function() {
+            initializeTest();
+            startTimer();
+            
+            // If on desktop, show the question navigation by default
+            if (window.innerWidth >= 992) {
+                document.getElementById('question-nav').classList.add('show');
+                document.getElementById('main-content').classList.add('with-nav');
+            }
+        };
+        
+        // Initialize test data
+        function initializeTest() {
+            // Add sections and questions
+            
+            sections["31"] = {
+                name: "Computer Knowledge",
+                start: 0,
+                end: 18
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="31">Computer Knowledge</option>`;
+            
+            sections["misc"] = {
+                name: "Miscellaneous",
+                start: 19,
+                end: 19
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="misc">Miscellaneous</option>`;
+            
+            
+                questions.push({
+                    id: "1",
+                    section: "31",
+                    question_en: " <p>1. Facebook is a/an ______.</p>",
+                    question_hi: "<p>1.<span style=\"font-family: Palanquin Dark;\">&#2347;&#2375;&#2360;&#2348;&#2369;&#2325; &#2319;&#2325; _______ &#2361;&#2376;&#2404;</span></p>\n",
+                    options_en: [" <p> Social network site</p>", " <p> Browser</p>", 
+                                " <p> Search engine</p>", " <p> Internet service provider</p>"],
+                    options_hi: ["<p><span style=\"font-weight: 400;\">&#2360;&#2379;&#2358;&#2354; &#2344;&#2375;&#2335;&#2357;&#2352;&#2381;&#2325; &#2360;&#2366;&#2311;&#2335;(Social network site)</span></p>\n", "<p><span style=\"font-weight: 400;\">&nbsp;&#2348;&#2381;&#2352;&#2366;&#2313;&#2332;&#2364;&#2352;(Browser)</span></p>\n",
+                                "<p><span style=\"font-weight: 400;\">&#2326;&#2379;&#2332; &#2311;&#2306;&#2332;&#2344;( Search engine)</span></p>\n", "<p><span style=\"font-weight: 400;\">&#2311;&#2306;&#2335;&#2352;&#2344;&#2375;&#2335; &#2360;&#2375;&#2357;&#2366; &#2346;&#2381;&#2352;&#2342;&#2366;&#2340;&#2366; (Internet service provider)</span></p>\n"],
+                    solution_en: " <p>1.(a) </span><span style=\"font-family:Palanquin Dark\">Facebook is an online social media and social networking service owned by American company Meta Platforms.It was founded in 2004 by </span><span style=\"font-family:Palanquin Dark\">Mark Zuckerberg</span><span style=\"font-family:Palanquin Dark\">.</span></p>",
+                    solution_hi: "<p>1.(a)<span style=\"font-family: Palanquin Dark;\"> &#2347;&#2375;&#2360;&#2348;&#2369;&#2325; &#2309;&#2350;&#2375;&#2352;&#2367;&#2325;&#2368; &#2325;&#2306;&#2346;&#2344;&#2368; &#2350;&#2375;&#2335;&#2366; &#2346;&#2381;&#2354;&#2375;&#2335;&#2347;&#2377;&#2352;&#2381;&#2350;&#2381;&#2360; &#2325;&#2375; &#2360;&#2381;&#2357;&#2366;&#2350;&#2367;&#2340;&#2381;&#2357; &#2357;&#2366;&#2354;&#2368; &#2319;&#2325; &#2321;&#2344;&#2354;&#2366;&#2311;&#2344; &#2360;&#2379;&#2358;&#2354; &#2350;&#2368;&#2337;&#2367;&#2351;&#2366; &#2324;&#2352; &#2360;&#2379;&#2358;&#2354; &#2344;&#2375;&#2335;&#2357;&#2352;&#2381;&#2325;&#2367;&#2306;&#2327; &#2360;&#2375;&#2357;&#2366; &#2361;&#2376;&#2404; &#2311;&#2360;&#2325;&#2368; &#2360;&#2381;&#2341;&#2366;&#2346;&#2344;&#2366; 2004 &#2350;&#2375;&#2306; &#2350;&#2366;&#2352;&#2381;&#2325; &#2332;&#2369;&#2325;&#2352;&#2348;&#2352;&#2381;&#2327; &#2344;&#2375; &#2325;&#2368; &#2341;&#2368;&#2404;</span></p>\n",
+                    correct: "a",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "2",
+                    section: "31",
+                    question_en: "<p>2.<span style=\"font-family: Palanquin Dark;\"> Choose the wrong option with respect to MS-Excel 2010.</span></p>\n",
+                    question_hi: "<p>2.<span style=\"font-family: Palanquin Dark;\"> MS-Excel 2010 &#2325;&#2375; &#2360;&#2306;&#2348;&#2306;&#2343; &#2350;&#2375;&#2306; &#2327;&#2354;&#2340; &#2357;&#2367;&#2325;&#2354;&#2381;&#2346; &#2330;&#2369;&#2344;&#2375;&#2306;&#2404;</span></p>\n",
+                    options_en: ["<p>In MS-Excel 2010, we can save the file by using F12.</p>\n", "<p>In MS-Excel 2010, we can insert a table from insert tab.</p>\n", 
+                                "<p>In MS-Excel 2010, we can insert comment to a cell.</p>\n", "<p>In MS-Excel 2010, to open a new blank file Ctrl+O is used.</p>\n"],
+                    options_hi: ["<p>&#2319;&#2350;&#2319;&#2360;-&#2319;&#2325;&#2381;&#2360;&#2375;&#2354; 2010 &#2350;&#2375;&#2306;, &#2361;&#2350; F12 &#2325;&#2366; &#2313;&#2346;&#2351;&#2379;&#2327; &#2325;&#2352;&#2325;&#2375; &#2347;&#2364;&#2366;&#2311;&#2354; &#2325;&#2379; &#2360;&#2375;&#2357; &#2325;&#2352; &#2360;&#2325;&#2340;&#2375; &#2361;&#2376;&#2306;&#2404;</p>\n", "<p>MS-Excel 2010 &#2350;&#2375;&#2306;, &#2361;&#2350; &#2311;&#2344;&#2381;&#2360;&#2352;&#2381;&#2335; &#2335;&#2376;&#2348; &#2360;&#2375; &#2335;&#2375;&#2348;&#2354; &#2346;&#2381;&#2352;&#2357;&#2367;&#2359;&#2381;&#2335; &#2325;&#2352; &#2360;&#2325;&#2340;&#2375; &#2361;&#2376;&#2306;&#2404;</p>\n",
+                                "<p>&#2319;&#2350;&#2319;&#2360;-&#2319;&#2325;&#2381;&#2360;&#2375;&#2354; 2010 &#2350;&#2375;&#2306;, &#2361;&#2350; &#2325;&#2367;&#2360;&#2368; &#2360;&#2375;&#2354; &#2350;&#2375;&#2306; &#2335;&#2367;&#2346;&#2381;&#2346;&#2339;&#2368; &#2346;&#2381;&#2352;&#2357;&#2367;&#2359;&#2381;&#2335; &#2325;&#2352; &#2360;&#2325;&#2340;&#2375; &#2361;&#2376;&#2306;&#2404;</p>\n", "<p>MS-Excel 2010 &#2350;&#2375;&#2306; &#2344;&#2312; &#2352;&#2367;&#2325;&#2381;&#2340; &#2347;&#2366;&#2311;&#2354; &#2326;&#2379;&#2354;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; Ctrl O &#2325;&#2366; &#2346;&#2381;&#2352;&#2351;&#2379;&#2327; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404;</p>\n"],
+                    solution_en: "<p>2.(d)<span style=\"font-family: Palanquin Dark;\"> </span><span style=\"font-family: Palanquin Dark;\">In Microsoft Excel and all other spreadsheet programs, pressing</span><strong><span style=\"font-family: Palanquin Dark;\"> Ctrl + O</span></strong><span style=\"font-family: Palanquin Dark;\"> brings up the Open window, allowing you to load an existing spreadsheet.</span></p>\n",
+                    solution_hi: "<p><span style=\"font-family: Palanquin Dark;\">2.(d)</span><span style=\"font-family: Palanquin Dark;\"> </span><span style=\"font-family: Palanquin Dark;\">Microsoft Excel &#2324;&#2352; &#2309;&#2344;&#2381;&#2351; &#2360;&#2349;&#2368; &#2360;&#2381;&#2346;&#2381;&#2352;&#2376;&#2337;&#2358;&#2368;&#2335; &#2346;&#2381;&#2352;&#2379;&#2327;&#2381;&#2352;&#2366;&#2350; &#2350;&#2375;&#2306;, <strong>Ctrl + O </strong>&#2342;&#2348;&#2366;&#2344;&#2375; &#2360;&#2375; &#2323;&#2346;&#2344; &#2357;&#2367;&#2306;&#2337;&#2379; &#2326;&#2369;&#2354;&#2340;&#2368; &#2361;&#2376;, &#2332;&#2367;&#2360;&#2360;&#2375; &#2310;&#2346; &#2350;&#2380;&#2332;&#2370;&#2342;&#2366; &#2360;&#2381;&#2346;&#2381;&#2352;&#2375;&#2337;&#2358;&#2368;&#2335; (spreadsheet) &#2325;&#2379; &#2354;&#2379;&#2337; (load) &#2325;&#2352; &#2360;&#2325;&#2340;&#2375; &#2361;&#2376;&#2306;&#2404;</span></p>\n",
+                    correct: "d",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "3",
+                    section: "31",
+                    question_en: "<p>3. <span style=\"font-family: Palanquin Dark;\">______ tab in MS-Excel 2010 ribbon bar contains the most frequently used commands </span><span style=\"font-family: Palanquin Dark;\">such as copying and pasting, sorting and filtering, formatting, etc.</span></p>\n",
+                    question_hi: "<p>3. &#2319;&#2350;&#2360; - &#2319;&#2325;&#2381;&#2360;&#2375;&#2354; 2010 (<span style=\"font-family: Palanquin Dark;\">MS-Excel 2010) &#2352;&#2367;&#2348;&#2344; &#2348;&#2366;&#2352; &#2350;&#2375;&#2306; ______ &#2335;&#2376;&#2348; &#2350;&#2375;&#2306; &#2360;&#2348;&#2360;&#2375; &#2309;&#2343;&#2367;&#2325; &#2348;&#2366;&#2352; &#2313;&#2346;&#2351;&#2379;&#2327; &#2325;&#2367;&#2319; &#2332;&#2366;&#2344;&#2375; &#2357;&#2366;&#2354;&#2375; &#2325;&#2350;&#2366;&#2306;&#2337; &#2361;&#2379;&#2340;&#2375; &#2361;&#2376;&#2306; &#2332;&#2376;&#2360;&#2375; &#2325;&#2377;&#2346;&#2368; &#2324;&#2352; &#2346;&#2375;&#2360;&#2381;&#2335; &#2325;&#2352;&#2344;&#2366;,&#2358;&#2366;&#2352;&#2381;&#2335; &#2325;&#2352;&#2344;&#2366; &#2324;&#2352; &#2398;&#2367;&#2354;&#2381;&#2335;&#2352; &#2325;&#2352;&#2344;&#2366; , &#2347;&#2377;&#2352;&#2381;&#2350;&#2375;&#2335; &#2325;&#2352;&#2344;&#2366; &#2310;&#2342;&#2367;&#2404;</span></p>\n",
+                    options_en: ["<p>HOME</p>\n", "<p>REVIEW</p>\n", 
+                                "<p>FORMULA</p>\n", "<p>FILE</p>\n"],
+                    options_hi: ["<p>HOME</p>\n", "<p>REVIEW</p>\n",
+                                "<p>FORMULA</p>\n", "<p>FILE</p>\n"],
+                    solution_en: "<p>3.(a) <strong><span style=\"font-family: Palanquin Dark;\">Home Tab</span></strong><span style=\"font-family: Arial Unicode MS;\">&rarr; </span><span style=\"font-family: Arial Unicode MS;\">The excel Home Tab is used to execute regular instructions like bold, underline, copy, and paste.<strong> </strong></span><strong><span style=\"font-family: Arial Unicode MS;\">Formula</span></strong><span style=\"font-family: Arial Unicode MS;\"> </span><span style=\"font-family: Arial Unicode MS;\">&rarr;</span><span style=\"font-family: Arial Unicode MS;\">In Microsoft Excel, a formula is an expression that operates on values in a range of </span><span style=\"font-family: Arial Unicode MS;\">cells. </span><strong><span style=\"font-family: Arial Unicode MS;\">Review Tab</span></strong><span style=\"font-family: Arial Unicode MS;\">&rarr;</span><span style=\"font-family: Arial Unicode MS;\">The Review tab provides icons for document review-related commands, such as spelling check, translation, track changes, apply changes, comments and so on. </span><span style=\"font-family: Arial Unicode MS;\"><strong>File</strong> </span><span style=\"font-family: Arial Unicode MS;\">&rarr;</span><span style=\"font-family: Arial Unicode MS;\">The File ribbon items enable you to perform file management functions, including open, save, close, and print.</span></p>\n",
+                    solution_hi: "<p><span style=\"font-family: Palanquin Dark;\">3.(a) <strong>&#2361;&#2379;&#2350; &#2335;&#2376;&#2348; (</strong></span><strong><span style=\"font-family: Palanquin Dark;\">Home Tab</span></strong><span style=\"font-family: Arial Unicode MS;\"><strong>) </strong>&rarr;</span><span style=\"font-family: Palanquin Dark;\"> &#2319;&#2325;&#2381;&#2360;&#2375;&#2354; &#2361;&#2379;&#2350; &#2335;&#2376;&#2348; &#2325;&#2366; &#2313;&#2346;&#2351;&#2379;&#2327; &#2348;&#2379;&#2354;&#2381;&#2337; (bold), &#2309;&#2306;&#2337;&#2352;&#2354;&#2366;&#2311;&#2344; (underline), &#2325;&#2377;&#2346;&#2368; (copy) &#2324;&#2352; &#2346;&#2375;&#2360;&#2381;&#2335; (paste) &#2332;&#2376;&#2360;&#2375; &#2344;&#2367;&#2351;&#2350;&#2367;&#2340; &#2344;&#2367;&#2352;&#2381;&#2342;&#2375;&#2358;&#2379;&#2306; &#2325;&#2379; &#2319;&#2325;&#2381;&#2360;&#2375;&#2325;&#2381;&#2351;&#2370;&#2335; (execute) &#2325;&#2352;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404; </span><strong><span style=\"font-family: Palanquin Dark;\">Formula</span></strong><span style=\"font-family: Arial Unicode MS;\"><strong>&rarr;</strong> &#2350;&#2366;&#2311;&#2325;&#2381;&#2352;&#2379;&#2360;&#2377;&#2347;&#2381;&#2335; &#2319;&#2325;&#2381;&#2360;&#2375;&#2354; &#2350;&#2375;&#2306;, &#2347;&#2377;&#2352;&#2381;&#2350;&#2370;&#2354;&#2366; &#2319;&#2325; &#2319;&#2325;&#2381;&#2360;&#2346;&#2381;&#2352;&#2375;&#2358;&#2344; &#2361;&#2379;&#2340;&#2366; &#2361;&#2376; &#2332;&#2379; &#2360;&#2375;&#2354; &#2325;&#2368; &#2352;&#2375;&#2306;&#2332; &#2350;&#2375;&#2306; &#2357;&#2376;&#2354;&#2381;&#2351;&#2370; &#2346;&#2352; &#2321;&#2346;&#2352;&#2375;&#2335; &#2361;&#2379;&#2340;&#2366; &#2361;&#2376;&#2404; <strong>&#2352;&#2367;&#2357;&#2381;&#2351;&#2369; &#2335;&#2376;&#2348; (review tab) </strong>&rarr; &#2352;&#2367;&#2357;&#2381;&#2351;&#2369; &#2335;&#2376;&#2348; &#2342;&#2360;&#2381;&#2340;&#2366;&#2357;&#2375;&#2332;&#2364; &#2352;&#2367;&#2357;&#2381;&#2351;&#2369; &#2360;&#2375; &#2360;&#2306;&#2348;&#2306;&#2343;&#2367;&#2340; &#2325;&#2350;&#2366;&#2306;&#2337;&#2381;&#2360; &#2325;&#2375; &#2354;&#2367;&#2319; &#2310;&#2311;&#2325;&#2344; &#2346;&#2381;&#2352;&#2342;&#2366;&#2344; &#2325;&#2352;&#2340;&#2366; &#2361;&#2376;, &#2332;&#2376;&#2360;&#2375; &#2357;&#2352;&#2381;&#2340;&#2344;&#2368; &#2332;&#2366;&#2306;&#2330;, &#2309;&#2344;&#2369;&#2357;&#2366;&#2342;, &#2335;&#2381;&#2352;&#2376;&#2325; &#2330;&#2375;&#2306;&#2332; , &#2309;&#2346;&#2381;&#2354;&#2366;&#2312; &#2330;&#2375;&#2306;&#2332; , &#2325;&#2350;&#2375;&#2306;&#2335; &#2310;&#2342;&#2367;&#2404; </span><strong><span style=\"font-family: Palanquin Dark;\">&#2347;&#2364;&#2366;&#2311;&#2354; </span></strong><span style=\"font-family: Arial Unicode MS;\"><strong>(File)</strong>&rarr; &#2347;&#2364;&#2366;&#2311;&#2354; &#2352;&#2367;&#2348;&#2344; &#2310;&#2311;&#2335;&#2350; &#2310;&#2346;&#2325;&#2379; &#2347;&#2364;&#2366;&#2311;&#2354; &#2346;&#2381;&#2352;&#2348;&#2306;&#2343;&#2344; &#2347;&#2306;&#2325;&#2381;&#2358;&#2344; &#2325;&#2352;&#2344;&#2375; &#2350;&#2375;&#2306; &#2360;&#2325;&#2381;&#2359;&#2350; &#2348;&#2344;&#2366;&#2340;&#2366; &#2361;&#2376;, &#2332;&#2367;&#2360;&#2350;&#2375;&#2306; &#2323;&#2346;&#2344; , &#2360;&#2375;&#2357; , &#2325;&#2381;&#2354;&#2379;&#2332; &#2324;&#2352; &#2346;&#2381;&#2352;&#2367;&#2306;&#2335; &#2325;&#2352;&#2344;&#2366; &#2358;&#2366;&#2350;&#2367;&#2354; &#2361;&#2376;&#2404;</span></p>\n",
+                    correct: "a",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "4",
+                    section: "31",
+                    question_en: "<p>4. <span style=\"font-family: Arial Unicode MS;\">Consider a formula =A3+B4 is typed in cell A5. If cell A5 is copied and pasted into cell </span><span style=\"font-family: Arial Unicode MS;\">E9, then what will be the formula in cell E9?</span></p>\n",
+                    question_hi: "<p>4. <span style=\"font-family: Palanquin Dark;\">&#2360;&#2375;&#2354; A5 &#2350;&#2375;&#2306; &#2335;&#2366;&#2311;&#2346; &#2325;&#2367;&#2351;&#2366; &#2327;&#2351;&#2366; &#2319;&#2325; &#2347;&#2366;&#2352;&#2381;&#2350;&#2370;&#2354;&#2366; =A3+ B4 &#2346;&#2352; &#2357;&#2367;&#2330;&#2366;&#2352; &#2325;&#2352;&#2375;&#2306; &#2351;&#2342;&#2367; &#2360;&#2375;&#2354; A5 &#2325;&#2379; &#2325;&#2377;&#2346;&#2368; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376; &#2324;&#2352; &#2360;&#2375;&#2354; E9 &#2350;&#2375; &#2346;&#2375;&#2360;&#2381;&#2335; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376; &#2340;&#2379; &#2360;&#2375;&#2354; E9 &#2350;&#2375;&#2306; &#2347;&#2366;&#2352;&#2381;&#2350;&#2370;&#2354;&#2366; &#2325;&#2381;&#2351;&#2366; &#2361;&#2379;&#2327;&#2366;?</span></p>\n",
+                    options_en: ["<p>=E7+F8</p>\n", "<p>=E8+F7</p>\n", 
+                                "<p>=A3+B4</p>\n", "<p>=B4+C5</p>\n"],
+                    options_hi: ["<p>=E7+F8</p>\n", "<p>=E8+F7</p>\n",
+                                "<p>=A3+B4</p>\n", "<p>=B4+C5</p>\n"],
+                    solution_en: "<p>4.(a)<span style=\"font-family: Palanquin Dark;\"> =E7+ F8 is the correct answer.</span></p>\n",
+                    solution_hi: "<p>4.(a)<span style=\"font-family: Palanquin Dark;\"> =E7 + F8 &#2360;&#2361;&#2368; &#2313;&#2340;&#2381;&#2340;&#2352; &#2361;&#2376;&#2404;</span></p>\n",
+                    correct: "a",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "5",
+                    section: "31",
+                    question_en: "<p>5. <span style=\"font-family: Palanquin Dark;\">Which of the following is not a web mail provider?</span></p>\n",
+                    question_hi: "<p>5.<span style=\"font-family: Palanquin Dark;\">&#2344;&#2367;&#2350;&#2381;&#2344;&#2354;&#2367;&#2326;&#2367;&#2340; &#2350;&#2375;&#2306; &#2360;&#2375; &#2325;&#2380;&#2344; &#2357;&#2375;&#2348; &#2350;&#2375;&#2354; &#2346;&#2381;&#2352;&#2379;&#2357;&#2366;&#2311;&#2337;&#2352; &#2344;&#2361;&#2368;&#2306; &#2361;&#2376;?</span></p>\n",
+                    options_en: ["<p>Outlook</p>\n", "<p>Gmail</p>\n", 
+                                "<p>Yahoo</p>\n", "<p>Baidu</p>\n"],
+                    options_hi: ["<p><span style=\"font-weight: 400;\">&#2310;&#2313;&#2335;&#2354;&#2369;&#2325; (Outlook)</span></p>\n", "<p><span style=\"font-weight: 400;\">&#2332;&#2368;&#2350;&#2375;&#2354; (Gmail)</span></p>\n",
+                                "<p><span style=\"font-weight: 400;\">&#2351;&#2366;&#2361;&#2370; (Yahoo)</span></p>\n", "<p><span style=\"font-weight: 400;\">&#2348;&#2376;&#2342;&#2369; (Baidu)</span></p>\n"],
+                    solution_en: "<p>5.(d)<span style=\"font-family: Palanquin Dark;\"> Outlook, gmail and yahoo all are web mail providers except </span><strong><span style=\"font-family: Palanquin Dark;\">Baidu</span></strong><span style=\"font-family: Palanquin Dark;\"><strong>.</strong> Baidu is a web browser.</span></p>\n",
+                    solution_hi: "<p>5.(d)<span style=\"font-family: Palanquin Dark;\"> <strong>Baidu</strong> &#2325;&#2379; &#2331;&#2379;&#2337;&#2364;&#2325;&#2352; &#2310;&#2313;&#2335;&#2354;&#2369;&#2325; (outlook), &#2332;&#2368;&#2350;&#2375;&#2354; (gmail) &#2324;&#2352; &#2351;&#2366;&#2361;&#2370; (yahoo) &#2360;&#2349;&#2368; &#2357;&#2375;&#2348; &#2350;&#2375;&#2354; &#2346;&#2381;&#2352;&#2379;&#2357;&#2366;&#2311;&#2337;&#2352; &#2361;&#2376;&#2306;&#2404; Baidu &#2319;&#2325; &#2357;&#2375;&#2348; &#2348;&#2381;&#2352;&#2366;&#2313;&#2332;&#2364;&#2352; &#2361;&#2376;&#2404;</span></p>\n",
+                    correct: "d",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "6",
+                    section: "31",
+                    question_en: "<p>6. I<span style=\"font-family: Palanquin Dark;\">n an MS-Excel 2010 sheet, a cell with text overflow problem can be deal with ______.</span></p>\n",
+                    question_hi: "<p>6. <span style=\"font-family: Palanquin Dark;\">MS-Excel 2010 &#2358;&#2368;&#2335; &#2350;&#2375;&#2306;, &#2335;&#2375;&#2325;&#2381;&#2360;&#2381;&#2335; &#2323;&#2357;&#2352;&#2347;&#2381;&#2354;&#2379; &#2360;&#2350;&#2360;&#2381;&#2351;&#2366; &#2357;&#2366;&#2354;&#2375; &#2360;&#2375;&#2354; &#2325;&#2379; _________ &#2342;&#2381;&#2357;&#2366;&#2352;&#2366; &#2336;&#2368;&#2325; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366; &#2360;&#2325;&#2340;&#2366; &#2361;&#2376;&#2404;</span></p>\n",
+                    options_en: ["<p>Text Bumping</p>\n", "<p>Text Aligning</p>\n", 
+                                "<p>Text Merging</p>\n", "<p>Text Wrapping</p>\n"],
+                    options_hi: ["<p><span style=\"font-weight: 400;\">&#2335;&#2375;&#2325;&#2381;&#2360;&#2381;&#2335; &#2348;&#2350;&#2381;&#2346;&#2367;&#2306;&#2327; (Text Bumping)</span></p>\n", "<p>&#2335;&#2375;&#2325;&#2381;&#2360;&#2381;&#2335; &#2309;&#2354;&#2367;&#2327;&#2344;&#2367;&#2306;&#2327; (Text Aligning)</p>\n",
+                                "<p><span style=\"font-weight: 400;\">&#2335;&#2375;&#2325;&#2381;&#2360;&#2381;&#2335; &#2350;&#2352;&#2381;&#2332;&#2367;&#2306;&#2327; (Text Merging)</span></p>\n", "<p><span style=\"font-weight: 400;\">&#2335;&#2375;&#2325;&#2381;&#2360;&#2381;&#2335; &#2352;&#2376;&#2346;&#2367;&#2306;&#2327; (Text Wrapping)</span></p>\n"],
+                    solution_en: "<p>6.(d) <strong>Text Wrapping</strong><span style=\"font-family: Arial Unicode MS;\">&rarr;</span><span style=\"font-family: Arial Unicode MS;\">The Excel wrap text feature can help you fully display longer text in a cell without it overflowing to other cells. \"Wrapping text\" means displaying the cell contents on multiple lines, rather than one long line<strong>.</strong></span><strong><span style=\"font-family: Arial Unicode MS;\">Text Aligning</span></strong><span style=\"font-family: Arial Unicode MS;\">&rarr;</span><span style=\"font-family: Arial Unicode MS;\">Cell alignment is a feature which shows how your text or numbers are positioned in the cell.</span></p>\n",
+                    solution_hi: "<p>6.(d)<span style=\"font-family: Palanquin Dark;\"> &#2335;&#2375;&#2325;&#2381;&#2360;&#2381;&#2335; &#2352;&#2376;&#2346;&#2367;&#2306;&#2327; <strong>(</strong></span><strong><span style=\"font-family: Palanquin Dark;\">Text Wrapping</span></strong><span style=\"font-family: Arial Unicode MS;\"><strong>) </strong>&rarr; &#2319;&#2325;&#2381;&#2360;&#2375;&#2354; &#2352;&#2376;&#2346; &#2335;&#2375;&#2325;&#2381;&#2360;&#2381;&#2335; &#2347;&#2368;&#2330;&#2352; &#2310;&#2346;&#2325;&#2379; &#2325;&#2367;&#2360;&#2368; &#2360;&#2375;&#2354; &#2350;&#2375;&#2306; &#2348;&#2367;&#2344;&#2366; &#2309;&#2344;&#2381;&#2351; &#2360;&#2375;&#2354; &#2350;&#2375;&#2306; &#2323;&#2357;&#2352;&#2347;&#2381;&#2354;&#2379; &#2325;&#2367;&#2319; &#2354;&#2306;&#2348;&#2375; &#2335;&#2375;&#2325;&#2381;&#2360;&#2381;&#2335; &#2325;&#2379; &#2346;&#2370;&#2352;&#2368; &#2340;&#2352;&#2361; &#2360;&#2375; &#2346;&#2381;&#2352;&#2342;&#2352;&#2381;&#2358;&#2367;&#2340; &#2325;&#2352;&#2344;&#2375; &#2350;&#2375;&#2306; &#2350;&#2342;&#2342; &#2325;&#2352; &#2360;&#2325;&#2340;&#2366; &#2361;&#2376;&#2404; \"&#2352;&#2376;&#2346;&#2367;&#2306;&#2327; &#2335;&#2375;&#2325;&#2381;&#2360;&#2381;&#2335;\" </span><strong><span style=\"font-family: Arial Unicode MS;\">(\"Wrapping text\")</span></strong><span style=\"font-family: Palanquin Dark;\"> &#2325;&#2366; &#2309;&#2352;&#2381;&#2341; &#2361;&#2376; &#2360;&#2375;&#2354; &#2325;&#2375; &#2325;&#2306;&#2335;&#2375;&#2306;&#2335; &#2325;&#2379; &#2319;&#2325; &#2354;&#2306;&#2348;&#2368; &#2354;&#2366;&#2311;&#2344; &#2325;&#2375; &#2348;&#2332;&#2366;&#2351; &#2325;&#2312; &#2354;&#2366;&#2311;&#2344;&#2379;&#2306; &#2346;&#2352; &#2346;&#2381;&#2352;&#2342;&#2352;&#2381;&#2358;&#2367;&#2340; &#2325;&#2352;&#2344;&#2366;&#2404; &#2335;&#2375;&#2325;&#2381;&#2360;&#2381;&#2335; &#2319;&#2354;&#2366;&#2311;&#2344;&#2367;&#2306;&#2327; <strong>(</strong></span><strong><span style=\"font-family: Palanquin Dark;\">Text Aligning</span></strong><span style=\"font-family: Arial Unicode MS;\"><strong>)</strong> &rarr; &#2360;&#2375;&#2354; &#2309;&#2354;&#2366;&#2311;&#2344;&#2350;&#2375;&#2306;&#2335; &#2319;&#2325; &#2320;&#2360;&#2368; &#2360;&#2369;&#2357;&#2367;&#2343;&#2366; &#2361;&#2376; &#2332;&#2379; &#2360;&#2375;&#2354; &#2350;&#2375;&#2306; &#2310;&#2346;&#2325;&#2366; &#2335;&#2375;&#2325;&#2381;&#2360;&#2381;&#2335; &#2351;&#2366; &#2344;&#2306;&#2348;&#2352; &#2325;&#2375; &#2360;&#2381;&#2341;&#2366;&#2344; &#2325;&#2379; &#2348;&#2340;&#2366;&#2340;&#2375; &#2361;&#2376;&#2306;&#2404;</span></p>\n",
+                    correct: "d",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "7",
+                    section: "31",
+                    question_en: "<p>7.<span style=\"font-family: Arial Unicode MS;\"> Which of the following keyboard shortcuts is used to move through each of the open tabs going to the right in Chrome browser?</span></p>\n",
+                    question_hi: "<p>7. <span style=\"font-family: Palanquin Dark;\">&#2325;&#2381;&#2352;&#2379;&#2350; &#2348;&#2381;&#2352;&#2366;&#2313;&#2332;&#2364;&#2352; &#2350;&#2375;&#2306; &#2342;&#2366;&#2312;&#2306; &#2323;&#2352; &#2325;&#2375; &#2346;&#2381;&#2352;&#2340;&#2381;&#2351;&#2375;&#2325; &#2326;&#2369;&#2354;&#2375; &#2361;&#2369;&#2319; &#2335;&#2376;&#2348; &#2350;&#2375;&#2306; &#2332;&#2366;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2344;&#2367;&#2350;&#2381;&#2344;&#2354;&#2367;&#2326;&#2367;&#2340; &#2350;&#2375;&#2306; &#2360;&#2375; &#2325;&#2367;&#2360; &#2325;&#2368;&#2348;&#2379;&#2352;&#2381;&#2337; &#2358;&#2377;&#2352;&#2381;&#2335;&#2325;&#2335; &#2325;&#2366; &#2313;&#2346;&#2351;&#2379;&#2327; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;?</span></p>\n",
+                    options_en: ["<p>Ctrl + N</p>\n", "<p>Alt + N</p>\n", 
+                                "<p>Alt + Tab</p>\n", "<p>Ctrl + Tab</p>\n"],
+                    options_hi: ["<p>Ctrl + N</p>\n", "<p>Alt + N</p>\n",
+                                "<p>Alt + Tab</p>\n", "<p>Ctrl + Tab</p>\n"],
+                    solution_en: "<p>7.(d) <strong>Ctrl + Tab</strong><span style=\"font-family: Arial Unicode MS;\">&rarr; </span><span style=\"font-family: Arial Unicode MS;\">Ctrl + Tab is a keyboard shortcut most often used to switch between open tabs in a browser.</span><strong><span style=\"font-family: Arial Unicode MS;\">Ctrl + N</span></strong><span style=\"font-family: Arial Unicode MS;\">&rarr;</span><span style=\"font-family: Arial Unicode MS;\"> </span><span style=\"font-family: Arial Unicode MS;\">In all major Internet browsers (e.g., Chrome, Edge, Firefox, Opera), pressing <strong>Ctrl + N</strong> opens a new application window. </span><strong><span style=\"font-family: Arial Unicode MS;\">Alt + N</span></strong><span style=\"font-family: Arial Unicode MS;\">&rarr; </span><span style=\"font-family: Arial Unicode MS;\">It is used to </span><span style=\"font-family: Arial Unicode MS;\">open the Insert tab to insert tables, pictures and shapes, headers, or text boxes. </span><strong><span style=\"font-family: Arial Unicode MS;\">Ctrl + Tab</span></strong><span style=\"font-family: Arial Unicode MS;\">&rarr; </span><span style=\"font-family: Arial Unicode MS;\">It is used to </span><span style=\"font-family: Arial Unicode MS;\">switch between windows.</span></p>\n",
+                    solution_hi: "<p><span style=\"font-family: Arial Unicode MS;\">7.(d) </span><strong><span style=\"font-family: Arial Unicode MS;\">Ctrl + Tab</span></strong><span style=\"font-family: Arial Unicode MS;\">&rarr; Ctrl + Tab &#2319;&#2325; &#2348;&#2381;&#2352;&#2366;&#2313;&#2332;&#2364;&#2352; &#2350;&#2375;&#2306; &#2326;&#2369;&#2354;&#2375; &#2335;&#2376;&#2348; &#2325;&#2375; &#2348;&#2368;&#2330; &#2360;&#2381;&#2357;&#2367;&#2330; &#2325;&#2352;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2309;&#2325;&#2381;&#2360;&#2352; &#2313;&#2346;&#2351;&#2379;&#2327; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2344;&#2375; &#2357;&#2366;&#2354;&#2366; &#2319;&#2325; &#2325;&#2368;&#2348;&#2379;&#2352;&#2381;&#2337; &#2358;&#2377;&#2352;&#2381;&#2335;&#2325;&#2335; &#2361;&#2376;&#2404; <strong>Ctrl + N</strong> &rarr; &#2360;&#2349;&#2368; &#2346;&#2381;&#2352;&#2350;&#2369;&#2326; &#2311;&#2306;&#2335;&#2352;&#2344;&#2375;&#2335; &#2348;&#2381;&#2352;&#2366;&#2313;&#2332;&#2364;&#2352;&#2379;&#2306; (&#2332;&#2376;&#2360;&#2375;, &#2325;&#2381;&#2352;&#2379;&#2350;, &#2319;&#2332;, &#2347;&#2364;&#2366;&#2351;&#2352;&#2347;&#2364;&#2377;&#2325;&#2381;&#2360;, &#2323;&#2346;&#2375;&#2352;&#2366;) &#2350;&#2375;&#2306;, Ctrl + N &#2342;&#2348;&#2366;&#2344;&#2375; &#2346;&#2352; &#2319;&#2325; &#2344;&#2312; &#2319;&#2346;&#2381;&#2354;&#2367;&#2325;&#2375;&#2358;&#2344; &#2357;&#2367;&#2306;&#2337;&#2379; &#2326;&#2369;&#2354;&#2340;&#2368; &#2361;&#2376;&#2404; <strong>Alt + N</strong>&rarr; &#2311;&#2360;&#2325;&#2366; &#2313;&#2346;&#2351;&#2379;&#2327; &#2311;&#2344;&#2381;&#2360;&#2352;&#2381;&#2335; &#2335;&#2376;&#2348; &#2325;&#2379; &#2326;&#2379;&#2354;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2335;&#2375;&#2348;&#2354;&#2381;&#2360;, &#2346;&#2367;&#2325;&#2381;&#2330;&#2352;&#2381;&#2360; &#2324;&#2352; &#2358;&#2375;&#2346;&#2381;&#2360;, &#2361;&#2375;&#2337;&#2352;&#2381;&#2360; (headers) &#2351;&#2366; &#2335;&#2375;&#2325;&#2381;&#2360;&#2381;&#2335; &#2348;&#2377;&#2325;&#2381;&#2360;&#2375;&#2360; &#2325;&#2379; &#2311;&#2344;&#2381;&#2360;&#2352;&#2381;&#2335; (insert) &#2325;&#2352;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404; <strong>Ctrl + Tab</strong>&rarr; &#2311;&#2360;&#2325;&#2366; &#2346;&#2381;&#2352;&#2351;&#2379;&#2327; windows &#2325;&#2375; &#2348;&#2368;&#2330; &#2360;&#2381;&#2357;&#2367;&#2330; &#2325;&#2352;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404;</span></p>\n",
+                    correct: "d",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "8",
+                    section: "31",
+                    question_en: "<p>8.<span style=\"font-family: Arial Unicode MS;\"> Which of the following keyboard shortcut keys can be used to insert a hyperlink in an </span><span style=\"font-family: Arial Unicode MS;\">MS-Word 2010 document?</span></p>\n",
+                    question_hi: "<p>8.<span style=\"font-family: Palanquin Dark;\">&#2319;&#2350;&#2319;&#2360;-&#2357;&#2352;&#2381;&#2337; 2010 &#2337;&#2377;&#2325;&#2381;&#2351;&#2370;&#2350;&#2375;&#2306;&#2335; &#2350;&#2375; &#2361;&#2366;&#2311;&#2346;&#2352;&#2354;&#2367;&#2306;&#2325; &#2311;&#2344;&#2381;&#2360;&#2352;&#2381;&#2335; &#2325;&#2352;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2344;&#2367;&#2350;&#2381;&#2344; &#2350;&#2375;&#2306; &#2360;&#2375; &#2325;&#2367;&#2360; &#2325;&#2368;&#2348;&#2379;&#2352;&#2381;&#2337; &#2358;&#2377;&#2352;&#2381;&#2335;&#2325;&#2335; &#2325;&#2368;(key) &#2325;&#2366; &#2313;&#2346;&#2351;&#2379;&#2327; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;?</span></p>\n",
+                    options_en: ["<p>Ctrl + K</p>\n", "<p>Alt + L</p>\n", 
+                                "<p>Ctrl + L</p>\n", "<p>Alt + K</p>\n"],
+                    options_hi: ["<p>Ctrl + K</p>\n", "<p>Alt + L</p>\n",
+                                "<p>Ctrl + L</p>\n", "<p>Alt + K</p>\n"],
+                    solution_en: "<p>8.(a)<span style=\"font-family: Palanquin Dark;\"> </span><strong><span style=\"font-family: Palanquin Dark;\">Ctrl + K</span></strong><span style=\"font-family: Arial Unicode MS;\">&rarr;</span><span style=\"font-family: Arial Unicode MS;\"> It is used to </span><span style=\"font-family: Arial Unicode MS;\">add, edit, or modify a hyperlink to a Web page. </span><strong><span style=\"font-family: Arial Unicode MS;\">Alt + L</span></strong><span style=\"font-family: Arial Unicode MS;\">&rarr;</span><span style=\"font-family: Arial Unicode MS;\">Alt+L is a keyboard shortcut most often used to open the Developer tab in the Ribbon.</span><strong><span style=\"font-family: Arial Unicode MS;\">Ctrl + L</span></strong><span style=\"font-family: Arial Unicode MS;\">&rarr;</span><span style=\"font-family: Arial Unicode MS;\"> It is used to </span><span style=\"font-family: Arial Unicode MS;\">align the line or selected text to the left of the screen. </span><strong><span style=\"font-family: Arial Unicode MS;\">Alt + K</span></strong><span style=\"font-family: Arial Unicode MS;\">&rarr; </span><span style=\"font-family: Arial Unicode MS;\">It is used to </span><span style=\"font-family: Arial Unicode MS;\">open the transitions tab in the ribbon.</span></p>\n",
+                    solution_hi: "<p>8.(a)<span style=\"font-family: Arial Unicode MS;\"> </span><strong><span style=\"font-family: Arial Unicode MS;\">Ctrl + K</span></strong><span style=\"font-family: Arial Unicode MS;\">&rarr; &#2311;&#2360;&#2325;&#2366; &#2313;&#2346;&#2351;&#2379;&#2327; &#2325;&#2367;&#2360;&#2368; &#2357;&#2375;&#2348; &#2346;&#2375;&#2332; &#2350;&#2375;&#2306; &#2361;&#2366;&#2311;&#2346;&#2352;&#2354;&#2367;&#2306;&#2325; &#2332;&#2379;&#2337;&#2364;&#2344;&#2375;, &#2319;&#2337;&#2367;&#2335; &#2325;&#2352;&#2344;&#2375; &#2351;&#2366; &#2360;&#2306;&#2358;&#2379;&#2343;&#2367;&#2340; &#2325;&#2352;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404;</span><span style=\"font-family: Arial Unicode MS;\"> <strong>Alt + L</strong></span><span style=\"font-family: Arial Unicode MS;\">&rarr;Alt + L &#2319;&#2325; &#2325;&#2368;&#2348;&#2379;&#2352;&#2381;&#2337; &#2358;&#2377;&#2352;&#2381;&#2335;&#2325;&#2335; &#2361;&#2376; &#2332;&#2367;&#2360;&#2325;&#2366; &#2313;&#2346;&#2351;&#2379;&#2327; &#2309;&#2325;&#2381;&#2360;&#2352; &#2352;&#2367;&#2348;&#2344; &#2350;&#2375;&#2306; &#2337;&#2375;&#2357;&#2354;&#2346;&#2352; (developer) &#2335;&#2376;&#2348; &#2326;&#2379;&#2354;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404; </span><strong><span style=\"font-family: Arial Unicode MS;\">Ctrl + L</span></strong><span style=\"font-family: Arial Unicode MS;\">&rarr; &#2311;&#2360;&#2325;&#2366; &#2313;&#2346;&#2351;&#2379;&#2327; &#2360;&#2381;&#2325;&#2381;&#2352;&#2368;&#2344; &#2325;&#2375; &#2348;&#2366;&#2312;&#2306; &#2323;&#2352; &#2354;&#2366;&#2311;&#2344; &#2351;&#2366; &#2330;&#2351;&#2344;&#2367;&#2340; &#2335;&#2375;&#2325;&#2381;&#2360;&#2381;&#2335; &#2325;&#2379; &#2309;&#2354;&#2366;&#2311;&#2344; &#2325;&#2352;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404; </span><strong><span style=\"font-family: Arial Unicode MS;\">Alt + K</span></strong><span style=\"font-family: Arial Unicode MS;\">&rarr; &#2311;&#2360;&#2325;&#2366; &#2313;&#2346;&#2351;&#2379;&#2327; &#2352;&#2367;&#2348;&#2344; &#2350;&#2375;&#2306; &#2335;&#2381;&#2352;&#2366;&#2306;&#2332;&#2364;&#2367;&#2358;&#2344; &#2335;&#2376;&#2348; (transition tab) &#2325;&#2379; &#2326;&#2379;&#2354;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404;</span></p>\n",
+                    correct: "a",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "9",
+                    section: "31",
+                    question_en: "<p>9. <span style=\"font-family: Arial Unicode MS;\">In MS-Excel 2010 ribbon, ______ is used for adding different objects in a worksheet such as images, charts, PivotTables, hyperlinks, special symbols, equations, headers and footers.</span></p>\n",
+                    question_hi: "<p>9. <span style=\"font-family: Palanquin Dark;\">MS-Excel 2010 &#2352;&#2367;&#2348;&#2344; &#2348;&#2366;&#2352; &#2350;&#2375;&#2306;, ______ &#2335;&#2375;&#2348; &#2350;&#2375; &#2360;&#2348;&#2360;&#2375; &#2309;&#2343;&#2367;&#2325; &#2313;&#2346;&#2351;&#2379;&#2327; &#2325;&#2367;&#2351;&#2375; &#2332;&#2366;&#2344;&#2375; &#2357;&#2366;&#2354;&#2375; &#2325;&#2350;&#2366;&#2306;&#2337; &#2361;&#2379;&#2340;&#2375; &#2361;&#2376; &#2332;&#2376;&#2360;&#2375; &#2325;&#2377;&#2346;&#2368; &#2346;&#2375;&#2360;&#2381;&#2335; &#2325;&#2352;&#2344;&#2366; &#2358;&#2366;&#2352;&#2381;&#2335; &#2325;&#2352;&#2344;&#2366; , &#2346;&#2366;&#2311;&#2357;&#2379;&#2335; &#2335;&#2375;&#2348;&#2354; &#2361;&#2366;&#2311;&#2346;&#2352;&#2354;&#2367;&#2306;&#2325; ,&#2360;&#2381;&#2346;&#2375;&#2358;&#2354; &#2360;&#2367;&#2350;&#2381;&#2348;&#2354; &#2375;&#2325;&#2358;&#2344; &#2361;&#2376;&#2337;&#2352; &#2319;&#2306;&#2337; &#2347;&#2370;&#2335;&#2352; , &#2310;&#2342;&#2367; </span></p>\n",
+                    options_en: ["<p><span style=\"font-family: Arial Unicode MS;\">DATA</span></p>\n", "<p>FILE</p>\n", 
+                                "<p>FORMULA</p>\n", "<p>INSERT</p>\n"],
+                    options_hi: ["<p><span style=\"font-weight: 400;\">&#2337;&#2375;&#2335;&#2366; (DATA)</span></p>\n", "<p>&#2347;&#2364;&#2366;&#2311;&#2354; (FILE)</p>\n",
+                                "<p>&#2347;&#2377;&#2352;&#2381;&#2350;&#2370;&#2354;&#2366; (FORMULA)</p>\n", "<p><span style=\"font-weight: 400;\">&#2311;&#2344;&#2381;&#2360;&#2352;&#2381;&#2335;&nbsp; (INSERT)</span></p>\n"],
+                    solution_en: "<p>9.(d)<span style=\"font-family: Palanquin Dark;\"> </span><strong><span style=\"font-family: Palanquin Dark;\">INSERT</span></strong><span style=\"font-family: Arial Unicode MS;\">&rarr;</span><span style=\"font-family: Arial Unicode MS;\">The Insert tab contains various items that you may want to insert into a document. These items include such things as tables, word art, hyperlinks, symbols, charts, signature line, date &amp; time, boxes, equations and so on. </span><strong><span style=\"font-family: Arial Unicode MS;\">DATA</span></strong><span style=\"font-family: Arial Unicode MS;\">&rarr;</span><span style=\"font-family: Arial Unicode MS;\">The data tab contains options mainly for filtering, sorting, and manipulating data.</span></p>\n",
+                    solution_hi: "<p>9.(d)<span style=\"font-family: Arial Unicode MS;\"> </span><span style=\"font-family: Arial Unicode MS;\"><strong>INSERT</strong> </span><span style=\"font-family: Arial Unicode MS;\">&rarr; &#2311;&#2344;&#2381;&#2360;&#2352;&#2381;&#2335; &#2335;&#2376;&#2348; &#2350;&#2375;&#2306; &#2357;&#2367;&#2349;&#2367;&#2344;&#2381;&#2344; &#2310;&#2311;&#2335;&#2350; &#2361;&#2379;&#2340;&#2375; &#2361;&#2376;&#2306; &#2332;&#2367;&#2344;&#2381;&#2361;&#2375;&#2306; &#2310;&#2346; &#2325;&#2367;&#2360;&#2368; &#2342;&#2360;&#2381;&#2340;&#2366;&#2357;&#2375;&#2332;&#2364; &#2350;&#2375;&#2306; &#2360;&#2350;&#2381;&#2350;&#2367;&#2354;&#2367;&#2340; &#2325;&#2352;&#2344;&#2366; &#2330;&#2366;&#2361;&#2340;&#2375; &#2361;&#2376;&#2306;,&#2358;&#2366;&#2350;&#2367;&#2354; &#2361;&#2376; &#2404; &#2311;&#2344; &#2310;&#2311;&#2335;&#2350; &#2350;&#2375;&#2306; &#2335;&#2375;&#2348;&#2354;, &#2357;&#2352;&#2381;&#2337; &#2310;&#2352;&#2381;&#2335;, &#2361;&#2366;&#2311;&#2346;&#2352;&#2354;&#2367;&#2306;&#2325;&#2381;&#2360;, &#2360;&#2367;&#2306;&#2348;&#2354;, &#2330;&#2366;&#2352;&#2381;&#2335;&#2381;&#2360;, &#2360;&#2367;&#2327;&#2381;&#2344;&#2375;&#2330;&#2352; &#2354;&#2366;&#2311;&#2344;, &#2337;&#2375;&#2335; &#2324;&#2352; &#2335;&#2366;&#2311;&#2350; &#2332;&#2376;&#2360;&#2368; &#2330;&#2368;&#2332;&#2375;&#2306; &#2358;&#2366;&#2350;&#2367;&#2354; &#2361;&#2376;&#2306;&#2404; </span><strong><span style=\"font-family: Arial Unicode MS;\">DATA</span></strong><span style=\"font-family: Arial Unicode MS;\"><strong>&rarr;</strong> &#2337;&#2375;&#2335;&#2366; &#2335;&#2376;&#2348; &#2350;&#2375;&#2306; &#2350;&#2369;&#2326;&#2381;&#2351; &#2352;&#2370;&#2346; &#2360;&#2375; &#2337;&#2375;&#2335;&#2366; &#2325;&#2379; &#2347;&#2364;&#2367;&#2354;&#2381;&#2335;&#2352; &#2325;&#2352;&#2344;&#2375;, &#2360;&#2377;&#2352;&#2381;&#2335; &#2325;&#2352;&#2344;&#2375; &#2324;&#2352; &#2350;&#2339;&#2367;&#2346;&#2369;&#2354;&#2335;&#2375; &#2325;&#2352;&#2344;&#2375; &#2325;&#2375; &#2357;&#2367;&#2325;&#2354;&#2381;&#2346; &#2361;&#2379;&#2340;&#2375; &#2361;&#2376;&#2306;&#2404;</span></p>\n",
+                    correct: "d",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "10",
+                    section: "31",
+                    question_en: "<p>10.<span style=\"font-family: Arial Unicode MS;\"> ______ shortcut key is used in MS-Excel 2010 to select the entire worksheet.</span></p>\n",
+                    question_hi: "<p>10. &#2319;&#2350;&#2360; - &#2319;&#2325;&#2381;&#2360;&#2375;&#2354; 2010 ( <span style=\"font-family: Palanquin Dark;\">MS-Excel 2010) &#2350;&#2375;&#2306; &#2360;&#2306;&#2346;&#2370;&#2352;&#2381;&#2339; &#2357;&#2352;&#2381;&#2325; &#2358;&#2368;&#2335; &#2325;&#2379; &#2360;&#2354;&#2375;&#2325;&#2381;&#2335; &#2325;&#2352;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; ______ &#2358;&#2377;&#2352;&#2381;&#2335;&#2325;&#2335; &#2325;&#2369;&#2306;&#2332;&#2368;(key) &#2325;&#2366; &#2313;&#2346;&#2351;&#2379;&#2327; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404;</span></p>\n",
+                    options_en: ["<p>Shift+R</p>\n", "<p>Ctrl+R</p>\n", 
+                                "<p>Ctrl+A</p>\n", "<p>ALT+A</p>\n"],
+                    options_hi: ["<p>Shift+R</p>\n", "<p>Ctrl+R</p>\n",
+                                "<p>Ctrl+A</p>\n", "<p>ALT+A</p>\n"],
+                    solution_en: "<p>10.(c) <strong>Ctrl + A</strong><span style=\"font-family: Arial Unicode MS;\">&rarr;</span><span style=\"font-family: Arial Unicode MS;\">In Microsoft Excel and all other spreadsheet programs, pressing Ctrl + A selects all cells in the spreadsheet.</span><strong><span style=\"font-family: Arial Unicode MS;\">Ctrl+R</span></strong><span style=\"font-family: Arial Unicode MS;\">&rarr; </span><span style=\"font-family: Arial Unicode MS;\">It is used to</span><span style=\"font-family: Arial Unicode MS;\"> fill the selected cell with active cells to the right.</span><strong><span style=\"font-family: Arial Unicode MS;\">ALT+A</span></strong><span style=\"font-family: Arial Unicode MS;\">&rarr;</span><span style=\"font-family: Arial Unicode MS;\">It is used to </span><span style=\"font-family: Arial Unicode MS;\">open the data tab in the ribbon.</span></p>\n",
+                    solution_hi: "<p><span style=\"font-family: Arial Unicode MS;\">10.(c)</span><span style=\"font-family: Arial Unicode MS;\"> </span><strong><span style=\"font-family: Arial Unicode MS;\">Ctrl +A</span></strong><span style=\"font-family: Arial Unicode MS;\">&rarr;Microsoft Excel &#2324;&#2352; &#2309;&#2344;&#2381;&#2351; &#2360;&#2349;&#2368; &#2360;&#2381;&#2346;&#2381;&#2352;&#2376;&#2337;&#2358;&#2368;&#2335; &#2346;&#2381;&#2352;&#2379;&#2327;&#2381;&#2352;&#2366;&#2350; &#2350;&#2375;&#2306;, Ctrl + A &#2342;&#2348;&#2366;&#2344;&#2375; &#2360;&#2375; &#2360;&#2381;&#2346;&#2381;&#2352;&#2375;&#2337;&#2358;&#2368;&#2335; &#2350;&#2375;&#2306; &#2360;&#2349;&#2368; &#2360;&#2375;&#2354; &#2360;&#2375;&#2354;&#2375;&#2325;&#2381;&#2335; &#2361;&#2379; &#2332;&#2366;&#2340;&#2375; &#2361;&#2376;&#2404; </span><strong><span style=\"font-family: Arial Unicode MS;\">Ctrl + R</span></strong><span style=\"font-family: Arial Unicode MS;\"> &rarr; &#2311;&#2360;&#2325;&#2366; &#2313;&#2346;&#2351;&#2379;&#2327; &#2330;&#2351;&#2344;&#2367;&#2340; &#2360;&#2375;&#2354; &#2325;&#2379; &#2342;&#2366;&#2312;&#2306; &#2323;&#2352; &#2360;&#2325;&#2381;&#2352;&#2367;&#2351; &#2360;&#2375;&#2354; &#2360;&#2375; &#2347;&#2367;&#2354; &#2325;&#2352;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404; </span><strong><span style=\"font-family: Arial Unicode MS;\">ALT + A</span></strong><span style=\"font-family: Arial Unicode MS;\"><strong> </strong>&rarr; &#2311;&#2360;&#2325;&#2366; &#2313;&#2346;&#2351;&#2379;&#2327; &#2352;&#2367;&#2348;&#2344; &#2350;&#2375;&#2306; &#2337;&#2375;&#2335;&#2366; &#2335;&#2376;&#2348; &#2325;&#2379; &#2326;&#2379;&#2354;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404; </span></p>\n",
+                    correct: "c",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "11",
+                    section: "31",
+                    question_en: "<p><span style=\"font-family: Roboto;\">11. </span><span style=\"font-family: Roboto;\"> Which of the following feature in MS-Word 2010 is used to type very letters or numbers </span><span style=\"font-family: Roboto;\">smaller than the normal line of type and set slightly above the line of text?</span></p>\n",
+                    question_hi: "<p><span style=\"font-family: Roboto;\">11.</span><span style=\"font-family: Palanquin;\"> &#2319;&#2350;&#2319;&#2360;-&#2357;&#2352;&#2381;&#2337; 2010 (MS-Word 2010) &#2350;&#2375;&#2306;, &#2344;&#2367;&#2350;&#2381;&#2344; &#2350;&#2375;&#2306; &#2360;&#2375; &#2325;&#2367;&#2360; &#2347;&#2368;&#2330;&#2352; &#2325;&#2366; &#2313;&#2346;&#2351;&#2379;&#2327; &#2360;&#2366;&#2350;&#2366;&#2344;&#2381;&#2351; &#2346;&#2381;&#2352;&#2325;&#2366;&#2352; &#2325;&#2368; &#2354;&#2366;&#2311;&#2344; &#2360;&#2375; &#2348;&#2361;&#2369;&#2340; &#2360;&#2375; &#2331;&#2379;&#2335;&#2375; &#2309;&#2325;&#2381;&#2359;&#2352;&#2379;&#2306; &#2351;&#2366; &#2360;&#2306;&#2326;&#2381;&#2351;&#2366;&#2323;&#2306; &#2325;&#2379; &#2335;&#2366;&#2311;&#2346; &#2325;&#2352;&#2344;&#2375; &#2324;&#2352; &#2335;&#2375;&#2325;&#2381;&#2360;&#2381;&#2335; &#2325;&#2368; &#2354;&#2366;&#2311;&#2344; &#2360;&#2375; &#2341;&#2379;&#2396;&#2366; &#2314;&#2346;&#2352; &#2360;&#2375;&#2335; &#2325;&#2352;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;?</span></p>\n",
+                    options_en: ["<p>Strikethrough</p>\n", "<p>Formal Painter</p>\n", 
+                                "<p>Superscript</p>\n", "<p>Subscript</p>\n"],
+                    options_hi: ["<p><span style=\"font-weight: 400;\">&#2360;&#2381;&#2335;&#2381;&#2352;&#2366;&#2311;&#2325;&#2341;&#2381;&#2352;&#2370; (Strikethrough)</span></p>\n", "<p><span style=\"font-weight: 400;\">&#2347;&#2377;&#2352;&#2381;&#2350;&#2354; &#2346;&#2375;&#2306;&#2335;&#2352; (Formal Painter)</span></p>\n",
+                                "<p><span style=\"font-weight: 400;\">&nbsp;&#2360;&#2348;&#2360;&#2381;&#2325;&#2381;&#2352;&#2367;&#2346;&#2381;&#2335; (Subscript)</span></p>\n", "<p><span style=\"font-weight: 400;\">&#2360;&#2369;&#2346;&#2352;&#2360;&#2381;&#2325;&#2381;&#2352;&#2367;&#2346;&#2381;&#2335; (Superscript)</span></p>\n"],
+                    solution_en: "<p>11.(c)<span style=\"font-family: Palanquin;\"> </span><span style=\"font-family: Palanquin;\">A<strong> </strong></span><strong><span style=\"font-family: Palanquin;\">subscript or superscript</span></strong><span style=\"font-family: Palanquin;\"> is a character (such as a number or letter) that is set slightly below or above the normal line of type, respectively. It is usually smaller than the rest of the text. Subscripts appear at or below the baseline, while superscripts are above. </span><strong><span style=\"font-family: Palanquin;\">Strikethrough</span></strong><span style=\"font-family: Arial Unicode MS;\">&rarr; </span><span style=\"font-family: Arial Unicode MS;\">Strikethrough is primarily used to mark text that is mistaken or to be removed.</span></p>\n",
+                    solution_hi: "<p>11.(c)<span style=\"font-family: Arial Unicode MS;\"> </span><span style=\"font-family: Palanquin Dark;\">&#2319;&#2325; </span><span style=\"font-family: Palanquin Dark;\"><strong>&#2360;&#2348;&#2360;&#2381;&#2325;&#2381;&#2352;&#2367;&#2346;&#2381;&#2335; (subscript )</strong> </span><span style=\"font-family: Palanquin Dark;\">&#2351;&#2366; </span><span style=\"font-family: Palanquin Dark;\">&#2360;&#2369;&#2346;&#2352;&#2360;&#2381;&#2325;&#2381;&#2352;&#2367;&#2346;&#2381;&#2335; (superscript</span><span style=\"font-family: Palanquin Dark;\"> </span><span style=\"font-family: Palanquin Dark;\">) </span><span style=\"font-family: Palanquin Dark;\">&#2319;&#2325; &#2357;&#2352;&#2381;&#2339; (&#2332;&#2376;&#2360;&#2375; &#2319;&#2325; &#2360;&#2306;&#2326;&#2381;&#2351;&#2366; &#2351;&#2366; &#2309;&#2325;&#2381;&#2359;&#2352;) &#2361;&#2376; &#2332;&#2379; &#2325;&#2381;&#2352;&#2350;&#2358;&#2307; &#2360;&#2366;&#2350;&#2366;&#2344;&#2381;&#2351; &#2346;&#2381;&#2352;&#2325;&#2366;&#2352; &#2325;&#2368; &#2352;&#2375;&#2326;&#2366; &#2360;&#2375; &#2341;&#2379;&#2337;&#2364;&#2366; &#2344;&#2368;&#2330;&#2375; &#2351;&#2366; &#2314;&#2346;&#2352; &#2360;&#2375;&#2335; &#2361;&#2379;&#2340;&#2366; &#2361;&#2376;&#2404; &#2351;&#2361; &#2310;&#2350;&#2340;&#2380;&#2352; &#2346;&#2352; &#2348;&#2366;&#2325;&#2368; &#2335;&#2375;&#2325;&#2381;&#2360;&#2381;&#2335; &#2360;&#2375; &#2331;&#2379;&#2335;&#2366; &#2361;&#2379;&#2340;&#2366; &#2361;&#2376;&#2404; &#2360;&#2348;&#2360;&#2381;&#2325;&#2381;&#2352;&#2367;&#2346;&#2381;&#2335; &#2348;&#2375;&#2360;&#2354;&#2366;&#2311;&#2344; &#2346;&#2352; &#2351;&#2366; &#2313;&#2360;&#2325;&#2375; &#2344;&#2368;&#2330;&#2375; &#2342;&#2367;&#2326;&#2366;&#2312; &#2342;&#2375;&#2340;&#2375; &#2361;&#2376;&#2306;, &#2332;&#2348;&#2325;&#2367; &#2360;&#2369;&#2346;&#2352;&#2360;&#2381;&#2325;&#2381;&#2352;&#2367;&#2346;&#2381;&#2335; &#2314;&#2346;&#2352; &#2361;&#2376;&#2306;&#2404; <strong>&#2360;&#2381;&#2335;&#2381;&#2352;&#2366;&#2311;&#2325;&#2341;&#2381;&#2352;&#2370;(</strong></span><strong><span style=\"font-family: Palanquin Dark;\">Strikethrough</span></strong><span style=\"font-family: Arial Unicode MS;\"><strong>) </strong>&rarr; &#2360;&#2381;&#2335;&#2381;&#2352;&#2366;&#2311;&#2325;&#2341;&#2381;&#2352;&#2370; &#2350;&#2369;&#2326;&#2381;&#2351; &#2352;&#2370;&#2346; &#2360;&#2375; &#2327;&#2354;&#2340; &#2351;&#2366; &#2361;&#2335;&#2366;&#2319; &#2332;&#2366;&#2344;&#2375; &#2357;&#2366;&#2354;&#2375; &#2335;&#2375;&#2325;&#2381;&#2360;&#2381;&#2335; &#2325;&#2379; &#2330;&#2367;&#2361;&#2381;&#2344;&#2367;&#2340; &#2325;&#2352;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2313;&#2346;&#2351;&#2379;&#2327; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404;</span></p>\n",
+                    correct: "c",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "12",
+                    section: "31",
+                    question_en: "<p><span style=\"font-family: Roboto;\">12. </span><span style=\"font-family: Roboto;\">Which of the following allows the user to send files along with email?</span></p>\n",
+                    question_hi: "<p><span style=\"font-family: Roboto;\">12.</span><span style=\"font-family: Palanquin;\"> &#2344;&#2367;&#2350;&#2381;&#2344;&#2354;&#2367;&#2326;&#2367;&#2340; &#2350;&#2375;&#2306; &#2360;&#2375; &#2325;&#2380;&#2344; &#2360;&#2366; &#2357;&#2367;&#2325;&#2354;&#2381;&#2346; &#2351;&#2370;&#2395;&#2352; &#2325;&#2379; &#2311;-&#2350;&#2375;&#2354; &#2325;&#2375; &#2360;&#2366;&#2341; &#2347;&#2366;&#2311;&#2354; &#2349;&#2375;&#2332;&#2344;&#2375; &#2325;&#2368; &#2360;&#2369;&#2357;&#2367;&#2343;&#2366; &#2342;&#2375;&#2340;&#2366; &#2361;&#2376;?</span></p>\n",
+                    options_en: ["<p>Messenger</p>\n", "<p>Spam</p>\n", 
+                                "<p>Snoozed</p>\n", "<p>Attachment</p>\n"],
+                    options_hi: ["<p><span style=\"font-weight: 400;\">&#2350;&#2376;&#2360;&#2375;&#2306;&#2332;&#2352; (Messenger)</span></p>\n", "<p><span style=\"font-weight: 400;\">&nbsp;&#2360;&#2381;&#2346;&#2376;&#2350; (Spam)</span></p>\n",
+                                "<p>&#2360;&#2381;&#2344;&#2370;&#2395;&#2375;&#2337; (Snoozed)</p>\n", "<p><span style=\"font-weight: 400;\">&nbsp;&#2309;&#2335;&#2376;&#2330;&#2350;&#2375;&#2306;&#2335;&nbsp; (Attachment)</span></p>\n"],
+                    solution_en: "<p>12.(d) <strong>Attachment<span style=\"font-family: Arial Unicode MS;\">&rarr;</span></strong><span style=\"font-family: Arial Unicode MS;\">An email attachment is a computer file sent along with an email message. One or more files can be attached to any email message, and be sent along with it to the recipient. </span><strong><span style=\"font-family: Arial Unicode MS;\">Spam</span></strong><span style=\"font-family: Arial Unicode MS;\">&rarr;</span><span style=\"font-family: Arial Unicode MS;\">Spam email is unsolicited and unwanted junk email sent out in bulk to an indiscriminate recipient list. </span></p>\n",
+                    solution_hi: "<p>12.(d)<span style=\"font-family: Arial Unicode MS;\"> </span><strong><span style=\"font-family: Palanquin Dark;\">&#2309;&#2335;&#2376;&#2330;&#2350;&#2375;&#2306;&#2335; (</span><span style=\"font-family: Palanquin Dark;\"> </span><span style=\"font-family: Palanquin Dark;\">Attachment</span></strong><span style=\"font-family: Arial Unicode MS;\"><strong>) </strong>&rarr; &#2319;&#2325; &#2312;&#2350;&#2375;&#2354; &#2309;&#2335;&#2376;&#2330;&#2350;&#2375;&#2306;&#2335; &#2319;&#2325; &#2312;&#2350;&#2375;&#2354; &#2360;&#2306;&#2342;&#2375;&#2358; &#2325;&#2375; &#2360;&#2366;&#2341; &#2349;&#2375;&#2332;&#2368; &#2327;&#2312; &#2319;&#2325; &#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352; &#2347;&#2364;&#2366;&#2311;&#2354; &#2361;&#2376;&#2404; &#2325;&#2367;&#2360;&#2368; &#2349;&#2368; &#2312;&#2350;&#2375;&#2354; &#2360;&#2306;&#2342;&#2375;&#2358; &#2360;&#2375; &#2319;&#2325; &#2351;&#2366; &#2309;&#2343;&#2367;&#2325; &#2347;&#2364;&#2366;&#2311;&#2354;&#2375;&#2306; &#2309;&#2335;&#2376;&#2330; &#2325;&#2368; &#2332;&#2366; &#2360;&#2325;&#2340;&#2368; &#2361;&#2376;&#2306;, &#2324;&#2352; &#2311;&#2360;&#2325;&#2375; &#2360;&#2366;&#2341; &#2346;&#2381;&#2352;&#2366;&#2346;&#2381;&#2340;&#2325;&#2352;&#2381;&#2340;&#2366; () &#2325;&#2379; &#2349;&#2375;&#2332;&#2368; &#2332;&#2366; &#2360;&#2325;&#2340;&#2368; &#2361;&#2376;&#2306;&#2404; <strong>&#2360;&#2381;&#2346;&#2376;&#2350; (Spam)</strong> &rarr; &#2360;&#2381;&#2346;&#2376;&#2350; &#2312;&#2350;&#2375;&#2354; &#2309;&#2357;&#2366;&#2306;&#2331;&#2367;&#2340; &#2332;&#2306;&#2325; &#2312;&#2350;&#2375;&#2354; (unwanted junk email ) &#2361;&#2376; &#2332;&#2379; &#2319;&#2325; &#2309;&#2306;&#2343;&#2366;&#2343;&#2369;&#2306;&#2343; (indiscriminate ) &#2346;&#2381;&#2352;&#2366;&#2346;&#2381;&#2340;&#2325;&#2352;&#2381;&#2340;&#2366; &#2360;&#2370;&#2330;&#2368; &#2350;&#2375;&#2306; &#2341;&#2379;&#2325; (bulk) &#2350;&#2375;&#2306; &#2349;&#2375;&#2332;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404;</span></p>\n",
+                    correct: "d",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "13",
+                    section: "31",
+                    question_en: "<p><span style=\"font-family: Roboto;\">13.</span><span style=\"font-family: Roboto;\">Which of the following font effects is not available in the MS-Excel 2010 font dialog </span><span style=\"font-family: Roboto;\">box?</span></p>\n",
+                    question_hi: "<p><span style=\"font-family: Roboto;\">13.</span><span style=\"font-family: Palanquin;\"> &#2344;&#2367;&#2350;&#2381;&#2344;&#2354;&#2367;&#2326;&#2367;&#2340; &#2350;&#2375;&#2306; &#2360;&#2375; &#2325;&#2380;&#2344; &#2360;&#2366; &#2398;&#2377;&#2344;&#2381;&#2335; &#2346;&#2381;&#2352;&#2349;&#2366;&#2357; () &#2319;&#2325;&#2381;&#2360;-&#2319;&#2325;&#2381;&#2360;&#2375;&#2354; 2010 &#2337;&#2366;&#2351;&#2354;&#2366;&#2327; &#2348;&#2377;&#2325;&#2381;&#2360; &#2350;&#2375;&#2306; &#2313;&#2346;&#2354;&#2348;&#2381;&#2343; &#2344;&#2361;&#2368;&#2306; &#2361;&#2379;&#2340;&#2366; &#2361;&#2376;?</span></p>\n",
+                    options_en: ["<p>Super Italic</p>\n", "<p>Bold</p>\n", 
+                                "<p>Underline</p>\n", "<p>Italic</p>\n"],
+                    options_hi: ["<p><span style=\"font-weight: 400;\">&#2360;&#2369;&#2346;&#2352; &#2311;&#2335;&#2376;&#2354;&#2367;&#2325; (Super Italic)</span></p>\n", "<p><span style=\"font-weight: 400;\">&nbsp;&#2348;&#2379;&#2354;&#2381;&#2337; (Bold)</span></p>\n",
+                                "<p><span style=\"font-weight: 400;\">&#2309;&#2306;&#2337;&#2352;&#2354;&#2366;&#2311;&#2344; (Underline)</span></p>\n", "<p><span style=\"font-weight: 400;\">&#2311;&#2335;&#2376;&#2354;&#2367;&#2325;&nbsp; (Italic)</span></p>\n"],
+                    solution_en: "<p>13.(a)<span style=\"font-family: Palanquin;\"> </span><strong><span style=\"font-family: Palanquin;\">Super Italic</span></strong><span style=\"font-family: Palanquin;\"> font style is not available in Ms Excel 2010.</span></p>\n",
+                    solution_hi: "<p>13.(a)<span style=\"font-family: Palanquin;\"> </span><span style=\"font-family: Palanquin Dark;\">&#2319;&#2350;&#2319;&#2360; &#2319;&#2325;&#2381;&#2360;&#2375;&#2354; 2010 &#2350;&#2375;&#2306; &#2360;&#2369;&#2346;&#2352; &#2311;&#2335;&#2376;&#2354;&#2367;&#2325; <strong>(</strong></span><strong><span style=\"font-family: Palanquin Dark;\">Super Italic</span></strong><span style=\"font-family: Palanquin Dark;\"><strong>)</strong> &#2347;&#2364;&#2377;&#2344;&#2381;&#2335; &#2360;&#2381;&#2335;&#2366;&#2311;&#2354; &#2313;&#2346;&#2354;&#2348;&#2381;&#2343; &#2344;&#2361;&#2368;&#2306; &#2361;&#2376;&#2404;</span></p>\n",
+                    correct: "a",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "14",
+                    section: "31",
+                    question_en: "<p><span style=\"font-family: Roboto;\">14.</span><span style=\"font-family: Roboto;\"> ______ tab in MS-Excel 2010 ribbon bar contains tools for inserting functions, defining </span><span style=\"font-family: Roboto;\">names and controlling the calculation options.</span></p>\n",
+                    question_hi: "<p><span style=\"font-family: Palanquin;\">14. &#2319;&#2350;&#2319;&#2360;-&#2319;&#2325;&#2381;&#2360;&#2375;&#2354; 2010 &#2352;&#2367;&#2348;&#2344; &#2348;&#2366;&#2352; &#2350;&#2375;&#2306; _____&#2335;&#2376;&#2348; &#2350;&#2375;&#2306; &#2347;&#2306;&#2325;&#2381;&#2358;&#2344; &#2337;&#2366;&#2354;&#2344;&#2375;, &#2344;&#2366;&#2350; &#2346;&#2352;&#2367;&#2349;&#2366;&#2359;&#2367;&#2340; &#2325;&#2352;&#2344;&#2375; &#2324;&#2352; &#2327;&#2339;&#2344;&#2366; - &#2360;&#2350;&#2381;&#2348;&#2344;&#2381;&#2343;&#2368; &#2357;&#2367;&#2325;&#2354;&#2381;&#2346;&#2379;&#2306; &#2325;&#2379; &#2344;&#2367;&#2351;&#2306;&#2340;&#2381;&#2352;&#2367;&#2340; &#2325;&#2352;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2335;&#2370;&#2354; &#2361;&#2379;&#2340;&#2375; &#2361;&#2376;&#2404; </span></p>\n",
+                    options_en: ["<p>PAGE Layout</p>\n", "<p>REVIEW</p>\n", 
+                                "<p>FORMULA</p>\n", "<p>FILE</p>\n"],
+                    options_hi: ["<p>PAGE Layout</p>\n", "<p>REVIEW</p>\n",
+                                "<p>FORMULA</p>\n", "<p>FILE</p>\n"],
+                    solution_en: "<p>14.(c)<span style=\"font-family: Roboto;\"> </span><strong><span style=\"font-family: Roboto;\">Formula</span></strong><span style=\"font-family: Roboto;\"> </span><span style=\"font-family: Arial Unicode MS;\">&rarr;</span><span style=\"font-family: Arial Unicode MS;\">In Microsoft Excel, a formula is an expression that operates on values in a range of </span><span style=\"font-family: Arial Unicode MS;\">cells. </span><strong><span style=\"font-family: Arial Unicode MS;\">Review Tab</span></strong><span style=\"font-family: Arial Unicode MS;\">&rarr;</span><span style=\"font-family: Arial Unicode MS;\">The Review tab provides icons for document review-related commands, such as spelling check, translation, track changes, apply changes, comments and so on. </span><span style=\"font-family: Arial Unicode MS;\"><strong>File</strong> </span><span style=\"font-family: Arial Unicode MS;\">&rarr;</span><span style=\"font-family: Arial Unicode MS;\">The File ribbon items enable you to perform file management functions, including open, save, close, and print. </span><strong><span style=\"font-family: Arial Unicode MS;\">PAGE Layout</span></strong><span style=\"font-family: Arial Unicode MS;\"> </span><span style=\"font-family: Arial Unicode MS;\">&rarr;</span><span style=\"font-family: Arial Unicode MS;\">The Page Layout Tab holds all the options that allow you to arrange your document pages just the way you want them.</span></p>\n",
+                    solution_hi: "<p>14.(c)<span style=\"font-family: Arial Unicode MS;\"> </span><strong><span style=\"font-family: Arial Unicode MS;\">Formula</span></strong><span style=\"font-family: Arial Unicode MS;\"> &rarr; &#2350;&#2366;&#2311;&#2325;&#2381;&#2352;&#2379;&#2360;&#2377;&#2347;&#2381;&#2335; &#2319;&#2325;&#2381;&#2360;&#2375;&#2354; &#2350;&#2375;&#2306;, &#2347;&#2377;&#2352;&#2381;&#2350;&#2370;&#2354;&#2366; &#2319;&#2325; &#2319;&#2325;&#2381;&#2360;&#2346;&#2381;&#2352;&#2375;&#2358;&#2344; &#2361;&#2379;&#2340;&#2366; &#2361;&#2376;, &#2332;&#2379; &#2360;&#2375;&#2354; &#2325;&#2368; &#2352;&#2375;&#2306;&#2332; &#2350;&#2375;&#2306; &#2357;&#2376;&#2354;&#2381;&#2351;&#2370; &#2346;&#2352; &#2321;&#2346;&#2352;&#2375;&#2335; &#2361;&#2379;&#2340;&#2366; &#2361;&#2376;&#2404;<strong> Review Tab</strong>&rarr; &#2352;&#2367;&#2357;&#2381;&#2351;&#2369; &#2335;&#2376;&#2348; &#2342;&#2360;&#2381;&#2340;&#2366;&#2357;&#2375;&#2332;&#2364; &#2360;&#2350;&#2368;&#2325;&#2381;&#2359;&#2366; (review ) &#2360;&#2375; &#2360;&#2306;&#2348;&#2306;&#2343;&#2367;&#2340; &#2310;&#2342;&#2375;&#2358;&#2379;&#2306; &#2325;&#2375; &#2354;&#2367;&#2319; &#2310;&#2311;&#2325;&#2344; &#2346;&#2381;&#2352;&#2342;&#2366;&#2344; &#2325;&#2352;&#2340;&#2366; &#2361;&#2376;, &#2332;&#2376;&#2360;&#2375; &#2357;&#2352;&#2381;&#2340;&#2344;&#2368; &#2332;&#2366;&#2306;&#2330;, &#2309;&#2344;&#2369;&#2357;&#2366;&#2342;, &#2335;&#2381;&#2352;&#2376;&#2325; &#2330;&#2375;&#2306;&#2332; , &#2309;&#2346;&#2381;&#2354;&#2366;&#2312; &#2330;&#2375;&#2306;&#2332; , &#2325;&#2350;&#2376;&#2306;&#2335;&#2381;&#2360; &#2310;&#2342;&#2367;&#2404; </span><span style=\"font-family: Arial Unicode MS;\"><strong>File</strong> </span><span style=\"font-family: Arial Unicode MS;\">&rarr; </span><span style=\"font-family: Palanquin Dark;\">&#2347;&#2364;&#2366;&#2311;&#2354; &#2352;&#2367;&#2348;&#2344; &#2310;&#2311;&#2335;&#2350; &#2310;&#2346;&#2325;&#2379; &#2347;&#2364;&#2366;&#2311;&#2354; &#2346;&#2381;&#2352;&#2348;&#2306;&#2343;&#2344; &#2347;&#2306;&#2325;&#2381;&#2358;&#2344; &#2325;&#2352;&#2344;&#2375; &#2350;&#2375;&#2306; &#2360;&#2325;&#2381;&#2359;&#2350; &#2348;&#2344;&#2366;&#2340;&#2366; &#2361;&#2376;, &#2332;&#2367;&#2360;&#2350;&#2375;&#2306; &#2323;&#2346;&#2344; , &#2360;&#2375;&#2357; ,&#2325;&#2381;&#2354;&#2379;&#2332; &#2324;&#2352; &#2346;&#2381;&#2352;&#2367;&#2306;&#2335; &#2325;&#2352;&#2344;&#2366; &#2358;&#2366;&#2350;&#2367;&#2354; &#2361;&#2376;&#2404; </span><strong><span style=\"font-family: Palanquin Dark;\">PAGE Layout</span><span style=\"font-family: Palanquin Dark;\"> </span></strong><span style=\"font-family: Arial Unicode MS;\">&rarr; </span><span style=\"font-family: Palanquin Dark;\">&#2346;&#2375;&#2332; &#2354;&#2375;&#2310;&#2313;&#2335; &#2335;&#2376;&#2348; &#2350;&#2375;&#2306; &#2357;&#2375; &#2360;&#2349;&#2368; &#2357;&#2367;&#2325;&#2354;&#2381;&#2346; &#2361;&#2379;&#2340;&#2375; &#2361;&#2376;&#2306; &#2332;&#2379; &#2310;&#2346;&#2325;&#2379; &#2309;&#2346;&#2344;&#2375; &#2342;&#2360;&#2381;&#2340;&#2366;&#2357;&#2375;&#2332;&#2364; &#2346;&#2371;&#2359;&#2381;&#2336;&#2379;&#2306; (document pages) &#2325;&#2379; &#2357;&#2376;&#2360;&#2375; &#2361;&#2368; &#2357;&#2381;&#2351;&#2357;&#2360;&#2381;&#2341;&#2367;&#2340; &#2325;&#2352;&#2344;&#2375; &#2325;&#2368; &#2309;&#2344;&#2369;&#2350;&#2340;&#2367; &#2342;&#2375;&#2340;&#2375; &#2361;&#2376;&#2306; &#2332;&#2376;&#2360;&#2375; &#2310;&#2346; &#2313;&#2344;&#2381;&#2361;&#2375;&#2306; &#2330;&#2366;&#2361;&#2340;&#2375; &#2361;&#2376;&#2306;&#2404;</span></p>\n",
+                    correct: "c",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "15",
+                    section: "31",
+                    question_en: "<p><span style=\"font-family: Roboto;\">15.</span><span style=\"font-family: Roboto;\"> ______ shortcut key is used in MS-Excel 2010 to select a column.</span></p>\n",
+                    question_hi: "<p><span style=\"font-family: Roboto;\">15.</span><span style=\"font-family: Palanquin;\"> &#2319;&#2350;&#2319;&#2360;-&#2319;&#2325;&#2381;&#2360;&#2375;&#2354; 2010 &#2350;&#2375;&#2306; &#2325;&#2377;&#2354;&#2350; &#2360;&#2375;&#2354;&#2375;&#2325;&#2381;&#2335; &#2325;&#2352;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319;_____&#2358;&#2377;&#2352;&#2381;&#2335;&#2325;&#2335; &#2325;&#2369;&#2306;&#2332;&#2368; (key) &#2325;&#2366; &#2313;&#2346;&#2351;&#2379;&#2327; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376; </span></p>\n",
+                    options_en: ["<p>Ctrl + Spacebar</p>\n", "<p>Shift + Spacebar</p>\n", 
+                                "<p>Ctrl + Enter</p>\n", "<p>Alt + Enter</p>\n"],
+                    options_hi: ["<p>Ctrl + Spacebar</p>\n", "<p>Shift + Spacebar</p>\n",
+                                "<p>Ctrl + Enter</p>\n", "<p>Alt + Enter</p>\n"],
+                    solution_en: "<p>15.(a)<span style=\"font-family: Roboto;\"> </span><strong><span style=\"font-family: Roboto;\">Ctrl + Spacebar</span></strong><span style=\"font-family: Arial Unicode MS;\">&rarr; It is used to </span><span style=\"font-family: Arial Unicode MS;\">select an entire column in a worksheet. </span><strong><span style=\"font-family: Arial Unicode MS;\">Shift + Spacebar</span></strong><span style=\"font-family: Arial Unicode MS;\">&rarr; </span><span style=\"font-family: Arial Unicode MS;\">It is used to select an entire row in a worksheet. </span><strong><span style=\"font-family: Arial Unicode MS;\">ALT + Enter</span></strong><span style=\"font-family: Arial Unicode MS;\">&rarr; It is </span><span style=\"font-family: Arial Unicode MS;\">used to move to the next line allowing for multiple lines of text in one cell.</span><strong><span style=\"font-family: Arial Unicode MS;\">Ctrl + Enter</span></strong><span style=\"font-family: Arial Unicode MS;\">&rarr; It is </span><span style=\"font-family: Arial Unicode MS;\">used to fill all selected cells with the same data or formula.</span></p>\n",
+                    solution_hi: "<p>15.(a)<span style=\"font-family: Arial Unicode MS;\"> </span><strong><span style=\"font-family: Arial Unicode MS;\">Ctrl + Spacebar</span></strong><span style=\"font-family: Arial Unicode MS;\">&rarr; &#2311;&#2360;&#2325;&#2366; &#2313;&#2346;&#2351;&#2379;&#2327; &#2357;&#2352;&#2381;&#2325;&#2358;&#2368;&#2335; &#2350;&#2375;&#2306; &#2319;&#2325; &#2346;&#2370;&#2352;&#2375; &#2325;&#2377;&#2354;&#2350; &#2325;&#2379; &#2360;&#2375;&#2354;&#2375;&#2325;&#2381;&#2335; &#2325;&#2352;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404; </span><strong><span style=\"font-family: Arial Unicode MS;\">Shift + Spacebar</span></strong><span style=\"font-family: Arial Unicode MS;\">&rarr; &#2311;&#2360;&#2325;&#2366; &#2313;&#2346;&#2351;&#2379;&#2327; &#2357;&#2352;&#2381;&#2325;&#2358;&#2368;&#2335; &#2350;&#2375;&#2306; &#2319;&#2325; &#2346;&#2370;&#2352;&#2368; &#2352;&#2379; &#2325;&#2366; &#2330;&#2351;&#2344; &#2325;&#2352;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404; </span><strong><span style=\"font-family: Arial Unicode MS;\">ALT + Enter</span></strong><span style=\"font-family: Arial Unicode MS;\"><strong> </strong>&rarr; &#2311;&#2360;&#2325;&#2366; &#2313;&#2346;&#2351;&#2379;&#2327; &#2319;&#2325; &#2360;&#2375;&#2354; &#2350;&#2375;&#2306; &#2335;&#2375;&#2325;&#2381;&#2360;&#2381;&#2335; &#2325;&#2368; &#2325;&#2312; &#2346;&#2306;&#2325;&#2381;&#2340;&#2367;&#2351;&#2379;&#2306; &#2325;&#2368; &#2309;&#2344;&#2369;&#2350;&#2340;&#2367; &#2342;&#2375;&#2344;&#2375; &#2357;&#2366;&#2354;&#2368; &#2309;&#2327;&#2354;&#2368; &#2346;&#2306;&#2325;&#2381;&#2340;&#2367; &#2350;&#2375;&#2306; &#2332;&#2366;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404;<strong> </strong></span><strong><span style=\"font-family: Arial Unicode MS;\">Ctrl + Enter</span></strong><span style=\"font-family: Arial Unicode MS;\">&rarr; &#2311;&#2360;&#2325;&#2366; &#2313;&#2346;&#2351;&#2379;&#2327; &#2360;&#2349;&#2368; &#2330;&#2351;&#2344;&#2367;&#2340; &#2360;&#2375;&#2354; &#2325;&#2379; &#2319;&#2325; &#2361;&#2368; &#2337;&#2375;&#2335;&#2366; &#2351;&#2366; &#2347;&#2366;&#2352;&#2381;&#2350;&#2370;&#2354;&#2366; &#2360;&#2375; &#2347;&#2367;&#2354; &#2325;&#2352;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376; &#2404;</span></p>\n",
+                    correct: "a",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "16",
+                    section: "31",
+                    question_en: "<p><span style=\"font-family: Roboto;\">16. </span><span style=\"font-family: Roboto;\">In MS-Excel 2010, ______ are used to make a graphical representation of any set of </span><span style=\"font-family: Roboto;\">data.</span></p>\n",
+                    question_hi: "<p><span style=\"font-family: Roboto;\">16.</span><span style=\"font-family: Palanquin;\"> &#2319;&#2350;&#2319;&#2360;-&#2319;&#2325;&#2381;&#2360;&#2375;&#2354; 2010 () &#2350;&#2375;&#2306;, _____&#2325;&#2366; &#2313;&#2346;&#2351;&#2379;&#2327; &#2337;&#2375;&#2335;&#2366; &#2325;&#2375; &#2325;&#2367;&#2360;&#2368; &#2349;&#2368; &#2360;&#2375;&#2335; &#2325;&#2366; &#2310;&#2354;&#2375;&#2326;&#2368; &#2344;&#2367;&#2352;&#2370;&#2346;&#2339; &#2325;&#2352;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2404;</span></p>\n",
+                    options_en: ["<p>Rows</p>\n", "<p>Table</p>\n", 
+                                "<p>Charts</p>\n", "<p>Columns</p>\n"],
+                    options_hi: ["<p><span style=\"font-weight: 400;\">&nbsp;&#2352;&#2379;&#2395; (Rows)</span></p>\n", "<p>&#2335;&#2375;&#2348;&#2354; (Table)</p>\n",
+                                "<p>&#2330;&#2366;&#2352;&#2381;&#2335;&#2381;&#2360; (Charts)</p>\n", "<p><span style=\"font-weight: 400;\">&#2325;&#2377;&#2354;&#2350;&#2381;&#2360;(Columns)</span></p>\n"],
+                    solution_en: "<p>16.(c)<span style=\"font-family: Palanquin;\"> </span><strong><span style=\"font-family: Palanquin;\">CHART</span></strong><span style=\"font-family: Arial Unicode MS;\"><strong>&rarr;</strong> </span><span style=\"font-family: Arial Unicode MS;\">A chart is a tool you can use in Excel to communicate data graphically. Charts allow your audience to see the meaning behind the numbers, and they make showing comparisons and trends much easier. </span><strong><span style=\"font-family: Arial Unicode MS;\">TABLE</span><span style=\"font-family: Arial Unicode MS;\">&rarr;</span></strong><span style=\"font-family: Arial Unicode MS;\"><strong>The</strong> purpose of an Excel table is not so much to calculate new values but rather to store lots of information in a consistent manner, making it easier to format, sort, and filter worksheet data. </span><strong><span style=\"font-family: Arial Unicode MS;\">Column</span></strong><span style=\"font-family: Arial Unicode MS;\"><strong>&rarr;</strong> </span><span style=\"font-family: Arial Unicode MS;\">Columns are denoted and identified by a unique alphabetical header letter, which is located at the top of the worksheet. </span><strong><span style=\"font-family: Arial Unicode MS;\">Row</span><span style=\"font-family: Arial Unicode MS;\">&rarr;</span></strong><span style=\"font-family: Arial Unicode MS;\">Each row is denoted and identified by a unique numeric value that you\'ll see on the left hand side. The row numbers are arranged vertically on the worksheet, ranging from 1-1,048,576.</span></p>\n",
+                    solution_hi: "<p>16.(c)<span style=\"font-family: Arial Unicode MS;\"> </span><span style=\"font-family: Arial Unicode MS;\"><strong>CHART&rarr;</strong> </span><span style=\"font-family: Palanquin Dark;\">&#2330;&#2366;&#2352;&#2381;&#2335; &#2319;&#2325; &#2335;&#2370;&#2354; &#2361;&#2376; &#2332;&#2367;&#2360;&#2375; &#2310;&#2346; &#2319;&#2325;&#2381;&#2360;&#2375;&#2354; &#2350;&#2375;&#2306; &#2327;&#2381;&#2352;&#2366;&#2347;&#2367;&#2325; &#2352;&#2370;&#2346; &#2360;&#2375; &#2337;&#2375;&#2335;&#2366; &#2360;&#2306;&#2330;&#2366;&#2352; &#2325;&#2352;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2313;&#2346;&#2351;&#2379;&#2327; &#2325;&#2352; &#2360;&#2325;&#2340;&#2375; &#2361;&#2376;&#2306;&#2404; &#2330;&#2366;&#2352;&#2381;&#2335; &#2310;&#2346;&#2325;&#2375; &#2342;&#2352;&#2381;&#2358;&#2325;&#2379;&#2306; &#2325;&#2379; &#2360;&#2306;&#2326;&#2381;&#2351;&#2366;&#2323;&#2306; &#2325;&#2375; &#2346;&#2368;&#2331;&#2375; &#2325;&#2366; &#2309;&#2352;&#2381;&#2341; &#2342;&#2375;&#2326;&#2344;&#2375; &#2325;&#2368; &#2309;&#2344;&#2369;&#2350;&#2340;&#2367; &#2342;&#2375;&#2340;&#2375; &#2361;&#2376;&#2306;, &#2324;&#2352; &#2357;&#2375; &#2340;&#2369;&#2354;&#2344;&#2366;&#2323;&#2306; (comparisons) &#2324;&#2352; &#2346;&#2381;&#2352;&#2357;&#2371;&#2340;&#2381;&#2340;&#2367;&#2351;&#2379;&#2306; (trends) &#2325;&#2379; &#2342;&#2367;&#2326;&#2366;&#2344;&#2366; &#2348;&#2361;&#2369;&#2340; &#2310;&#2360;&#2366;&#2344; &#2348;&#2344;&#2366;&#2340;&#2375; &#2361;&#2376;&#2306;&#2404; </span><span style=\"font-family: Palanquin Dark;\"><strong>Table</strong> </span><span style=\"font-family: Arial Unicode MS;\">&rarr; &#2319;&#2325;&#2381;&#2360;&#2375;&#2354; &#2335;&#2375;&#2348;&#2354; &#2325;&#2366; &#2313;&#2342;&#2381;&#2342;&#2375;&#2358;&#2381;&#2351; &#2344;&#2319; &#2350;&#2370;&#2354;&#2381;&#2351;&#2379;&#2306; &#2325;&#2368; &#2327;&#2339;&#2344;&#2366; &#2325;&#2352;&#2344;&#2366; &#2344;&#2361;&#2368;&#2306; &#2361;&#2376;, &#2348;&#2354;&#2381;&#2325;&#2367; &#2348;&#2361;&#2369;&#2340; &#2360;&#2366;&#2352;&#2368; &#2360;&#2370;&#2330;&#2344;&#2366;&#2323;&#2306; &#2325;&#2379; &#2319;&#2325; &#2360;&#2369;&#2360;&#2306;&#2327;&#2340; (consistent ) &#2340;&#2352;&#2368;&#2325;&#2375; &#2360;&#2375; &#2360;&#2306;&#2327;&#2381;&#2352;&#2361;&#2368;&#2340; (store) &#2325;&#2352;&#2344;&#2366; &#2361;&#2376;, &#2332;&#2367;&#2360;&#2360;&#2375; &#2357;&#2352;&#2381;&#2325;&#2358;&#2368;&#2335; &#2337;&#2375;&#2335;&#2366; &#2325;&#2379; &#2347;&#2377;&#2352;&#2381;&#2350;&#2375;&#2335; &#2325;&#2352;&#2344;&#2366;, &#2325;&#2381;&#2352;&#2350;&#2348;&#2342;&#2381;&#2343; &#2325;&#2352;&#2344;&#2366; &#2324;&#2352; &#2347;&#2364;&#2367;&#2354;&#2381;&#2335;&#2352; &#2325;&#2352;&#2344;&#2366; &#2310;&#2360;&#2366;&#2344; &#2361;&#2379; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404; </span><span style=\"font-family: Arial Unicode MS;\"><strong>Column&rarr;</strong> </span><span style=\"font-family: Palanquin Dark;\">&#2325;&#2377;&#2354;&#2350; &#2325;&#2379; &#2319;&#2325; &#2309;&#2342;&#2381;&#2357;&#2367;&#2340;&#2368;&#2351; &#2309;&#2354;&#2381;&#2347;&#2366;&#2348;&#2375;&#2335;&#2367;&#2325;&#2354; &#2361;&#2376;&#2337;&#2352; &#2354;&#2375;&#2335;&#2352; &#2342;&#2381;&#2357;&#2366;&#2352;&#2366; &#2342;&#2352;&#2381;&#2358;&#2366;&#2351;&#2366; &#2324;&#2352; &#2346;&#2361;&#2330;&#2366;&#2344;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;, &#2332;&#2379; &#2357;&#2352;&#2381;&#2325;&#2358;&#2368;&#2335; &#2325;&#2375; &#2358;&#2368;&#2352;&#2381;&#2359; &#2346;&#2352; &#2360;&#2381;&#2341;&#2367;&#2340; &#2361;&#2379;&#2340;&#2366; &#2361;&#2376;&#2404; </span><span style=\"font-family: Arial Unicode MS;\"><strong>Row&rarr;</strong> </span><span style=\"font-family: Palanquin Dark;\">&#2346;&#2381;&#2352;&#2340;&#2381;&#2351;&#2375;&#2325; &#2352;&#2379; &#2325;&#2379; &#2319;&#2325; &#2309;&#2342;&#2381;&#2357;&#2367;&#2340;&#2368;&#2351; &#2360;&#2306;&#2326;&#2381;&#2351;&#2366;&#2340;&#2381;&#2350;&#2325; &#2350;&#2366;&#2344; &#2342;&#2381;&#2357;&#2366;&#2352;&#2366; &#2342;&#2352;&#2381;&#2358;&#2366;&#2351;&#2366; &#2324;&#2352; &#2346;&#2361;&#2330;&#2366;&#2344;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376; &#2332;&#2367;&#2360;&#2375; &#2310;&#2346; &#2348;&#2366;&#2312;&#2306; &#2323;&#2352; &#2342;&#2375;&#2326;&#2375;&#2306;&#2327;&#2375;&#2404; &#2352;&#2379; &#2360;&#2306;&#2326;&#2381;&#2351;&#2366;&#2323;&#2306; &#2325;&#2379; &#2357;&#2352;&#2381;&#2325;&#2358;&#2368;&#2335; &#2346;&#2352; &#2354;&#2306;&#2348;&#2357;&#2340; (vertical) &#2352;&#2370;&#2346; &#2360;&#2375; &#2357;&#2381;&#2351;&#2357;&#2360;&#2381;&#2341;&#2367;&#2340; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;, &#2332;&#2379; 1-1,048,576 &#2360;&#2375; &#2354;&#2375;&#2325;&#2352; &#2361;&#2379;&#2340;&#2366; &#2361;&#2376;&#2404;</span></p>\n",
+                    correct: "c",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "17",
+                    section: "31",
+                    question_en: "<p><span style=\"font-family: Roboto;\">17.</span><span style=\"font-family: Roboto;\"> Secure communication is required when two parties are communicating through </span><span style=\"font-family: Roboto;\">internet, and they do not want any third party to intercept between them. Which of the </span><span style=\"font-family: Roboto;\">following is a property of secure communication?</span></p>\r\n<p><span style=\"font-family: Roboto;\">P: Confidentiality</span></p>\r\n<p><span style=\"font-family: Roboto;\">Q: Accuracy</span></p>\n",
+                    question_hi: "<p><span style=\"font-family: Roboto;\">17.</span><span style=\"font-family: Palanquin;\"> &#2360;&#2369;&#2352;&#2325;&#2381;&#2359;&#2367;&#2340; &#2360;&#2306;&#2330;&#2366;&#2352; &#2325;&#2368; &#2310;&#2357;&#2358;&#2381;&#2351;&#2325;&#2340;&#2366; &#2340;&#2348; &#2361;&#2379;&#2340;&#2368; &#2361;&#2376; &#2332;&#2348; &#2342;&#2379; &#2346;&#2325;&#2381;&#2359; &#2311;&#2306;&#2335;&#2352;&#2344;&#2375;&#2335; &#2325;&#2375; &#2350;&#2366;&#2343;&#2381;&#2351;&#2350; &#2360;&#2375; &#2360;&#2306;&#2330;&#2366;&#2352; &#2325;&#2352; &#2352;&#2361;&#2375; &#2361;&#2379;&#2306;, &#2324;&#2352; &#2357;&#2375; &#2344;&#2361;&#2368;&#2306; &#2330;&#2366;&#2361;&#2340;&#2375; &#2325;&#2368; &#2325;&#2379;&#2312; &#2340;&#2368;&#2360;&#2352;&#2366; &#2346;&#2325;&#2381;&#2359; &#2313;&#2344;&#2325;&#2375; &#2348;&#2368;&#2330; &#2309;&#2357;&#2352;&#2379;&#2343; &#2313;&#2340;&#2381;&#2346;&#2344;&#2381;&#2344; &#2325;&#2352;&#2375;&#2404; &#2344;&#2367;&#2350;&#2381;&#2344;&#2354;&#2367;&#2326;&#2367;&#2340; &#2350;&#2375;&#2306; &#2360;&#2375; &#2325;&#2380;&#2344;-&#2360;&#2368; &#2319;&#2325; &#2360;&#2369;&#2352;&#2325;&#2381;&#2359;&#2367;&#2340; &#2360;&#2306;&#2330;&#2366;&#2352; &#2325;&#2368; &#2357;&#2367;&#2358;&#2375;&#2359;&#2340;&#2366; &#2361;&#2376; ?</span></p>\r\n<p><span style=\"font-family: Roboto;\">P: (Confidentiality)</span></p>\r\n<p><span style=\"font-family: Roboto;\">Q: (Accuracy)</span></p>\n",
+                    options_en: ["<p>Neither P nor Q</p>\n", "<p>Only Q</p>\n", 
+                                "<p>Both P and Q</p>\n", "<p>Only P</p>\n"],
+                    options_hi: ["<p>&#2344; &#2340;&#2379; P &#2324;&#2352; &#2344; &#2361;&#2368; Q</p>\n", "<p>&#2325;&#2375;&#2357;&#2354; Q</p>\n",
+                                "<p>&#2342;&#2379;&#2344;&#2379;&#2306; P &#2324;&#2352; Q</p>\n", "<p>&#2325;&#2375;&#2357;&#2354; P</p>\n"],
+                    solution_en: "<p>17.(d)<span style=\"font-family: Roboto;\"> </span><span style=\"font-family: Roboto;\"><strong>Data confidentiality</strong> indicates the guarantee that data can be accessed and modified only by authorized entities. Not only users, but authorized entities may also access information, which requires an access control approach and authentication process for the device.</span></p>\n",
+                    solution_hi: "<p><span style=\"font-family: Roboto;\">17.(d)</span><span style=\"font-family: Roboto;\"> </span><strong><span style=\"font-family: Palanquin Dark;\">&#2337;&#2375;&#2335;&#2366; &#2325;&#2377;&#2344;&#2381;&#2347;&#2367;&#2337;&#2375;&#2306;&#2335;&#2367;&#2310;&#2354;&#2368;</span></strong><span style=\"font-family: Palanquin Dark;\">(Data confidentiality) &#2311;&#2360; &#2327;&#2366;&#2352;&#2306;&#2335;&#2368; &#2325;&#2379; &#2311;&#2306;&#2327;&#2367;&#2340; &#2325;&#2352;&#2340;&#2368; &#2361;&#2376; &#2325;&#2367; &#2337;&#2375;&#2335;&#2366; &#2325;&#2379; &#2325;&#2375;&#2357;&#2354; &#2309;&#2343;&#2367;&#2325;&#2371;&#2340; &#2360;&#2306;&#2360;&#2381;&#2341;&#2366;&#2323;&#2306; &#2342;&#2381;&#2357;&#2366;&#2352;&#2366; &#2361;&#2368; &#2319;&#2325;&#2381;&#2360;&#2375;&#2360; &#2324;&#2352; &#2360;&#2306;&#2358;&#2379;&#2343;&#2367;&#2340; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366; &#2360;&#2325;&#2340;&#2366; &#2361;&#2376;&#2404; &#2344; &#2325;&#2375;&#2357;&#2354; &#2313;&#2346;&#2351;&#2379;&#2327;&#2325;&#2352;&#2381;&#2340;&#2366;, &#2348;&#2354;&#2381;&#2325;&#2367; &#2309;&#2343;&#2367;&#2325;&#2371;&#2340; &#2360;&#2306;&#2360;&#2381;&#2341;&#2366;&#2323;&#2306; &#2349;&#2368; &#2332;&#2366;&#2344;&#2325;&#2366;&#2352;&#2368; &#2340;&#2325; &#2346;&#2361;&#2369;&#2306;&#2330; &#2360;&#2325;&#2340;&#2368; &#2361;&#2376;&#2306;, &#2332;&#2367;&#2360;&#2325;&#2375; &#2354;&#2367;&#2319; &#2337;&#2367;&#2357;&#2366;&#2311;&#2360; &#2325;&#2375; &#2354;&#2367;&#2319; &#2319;&#2325;&#2381;&#2360;&#2375;&#2360; &#2325;&#2306;&#2335;&#2381;&#2352;&#2379;&#2354; &#2342;&#2371;&#2359;&#2381;&#2335;&#2367;&#2325;&#2379;&#2339; &#2324;&#2352; &#2346;&#2381;&#2352;&#2350;&#2366;&#2339;&#2368;&#2325;&#2352;&#2339; &#2346;&#2381;&#2352;&#2325;&#2381;&#2352;&#2367;&#2351;&#2366; &#2325;&#2368; &#2310;&#2357;&#2358;&#2381;&#2351;&#2325;&#2340;&#2366; &#2361;&#2379;&#2340;&#2368; &#2361;&#2376;&#2404;</span></p>\n",
+                    correct: "d",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "18",
+                    section: "31",
+                    question_en: "<p><span style=\"font-family: Roboto;\">18. </span><span style=\"font-family: Roboto;\"> 8 Which of the following shortcut key is used to increase the font size to the next larger </span><span style=\"font-family: Roboto;\">point size available in the Font Size list box of MS-Word 2010?</span></p>\n",
+                    question_hi: "<p><span style=\"font-family: Roboto;\">18.</span><span style=\"font-family: Palanquin;\"> MS - word 2010 &#2325;&#2375; &#2398;&#2377;&#2344;&#2381;&#2335; &#2360;&#2366;&#2311;&#2395; &#2354;&#2367;&#2360;&#2381;&#2335; &#2348;&#2377;&#2325;&#2381;&#2360; &#2350;&#2375;&#2306; &#2313;&#2346;&#2354;&#2348;&#2381;&#2343; &#2309;&#2327;&#2354;&#2375; &#2348;&#2396;&#2375; &#2346;&#2377;&#2311;&#2306;&#2335; &#2360;&#2366;&#2311;&#2395; &#2340;&#2325; &#2398;&#2377;&#2344;&#2381;&#2335; &#2360;&#2366;&#2311;&#2395; &#2325;&#2379; &#2348;&#2396;&#2366; &#2325;&#2352;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2344;&#2367;&#2350;&#2381;&#2344;&#2354;&#2367;&#2326;&#2367;&#2340; &#2350;&#2375;&#2306; &#2360;&#2375; &#2325;&#2367;&#2360; &#2358;&#2377;&#2352;&#2381;&#2335;&#2325;&#2335; &#2325;&#2368; (Key) &#2325;&#2366; &#2313;&#2346;&#2351;&#2379;&#2327; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376; ?</span></p>\n",
+                    options_en: ["<p>Ctrl + Shift + &lt;</p>\n", "<p>Ctrl + Shift + F3</p>\n", 
+                                "<p>Ctrl + Shift + &gt;</p>\n", "<p>Ctrl + Shift + F4</p>\n"],
+                    options_hi: ["<p>Ctrl + Shift + &lt;</p>\n", "<p>Ctrl + Shift + F3</p>\n",
+                                "<p>Ctrl + Shift + &gt;</p>\n", "<p>Ctrl + Shift + F4</p>\n"],
+                    solution_en: "<p>18.(c)<span style=\"font-family: Roboto;\"> </span><strong><span style=\"font-family: Roboto;\">Ctrl + Shift + &gt;</span></strong><span style=\"font-family: Arial Unicode MS;\">&rarr; It is used to increase the font size.</span><strong><span style=\"font-family: Arial Unicode MS;\">Ctrl + Shift + &lt;</span></strong><span style=\"font-family: Arial Unicode MS;\">&rarr; It is used to decrease the font size.</span><strong><span style=\"font-family: Arial Unicode MS;\"> Ctrl Shift + F3</span></strong><span style=\"font-family: Arial Unicode MS;\">&rarr;The Microsoft docs tell us that once you get to the final dialog after the last boot during the Windows install process, one can </span><strong><span style=\"font-family: Arial Unicode MS;\">enter Audit mode</span></strong><span style=\"font-family: Arial Unicode MS;\"> using Ctrl + Shift + F3 keys. </span><strong><span style=\"font-family: Arial Unicode MS;\">Ctrl + Shift + F4</span></strong><span style=\"font-family: Arial Unicode MS;\">&rarr; </span><span style=\"font-family: Arial Unicode MS;\"> This shortcut commands will make the \'find go\' in reverse to locate the previous cell.</span></p>\n",
+                    solution_hi: "<p>18.(c)<strong><span style=\"font-family: Arial Unicode MS;\"> </span><span style=\"font-family: Arial Unicode MS;\">Ctrl + Shift + &gt;</span></strong><span style=\"font-family: Arial Unicode MS;\">&rarr; &#2311;&#2360;&#2325;&#2366; &#2313;&#2346;&#2351;&#2379;&#2327; &#2347;&#2377;&#2344;&#2381;&#2335; &#2360;&#2366;&#2311;&#2332; &#2325;&#2379; &#2348;&#2338;&#2364;&#2366;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404; </span></p>\r\n<p><strong><span style=\"font-family: Arial Unicode MS;\">Ctrl + Shift + &lt;</span></strong><span style=\"font-family: Arial Unicode MS;\">&rarr; &#2311;&#2360;&#2325;&#2366; &#2313;&#2346;&#2351;&#2379;&#2327; &#2347;&#2377;&#2344;&#2381;&#2335; &#2360;&#2366;&#2311;&#2332; &#2325;&#2379; &#2325;&#2350; &#2325;&#2352;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404; </span><strong><span style=\"font-family: Arial Unicode MS;\">Ctrl + Shift + F3</span></strong><span style=\"font-family: Arial Unicode MS;\"><strong> &rarr;</strong> Microsoft &#2337;&#2377;&#2325;&#2381;&#2360; &#2361;&#2350;&#2375;&#2306; &#2348;&#2340;&#2366;&#2340;&#2366; &#2361;&#2376; &#2325;&#2367; &#2319;&#2325; &#2348;&#2366;&#2352; &#2332;&#2348; &#2310;&#2346; &#2357;&#2367;&#2306;&#2337;&#2379;&#2332; &#2311;&#2306;&#2360;&#2381;&#2335;&#2366;&#2354; &#2346;&#2381;&#2352;&#2325;&#2381;&#2352;&#2367;&#2351;&#2366; &#2325;&#2375; &#2342;&#2380;&#2352;&#2366;&#2344; &#2309;&#2306;&#2340;&#2367;&#2350; &#2348;&#2370;&#2335; &#2325;&#2375; &#2348;&#2366;&#2342; &#2309;&#2306;&#2340;&#2367;&#2350; &#2337;&#2366;&#2351;&#2354;&#2377;&#2327; &#2346;&#2352; &#2346;&#2361;&#2369;&#2306;&#2330; &#2332;&#2366;&#2340;&#2375; &#2361;&#2376;&#2306;, &#2340;&#2379; &#2325;&#2379;&#2312; &#2357;&#2381;&#2351;&#2325;&#2381;&#2340;&#2367; Ctrl + Shift + F3 &#2325;&#2368;&#2395; &#2325;&#2366; &#2313;&#2346;&#2351;&#2379;&#2327; &#2325;&#2352;&#2325;&#2375; &#2321;&#2337;&#2367;&#2335; &#2350;&#2379;&#2337; &#2350;&#2375;&#2306; &#2346;&#2381;&#2352;&#2357;&#2375;&#2358; &#2325;&#2352; &#2360;&#2325;&#2340;&#2366; &#2361;&#2376;&#2404;<strong> </strong></span><strong><span style=\"font-family: Arial Unicode MS;\">Ctrl + Shift + F4</span></strong><span style=\"font-family: Arial Unicode MS;\"><strong> </strong>&rarr; &#2351;&#2361; &#2358;&#2377;&#2352;&#2381;&#2335;&#2325;&#2335; &#2325;&#2350;&#2366;&#2306;&#2337; &#2346;&#2367;&#2331;&#2354;&#2375; &#2360;&#2375;&#2354; &#2325;&#2366; &#2346;&#2340;&#2366; &#2354;&#2327;&#2366;&#2344;&#2375; &#2325;&#2375; &#2354;&#2367;&#2319; \'&#2347;&#2366;&#2311;&#2306;&#2337; &#2327;&#2379;(Find Go)\' &#2325;&#2379; &#2352;&#2367;&#2357;&#2352;&#2381;&#2360; (Reverse) &#2325;&#2352; &#2342;&#2375;&#2327;&#2366;&#2404; </span></p>\n",
+                    correct: "c",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "19",
+                    section: "31",
+                    question_en: "<p><span style=\"font-family: Roboto;\">19.</span><span style=\"font-family: Roboto;\"> Consider the following word written in a MS-Word 2010 document:</span></p>\r\n<p><span style=\"font-family: Roboto;\"> </span><span style=\"font-family: Roboto;\">Prestige </span></p>\r\n<p><span style=\"font-family: Roboto;\">Which of the following is correct regarding the given word?</span></p>\n",
+                    question_hi: "<p><span style=\"font-family: Roboto;\">19. </span><span style=\"font-family: Palanquin;\">&#2319;&#2350;&#2319;&#2360;-&#2357;&#2352;&#2381;&#2337; 2010 &#2337;&#2377;&#2325;&#2381;&#2351;&#2370;&#2350;&#2375;&#2306;&#2335; &#2350;&#2375;&#2306; &#2354;&#2367;&#2326;&#2375; &#2327;&#2319; &#2344;&#2367;&#2350;&#2381;&#2344;&#2354;&#2367;&#2326;&#2367;&#2340; &#2358;&#2348;&#2381;&#2342; &#2346;&#2352; &#2357;&#2367;&#2330;&#2366;&#2352; &#2325;&#2352;&#2375;&#2306;: </span></p>\r\n<p><span style=\"font-family: Roboto;\">Prestige </span></p>\r\n<p><span style=\"font-family: Palanquin;\">&#2342;&#2367;&#2319; &#2327;&#2319; &#2358;&#2348;&#2381;&#2342; &#2325;&#2375; &#2360;&#2350;&#2381;&#2348;&#2344;&#2381;&#2343; &#2350;&#2375;&#2306; &#2344;&#2367;&#2350;&#2381;&#2344;&#2354;&#2367;&#2326;&#2367;&#2340; &#2350;&#2375;&#2306; &#2360;&#2375; &#2325;&#2380;&#2344; &#2360;&#2366; &#2325;&#2341;&#2344; &#2360;&#2361;&#2368; &#2361;&#2376;?</span></p>\n",
+                    options_en: ["<p>The word is bold as well as italic</p>\n", "<p>The word is italic and has a strike through.</p>\n", 
+                                "<p>The word is italic.</p>\n", "<p>The word has a strikethrough</p>\n"],
+                    options_hi: ["<p>&#2351;&#2361; &#2358;&#2348;&#2381;&#2342; &#2348;&#2379;&#2354;&#2381;&#2337; &#2361;&#2379;&#2344;&#2375; &#2325;&#2375; &#2360;&#2366;&#2341;-&#2360;&#2366;&#2341; &#2311;&#2335;&#2366;&#2354;&#2367;&#2325; &#2349;&#2368; &#2361;&#2376;</p>\n", "<p>&#2358;&#2348;&#2381;&#2342; &#2311;&#2335;&#2376;&#2354;&#2367;&#2325; &#2361;&#2376; &#2324;&#2352; &#2311;&#2360;&#2350;&#2375;&#2306; &#2360;&#2381;&#2335;&#2381;&#2352;&#2367;&#2325;&#2341;&#2381;&#2352;&#2370; &#2361;&#2376;</p>\n",
+                                "<p>&#2358;&#2348;&#2381;&#2342; &#2311;&#2335;&#2376;&#2354;&#2367;&#2325; &#2361;&#2376;</p>\n", "<p>&#2358;&#2348;&#2381;&#2342; &#2350;&#2375;&#2306; &#2319;&#2325; &#2360;&#2381;&#2335;&#2381;&#2352;&#2367;&#2325;&#2341;&#2381;&#2352;&#2370; &#2361;&#2376;</p>\n"],
+                    solution_en: "<p>19.(d) <span style=\"font-family: Palanquin;\">The word strikethrough is the correct answer.</span></p>\n",
+                    solution_hi: "<p>19.(d)<span style=\"font-family: Palanquin Dark;\"> &#2360;&#2381;&#2335;&#2381;&#2352;&#2366;&#2311;&#2325;&#2341;&#2381;&#2352;&#2370; &#2358;&#2348;&#2381;&#2342; &#2360;&#2361;&#2368; &#2313;&#2340;&#2381;&#2340;&#2352; &#2361;&#2376;&#2404;</span></p>\n",
+                    correct: "d",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "20",
+                    section: "misc",
+                    question_en: "<p><span style=\"font-family: Roboto;\">20. </span><span style=\"font-family: Roboto;\">Which of the following refers to a huge database of Internet resources such as </span><span style=\"font-family: Roboto;\">webpages, newsgroups, programs, images etc. and helps to locate information on </span><span style=\"font-family: Roboto;\">World Wide Web?</span></p>\n",
+                    question_hi: "<p><span style=\"font-family: Roboto;\">20.</span><span style=\"font-family: Palanquin;\"> &#2344;&#2367;&#2350;&#2381;&#2344;&#2354;&#2367;&#2326;&#2367;&#2340; &#2350;&#2375;&#2306; &#2360;&#2375; &#2325;&#2380;&#2344;-&#2360;&#2366; &#2357;&#2367;&#2325;&#2354;&#2381;&#2346; &#2311;&#2306;&#2335;&#2352;&#2344;&#2375;&#2335; &#2360;&#2306;&#2360;&#2366;&#2343;&#2344;&#2379;&#2306; &#2332;&#2376;&#2360;&#2375; &#2357;&#2375;&#2348;&#2346;&#2375;&#2332;&#2379;&#2306;, &#2360;&#2350;&#2366;&#2330;&#2366;&#2352;, &#2360;&#2350;&#2370;&#2361;&#2379;&#2306;, &#2346;&#2381;&#2352;&#2379;&#2327;&#2381;&#2352;&#2366;&#2350;&#2379;, &#2331;&#2357;&#2367;&#2351;&#2379;&#2306;, &#2310;&#2342;&#2367; &#2325;&#2375; &#2357;&#2367;&#2358;&#2366;&#2354; &#2337;&#2375;&#2335;&#2366;&#2348;&#2375;&#2360; &#2325;&#2379; &#2360;&#2306;&#2342;&#2352;&#2381;&#2349;&#2367;&#2340; &#2325;&#2352;&#2340;&#2366; &#2361;&#2376; &#2324;&#2352; &#2357;&#2352;&#2381;&#2354;&#2381;&#2337; &#2357;&#2366;&#2311;&#2337; &#2357;&#2375;&#2348; &#2346;&#2352; &#2332;&#2366;&#2344;&#2325;&#2366;&#2352;&#2368; &#2326;&#2379;&#2332;&#2344;&#2375; &#2350;&#2375;&#2306; &#2350;&#2342;&#2342; &#2325;&#2352;&#2340;&#2366; &#2361;&#2376; ?</span></p>\n",
+                    options_en: ["<p>Protocols</p>\n", "<p>Web server</p>\n", 
+                                "<p>Search engine</p>\n", "<p>Domain</p>\n"],
+                    options_hi: ["<p><span style=\"font-weight: 400;\">&#2346;&#2381;&#2352;&#2379;&#2335;&#2379;&#2325;&#2377;&#2354;&nbsp; (Protocols)</span></p>\n", "<p><span style=\"font-weight: 400;\">&#2357;&#2375;&#2348; &#2360;&#2352;&#2381;&#2357;&#2352; (Web server)</span></p>\n",
+                                "<p><span style=\"font-weight: 400;\">&#2360;&#2352;&#2381;&#2330; &#2311;&#2306;&#2332;&#2344; (Search engine)</span></p>\n", "<p><span style=\"font-weight: 400;\">&#2337;&#2379;&#2350;&#2375;&#2344; (Domain)</span></p>\n"],
+                    solution_en: "<p>20.(c)<span style=\"font-family: Roboto;\"> A<strong> </strong></span><strong><span style=\"font-family: Roboto;\">search engine</span></strong><span style=\"font-family: Roboto;\"><strong> </strong>is a web-based tool that enables users to locate information on the World Wide Web. Popular examples of search engines are Google, Yahoo!, and MSN Search. </span><strong><span style=\"font-family: Roboto;\">Protocols</span></strong><span style=\"font-family: Arial Unicode MS;\"><strong>&rarr;</strong> A network protocol is </span><span style=\"font-family: Arial Unicode MS;\">an established set of rules that determine how data is transmitted between different devices in the same network. </span><strong><span style=\"font-family: Arial Unicode MS;\">Web server</span></strong><span style=\"font-family: Arial Unicode MS;\">&rarr; </span><span style=\"font-family: Arial Unicode MS;\">A web server connects to the Internet and supports physical data interchange with other devices connected to the web. </span><strong><span style=\"font-family: Arial Unicode MS;\">Domain</span></strong><span style=\"font-family: Arial Unicode MS;\"><strong>&rarr;</strong> </span><span style=\"font-family: Arial Unicode MS;\">A domain is one part of a complete web address, or URL. A URL typically consists of a protocol, domain name, and path. For example, </span><strong><span style=\"font-family: Arial Unicode MS;\">blog.hubspot.com.</span></strong></p>\n",
+                    solution_hi: "<p>20.(c)<span style=\"font-family: Arial Unicode MS;\"> </span><strong><span style=\"font-family: Palanquin Dark;\">&#2360;&#2352;&#2381;&#2330; &#2311;&#2306;&#2332;&#2344;</span></strong><span style=\"font-family: Palanquin Dark;\"> (Search engine) &#2319;&#2325; &#2357;&#2375;&#2348;-&#2310;&#2343;&#2366;&#2352;&#2367;&#2340; &#2335;&#2370;&#2354; &#2361;&#2376; &#2332;&#2379; &#2313;&#2346;&#2351;&#2379;&#2327;&#2325;&#2352;&#2381;&#2340;&#2366;&#2323;&#2306; &#2325;&#2379; &#2357;&#2352;&#2381;&#2354;&#2381;&#2337; &#2357;&#2366;&#2311;&#2337; &#2357;&#2375;&#2348; &#2346;&#2352; &#2332;&#2366;&#2344;&#2325;&#2366;&#2352;&#2368; &#2325;&#2366; &#2346;&#2340;&#2366; &#2354;&#2327;&#2366;&#2344;&#2375; &#2350;&#2375;&#2306; &#2360;&#2325;&#2381;&#2359;&#2350; &#2348;&#2344;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404; &#2327;&#2370;&#2327;&#2354;, &#2351;&#2366;&#2361;&#2370;!, &#2324;&#2352; msn search &#2360;&#2352;&#2381;&#2330; &#2311;&#2306;&#2332;&#2344; &#2325;&#2375; &#2354;&#2379;&#2325;&#2346;&#2381;&#2352;&#2367;&#2351; &#2313;&#2342;&#2366;&#2361;&#2352;&#2339; &#2361;&#2376;&#2306;&#2404; </span><span style=\"font-family: Palanquin Dark;\"><strong>&#2346;&#2381;&#2352;&#2379;&#2335;&#2379;&#2325;&#2377;&#2354;</strong> </span><span style=\"font-family: Arial Unicode MS;\">(Protocol) &rarr; &#2319;&#2325; &#2344;&#2375;&#2335;&#2357;&#2352;&#2381;&#2325; &#2346;&#2381;&#2352;&#2379;&#2335;&#2379;&#2325;&#2377;&#2354; &#2344;&#2367;&#2351;&#2350;&#2379;&#2306; &#2325;&#2366; &#2319;&#2325; &#2360;&#2381;&#2341;&#2366;&#2346;&#2367;&#2340; &#2360;&#2375;&#2335; &#2361;&#2376; &#2332;&#2379; &#2351;&#2361; &#2344;&#2367;&#2352;&#2381;&#2343;&#2366;&#2352;&#2367;&#2340; &#2325;&#2352;&#2340;&#2366; &#2361;&#2376; &#2325;&#2367; &#2319;&#2325; &#2361;&#2368; &#2344;&#2375;&#2335;&#2357;&#2352;&#2381;&#2325; &#2350;&#2375;&#2306; &#2357;&#2367;&#2349;&#2367;&#2344;&#2381;&#2344; &#2337;&#2367;&#2357;&#2366;&#2311;&#2360; &#2325;&#2375; &#2348;&#2368;&#2330; &#2337;&#2375;&#2335;&#2366; &#2325;&#2376;&#2360;&#2375; &#2346;&#2381;&#2352;&#2360;&#2366;&#2352;&#2367;&#2340; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;&#2404; </span><span style=\"font-family: Palanquin Dark;\"><strong>&#2357;&#2375;&#2348; &#2360;&#2352;&#2381;&#2357;&#2352;</strong> </span><span style=\"font-family: Arial Unicode MS;\">&rarr; &#2319;&#2325; &#2357;&#2375;&#2348; &#2360;&#2352;&#2381;&#2357;&#2352; &#2311;&#2306;&#2335;&#2352;&#2344;&#2375;&#2335; &#2360;&#2375; &#2325;&#2344;&#2375;&#2325;&#2381;&#2335;&#2375;&#2337; &#2361;&#2376; &#2324;&#2352; &#2357;&#2375;&#2348; &#2360;&#2375; &#2332;&#2369;&#2337;&#2364;&#2375; &#2309;&#2344;&#2381;&#2351; &#2313;&#2346;&#2325;&#2352;&#2339;&#2379;&#2306; &#2325;&#2375; &#2360;&#2366;&#2341; &#2349;&#2380;&#2340;&#2367;&#2325; &#2337;&#2375;&#2335;&#2366; &#2311;&#2306;&#2335;&#2352;&#2330;&#2375;&#2306;&#2332; &#2325;&#2366; &#2360;&#2350;&#2352;&#2381;&#2341;&#2344; &#2325;&#2352;&#2340;&#2366; &#2361;&#2376;&#2404; </span><span style=\"font-family: Palanquin Dark;\"><strong>&#2337;&#2379;&#2350;&#2375;&#2344;</strong> </span><span style=\"font-family: Arial Unicode MS;\">&rarr; &#2319;&#2325; &#2337;&#2379;&#2350;&#2375;&#2344; &#2319;&#2325; &#2360;&#2306;&#2346;&#2370;&#2352;&#2381;&#2339; &#2357;&#2375;&#2348; &#2319;&#2337;&#2381;&#2352;&#2375;&#2360; &#2351;&#2366; URL&#2325;&#2366; &#2319;&#2325; &#2361;&#2367;&#2360;&#2381;&#2360;&#2366; &#2361;&#2376;&#2404; URL &#2350;&#2375;&#2306; &#2310;&#2350;&#2340;&#2380;&#2352; &#2346;&#2352; &#2319;&#2325; &#2346;&#2381;&#2352;&#2379;&#2335;&#2379;&#2325;&#2377;&#2354;, &#2337;&#2379;&#2350;&#2375;&#2344; &#2344;&#2366;&#2350; &#2324;&#2352; &#2346;&#2366;&#2341; (path) &#2361;&#2379;&#2340;&#2366; &#2361;&#2376;&#2404; &#2313;&#2342;&#2366;&#2361;&#2352;&#2339; &#2325;&#2375; &#2354;&#2367;&#2319;, <strong>blog.hubspot.com</strong>&#2404;</span></p>\n",
+                    correct: "c",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+            
+            // Generate question boxes
+            const boxesContainer = document.getElementById('question-boxes');
+            questions.forEach((q, index) => {
+                const box = document.createElement('div');
+                box.className = 'q-box';
+                box.textContent = index + 1;
+                box.onclick = () => showQuestion(index);
+                box.id = `box-${index}`;
+                boxesContainer.appendChild(box);
+            });
+            
+            // Show first question
+            showQuestion(0);
+            updateProgress();
+        }
+        
+        // Show a specific question
+        
+        function formatContent(text) {
+            if (!text) return '';
+            return text.replace(/<img/g, '<img style="max-width:100%;height:auto;"');
+        }
+        
+        function showQuestion(index) {
+            if (index < 0 || index >= questions.length) return;
+            
+            currentQuestion = index;
+            const question = questions[index];
+            
+            // Update question counter
+            document.getElementById('question-counter').textContent = `Question ${index + 1} of ${questions.length}`;
+            
+            // Update question boxes
+            document.querySelectorAll('.q-box').forEach(box => box.classList.remove('current'));
+            document.getElementById(`box-${index}`).classList.add('current');
+            
+            // Generate question HTML
+            let html = `
+                <div class="question-card">
+                    <div class="question-text">
+                        <div class="en">${formatContent(question.question_en)}</div>
+                        <div class="hi" style="display:none">${formatContent(question.question_hi)} </div>
+                    </div>
+                    <div class="options" id="options-container">`;
+            
+            // Add options
+            ['a', 'b', 'c', 'd'].forEach((opt, i) => {
+                let optionClass = '';
+                let isCorrectAnswer = opt === question.correct;
+                let isUserAnswer = answers[question.id] === opt;
+                
+                // When reviewing, add appropriate classes
+                if (submitted) {
+                    if (isCorrectAnswer) {
+                        optionClass += ' correct-answer';
+                    } else if (isUserAnswer && !isCorrectAnswer) {
+                        optionClass += ' incorrect';
+                    }
+                }
+                
+                html += `
+                    <div class="option-item">
+                        <input class="option-input" type="radio" name="q${index}" 
+                            id="opt-${index}-${opt}" value="${opt}" 
+                            ${isUserAnswer ? 'checked' : ''}
+                            onclick="selectAnswer('${question.id}', '${opt}')">
+                       <label class="option-label${optionClass}" for="opt-${index}-${opt}">
+                            <div class="en">${question.options_en[i]}</div>
+                            <div class="hi" style="display:none">${question.options_hi[i]}</div>
+                        </label>
+                    </div>`;
+            });
+            
+            // Add solution if submitted
+            if (submitted) {
+                const isCorrect = answers[question.id] === question.correct;
+                const resultText = answers[question.id] ? (isCorrect ? 'Correct!' : 'Incorrect!') : 'Not attempted';
+                
+                html += `
+                    <div class="solution-container">
+                        <div class="solution-title">${resultText}</div>
+                        <div class="solution-text">
+                            <div class="en">${question.solution_en}</div>
+                            <div class="hi" style="display:none">${question.solution_hi}</div>
+                        </div>
+                    </div>`;
+            }
+            
+            html += `</div></div>`;
+            
+            document.getElementById('questions-container').innerHTML = html;
+            
+            // Apply language settings
+            applyLanguage();
+            
+            // If in mobile view, close the menu
+            if (window.innerWidth < 992) {
+                toggleNav(false);
+            }
+            
+            // Add review mode class if submitted
+            if (submitted) {
+                document.getElementById('options-container').classList.add('review-mode');
+            }
+        }
+        
+        // Apply current language
+        function applyLanguage() {
+            document.querySelectorAll(`.${currentLang}`).forEach(el => el.style.display = 'block');
+            document.querySelectorAll(`.${currentLang === 'en' ? 'hi' : 'en'}`).forEach(el => el.style.display = 'none');
+            
+            // Update language button text
+            document.getElementById('lang-text').textContent = currentLang === 'en' ? 'Hi' : 'En';
+        }
+        
+        // Select an answer
+        function selectAnswer(qId, option) {
+            if (submitted) return;
+            
+            answers[qId] = option;
+            updateProgress();
+            
+            // Mark question as attempted in the navigation
+            const index = questions.findIndex(q => q.id === qId);
+            if (index >= 0) {
+                const box = document.getElementById(`box-${index}`);
+                box.classList.add('attempted');
+                box.classList.remove('unattempted');
+            }
+        }
+        
+        // Navigate to previous/next question
+        function prevQuestion() { 
+            if (currentQuestion > 0) showQuestion(currentQuestion - 1); 
+        }
+        
+        function nextQuestion() { 
+            if (currentQuestion < questions.length - 1) showQuestion(currentQuestion + 1); 
+        }
+        
+        // Switch section
+        function switchSection(sectionId) {
+            if (sectionId === 'all') {
+                showQuestion(0);
+                return;
+            }
+            
+            const section = sections[sectionId];
+            if (section) showQuestion(section.start);
+        }
+        
+        // Toggle language
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'hi' : 'en';
+            applyLanguage();
+        }
+        
+        // Toggle navigation sidebar
+        function toggleNav(show) {
+            const nav = document.getElementById('question-nav');
+            const overlay = document.getElementById('nav-overlay');
+            
+            if (show === undefined) {
+                show = !nav.classList.contains('show');
+            }
+            
+            if (show) {
+                nav.classList.add('show');
+                overlay.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            } else {
+                nav.classList.remove('show');
+                overlay.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+        }
+        
+        // Update progress
+        function updateProgress() {
+            const attempted = Object.keys(answers).length;
+            document.getElementById('attempted-count').textContent = attempted;
+        }
+        
+        // Start timer
+        function startTimer() {
+            const timerDisplay = document.getElementById('timer-display');
+            let timeLeft = totalTime;
+            
+            const timerInterval = setInterval(() => {
+                if (timeLeft <= 0 || submitted) {
+                    clearInterval(timerInterval);
+                    if (!submitted) submitTest();
+                    return;
+                }
+                
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                timeLeft--;
+            }, 1000);
+        }
+        
+        // Confirm before submitting
+        function confirmSubmit() {
+            if (submitted) return;
+            
+            const attempted = Object.keys(answers).length;
+            const remaining = questions.length - attempted;
+            
+            // Create a more modern confirmation dialog
+            const confirmHtml = `
+                <div style="text-align: center; padding: 20px;">
+                    <h4 style="margin-bottom: 16px; color: var(--dark);">Confirm Submission</h4>
+                    <p style="margin-bottom: 24px; color: var(--gray);">
+                        You have attempted ${attempted} of ${questions.length} questions.<br>
+                        ${remaining} questions are unattempted.
+                    </p>
+                    <div style="display: flex; justify-content: center; gap: 12px;">
+                        <button onclick="this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; border: 1px solid var(--light-gray); background: white; border-radius: 8px; cursor: pointer;">
+                            Cancel
+                        </button>
+                        <button onclick="submitTest(); this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer;">
+                            Submit Test
+                        </button>
+                    </div>
+                </div>`;
+            
+            // Create modal element
+            const modal = document.createElement('div');
+            modal.className = 'results-modal show';
+            modal.innerHTML = `
+                <div class="results-card" style="max-width: 400px;">
+                    <button class="cancel-btn" style="position: absolute; top: 12px; right: 12px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--gray);" onclick="this.closest('.results-modal').remove()">
+                        ×
+                    </button>
+                    ${confirmHtml}
+                </div>`;
+            
+            document.body.appendChild(modal);
+        }
+        
+        // Submit test
+        function submitTest() {
+            if (submitted) return;
+            
+            submitted = true;
+            
+            let score = 0;
+            let correctCount = 0;
+            let incorrectCount = 0;
+            let unattemptedCount = 0;
+            
+            questions.forEach((q, index) => {
+                const userAns = answers[q.id];
+                const box = document.getElementById(`box-${index}`);
+                
+                box.classList.remove('attempted');
+                
+                if (!userAns) {
+                    unattemptedCount++;
+                    box.classList.add('unattempted');
+                } else if (userAns === q.correct) {
+                    correctCount++;
+                    score += q.pos_marks;
+                    box.classList.add('correct');
+                } else {
+                    incorrectCount++;
+                    score -= q.neg_marks;
+                    box.classList.add('incorrect');
+                }
+            });
+            
+            // Update result values
+            document.getElementById('score-value').textContent = score.toFixed(2);
+            document.getElementById('correct-value').textContent = correctCount;
+            document.getElementById('incorrect-value').textContent = incorrectCount;
+            document.getElementById('unattempted-value').textContent = unattemptedCount;
+            
+            // Show the results modal
+            document.getElementById('results-modal').classList.add('show');
+            
+            // Disable submit button
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-check"></i>';
+            submitBtn.style.backgroundColor = 'var(--success)';
+            
+            // Refresh current question view to show solution
+            showQuestion(currentQuestion);
+        }
+        
+        // Review test
+        function reviewTest() {
+            document.getElementById('results-modal').classList.remove('show');
+            showQuestion(0);
+        }
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target === document.getElementById('results-modal')) {
+                document.getElementById('results-modal').classList.remove('show');
+            }
+        });
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') prevQuestion();
+            if (e.key === 'ArrowRight') nextQuestion();
+        });
+    </script>
+</body>
+</html>
