@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mocks Wallah</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --primary-light: #a29bfe;
+            --primary-dark: #5649c0;
+            --secondary: #00cec9;
+            --accent: #fd79a8;
+            --success: #00b894;
+            --warning: #fdcb6e;
+            --danger: #d63031;
+            --light: #f8f9fa;
+            --dark: #2d3436;
+            --gray: #636e72;
+            --light-gray: #dfe6e9;
+            --card-bg: #ffffff;
+            --body-bg: #f5f6fa;
+            --header-bg: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            --footer-bg: #ffffff;
+            --box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            --box-shadow-sm: 0 2px 10px rgba(0,0,0,0.05);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background-color: var(--body-bg);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            color: var(--dark);
+            line-height: 1.6;
+            padding-bottom: 80px; /* Space for fixed navigation */
+            overflow-x: hidden;
+        }
+        
+        /* Header Styles */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: var(--header-bg);
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            z-index: 1000;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .header-brand {
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .header-brand i {
+            margin-right: 8px;
+            font-size: 1.2rem;
+        }
+        
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .control-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .control-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .control-btn.active {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .timer-display {
+            background: rgba(0,0,0,0.2);
+            border-radius: 18px;
+            padding: 4px 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+        
+        .timer-display i {
+            margin-right: 6px;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-top: 60px;
+            padding: 16px;
+            min-height: calc(100vh - 140px);
+        }
+        
+        .question-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--box-shadow-sm);
+            border: none;
+            transition: var(--transition);
+        }
+        
+        .question-counter {
+            font-size: 0.9rem;
+            color: var(--gray);
+            text-align: center;
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+        
+        .question-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+        
+        .option-item {
+            margin-bottom: 12px;
+            position: relative;
+        }
+        
+        .option-input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+            .question-text {
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        hyphens: auto;
+        max-width: 100%;
+    }
+
+    .question-text img,
+    .option-label img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 8px 0;
+        border-radius: 8px;
+    }
+
+    .option-label {
+        overflow: hidden;
+    }
+
+    .question-card {
+        overflow: hidden;
+    }
+        
+        .option-label {
+            display: block;
+            padding: 14px 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--light-gray);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .option-label:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .option-input:checked + .option-label {
+            border-color: var(--primary);
+            background: rgba(108, 92, 231, 0.05);
+            box-shadow: 0 0 0 1px var(--primary);
+        }
+        
+        .option-input:checked + .option-label::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--primary);
+        }
+        
+        /* When reviewing answers */
+        .review-mode .option-input:checked + .option-label.correct {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.correct::after {
+            background: var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.incorrect {
+            border-color: var(--danger);
+            background: rgba(214, 48, 49, 0.05);
+            box-shadow: 0 0 0 1px var(--danger);
+        }
+        
+        .MathJax, .mjx-chtml {
+            overflow-x: auto;
+            max-width: 100%;
+            display: inline-block;
+        }
+
+        
+        .review-mode .option-input:checked + .option-label.incorrect::after {
+            background: var(--danger);
+        }
+        
+        .review-mode .option-label.correct-answer {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-label.correct-answer::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--success);
+        }
+        
+        .solution-container {
+            margin-top: 20px;
+            padding: 16px;
+            background: rgba(108, 92, 231, 0.05);
+            border-radius: 12px;
+            border-left: 3px solid var(--primary);
+        }
+        
+        .solution-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+        
+        /* Question Navigation */
+        .question-nav {
+            position: fixed;
+            top: 60px;
+            right: 0;
+            bottom: 80px;
+            width: 100%;
+            max-width: 320px;
+            background: var(--card-bg);
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            transform: translateX(100%);
+            transition: var(--transition);
+            z-index: 900;
+            overflow-y: auto;
+            padding: 16px;
+        }
+        
+        .question-nav.show {
+            transform: translateX(0);
+        }
+        
+        .nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .nav-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+        
+        .question-stats {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .stat-badge {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        
+        .section-selector {
+            width: 100%;
+            margin-bottom: 16px;
+            border-radius: 12px;
+            padding: 10px 16px;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            font-size: 0.9rem;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 16px;
+        }
+        
+        .question-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+            gap: 8px;
+        }
+        
+        .q-box {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .q-box:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .q-box.attempted {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .q-box.correct {
+            background-color: var(--success);
+            color: white;
+            border-color: var(--success);
+        }
+        
+        .q-box.incorrect {
+            background-color: var(--danger);
+            color: white;
+            border-color: var(--danger);
+        }
+        
+        .q-box.current {
+            border: 2px solid var(--accent) !important;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .q-box.unattempted {
+            background-color: var(--gray);
+            color: white;
+            border-color: var(--gray);
+        }
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: var(--footer-bg);
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            z-index: 800;
+        }
+        
+        .nav-btn {
+            height: 48px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 20px;
+            transition: var(--transition);
+            gap: 8px;
+        }
+        
+        .nav-btn i {
+            font-size: 1rem;
+        }
+        
+        .nav-btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .nav-btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+        
+        .nav-btn-outline:hover {
+            background: rgba(108, 92, 231, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        /* Overlay when nav is open */
+        .nav-overlay {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            bottom: 80px;
+            background: rgba(0,0,0,0.5);
+            z-index: 800;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+        }
+        
+        .nav-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        /* Results Modal */
+        .results-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1100;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+            padding: 16px;
+        }
+        
+        .results-modal.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .results-card {
+            background: white;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+            transform: translateY(20px);
+            transition: var(--transition);
+        }
+        
+        .results-modal.show .results-card {
+            transform: translateY(0);
+        }
+        
+        .results-header {
+            background: var(--header-bg);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .results-title {
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .results-body {
+            padding: 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            color: white;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+        
+        .results-footer {
+            padding: 16px 20px;
+            display: flex;
+            justify-content: center;
+            border-top: 1px solid var(--light-gray);
+        }
+        
+        /* Responsive Adjustments */
+        @media (min-width: 992px) {
+            .question-nav {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-right: 320px;
+            }
+            
+            .nav-overlay {
+                display: none;
+            }
+            
+            .bottom-nav {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .question-grid {
+                grid-template-columns: repeat(auto-fill, minmax(36px, 1fr));
+                gap: 6px;
+            }
+            
+            .q-box {
+                width: 36px;
+                height: 36px;
+                font-size: 0.9rem;
+            }
+            
+            .option-label {
+                padding: 12px 14px;
+            }
+            
+            .question-text {
+                font-size: 1rem;
+            }
+            
+            .header-brand {
+                font-size: 1rem;
+            }
+            
+            .control-btn {
+                width: 32px;
+                height: 32px;
+            }
+            
+            .timer-display {
+                font-size: 0.8rem;
+                padding: 4px 10px;
+            }
+            
+            .nav-btn {
+                height: 44px;
+                padding: 0 16px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="#" class="header-brand">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Mocks Wallah</span>
+            </a>
+            
+            <div class="header-controls">
+                <!-- Timer -->
+                <div class="timer-display">
+                    <i class="far fa-clock"></i>
+                    <span id="timer-display">6:00</span>
+                </div>
+                
+                <!-- Language toggle -->
+                <button class="control-btn" id="lang-btn" onclick="toggleLanguage()">
+                    <span id="lang-text">En</span>
+                </button>
+                
+                <!-- Submit button -->
+                <button class="control-btn" id="submit-btn" onclick="confirmSubmit()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+                
+                <!-- Questions toggle for mobile -->
+                <button class="control-btn nav-toggle-btn" id="nav-toggle" onclick="toggleNav()">
+                    <i class="fas fa-th"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main content -->
+    <main class="main-content" id="main-content">
+        <div class="question-counter" id="question-counter">Question 1 of 20</div>
+        
+        <!-- Questions will be displayed here -->
+        <div id="questions-container"></div>
+    </main>
+    
+    <!-- Overlay for mobile nav -->
+    <div class="nav-overlay" id="nav-overlay" onclick="toggleNav(false)"></div>
+    
+    <!-- Question navigation sidebar -->
+    <aside class="question-nav" id="question-nav">
+        <div class="nav-header">
+            <h3 class="nav-title">Questions</h3>
+            <div class="question-stats">
+                <span class="stat-badge bg-primary" id="attempted-count">0</span>
+                <span class="stat-badge bg-gray" id="total-count">20</span>
+                <button class="control-btn d-lg-none" onclick="toggleNav(false)">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Section selector -->
+        <select class="section-selector" id="section-selector" onchange="switchSection(this.value)">
+            <option value="all">All Sections</option>
+        </select>
+        
+        <!-- Question grid -->
+        <div class="question-grid" id="question-boxes"></div>
+    </aside>
+    
+    <!-- Bottom navigation for mobile -->
+    <nav class="bottom-nav d-lg-none">
+        <button class="nav-btn nav-btn-outline" onclick="prevQuestion()">
+            <i class="fas fa-chevron-left"></i>
+            <span>Previous</span>
+        </button>
+        <button class="nav-btn nav-btn-outline" onclick="nextQuestion()">
+            <span>Next</span>
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </nav>
+    
+    <!-- Results modal -->
+    <div class="results-modal" id="results-modal">
+        <div class="results-card">
+            <div class="results-header">
+                <h3 class="results-title">Test Results</h3>
+            </div>
+            <div class="results-body">
+                <div class="stats-grid">
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark))">
+                        <div class="stat-value" id="score-value">0</div>
+                        <div class="stat-label">Score</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--success), #1b9aaa)">
+                        <div class="stat-value" id="correct-value">0</div>
+                        <div class="stat-label">Correct</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--danger), var(--accent))">
+                        <div class="stat-value" id="incorrect-value">0</div>
+                        <div class="stat-label">Incorrect</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--gray), var(--dark))">
+                        <div class="stat-value" id="unattempted-value">0</div>
+                        <div class="stat-label">Unattempted</div>
+                    </div>
+                </div>
+            </div>
+            <div class="results-footer">
+                <button class="nav-btn nav-btn-primary" onclick="reviewTest()">
+                    <i class="fas fa-search me-1"></i>
+                    <span>Review Test</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Questions data
+        const questions = [];
+        const sections = {};
+        let currentLang = "en";
+        let currentQuestion = 0;
+        let answers = {};
+        let submitted = false;
+        let totalTime = 6 * 60;
+        
+        // Initialize the test
+        window.onload = function() {
+            initializeTest();
+            startTimer();
+            
+            // If on desktop, show the question navigation by default
+            if (window.innerWidth >= 992) {
+                document.getElementById('question-nav').classList.add('show');
+                document.getElementById('main-content').classList.add('with-nav');
+            }
+        };
+        
+        // Initialize test data
+        function initializeTest() {
+            // Add sections and questions
+            
+            sections["18"] = {
+                name: "General Awareness",
+                start: 0,
+                end: 18
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="18">General Awareness</option>`;
+            
+            sections["misc"] = {
+                name: "Miscellaneous",
+                start: 19,
+                end: 19
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="misc">Miscellaneous</option>`;
+            
+            
+                questions.push({
+                    id: "1",
+                    section: "18",
+                    question_en: "<p>1. <span style=\"font-family: Times New Roman;\">Which of the following is also known as the &lsquo;White Mountain&rsquo;?</span></p>",
+                    question_hi: "<p>1.<span style=\"font-family: Baloo;\"> निम्नलिखित में से किसे \'श्वेत पर्वत\' के नाम से भी जाना जाता है?</span></p>",
+                    options_en: ["<p>Cho Oyu</p>", "<p>Makalu</p>", 
+                                "<p>Dhaulagiri</p>", "<p>Lhotse</p>"],
+                    options_hi: ["<p>चो ओयू</p>", "<p>मकालु</p>",
+                                "<p>धौलागिरी</p>", "<p>ल्होत्से</p>"],
+                    solution_en: "<p>1.(c) <strong>Dhaulagiri I</strong> <span style=\"font-family: Times New Roman;\">is also known as the &lsquo;White Mountain&rsquo;. </span><span style=\"font-family: Times New Roman;\">Dhaulagiri, mountain massif of the Himalayas in west-central Nepal. </span><span style=\"font-family: Times New Roman;\"><strong>Cho Oyu</strong></span><span style=\"font-family: Times New Roman;\">, mountain, in the Himalayas on the Nepalese&ndash;Tibetan (Chinese) border.</span><span style=\"font-family: Times New Roman;\"> <strong>Makalu</strong></span><span style=\"font-family: Times New Roman;\"><strong> </strong>Mountain is located in the Mahalangur Himalayas 19 km southeast of Mount Everest, on the border between Nepal and Tibet. </span><strong><span style=\"font-family: Times New Roman;\">Lhotse Mountain</span></strong><span style=\"font-family: Times New Roman;\"> - </span><span style=\"font-family: Times New Roman;\">The main summit is on the border between Tibet and the Khumbu region of Nepal.</span></p>",
+                    solution_hi: "<p>1.(c) <strong>धौलागिरी I</strong> <span style=\"font-family: Baloo;\">को \'व्हाइट माउंटेन\' के नाम से भी जाना जाता है। धौलागिरी पश्चिम-मध्य नेपाल में हिमालय का एक पर्वतीय पर्वतमाला है। </span><strong><span style=\"font-family: Baloo;\">चो ओयू</span></strong><span style=\"font-family: Baloo;\"> नेपाली-तिब्बती (चीनी) सीमा पर हिमालय में एक पर्वत है। </span><strong><span style=\"font-family: Baloo;\">मकालू पर्वत</span></strong><span style=\"font-family: Baloo;\"> महालंगुर हिमालय में माउंट एवरेस्ट से 19 किमी दक्षिण पूर्व में नेपाल और तिब्बत की सीमा पर स्थित है। </span><strong><span style=\"font-family: Baloo;\">ल्होत्से पर्वत</span></strong><span style=\"font-family: Baloo;\"> - मुख्य शिखर तिब्बत और नेपाल के खुंबू क्षेत्र के बीच की सीमा पर है।</span></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "2",
+                    section: "18",
+                    question_en: "<p>2.<span style=\"font-family: Times New Roman;\"> With which of the following oceans would you associate the &lsquo;Ring of Fire&rsquo;?</span></p>",
+                    question_hi: "<p>2. <span style=\"font-family: Baloo;\">आप निम्नलिखित में से किस महासागर से \'रिंग ऑफ फायर\' को संबद्ध करेंगे?</span></p>",
+                    options_en: [" <p> Arctic</span></p>", "<p>Atlantic</p>", 
+                                "<p>Indian</p>", "<p>Pacific</p>"],
+                    options_hi: ["<p>आर्कटिक</p>", "<p>अटलांटिक</p>",
+                                "<p>हिंद</p>", "<p>प्रशांत</p>"],
+                    solution_en: "<p>2.(d)&nbsp;<span style=\"font-family: Times New Roman;\">The</span><span style=\"font-family: Times New Roman;\"> <strong>Ring of Fire</strong></span><span style=\"font-family: Times New Roman;\">, also referred to as the Circum-Pacific Belt, is a path along the Pacific Ocean characterized by active volcanoes and frequent earthquakes. </span><strong><span style=\"font-family: Times New Roman;\">Indonesia</span></strong><span style=\"font-family: Times New Roman;\"><strong> </strong>is the country of the Ring of Fire volcanic belt and holds about 40% of the world\'s geothermal reserves.</span></p>",
+                    solution_hi: "<p>2.(d) <strong>रिंग ऑफ फायर</strong><span style=\"font-family: Baloo;\"> को सर्कम-पैसिफिक बेल्ट के रूप में भी जाना जाता है, जो सक्रिय ज्वालामुखियों और लगातार भूकंपों की विशेषता प्रशांत महासागर के साथ एक पथ है। </span><strong><span style=\"font-family: Baloo;\">इंडोनेशिया</span></strong><span style=\"font-family: Baloo;\"><strong> </strong>रिंग ऑफ फायर ज्वालामुखी बेल्ट का देश है और दुनिया के भू-तापीय भंडार का लगभग 40% हिस्सा रखता है।</span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "3",
+                    section: "18",
+                    question_en: "<p>3.<span style=\"font-family: Times New Roman;\"> Musi river is a tributary of which of the following rivers?</span></p>",
+                    question_hi: "<p>3. <span style=\"font-family: Baloo;\">मुसी नदी निम्नलिखित में से किस नदी की सहायक नदी है?</span></p>",
+                    options_en: ["<p>Yamuna</p>", "<p>Ganges</p>", 
+                                "<p>Godavari</p>", "<p>Krishna</p>"],
+                    options_hi: ["<p>यमुना</p>", "<p>गंगा</p>",
+                                "<p>गोदावरी</p>", "<p>कृष्णा</p>"],
+                    solution_en: "<p>3.(d) <strong><span style=\"font-family: Times New Roman;\">Krishna River</span></strong><span style=\"font-family: Times New Roman;\"> Tributary- Musi, Ghataprabha, Malaprabha, Bhima and Tungabhadra. Tributary of </span><strong><span style=\"font-family: Times New Roman;\">Yamuna</span></strong><span style=\"font-family: Times New Roman;\">- Tons, Chambal, Hindon, Betwa and Ken, </span><span style=\"font-family: Times New Roman;\"><strong>Godavari&rsquo;s Tributary</strong> </span><span style=\"font-family: Times New Roman;\">- Pravara,Purna, Manjra,Penganga, Wardha Wainganga, Pranhita (combined flow of Wainganga, Penganga, Wardha), the Indravati, the Maner and the Sabri. Tributaries of the Ganga</span><span style=\"font-family: Times New Roman;\"> <strong>River</strong></span><span style=\"font-family: Times New Roman;\"><strong>-</strong> Yamuna, Ram Ganga, Gomti, Ghagra, Son, Gandak, Burhi Gandak, Kosi and Mahananda.</span></p>",
+                    solution_hi: "<p>3.(d) <strong><span style=\"font-family: Baloo;\">कृष्णा नदी की सहायक नदी</span></strong><span style=\"font-family: Baloo;\">- मुसी, घटप्रभा, मालाप्रभा, भीमा और तुंगभद्रा। </span><strong><span style=\"font-family: Baloo;\">यमुना की सहायक नदी</span></strong><span style=\"font-family: Baloo;\"><strong>-</strong> टोंस, चंबल, हिंडन, बेतवा और केन, </span><strong><span style=\"font-family: Baloo;\">गोदावरी की सहायक नदी</span></strong><span style=\"font-family: Baloo;\"> - प्रवर, पूर्णा, मांजरा, पेंगंगा, वर्धा वैनगंगा, प्राणहिता (वेनगंगा, पेंगंगा, वर्धा का संयुक्त प्रवाह), इंद्रावती, मनेर और साबरी। </span><strong><span style=\"font-family: Baloo;\">गंगा नदी की सहायक नदियाँ</span></strong><span style=\"font-family: Baloo;\">- यमुना, राम गंगा, गोमती, घाघरा, सोन, गंडक, बूढ़ी गंडक, कोसी और महानंदा।</span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "4",
+                    section: "18",
+                    question_en: "<p>4.<span style=\"font-family: Times New Roman;\"> What is the percentage of rural child population to the total child population of the </span><span style=\"font-family: Times New Roman;\">country in India as per Provisional Population Totals of Census 2011?</span></p>",
+                    question_hi: "<p>4.<span style=\"font-family: Baloo;\"> 2011 की जनगणना के अनंतिम जनसंख्या योग के अनुसार भारत में देश की कुल बाल जनसंख्या में ग्रामीण बाल जनसंख्या का प्रतिशत कितना है?</span></p>",
+                    options_en: ["<p>74.05 %</p>", "<p>79.03%</p>", 
+                                "<p>62.45%</p>", "<p>55.23%</p>"],
+                    options_hi: ["<p>74.05 %</p>", "<p>79.03%</p>",
+                                "<p>62.45%</p>", "<p>55.23%</p>"],
+                    solution_en: "<p>4.(a)<span style=\"font-family: Times New Roman;\"> 74.05% is the percentage of rural child population to the total child population of the country in India as per Provisional Population Totals of census 2011. </span></p>",
+                    solution_hi: "<p>4.(a) <span style=\"font-family: Baloo;\">2011 की जनगणना के अनंतिम जनसंख्या योग के अनुसार, भारत में देश की कुल बाल जनसंख्या में ग्रामीण बाल जनसंख्या का 74.05% प्रतिशत है।</span></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "5",
+                    section: "18",
+                    question_en: "<p>5.<span style=\"font-family: Times New Roman;\"> Which of the following is the main cause of &lsquo;bad lands&rsquo;?</span></p>",
+                    question_hi: "<p>5.<span style=\"font-family: Baloo;\"> निम्नलिखित में से कौन \'खराब भूमि\' का मुख्य कारण है?</span></p>",
+                    options_en: ["<p>Scanty rainfall</p>", "<p>Soil erosion</p>", 
+                                "<p>Excessive forest cover</p>", "<p>Open defecation</p>"],
+                    options_hi: ["<p>अल्प वर्षा</p>", "<p>मिट्टी का क्षरण</p>",
+                                "<p>अत्यधिक वनावरण</p>", "<p>खुले में शौच</p>"],
+                    solution_en: "<p>5.(b) <span style=\"font-family: Times New Roman;\">Soil Erosion is the main cause of Badlands. The Badlands are a type of arid terrain with clay-rich soil that has been extensively eroded by wind and water. Canyons, ravines, gullies, hoodoos and other such geological forms are common in the Badlands.</span></p>",
+                    solution_hi: "<p>5.(b) <span style=\"font-family: Baloo;\">मृदा अपरदन बैडलैंड का मुख्य कारण है। बैडलैंड एक प्रकार का शुष्क इलाका है जिसमें मिट्टी से भरपूर मिट्टी होती है जो हवा और पानी से बड़े पैमाने पर नष्ट हो जाती है। बैडलैंड्स में घाटी, गली, हूडू और ऐसे अन्य भूवैज्ञानिक रूप आम हैं।</span></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "6",
+                    section: "18",
+                    question_en: "<p>6. <span style=\"font-family: Times New Roman;\">The process of wastewater treatment is commonly called ______ treatment.</span></p>",
+                    question_hi: "<p>6. <span style=\"font-family: Baloo;\">अपशिष्ट जल उपचार की प्रक्रिया को सामान्यतः ______ उपचार कहा जाता है।</span></p>",
+                    options_en: ["<p>sewage</p>", "<p>microbe</p>", 
+                                "<p>bacteria</p>", "<p>pollutant</p>"],
+                    options_hi: ["<p>सीवेज</p>", "<p>सूक्ष्म जीव</p>",
+                                "<p>बैक्टीरिया</p>", "<p>प्रदूषक</p>"],
+                    solution_en: "<p>6.(a) <span style=\"font-family: Times New Roman;\">The process of wastewater treatment is commonly called sewage treatment. The 4 steps of sewage treatment are Step 1 &ndash;</span><span style=\"font-family: Times New Roman;\"> <strong>Sludge Thickening</strong></span><span style=\"font-family: Times New Roman;\">- The first step in the sewage sludge treatment plan is called thickening. Step 2 &ndash; </span><strong><span style=\"font-family: Times New Roman;\">Sludge Digestion</span></strong><span style=\"font-family: Times New Roman;\">- After amassing all the solids from the sewage sludge begins the sludge digestion process. Step 3 &ndash; </span><strong><span style=\"font-family: Times New Roman;\">Dewatering</span></strong><span style=\"font-family: Times New Roman;\">- After retrieving useful gases and other byproducts, the remaining sludge is then dewatered before final disposal. Step 4 &ndash; </span><strong><span style=\"font-family: Times New Roman;\">Disposal</span></strong><span style=\"font-family: Times New Roman;\">- Once the sludge has been effectively dewatered, it can be buried underground in a sanitary landfill or can be used as a fertilizer, depending on its chemical composition. </span></p>",
+                    solution_hi: "<p>6.(a) <span style=\"font-family: Baloo;\">अपशिष्ट जल उपचार की प्रक्रिया को आमतौर पर सीवेज उपचार कहा जाता है। सीवेज उपचार के 4 चरण हैं चरण 1 - </span><strong><span style=\"font-family: Baloo;\">कीचड़ का मोटा होना (Sludge Thickening)</span></strong><span style=\"font-family: Baloo;\">- सीवेज कीचड़ उपचार योजना के पहले चरण को मोटा होना कहा जाता है। चरण 2 - </span><strong><span style=\"font-family: Baloo;\">कीचड़ का पाचन(Sludge Digestion)</span></strong><span style=\"font-family: Baloo;\"> - सीवेज कीचड़ से सभी ठोस पदार्थों को इकट्ठा करने के बाद कीचड़ पाचन प्रक्रिया शुरू होती है। चरण 3 - </span><strong><span style=\"font-family: Baloo;\">पानी निकालने की व्यवस्था <strong id=\"docs-internal-guid-ba4c0dc3-7fff-f463-84f6-1a66888f9fd5\">( Dewatering)</strong></span><span style=\"font-family: Times New Roman;\">&nbsp;</span></strong><span style=\"font-family: Baloo;\">- उपयोगी गैसों और अन्य उपोत्पादों को पुनः प्राप्त करने के बाद, शेष कीचड़ को अंतिम निपटान से पहले हटा दिया जाता है। चरण 4 - </span><strong><span style=\"font-family: Baloo;\">निपटान (Disposal)</span></strong><span style=\"font-family: Baloo;\">- एक बार जब कीचड़ को प्रभावी ढंग से निर्जलित कर दिया जाता है, तो इसे एक सैनिटरी लैंडफिल में भूमिगत दफन किया जा सकता है या इसकी रासायनिक संरचना के आधार पर उर्वरक के रूप में इस्तेमाल किया जा सकता है।</span></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "7",
+                    section: "18",
+                    question_en: "<p>7. <span style=\"font-family: Times New Roman;\">______ refers to a sanitation system in which toilets collect human excreta in sealable, removable cartridges that are transported to treatment facilities.</span></p>",
+                    question_hi: "<p>7. <span style=\"font-family: Baloo;\">______ एक स्वच्छता प्रणाली को संदर्भित करता है जिसमें शौचालय मानव मल को सील करने योग्य, हटाने योग्य कार्ट्रिज में एकत्र करता है जिसे उपचार सुविधाओं में ले जाया जाता है।</span></p>",
+                    options_en: ["<p>Ecological sanitation</p>", "<p>Container-Based sanitation</p>", 
+                                "<p>Community-led total sanitation</p>", "<p>Dry sanitation</p>"],
+                    options_hi: ["<p>पारिस्थितिक स्वच्छता</p>", "<p>कंटेनर आधारित स्वच्छता</p>",
+                                "<p>समुदाय के नेतृत्व वाली कुल स्वच्छता</p>", "<p>सूखी स्वच्छता</p>"],
+                    solution_en: "<p>7.(b) <strong>Container Based Sanitation</strong><span style=\"font-family: Times New Roman;\"> refers to a sanitation system in which toilets collect human excreta in sealable, removable cartridges that are transported to treatment facilities. </span><strong><span style=\"font-family: Times New Roman;\">Ecological sanitation</span></strong><span style=\"font-family: Times New Roman;\"> is that protects human and ecosystem health while preventing water pollution, conserving energy, and capturing nutrients. </span><strong><span style=\"font-family: Times New Roman;\">Community Led Total Sanitation (CLTS)</span></strong><span style=\"font-family: Times New Roman;\"> is an innovative methodology for mobilizing communities to completely eliminate open defecation (OD). </span><strong><span style=\"font-family: Times New Roman;\">Dry sanitation</span></strong><span style=\"font-family: Times New Roman;\"> is defined as the disposal of human waste without the use of water as a carrier. </span></p>",
+                    solution_hi: "<p>7.(b) <strong>कंटेनर आधारित स्वच्छता</strong><span style=\"font-family: Baloo;\"> एक स्वच्छता प्रणाली को संदर्भित करता है जिसमें शौचालय मानव मल को सील करने योग्य, हटाने योग्य कार्ट्रिज में एकत्र करते हैं जिन्हें उपचार सुविधाओं तक पहुंचाया जाता है।</span><span style=\"font-family: Baloo;\"> <strong>पारिस्थितिक स्वच्छता</strong></span><span style=\"font-family: Baloo;\"> वह है जो मानव और पारिस्थितिकी तंत्र के स्वास्थ्य की रक्षा करती है, जबकि जल प्रदूषण को रोकती है, ऊर्जा का संरक्षण करती है और पोषक तत्वों को ग्रहण करती है। </span><strong><span style=\"font-family: Baloo;\">सामुदायिक नेतृत्व पूर्ण स्वच्छता (CLTS)</span></strong><span style=\"font-family: Baloo;\"> खुले में शौच (</span><span style=\"font-family: Times New Roman;\">OD</span><span style=\"font-family: Baloo;\">) को पूरी तरह से समाप्त करने के लिए समुदायों को संगठित करने के लिए एक नवीन पद्धति है। </span><strong><span style=\"font-family: Baloo;\">शुष्क स्वच्छता</span></strong><span style=\"font-family: Baloo;\"> को वाहक के रूप में पानी के उपयोग के बिना मानव अपशिष्ट के निपटान के रूप में परिभाषित किया गया है।</span></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "8",
+                    section: "18",
+                    question_en: "<p>8. <span style=\"font-family: Times New Roman;\">The number of deaths during the first 28 completed days of life per 1000 live births in a </span><span style=\"font-family: Times New Roman;\">given</span><span style=\"font-family: Times New Roman;\"> year or period is defined as ______.</span></p>",
+                    question_hi: "<p>8. <span style=\"font-family: Baloo;\">किसी दिए गए वर्ष या अवधि में प्रति 1000 जीवित जन्मों पर जीवन के पहले 28 पूर्ण दिनों के दौरान होने वाली मौतों की संख्या को ______ के रूप में परिभाषित किया गया है।</span></p>",
+                    options_en: ["<p>neonatal mortality rate</p>", "<p>age-specific mortality rate</p>", 
+                                "<p>crude mortality rate</p>", "<p>infant mortality rate</p>"],
+                    options_hi: ["<p>नवजात मृत्यु दर</p>", "<p>आयु-विशिष्ट मृत्यु दर</p>",
+                                "<p>अशोधित मृत्यु दर</p>", "<p>शिशु मृत्यु दर</p>"],
+                    solution_en: "<p>8.(a) <span style=\"font-family: Times New Roman;\">The number of deaths during the first 28 completed days of life per 1000 live births in a given year or period is defined as </span><strong><span style=\"font-family: Times New Roman;\">neonatal mortality rate</span><span style=\"font-family: Times New Roman;\">.</span><span style=\"font-family: Times New Roman;\"> </span><span style=\"font-family: Times New Roman;\">An age-specific mortality rate</span></strong><span style=\"font-family: Times New Roman;\"> is a mortality rate limited to a particular age group. </span><span style=\"font-family: Times New Roman;\"><strong>The crude death</strong> <strong>rate</strong></span><span style=\"font-family: Times New Roman;\"><strong> </strong>is calculated as the number of deaths in a given period divided by the population exposed to risk of death in that period. </span><strong><span style=\"font-family: Times New Roman;\">The infant mortality rate</span></strong><span style=\"font-family: Times New Roman;\"> is the number of infant deaths for every 1,000 live births. </span></p>",
+                    solution_hi: "<p>8.(a) <span style=\"font-family: Baloo;\">किसी दिए गए वर्ष या अवधि में प्रति 1000 जीवित जन्मों पर जीवन के पहले 28 पूर्ण दिनों के दौरान होने वाली मौतों की संख्या को </span><strong><span style=\"font-family: Baloo;\">नवजात मृत्यु दर</span></strong><span style=\"font-family: Baloo;\"> के रूप में परिभाषित किया गया है। </span><strong><span style=\"font-family: Baloo;\">एक आयु-विशिष्ट मृत्यु</span></strong><span style=\"font-family: Baloo;\"><strong> दर</strong> एक विशेष आयु वर्ग तक सीमित मृत्यु दर है। </span><strong><span style=\"font-family: Baloo;\">अपरिष्कृत मृत्यु दर</span></strong><span style=\"font-family: Baloo;\"> की गणना एक निश्चित अवधि में हुई मौतों की संख्या को उस अवधि में मृत्यु के जोखिम के संपर्क में आने वाली जनसंख्या से विभाजित करके की जाती है। </span><span style=\"font-family: Baloo;\"><strong>शिशु मृत्यु दर</strong> प्रति </span><span style=\"font-family: Baloo;\">1,000 जीवित जन्मों पर शिशु मृत्यु की संख्या है।</span></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "9",
+                    section: "18",
+                    question_en: "<p>9. <span style=\"font-family: Times New Roman;\">The pilgrimage sites of Nasik, Triyambak and Bhadrachalam lie on the banks of which of the following rivers?</span></p>",
+                    question_hi: "<p>9. <span style=\"font-family: Baloo;\">नासिक, त्र्यंबक और भद्राचलम के तीर्थ स्थल निम्नलिखित में से किस नदी के तट पर स्थित हैं?</span></p>",
+                    options_en: ["<p>Krishna</p>", "<p>Godavari</p>", 
+                                "<p>Narmada</p>", "<p>Brahmaputra</p>"],
+                    options_hi: ["<p>कृष्ण</p>", "<p>गोदावरी</p>",
+                                "<p>नर्मदा</p>", "<p>ब्रह्मपुत्र</p>"],
+                    solution_en: "<p>9.(b) <span style=\"font-family: Times New Roman;\">The pilgrimage sites of Nasik, Triyambak and Bhadrachalam lie on the banks of </span><span style=\"font-family: Times New Roman;\"><strong>Godavari river</strong>.</span><span style=\"font-family: Times New Roman;\"> There are many pilgrimage centers on the banks of the </span><strong><span style=\"font-family: Times New Roman;\">River Krishna</span></strong><span style=\"font-family: Times New Roman;\"> including Mallikarjuna temple (Srisailam), Amareshwara Swamy temple (Amaravati), Datta Deva temple, Sangameshwara Shiva temple, Ramling temple and Durga Malleswara temple (Vijyawada). Amarkantak, Omkareshwar, Maheshwar, Bharuch lie on the bank of </span><strong><span style=\"font-family: Times New Roman;\">Narmada River</span></strong><span style=\"font-family: Times New Roman;\">. </span><span style=\"font-family: Times New Roman;\">Kamakhya temple lies on </span><strong><span style=\"font-family: Times New Roman;\">Brahmaputra River</span></strong><span style=\"font-family: Times New Roman;\">.</span></p>",
+                    solution_hi: "<p>9.(b) <span style=\"font-family: Baloo;\">नासिक, त्र्यंबक और भद्राचलम के तीर्थ स्थल </span><span style=\"font-family: Baloo;\"><strong>गोदावरी नदी</strong> </span><span style=\"font-family: Baloo;\">के तट पर स्थित हैं। </span><strong><span style=\"font-family: Baloo;\">कृष्णा नदी</span></strong><span style=\"font-family: Baloo;\"> के तट पर मल्लिकार्जुन मंदिर (श्रीशैलम), अमरेश्वर स्वामी मंदिर (अमरावती), दत्ता देव मंदिर, संगमेश्वर शिव मंदिर, रामलिंग मंदिर और दुर्गा मल्लेश्वर मंदिर (विजयवाड़ा) सहित कई तीर्थस्थल हैं। अमरकंटक, ओंकारेश्वर, महेश्वर, भरूच </span><strong><span style=\"font-family: Baloo;\">नर्मदा नदी</span></strong><span style=\"font-family: Baloo;\"> के तट पर स्थित हैं। कामाख्या मंदिर </span><span style=\"font-family: Baloo;\"><strong>ब्रह्मपुत्र नदी</strong> </span><span style=\"font-family: Baloo;\">पर स्थित है।</span></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "10",
+                    section: "18",
+                    question_en: "<p>10. <span style=\"font-family: Times New Roman;\">A ______ tank is an underground chamber made of concrete, fiberglass, or plastic </span><span style=\"font-family: Times New Roman;\">through which domestic wastewater (sewage) flows for basic treatment.</span></p>",
+                    question_hi: "<p>10. <span style=\"font-family: Baloo;\">एक ______ टैंक कंक्रीट, फाइबरग्लास या प्लास्टिक से बना एक भूमिगत कक्ष है जिसके माध्यम से घरेलू अपशिष्ट जल (सीवेज) बुनियादी उपचार के लिए बहता है।</span></p>",
+                    options_en: ["<p>soap</p>", "<p>pressure</p>", 
+                                "<p>flush</p>", "<p>septic</p>"],
+                    options_hi: [" <p> साबुन</span></p>", " <p> दबाव</span></p>",
+                                " <p> फ्लश</span></p>", " <p> सेप्टिक</span></p>"],
+                    solution_en: "<p>10.(d) <span style=\"font-family: Times New Roman;\">A septic tank is an underground chamber made of concrete, fiberglass, or plastic through which domestic wastewater (Sewage) flows for basic treatment. </span><span style=\"font-family: Times New Roman;\">The term \"septic\" refers to the anaerobic bacterial environment that develops in the tank that decomposes or mineralizes the waste discharged into the tank. </span></p>",
+                    solution_hi: "<p>10.(d)&nbsp;<span style=\"font-family: Baloo;\">एक सेप्टिक टैंक कंक्रीट, फाइबरग्लास या प्लास्टिक से बना एक भूमिगत कक्ष है जिसके माध्यम से घरेलू अपशिष्ट जल (sewage) बुनियादी उपचार के लिए बहता है। शब्द \"सेप्टिक\" अवायवीय जीवाणु वातावरण को संदर्भित करता है जो टैंक में विकसित होता है जो टैंक में छोड़े गए कचरे को विघटित या खनिज करता है।</span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "11",
+                    section: "18",
+                    question_en: "<p>11.<span style=\"font-family: Times New Roman;\"> Which of the following statements is/are correct regarding the mountains?&nbsp;<br></span><span style=\"font-family: Times New Roman;\">I- Mountains may be arranged in a line known as range.&nbsp;<br></span><span style=\"font-family: Times New Roman;\">II-The Aravali range in India is one of the </span><span style=\"font-family: Times New Roman;\">oldest fold mountain</span><span style=\"font-family: Times New Roman;\"> systems in the world.&nbsp;<br></span><span style=\"font-family: Times New Roman;\">III- Mt. Kilimanjaro in South America is an example of Volcanic Mountain</span></p>",
+                    question_hi: "<p>11. <span style=\"font-family: Baloo;\">पहाड़ों के संबंध में निम्नलिखित में से कौन सा/से कथन सही है/हैं?<br></span><span style=\"font-family: Baloo;\">I- पर्वतों को एक रेखा में व्यवस्थित किया जा सकता है जिसे श्रेणी कहते हैं।<br></span><span style=\"font-family: Baloo;\">II-भारत में अरावली श्रृंखला दुनिया की सबसे पुरानी तह पर्वत प्रणालियों में से एक है।<br></span><span style=\"font-family: Baloo;\">III- दक्षिण अमेरिका में माउंट किलिमंजारो ज्वालामुखी पर्वत का एक उदाहरण है</span></p>",
+                    options_en: ["<p>Only I and II</p>", "<p>Only II</p>", 
+                                "<p>I, II and III</p>", "<p>Only I</p>"],
+                    options_hi: ["<p>केवल I और II</p>", "<p>केवल II</p>",
+                                "<p>I, II और III</p>", "<p>केवल I</p>"],
+                    solution_en: "<p>11.(a) <span style=\"font-family: Times New Roman;\">Mount Kilimanjaro is a dormant volcano in Tanzania. It is the highest mountain in Africa .</span></p>",
+                    solution_hi: "<p>11.(a) <span style=\"font-family: Baloo;\">माउंट किलिमंजारो तंजानिया में एक निष्क्रिय ज्वालामुखी है। यह अफ्रीका का सबसे ऊँचा पर्वत है।</span></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "12",
+                    section: "18",
+                    question_en: "<p>12. <span style=\"font-family: Times New Roman;\">Approximately how much percentage (nearest to integer) of total water on the surface of earth is accounted for by the oceans?</span></p>",
+                    question_hi: "<p>12.<span style=\"font-family: Baloo;\"> पृथ्वी की सतह पर कुल पानी का लगभग कितना प्रतिशत (निकटतम से पूर्णांक) महासागरों के लिए जिम्मेदार है?</span></p>",
+                    options_en: ["<p>96</p>", "<p>97</p>", 
+                                "<p>94</p>", "<p>92</p>"],
+                    options_hi: ["<p>96</p>", "<p>97</p>",
+                                "<p>94</p>", "<p>92</p>"],
+                    solution_en: "<p>12.(b)&nbsp;<span style=\"font-family: Times New Roman;\">Approximately 97 percent of total water on the surface Earth is accounted for by the oceans. </span><span style=\"font-family: Times New Roman;\">. Two percent of the earth\'s water is stored as fresh water in glaciers, ice caps, and snowy mountain ranges. About 71 percent of the Earth\'s surface is water-covered. </span></p>",
+                    solution_hi: "<p>12.(b) <span style=\"font-family: Baloo;\">पृथ्वी की सतह पर कुल जल का लगभग 97 प्रतिशत भाग महासागरों के लिए है। पृथ्वी के जल का दो प्रतिशत हिमनदों, बर्फ की चोटियों और बर्फीली पर्वत श्रृंखलाओं में ताजे पानी के रूप में संग्रहित है। पृथ्वी की सतह का लगभग 71 प्रतिशत भाग जल से आच्छादित है।</span><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "13",
+                    section: "18",
+                    question_en: "<p>13.<span style=\"font-family: Times New Roman;\"> The Deomali is the highest mountain peak of ______.</span></p>",
+                    question_hi: "<p>13. <span style=\"font-family: Baloo;\">देवमाली ______ की सबसे ऊंची पर्वत चोटी है।</span></p>",
+                    options_en: [" <p> Assam</span></p>", " <p> West Bengal</span></p>", 
+                                " <p> Bihar</span></p>", " <p> Odisha </span></p>"],
+                    options_hi: [" <p> असम</span></p>", " <p> पश्चिम बंगाल</span></p>",
+                                " <p> बिहार</span></p>", " <p> ओडिशा</span></p>"],
+                    solution_en: "<p>13.(d) <span style=\"font-family: Times New Roman;\">The </span><strong><span style=\"font-family: Times New Roman;\">Deomali </span></strong><span style=\"font-family: Times New Roman;\">(</span><span style=\"font-family: Times New Roman;\">1,672 m)</span><span style=\"font-family: Times New Roman;\"> is the highest mountain peak of Odisha and </span><span style=\"font-family: Times New Roman;\">the tallest in the whole of the Eastern Ghats . The</span><span style=\"font-family: Times New Roman;\"> <strong>Borail Range</strong></span><span style=\"font-family: Times New Roman;\"> is the highest Mountain Ranges in Assam.</span><span style=\"font-family: Times New Roman;\"> <strong>Sandakphu</strong></span><span style=\"font-family: Times New Roman;\"><strong> </strong>is the highest peak in West Bengal. </span><strong><span style=\"font-family: Times New Roman;\">Someshwar Fort</span></strong><span style=\"font-family: Times New Roman;\"> is the highest peak of Bihar. It is part of Shivalik hill. </span></p>",
+                    solution_hi: "<p>13.(d) <strong>देवमाली</strong><span style=\"font-family: Baloo;\"><strong> </strong>(1,672 मीटर) ओडिशा की सबसे ऊंची पर्वत चोटी है और पूरे पूर्वी घाट में सबसे ऊंची है। </span><strong><span style=\"font-family: Baloo;\">बोरेल रेंज</span></strong><span style=\"font-family: Baloo;\"> असम की सबसे ऊंची पर्वत श्रृंखला है। </span><strong><span style=\"font-family: Baloo;\">संदकफू</span></strong><span style=\"font-family: Baloo;\"><strong> </strong>पश्चिम बंगाल की सबसे ऊंची चोटी है। </span><strong><span style=\"font-family: Baloo;\">सोमेश्वर किला</span></strong><span style=\"font-family: Baloo;\"> बिहार की सबसे ऊँची चोटी है। यह शिवालिक पहाड़ी का हिस्सा है।</span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "14",
+                    section: "18",
+                    question_en: "<p>14.<span style=\"font-family: Times New Roman;\"> Which of the following is a UNESCO recognised dance form?</span></p>",
+                    question_hi: "<p>14.<span style=\"font-family: Baloo;\"> निम्नलिखित में से कौन सा यूनेस्को (UNESCO) द्वारा मान्यता प्राप्त नृत्य रूप है?</span></p>",
+                    options_en: ["<p>Bhangra</p>", "<p>Dalkhai</p>", 
+                                "<p>Kalbelia</p>", "<p>Giddha</p>"],
+                    options_hi: ["<p>भांगड़ा</p>", "<p>दलखाई</p>",
+                                "<p>कालबेलिया</p>", "<p>गिद्दा</p>"],
+                    solution_en: "<p>14.(c) <span style=\"font-family: Times New Roman;\">The </span><span style=\"font-family: Times New Roman;\"><strong>Kalbelia</strong> </span><span style=\"font-family: Times New Roman;\">are a snake charming tribe from the Thar Desert in Rajasthan, India. </span><strong><span style=\"font-family: Times New Roman;\">Bhangra</span></strong><span style=\"font-family: Times New Roman;\">- Punjab, </span><strong><span style=\"font-family: Times New Roman;\">Dalkhai</span></strong><span style=\"font-family: Times New Roman;\">- Odisha, </span><strong><span style=\"font-family: Times New Roman;\">Giddha</span></strong><span style=\"font-family: Times New Roman;\">- Punjab.</span></p>",
+                    solution_hi: "<p>14.(c) <strong>कालबेलिया</strong><span style=\"font-family: Baloo;\"> भारत के राजस्थान में थार रेगिस्तान से एक सांप आकर्षक जनजाति है। </span><strong><span style=\"font-family: Baloo;\">भांगड़ा</span></strong><span style=\"font-family: Baloo;\">-पंजाब, </span><strong><span style=\"font-family: Baloo;\">दलखाई</span></strong><span style=\"font-family: Baloo;\">-ओडिशा, </span><strong><span style=\"font-family: Baloo;\">गिद्दा</span></strong><span style=\"font-family: Baloo;\">-पंजाब।</span></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "15",
+                    section: "18",
+                    question_en: "<p>15. <span style=\"font-family: Times New Roman;\">Me-Dum-Me-Phi is an ancestor-worship festival celebrated in the state of ______.</span></p>",
+                    question_hi: "<p>15. <span style=\"font-family: Baloo;\">Me-Dum-Me-Phi एक पूर्वज-पूजा उत्सव है जो ______ राज्य में मनाया जाता है।</span></p>",
+                    options_en: ["<p>Madhya Pradesh</p>", "<p>Himachal Pradesh</p>", 
+                                "<p>Assam</p>", "<p>Goa</p>"],
+                    options_hi: ["<p>मध्य प्रदेश</p>", "<p>हिमाचल प्रदेश</p>",
+                                "<p>असम</p>", "<p>गोवा</p>"],
+                    solution_en: "<p>15.(c) <strong>Me-Dum-Me-Ph</strong><span style=\"font-family: Times New Roman;\"><strong>i</strong> is the festival of Assam. </span><span style=\"font-family: Times New Roman;\">The major festivals celebrated in Assam are Bihu, Baishagu, Ali-Ai-Ligang, Baikho, Rongker, Bohaggiyo Bishu, Ambubashi Mela etc </span></p>",
+                    solution_hi: "<p>15.(c) <span style=\"font-family: Baloo;\"><strong>Me-Dum-Me-Phi</strong> असम का त्योहार है। असम में मनाए जाने वाले प्रमुख त्योहार बिहू, बैशागु, अली-ऐ-लिगांग, बैखो, रोंगकर, बोहागियो बिशु, अंबुबाशी मेला आदि हैं।</span></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "16",
+                    section: "18",
+                    question_en: "<p>16. <span style=\"font-family: Times New Roman;\">Which of the following crops is described as &ndash; &lsquo;It is a crop which is used both as food and fodder. It is a Kharif crop that requires temperature between 21&deg;C to 27&deg;C and </span><span style=\"font-family: Times New Roman;\">grows well in old alluvial soil&rsquo;?</span></p>",
+                    question_hi: "<p>16. <span style=\"font-family: Baloo;\">निम्नलिखित में से किस फसल का वर्णन इस प्रकार किया गया है - \'यह एक ऐसी फसल है जिसका उपयोग भोजन और चारे दोनों के रूप में किया जाता है। यह एक खरीफ फसल है जिसे 21 डिग्री सेल्सियस से 27 डिग्री सेल्सियस के बीच तापमान की आवश्यकता होती है और जो पुरानी जलोढ़ मिट्टी में अच्छी तरह से बढ़ती है\'?</span></p>",
+                    options_en: ["<p>Sesamum</p>", "<p>Maize</p>", 
+                                "<p>Bajra</p>", "<p>Ragi</p>"],
+                    options_hi: ["<p>तिल</p>", "<p>मक्का</p>",
+                                "<p>बजरा</p>", "<p>रागी</p>"],
+                    solution_en: "<p>16.(b) <span style=\"font-family: Times New Roman;\">In India, </span><strong><span style=\"font-family: Times New Roman;\">maize</span></strong><span style=\"font-family: Times New Roman;\"><strong> </strong>is traditionally grown in monsoon (Kharif) season, which is accompanied by high temperature (&lt;35&deg; C) and rainfall.</span><span style=\"font-family: Times New Roman;\"> <strong>Andhra Pradesh</strong></span><span style=\"font-family: Times New Roman;\"> is the highest Maize producing state. </span><strong><span style=\"font-family: Times New Roman;\">Sesame</span></strong><span style=\"font-family: Times New Roman;\"><strong> </strong>( Sesamum indicum L.) is the oldest indigenous oilseed crop. </span><strong><span style=\"font-family: Times New Roman;\">Bajra</span></strong><span style=\"font-family: Times New Roman;\"><strong> </strong>is the Kharif Crop. </span><strong><span style=\"font-family: Times New Roman;\">Ragi</span></strong><span style=\"font-family: Times New Roman;\"><strong> </strong>is also a Kharif crop.</span></p>",
+                    solution_hi: "<p>16.(b) <span style=\"font-family: Baloo;\">भारत में, <strong>मक्का </strong>पारंपरिक रूप से मानसून (खरीफ) के मौसम में उगाया जाता है, जो उच्च तापमान (&lt;35</span><span style=\"font-family: Times New Roman;\">&deg;</span><span style=\"font-family: Baloo;\"> सेल्सियस) और वर्षा के साथ होता है। <strong>आंध्र प्रदेश</strong> मक्का का सर्वाधिक उत्पादन करने वाला राज्य है। <strong>तिल </strong>( Sesamum indicum L.) सबसे पुरानी स्वदेशी तिलहन फसल है। <strong>बाजरा </strong>खरीफ की फसल है। <strong>रागी </strong>भी खरीफ की फसल है।</span></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "17",
+                    section: "18",
+                    question_en: "<p>17.<span style=\"font-family: Times New Roman;\"> Which of the following dwarf planets lies in the main asteroid belt ?</span></p>",
+                    question_hi: "<p>17.<span style=\"font-family: Baloo;\"> निम्नलिखित में से कौन सा बौना ग्रह मुख्य क्षुद्रग्रह बेल्ट में स्थित है?</span></p>",
+                    options_en: ["<p>Eris</p>", "<p>Makemake</p>", 
+                                "<p>Ceres</p>", "<p>Haumea</p>"],
+                    options_hi: ["<p>एरिस</p>", "<p>मेकमेक</p>",
+                                "<p>सेरेस</p>", "<p>हाउमिया</p>"],
+                    solution_en: "<p>17.(c) <strong><span style=\"font-family: Times New Roman;\">Ceres </span></strong><span style=\"font-family: Times New Roman;\">is a dwarf planet in the asteroid belt between the orbits of Mars and Jupiter. </span><span style=\"font-family: Times New Roman;\"> </span><strong><span style=\"font-family: Times New Roman;\">Eris</span></strong><span style=\"font-family: Times New Roman;\"><strong> </strong>is the most massive and second-largest known dwarf planet in the Solar System.</span><span style=\"font-family: Times New Roman;\"> <strong>Makemake</strong></span><span style=\"font-family: Times New Roman;\"><strong> </strong>is a dwarf planet and perhaps the second-largest Kuiper belt object in the classical population, with a diameter approximately two-thirds that of Pluto. </span><strong><span style=\"font-family: Times New Roman;\">Haumea</span></strong><span style=\"font-family: Times New Roman;\"><strong> </strong>is a dwarf planet located beyond Neptune\'s orbit. </span></p>",
+                    solution_hi: "<p>17.(c) <span style=\"font-family: Baloo;\"><strong>सेरेस</strong> मंगल और बृहस्पति की कक्षाओं के बीच क्षुद्रग्रह बेल्ट में एक बौना ग्रह है। <strong>एरिस </strong>सौर मंडल में सबसे बड़े पैमाने पर और दूसरा सबसे बड़ा ज्ञात बौना ग्रह है। <strong>मेकमेक </strong>एक बौना ग्रह है और शायद शास्त्रीय आबादी में दूसरा सबसे बड़ा कुइपर बेल्ट ऑब्जेक्ट है, जिसका व्यास प्लूटो के व्यास के लगभग दो-तिहाई है। <strong>हौमिया </strong>नेप्च्यून की कक्षा से परे स्थित एक बौना ग्रह है। </span></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "18",
+                    section: "18",
+                    question_en: "<p>18. <span style=\"font-family: Times New Roman;\">&nbsp;______ is concerned with constructing records of past climates and climatic events by analysis of tree growth characteristics, especially growth rings.</span></p>",
+                    question_hi: "<p>18.<span style=\"font-family: Baloo;\"> ________ पेड़ की वृद्धि विशेषताओं, विशेष रूप से विकास के छल्ले के विश्लेषण द्वारा पिछले जलवायु और जलवायु घटनाओं के रिकॉर्ड के निर्माण से संबंधित है।</span></p>",
+                    options_en: ["<p>Bioclimatology</p>", "<p>Historical- climatology</p>", 
+                                "<p>Geo climatology</p>", "<p>Dendroclimatology</p>"],
+                    options_hi: ["<p>जैव जलवायु विज्ञान</p>", "<p>ऐतिहासिक-जलवायु विज्ञान</p>",
+                                "<p>भू-जलवायु विज्ञान</p>", "<p>डेन्ड्रोक्लाइमेटोलॉजी</p>"],
+                    solution_en: "<p>18.(d) <strong>Dendroclimatology&nbsp;</strong><span style=\"font-family: Times New Roman;\"><strong> </strong>is concerned with constructing records of past climates and climatic events by analysis of tree growth characteristics, especially growth rings.</span><span style=\"font-family: Times New Roman;\"> </span><strong><span style=\"font-family: Times New Roman;\">Bioclimatology</span></strong><span style=\"font-family: Times New Roman;\"><strong> </strong>(biometeorology) is the study of the relationships between climate (weather) and living organisms. </span><strong><span style=\"font-family: Times New Roman;\">Historical climatology</span></strong><span style=\"font-family: Times New Roman;\"> is the study of historical changes in climate and their effect on civilization from the emergence of hominids to the present day. </span><strong><span style=\"font-family: Times New Roman;\">Geo climatology</span></strong><span style=\"font-family: Times New Roman;\"> is the study of climate and how it changes over time. </span></p>",
+                    solution_hi: "<p>18.(d) <strong>डेंड्रोक्लाइमेटोलॉजी</strong><span style=\"font-family: Baloo;\"><strong> </strong>पेड़ की वृद्धि विशेषताओं, विशेष रूप से विकास के छल्ले के विश्लेषण द्वारा पिछली जलवायु और जलवायु घटनाओं के रिकॉर्ड बनाने से संबंधित है। </span><strong><span style=\"font-family: Baloo;\">बायोक्लाइमेटोलॉजी </span></strong><span style=\"font-family: Baloo;\">(बायोमेटियोरोलॉजी) जलवायु (मौसम) और जीवित जीवों के बीच संबंधों का अध्ययन है। <strong>ऐतिहासिक जलवायु</strong> विज्ञान, होमिनिड्स के उद्भव से लेकर आज तक, जलवायु में ऐतिहासिक परिवर्तनों और सभ्यता पर उनके प्रभाव का अध्ययन है। <strong>भू जलवायु विज्ञान</strong> जलवायु का अध्ययन है और यह समय के साथ कैसे बदलता है।</span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "19",
+                    section: "18",
+                    question_en: "<p>19. <span style=\"font-family: Times New Roman;\">Which of the following statements is/are correct? <br></span><span style=\"font-family: Times New Roman;\">I- Karnataka is the largest producer of coffee in India.&nbsp;<br></span><span style=\"font-family: Times New Roman;\">II- Arabica is a variety of coffee.&nbsp;<br></span><span style=\"font-family: Times New Roman;\">III- The Arabica variety initially brought from Mexico is produced in India.</span></p>",
+                    question_hi: "<p>19. <span style=\"font-family: Baloo;\">निम्नलिखित में से कौन सा/से कथन सही है/हैं?<br></span><span style=\"font-family: Baloo;\">I- कर्नाटक भारत में कॉफी का सबसे बड़ा उत्पादक है।<br></span><span style=\"font-family: Baloo;\">II- अरेबिका कॉफी की एक किस्म है।<br></span><span style=\"font-family: Baloo;\">III- शुरू में मेक्सिको से लाई गई अरेबिका किस्म का उत्पादन भारत में होता है।</span></p>",
+                    options_en: ["<p>I, II and III</p>", "<p>Only II and III</p>", 
+                                "<p>Only III</p>", "<p>Only I and II</p>"],
+                    options_hi: ["<p>I, II और III</p>", "<p>केवल II और II</p>",
+                                "<p>केवल III</p>", "<p>केवल I और II</p>"],
+                    solution_en: "<p>19.(d) <strong>Brazil </strong><span style=\"font-family: Times New Roman;\">is the largest coffee producer in the world. </span><span style=\"font-family: Times New Roman;\">Coffea is a genus of flowering plants in the family </span><strong><span style=\"font-family: Times New Roman;\">Rubiaceae</span></strong><span style=\"font-family: Times New Roman;\">. Coffee can be grown on lots of soils but the ideal types are fertile volcanic </span><span style=\"font-family: Times New Roman;\"><strong>red earth or deep sandy loam</strong>.</span><span style=\"font-family: Times New Roman;\"> Coffee beans can be classed into </span><strong><span style=\"font-family: Times New Roman;\">four type</span></strong><span style=\"font-family: Times New Roman;\"><strong>s</strong>: Arabica, Robusta, Liberica, and Excelsa.</span></p>",
+                    solution_hi: "<p>19.(d) <span style=\"font-family: Baloo;\"><strong>ब्राजील </strong>दुनिया का सबसे बड़ा कॉफी उत्पादक है। कोफिया परिवार में फूलों के पौधों का एक जीनस है <strong>रुबियासी</strong>। कॉफी को बहुत सारी मिट्टी पर उगाया जा सकता है लेकिन आदर्श प्रकार उपजाऊ ज्वालामुखीय <strong>लाल पृथ्वी या गहरे रेतीले दोमट</strong> हैं। कॉफी बीन्स को <strong>चार प्रकारों</strong> में वर्गीकृत किया जा सकता है: अरेबिका, रोबस्टा, लिबरिका और एक्सेलसा।</span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "20",
+                    section: "misc",
+                    question_en: "<p>20.<span style=\"font-family: Times New Roman;\"> The greater one-horned rhino is listed under the Schedule ______ of the Wildlife Protection Act, 1972</span></p>",
+                    question_hi: "<p>20.<span style=\"font-family: Baloo;\"> एक सींग वाले गैंडे को वन्यजीव संरक्षण अधिनियम, 1972 की अनुसूची ______ के तहत सूचीबद्ध किया गया है।</span></p>",
+                    options_en: [" <p> II </span></p>", " <p> IV </span></p>", 
+                                " <p> III </span></p>", " <p> I </span></p>"],
+                    options_hi: [" <p> II </span></p>", " <p> IV </span></p>",
+                                "<p>III</p>", "<p>I</p>"],
+                    solution_en: "<p>20.(d) <span style=\"font-family: Times New Roman;\">The greater one-horned rhino is listed under the Schedule I of the Wildlife Protection Act, 1972. There are six schedule in Wildlife Protection Act, 1972</span></p>",
+                    solution_hi: "<p>20.(d) <span style=\"font-family: Baloo;\">एक सींग वाले बड़े गैंडे को वन्यजीव संरक्षण अधिनियम, 1972 की अनुसूची I के तहत सूचीबद्ध किया गया है। वन्यजीव संरक्षण अधिनियम, 1972 में छह अनुसूची हैं।</span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+            
+            // Generate question boxes
+            const boxesContainer = document.getElementById('question-boxes');
+            questions.forEach((q, index) => {
+                const box = document.createElement('div');
+                box.className = 'q-box';
+                box.textContent = index + 1;
+                box.onclick = () => showQuestion(index);
+                box.id = `box-${index}`;
+                boxesContainer.appendChild(box);
+            });
+            
+            // Show first question
+            showQuestion(0);
+            updateProgress();
+        }
+        
+        // Show a specific question
+        
+        function formatContent(text) {
+            if (!text) return '';
+            return text.replace(/<img/g, '<img style="max-width:100%;height:auto;"');
+        }
+        
+        function showQuestion(index) {
+            if (index < 0 || index >= questions.length) return;
+            
+            currentQuestion = index;
+            const question = questions[index];
+            
+            // Update question counter
+            document.getElementById('question-counter').textContent = `Question ${index + 1} of ${questions.length}`;
+            
+            // Update question boxes
+            document.querySelectorAll('.q-box').forEach(box => box.classList.remove('current'));
+            document.getElementById(`box-${index}`).classList.add('current');
+            
+            // Generate question HTML
+            let html = `
+                <div class="question-card">
+                    <div class="question-text">
+                        <div class="en">${formatContent(question.question_en)}</div>
+                        <div class="hi" style="display:none">${formatContent(question.question_hi)} </div>
+                    </div>
+                    <div class="options" id="options-container">`;
+            
+            // Add options
+            ['a', 'b', 'c', 'd'].forEach((opt, i) => {
+                let optionClass = '';
+                let isCorrectAnswer = opt === question.correct;
+                let isUserAnswer = answers[question.id] === opt;
+                
+                // When reviewing, add appropriate classes
+                if (submitted) {
+                    if (isCorrectAnswer) {
+                        optionClass += ' correct-answer';
+                    } else if (isUserAnswer && !isCorrectAnswer) {
+                        optionClass += ' incorrect';
+                    }
+                }
+                
+                html += `
+                    <div class="option-item">
+                        <input class="option-input" type="radio" name="q${index}" 
+                            id="opt-${index}-${opt}" value="${opt}" 
+                            ${isUserAnswer ? 'checked' : ''}
+                            onclick="selectAnswer('${question.id}', '${opt}')">
+                       <label class="option-label${optionClass}" for="opt-${index}-${opt}">
+                            <div class="en">${question.options_en[i]}</div>
+                            <div class="hi" style="display:none">${question.options_hi[i]}</div>
+                        </label>
+                    </div>`;
+            });
+            
+            // Add solution if submitted
+            if (submitted) {
+                const isCorrect = answers[question.id] === question.correct;
+                const resultText = answers[question.id] ? (isCorrect ? 'Correct!' : 'Incorrect!') : 'Not attempted';
+                
+                html += `
+                    <div class="solution-container">
+                        <div class="solution-title">${resultText}</div>
+                        <div class="solution-text">
+                            <div class="en">${question.solution_en}</div>
+                            <div class="hi" style="display:none">${question.solution_hi}</div>
+                        </div>
+                    </div>`;
+            }
+            
+            html += `</div></div>`;
+            
+            document.getElementById('questions-container').innerHTML = html;
+            
+            // Apply language settings
+            applyLanguage();
+            
+            // If in mobile view, close the menu
+            if (window.innerWidth < 992) {
+                toggleNav(false);
+            }
+            
+            // Add review mode class if submitted
+            if (submitted) {
+                document.getElementById('options-container').classList.add('review-mode');
+            }
+        }
+        
+        // Apply current language
+        function applyLanguage() {
+            document.querySelectorAll(`.${currentLang}`).forEach(el => el.style.display = 'block');
+            document.querySelectorAll(`.${currentLang === 'en' ? 'hi' : 'en'}`).forEach(el => el.style.display = 'none');
+            
+            // Update language button text
+            document.getElementById('lang-text').textContent = currentLang === 'en' ? 'Hi' : 'En';
+        }
+        
+        // Select an answer
+        function selectAnswer(qId, option) {
+            if (submitted) return;
+            
+            answers[qId] = option;
+            updateProgress();
+            
+            // Mark question as attempted in the navigation
+            const index = questions.findIndex(q => q.id === qId);
+            if (index >= 0) {
+                const box = document.getElementById(`box-${index}`);
+                box.classList.add('attempted');
+                box.classList.remove('unattempted');
+            }
+        }
+        
+        // Navigate to previous/next question
+        function prevQuestion() { 
+            if (currentQuestion > 0) showQuestion(currentQuestion - 1); 
+        }
+        
+        function nextQuestion() { 
+            if (currentQuestion < questions.length - 1) showQuestion(currentQuestion + 1); 
+        }
+        
+        // Switch section
+        function switchSection(sectionId) {
+            if (sectionId === 'all') {
+                showQuestion(0);
+                return;
+            }
+            
+            const section = sections[sectionId];
+            if (section) showQuestion(section.start);
+        }
+        
+        // Toggle language
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'hi' : 'en';
+            applyLanguage();
+        }
+        
+        // Toggle navigation sidebar
+        function toggleNav(show) {
+            const nav = document.getElementById('question-nav');
+            const overlay = document.getElementById('nav-overlay');
+            
+            if (show === undefined) {
+                show = !nav.classList.contains('show');
+            }
+            
+            if (show) {
+                nav.classList.add('show');
+                overlay.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            } else {
+                nav.classList.remove('show');
+                overlay.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+        }
+        
+        // Update progress
+        function updateProgress() {
+            const attempted = Object.keys(answers).length;
+            document.getElementById('attempted-count').textContent = attempted;
+        }
+        
+        // Start timer
+        function startTimer() {
+            const timerDisplay = document.getElementById('timer-display');
+            let timeLeft = totalTime;
+            
+            const timerInterval = setInterval(() => {
+                if (timeLeft <= 0 || submitted) {
+                    clearInterval(timerInterval);
+                    if (!submitted) submitTest();
+                    return;
+                }
+                
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                timeLeft--;
+            }, 1000);
+        }
+        
+        // Confirm before submitting
+        function confirmSubmit() {
+            if (submitted) return;
+            
+            const attempted = Object.keys(answers).length;
+            const remaining = questions.length - attempted;
+            
+            // Create a more modern confirmation dialog
+            const confirmHtml = `
+                <div style="text-align: center; padding: 20px;">
+                    <h4 style="margin-bottom: 16px; color: var(--dark);">Confirm Submission</h4>
+                    <p style="margin-bottom: 24px; color: var(--gray);">
+                        You have attempted ${attempted} of ${questions.length} questions.<br>
+                        ${remaining} questions are unattempted.
+                    </p>
+                    <div style="display: flex; justify-content: center; gap: 12px;">
+                        <button onclick="this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; border: 1px solid var(--light-gray); background: white; border-radius: 8px; cursor: pointer;">
+                            Cancel
+                        </button>
+                        <button onclick="submitTest(); this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer;">
+                            Submit Test
+                        </button>
+                    </div>
+                </div>`;
+            
+            // Create modal element
+            const modal = document.createElement('div');
+            modal.className = 'results-modal show';
+            modal.innerHTML = `
+                <div class="results-card" style="max-width: 400px;">
+                    <button class="cancel-btn" style="position: absolute; top: 12px; right: 12px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--gray);" onclick="this.closest('.results-modal').remove()">
+                        ×
+                    </button>
+                    ${confirmHtml}
+                </div>`;
+            
+            document.body.appendChild(modal);
+        }
+        
+        // Submit test
+        function submitTest() {
+            if (submitted) return;
+            
+            submitted = true;
+            
+            let score = 0;
+            let correctCount = 0;
+            let incorrectCount = 0;
+            let unattemptedCount = 0;
+            
+            questions.forEach((q, index) => {
+                const userAns = answers[q.id];
+                const box = document.getElementById(`box-${index}`);
+                
+                box.classList.remove('attempted');
+                
+                if (!userAns) {
+                    unattemptedCount++;
+                    box.classList.add('unattempted');
+                } else if (userAns === q.correct) {
+                    correctCount++;
+                    score += q.pos_marks;
+                    box.classList.add('correct');
+                } else {
+                    incorrectCount++;
+                    score -= q.neg_marks;
+                    box.classList.add('incorrect');
+                }
+            });
+            
+            // Update result values
+            document.getElementById('score-value').textContent = score.toFixed(2);
+            document.getElementById('correct-value').textContent = correctCount;
+            document.getElementById('incorrect-value').textContent = incorrectCount;
+            document.getElementById('unattempted-value').textContent = unattemptedCount;
+            
+            // Show the results modal
+            document.getElementById('results-modal').classList.add('show');
+            
+            // Disable submit button
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-check"></i>';
+            submitBtn.style.backgroundColor = 'var(--success)';
+            
+            // Refresh current question view to show solution
+            showQuestion(currentQuestion);
+        }
+        
+        // Review test
+        function reviewTest() {
+            document.getElementById('results-modal').classList.remove('show');
+            showQuestion(0);
+        }
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target === document.getElementById('results-modal')) {
+                document.getElementById('results-modal').classList.remove('show');
+            }
+        });
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') prevQuestion();
+            if (e.key === 'ArrowRight') nextQuestion();
+        });
+    </script>
+</body>
+</html>
