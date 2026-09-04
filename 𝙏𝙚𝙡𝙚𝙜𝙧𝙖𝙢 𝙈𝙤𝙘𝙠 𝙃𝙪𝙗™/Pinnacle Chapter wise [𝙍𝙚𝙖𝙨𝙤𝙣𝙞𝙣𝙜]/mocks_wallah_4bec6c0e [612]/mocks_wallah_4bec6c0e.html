@@ -1,0 +1,1449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mocks Wallah</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --primary-light: #a29bfe;
+            --primary-dark: #5649c0;
+            --secondary: #00cec9;
+            --accent: #fd79a8;
+            --success: #00b894;
+            --warning: #fdcb6e;
+            --danger: #d63031;
+            --light: #f8f9fa;
+            --dark: #2d3436;
+            --gray: #636e72;
+            --light-gray: #dfe6e9;
+            --card-bg: #ffffff;
+            --body-bg: #f5f6fa;
+            --header-bg: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            --footer-bg: #ffffff;
+            --box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            --box-shadow-sm: 0 2px 10px rgba(0,0,0,0.05);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background-color: var(--body-bg);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            color: var(--dark);
+            line-height: 1.6;
+            padding-bottom: 80px; /* Space for fixed navigation */
+            overflow-x: hidden;
+        }
+        
+        /* Header Styles */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: var(--header-bg);
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            z-index: 1000;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .header-brand {
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .header-brand i {
+            margin-right: 8px;
+            font-size: 1.2rem;
+        }
+        
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .control-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .control-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .control-btn.active {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .timer-display {
+            background: rgba(0,0,0,0.2);
+            border-radius: 18px;
+            padding: 4px 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+        
+        .timer-display i {
+            margin-right: 6px;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-top: 60px;
+            padding: 16px;
+            min-height: calc(100vh - 140px);
+        }
+        
+        .question-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--box-shadow-sm);
+            border: none;
+            transition: var(--transition);
+        }
+        
+        .question-counter {
+            font-size: 0.9rem;
+            color: var(--gray);
+            text-align: center;
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+        
+        .question-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+        
+        .option-item {
+            margin-bottom: 12px;
+            position: relative;
+        }
+        
+        .option-input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+            .question-text {
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        hyphens: auto;
+        max-width: 100%;
+    }
+
+    .question-text img,
+    .option-label img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 8px 0;
+        border-radius: 8px;
+    }
+
+    .option-label {
+        overflow: hidden;
+    }
+
+    .question-card {
+        overflow: hidden;
+    }
+        
+        .option-label {
+            display: block;
+            padding: 14px 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--light-gray);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .option-label:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .option-input:checked + .option-label {
+            border-color: var(--primary);
+            background: rgba(108, 92, 231, 0.05);
+            box-shadow: 0 0 0 1px var(--primary);
+        }
+        
+        .option-input:checked + .option-label::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--primary);
+        }
+        
+        /* When reviewing answers */
+        .review-mode .option-input:checked + .option-label.correct {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.correct::after {
+            background: var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.incorrect {
+            border-color: var(--danger);
+            background: rgba(214, 48, 49, 0.05);
+            box-shadow: 0 0 0 1px var(--danger);
+        }
+        
+        .MathJax, .mjx-chtml {
+            overflow-x: auto;
+            max-width: 100%;
+            display: inline-block;
+        }
+
+        
+        .review-mode .option-input:checked + .option-label.incorrect::after {
+            background: var(--danger);
+        }
+        
+        .review-mode .option-label.correct-answer {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-label.correct-answer::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--success);
+        }
+        
+        .solution-container {
+            margin-top: 20px;
+            padding: 16px;
+            background: rgba(108, 92, 231, 0.05);
+            border-radius: 12px;
+            border-left: 3px solid var(--primary);
+        }
+        
+        .solution-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+        
+        /* Question Navigation */
+        .question-nav {
+            position: fixed;
+            top: 60px;
+            right: 0;
+            bottom: 80px;
+            width: 100%;
+            max-width: 320px;
+            background: var(--card-bg);
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            transform: translateX(100%);
+            transition: var(--transition);
+            z-index: 900;
+            overflow-y: auto;
+            padding: 16px;
+        }
+        
+        .question-nav.show {
+            transform: translateX(0);
+        }
+        
+        .nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .nav-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+        
+        .question-stats {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .stat-badge {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        
+        .section-selector {
+            width: 100%;
+            margin-bottom: 16px;
+            border-radius: 12px;
+            padding: 10px 16px;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            font-size: 0.9rem;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 16px;
+        }
+        
+        .question-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+            gap: 8px;
+        }
+        
+        .q-box {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .q-box:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .q-box.attempted {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .q-box.correct {
+            background-color: var(--success);
+            color: white;
+            border-color: var(--success);
+        }
+        
+        .q-box.incorrect {
+            background-color: var(--danger);
+            color: white;
+            border-color: var(--danger);
+        }
+        
+        .q-box.current {
+            border: 2px solid var(--accent) !important;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .q-box.unattempted {
+            background-color: var(--gray);
+            color: white;
+            border-color: var(--gray);
+        }
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: var(--footer-bg);
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            z-index: 800;
+        }
+        
+        .nav-btn {
+            height: 48px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 20px;
+            transition: var(--transition);
+            gap: 8px;
+        }
+        
+        .nav-btn i {
+            font-size: 1rem;
+        }
+        
+        .nav-btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .nav-btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+        
+        .nav-btn-outline:hover {
+            background: rgba(108, 92, 231, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        /* Overlay when nav is open */
+        .nav-overlay {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            bottom: 80px;
+            background: rgba(0,0,0,0.5);
+            z-index: 800;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+        }
+        
+        .nav-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        /* Results Modal */
+        .results-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1100;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+            padding: 16px;
+        }
+        
+        .results-modal.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .results-card {
+            background: white;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+            transform: translateY(20px);
+            transition: var(--transition);
+        }
+        
+        .results-modal.show .results-card {
+            transform: translateY(0);
+        }
+        
+        .results-header {
+            background: var(--header-bg);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .results-title {
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .results-body {
+            padding: 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            color: white;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+        
+        .results-footer {
+            padding: 16px 20px;
+            display: flex;
+            justify-content: center;
+            border-top: 1px solid var(--light-gray);
+        }
+        
+        /* Responsive Adjustments */
+        @media (min-width: 992px) {
+            .question-nav {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-right: 320px;
+            }
+            
+            .nav-overlay {
+                display: none;
+            }
+            
+            .bottom-nav {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .question-grid {
+                grid-template-columns: repeat(auto-fill, minmax(36px, 1fr));
+                gap: 6px;
+            }
+            
+            .q-box {
+                width: 36px;
+                height: 36px;
+                font-size: 0.9rem;
+            }
+            
+            .option-label {
+                padding: 12px 14px;
+            }
+            
+            .question-text {
+                font-size: 1rem;
+            }
+            
+            .header-brand {
+                font-size: 1rem;
+            }
+            
+            .control-btn {
+                width: 32px;
+                height: 32px;
+            }
+            
+            .timer-display {
+                font-size: 0.8rem;
+                padding: 4px 10px;
+            }
+            
+            .nav-btn {
+                height: 44px;
+                padding: 0 16px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="#" class="header-brand">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Mocks Wallah</span>
+            </a>
+            
+            <div class="header-controls">
+                <!-- Timer -->
+                <div class="timer-display">
+                    <i class="far fa-clock"></i>
+                    <span id="timer-display">16:00</span>
+                </div>
+                
+                <!-- Language toggle -->
+                <button class="control-btn" id="lang-btn" onclick="toggleLanguage()">
+                    <span id="lang-text">En</span>
+                </button>
+                
+                <!-- Submit button -->
+                <button class="control-btn" id="submit-btn" onclick="confirmSubmit()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+                
+                <!-- Questions toggle for mobile -->
+                <button class="control-btn nav-toggle-btn" id="nav-toggle" onclick="toggleNav()">
+                    <i class="fas fa-th"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main content -->
+    <main class="main-content" id="main-content">
+        <div class="question-counter" id="question-counter">Question 1 of 23</div>
+        
+        <!-- Questions will be displayed here -->
+        <div id="questions-container"></div>
+    </main>
+    
+    <!-- Overlay for mobile nav -->
+    <div class="nav-overlay" id="nav-overlay" onclick="toggleNav(false)"></div>
+    
+    <!-- Question navigation sidebar -->
+    <aside class="question-nav" id="question-nav">
+        <div class="nav-header">
+            <h3 class="nav-title">Questions</h3>
+            <div class="question-stats">
+                <span class="stat-badge bg-primary" id="attempted-count">0</span>
+                <span class="stat-badge bg-gray" id="total-count">23</span>
+                <button class="control-btn d-lg-none" onclick="toggleNav(false)">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Section selector -->
+        <select class="section-selector" id="section-selector" onchange="switchSection(this.value)">
+            <option value="all">All Sections</option>
+        </select>
+        
+        <!-- Question grid -->
+        <div class="question-grid" id="question-boxes"></div>
+    </aside>
+    
+    <!-- Bottom navigation for mobile -->
+    <nav class="bottom-nav d-lg-none">
+        <button class="nav-btn nav-btn-outline" onclick="prevQuestion()">
+            <i class="fas fa-chevron-left"></i>
+            <span>Previous</span>
+        </button>
+        <button class="nav-btn nav-btn-outline" onclick="nextQuestion()">
+            <span>Next</span>
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </nav>
+    
+    <!-- Results modal -->
+    <div class="results-modal" id="results-modal">
+        <div class="results-card">
+            <div class="results-header">
+                <h3 class="results-title">Test Results</h3>
+            </div>
+            <div class="results-body">
+                <div class="stats-grid">
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark))">
+                        <div class="stat-value" id="score-value">0</div>
+                        <div class="stat-label">Score</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--success), #1b9aaa)">
+                        <div class="stat-value" id="correct-value">0</div>
+                        <div class="stat-label">Correct</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--danger), var(--accent))">
+                        <div class="stat-value" id="incorrect-value">0</div>
+                        <div class="stat-label">Incorrect</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--gray), var(--dark))">
+                        <div class="stat-value" id="unattempted-value">0</div>
+                        <div class="stat-label">Unattempted</div>
+                    </div>
+                </div>
+            </div>
+            <div class="results-footer">
+                <button class="nav-btn nav-btn-primary" onclick="reviewTest()">
+                    <i class="fas fa-search me-1"></i>
+                    <span>Review Test</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Questions data
+        const questions = [];
+        const sections = {};
+        let currentLang = "en";
+        let currentQuestion = 0;
+        let answers = {};
+        let submitted = false;
+        let totalTime = 16 * 60;
+        
+        // Initialize the test
+        window.onload = function() {
+            initializeTest();
+            startTimer();
+            
+            // If on desktop, show the question navigation by default
+            if (window.innerWidth >= 992) {
+                document.getElementById('question-nav').classList.add('show');
+                document.getElementById('main-content').classList.add('with-nav');
+            }
+        };
+        
+        // Initialize test data
+        function initializeTest() {
+            // Add sections and questions
+            
+            sections["6"] = {
+                name: "Reasoning",
+                start: 0,
+                end: 21
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="6">Reasoning</option>`;
+            
+            sections["misc"] = {
+                name: "Miscellaneous",
+                start: 22,
+                end: 22
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="misc">Miscellaneous</option>`;
+            
+            
+                questions.push({
+                    id: "1",
+                    section: "6",
+                    question_en: "<p>1. Select the correct water image of the given combination of letters.<br><strong id=\"docs-internal-guid-80d3491e-7fff-7e88-e83c-3be4713f6696\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXefU0bVA8upAS2Y5KXfZc-HANlFzxfDkgL3ndJ6L1dUcFsKyWPFOFC399jkoCij5ofQq7CafE1nFyWRymfkCe-g9xqosPX4juHMVF-42ZqAKmVbRVQxnV5I36b539_2Iy-zowaOTw?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"122\" height=\"17\"></strong></p>",
+                    question_hi: "<p>1. <span style=\"font-family: Palanquin Dark;\">दिए गए अक्षरों के संयोजन के सही जल प्रतिबिम्ब का चयन कीजिये।</span></p>\n<p><strong id=\"docs-internal-guid-9f47a105-7fff-e7f4-9de2-76170f90b273\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXefU0bVA8upAS2Y5KXfZc-HANlFzxfDkgL3ndJ6L1dUcFsKyWPFOFC399jkoCij5ofQq7CafE1nFyWRymfkCe-g9xqosPX4juHMVF-42ZqAKmVbRVQxnV5I36b539_2Iy-zowaOTw?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"143\" height=\"20\"></strong></p>",
+                    options_en: ["<p><strong id=\"docs-internal-guid-13c5dfa3-7fff-bc5c-e244-7cef6b8e3dc0\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXep3ClA9ZYJCj2_FWSbt_S_iNtW1wxxK5_3tAEwj9YiR3zfyqVOjLhAf6UvlS9PpfUnPnZ7VUbHHBc55L52dbRlsrZ5BV6OZk91Pm556j_WGQWkgHLy_lBepGAv2mxKx8_qnWUvlw?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"138\" height=\"20\"></strong></p>", "<p><strong id=\"docs-internal-guid-6457de09-7fff-e97f-9cdb-4f1b72f36992\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeuyadnqHXuw_lP_f4yG-jjQc8ejwW6SlHTac4ORzoT70Eo6VG0fxjAfX2ES-hG24U2UTUSxrHPlyz4oXg-fZTJnTYCbwk1pilxNTaGbvIBotIzUbjqWDq60AwXiKHWCJfswKVY4Q?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"138\" height=\"20\">&nbsp;</strong></p>", 
+                                "<p><strong id=\"docs-internal-guid-4c541f00-7fff-260d-dcf2-0f7861ad82a7\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXc0Pt2CbOG0_YyNWHDHM8xpfPRSLwGXuXlkZMgDDQnhrrudzwqAllrrKsLgzhWEUckUfv-pf5z7lS1zWMoQ8mwOXkM284VewgUFXoaxu9eZu76ArvbIWxCOkRkwMgbVz1hDKWzZ?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"138\" height=\"20\"></strong></p>", "<p><strong id=\"docs-internal-guid-45ecafb0-7fff-4ab4-7713-e63c8cc16201\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdrnZWOZVCGRU8qqW7fiEguTZprlS4jifWJ9XIYVfJIy6Jk-tjYG6iAh6HV5npHkd0otdcq9xHqWv2PmXkjFemlQ1oQRLXdx2GMlc3FXARBDqtR707mRKsIF9XtbYBwC9CjTpNl?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"138\" height=\"20\"></strong></p>"],
+                    options_hi: ["<p><strong id=\"docs-internal-guid-8ae51c26-7fff-f73a-70c1-a05b1ffe742c\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXep3ClA9ZYJCj2_FWSbt_S_iNtW1wxxK5_3tAEwj9YiR3zfyqVOjLhAf6UvlS9PpfUnPnZ7VUbHHBc55L52dbRlsrZ5BV6OZk91Pm556j_WGQWkgHLy_lBepGAv2mxKx8_qnWUvlw?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"138\" height=\"20\"></strong></p>", "<p><strong id=\"docs-internal-guid-39baa64b-7fff-057f-432b-4782f0d88c42\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeuyadnqHXuw_lP_f4yG-jjQc8ejwW6SlHTac4ORzoT70Eo6VG0fxjAfX2ES-hG24U2UTUSxrHPlyz4oXg-fZTJnTYCbwk1pilxNTaGbvIBotIzUbjqWDq60AwXiKHWCJfswKVY4Q?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"138\" height=\"20\"></strong></p>",
+                                "<p><strong id=\"docs-internal-guid-1489e160-7fff-1d83-f572-80a15b6a5800\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXc0Pt2CbOG0_YyNWHDHM8xpfPRSLwGXuXlkZMgDDQnhrrudzwqAllrrKsLgzhWEUckUfv-pf5z7lS1zWMoQ8mwOXkM284VewgUFXoaxu9eZu76ArvbIWxCOkRkwMgbVz1hDKWzZ?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"138\" height=\"20\"></strong></p>", "<p><strong id=\"docs-internal-guid-ca180632-7fff-33cf-1889-130fb4df5638\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdrnZWOZVCGRU8qqW7fiEguTZprlS4jifWJ9XIYVfJIy6Jk-tjYG6iAh6HV5npHkd0otdcq9xHqWv2PmXkjFemlQ1oQRLXdx2GMlc3FXARBDqtR707mRKsIF9XtbYBwC9CjTpNl?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"138\" height=\"20\"></strong></p>"],
+                    solution_en: "<p>1.(d)<br><strong id=\"docs-internal-guid-f2180daf-7fff-59dc-a8db-c418d9b5728a\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdrnZWOZVCGRU8qqW7fiEguTZprlS4jifWJ9XIYVfJIy6Jk-tjYG6iAh6HV5npHkd0otdcq9xHqWv2PmXkjFemlQ1oQRLXdx2GMlc3FXARBDqtR707mRKsIF9XtbYBwC9CjTpNl?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"138\" height=\"20\"></strong></p>",
+                    solution_hi: "<p>1.(d)<br><strong id=\"docs-internal-guid-f2180daf-7fff-59dc-a8db-c418d9b5728a\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdrnZWOZVCGRU8qqW7fiEguTZprlS4jifWJ9XIYVfJIy6Jk-tjYG6iAh6HV5npHkd0otdcq9xHqWv2PmXkjFemlQ1oQRLXdx2GMlc3FXARBDqtR707mRKsIF9XtbYBwC9CjTpNl?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"138\" height=\"20\"></strong></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "2",
+                    section: "6",
+                    question_en: "<p>2.<span style=\"font-family: Palanquin Dark;\"> Select the correct mirror image of the given combination when the mirror is placed at &lsquo;PQ&rsquo; as shown.<br></span><strong id=\"docs-internal-guid-d0ffc9cb-7fff-3d6f-f794-e2a5c83f2b36\"><strong id=\"docs-internal-guid-b25d147f-7fff-5512-d7ef-41c5102dd883\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcjN-ddzqAAn9IuvH-Ek8ShjKTv3rFVgOEnzSt31JHADnoUn53o9THQByxvc88cV95sR3eaESOFEDaEW9xCRix95pIoPlsoWPHN4g8zM1tQQ5E-e8wD4zQ1wBAM1dgArzSnG8SiSg?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"147\" height=\"101\"></strong></strong></p>",
+                    question_hi: "<p>2. <span style=\"font-family: Palanquin Dark;\">दिए गए संयोजन की सही दर्पण छवि का चयन कीजिये जब दर्पण को \'PQ\' पर रखा गया है, जैसा कि दिखाया गया है।<br></span><strong id=\"docs-internal-guid-d0ffc9cb-7fff-3d6f-f794-e2a5c83f2b36\"><strong id=\"docs-internal-guid-b25d147f-7fff-5512-d7ef-41c5102dd883\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcjN-ddzqAAn9IuvH-Ek8ShjKTv3rFVgOEnzSt31JHADnoUn53o9THQByxvc88cV95sR3eaESOFEDaEW9xCRix95pIoPlsoWPHN4g8zM1tQQ5E-e8wD4zQ1wBAM1dgArzSnG8SiSg?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"147\" height=\"101\"></strong></strong></p>",
+                    options_en: ["<p><strong id=\"docs-internal-guid-638d6b9e-7fff-5c01-9658-a6114d84f663\"><strong id=\"docs-internal-guid-72655799-7fff-b8a6-3962-6b5200dbac4d\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXf-yLAwoedKYoh-aUdeO8pyll47VXYFmrNE4wLBqni98iDxBjKIZ_hLXiuvi4EbeGEpEgWyRPAawcDHaXgXIUWhEuduh5V7uFdxfrt3s6XTB6CtoGPZe2v6ii7GXdnW-qmMFcN3Vg?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"156\" height=\"17\"></strong></strong></p>", "<p><strong id=\"docs-internal-guid-6e9c1fc9-7fff-7c08-f6f7-38b22f1478d2\"><strong id=\"docs-internal-guid-ff90c31c-7fff-ce33-4523-9596ca40526d\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXd1dTSQno1uQAYLfbrAtGcM9tPz0twjr6DzBtMY580fYz1N3UiCm9D0jimaeXqjYNNCaN359jfqBSJKHjMMWGlgYBGAaIPxc3bQGIznWLkXNjQYk2vXM2DOiEHWOg8bBt1YDtqugw?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"151\" height=\"16\"></strong></strong></p>", 
+                                "<p><strong id=\"docs-internal-guid-fc0614a2-7fff-e66f-7d95-199e5b41153c\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXd3vGEv_cOcjQ4I-zYoBRuWXYFBaN9aoSXzsqOYt6MM28CtRDtKYcvO-J_t4nTUvyp-i-goEW96a_8lLok2BAOlClu1wbUYWUd0PwXAl1c4X4lP_PvRj3wRcvShQlSBrT_X1aG4?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"151\" height=\"16\"></strong></p>", "<p><strong id=\"docs-internal-guid-7f5d8cfa-7fff-f965-69cc-af966da70b05\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXd8f_Can_0pa7di46a_KYxscmYfL2bogFDoIG3rGNSUqqp6EhvaXtSGS5vWKmMpb1zX9MKQoDNhvzEMZytbz-Fpgb7F2pLhsVliufTFIUsH72lPEdAFkBI-5fEuNhZ7RME8nIyd?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"155\" height=\"17\"></strong></p>"],
+                    options_hi: ["<p><strong id=\"docs-internal-guid-bc517528-7fff-2088-82e9-ecdf40d432df\"><strong id=\"docs-internal-guid-638d6b9e-7fff-5c01-9658-a6114d84f663\"><strong id=\"docs-internal-guid-72655799-7fff-b8a6-3962-6b5200dbac4d\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXf-yLAwoedKYoh-aUdeO8pyll47VXYFmrNE4wLBqni98iDxBjKIZ_hLXiuvi4EbeGEpEgWyRPAawcDHaXgXIUWhEuduh5V7uFdxfrt3s6XTB6CtoGPZe2v6ii7GXdnW-qmMFcN3Vg?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"156\" height=\"17\"></strong></strong></strong></p>", "<p><strong id=\"docs-internal-guid-6e9c1fc9-7fff-7c08-f6f7-38b22f1478d2\"><strong id=\"docs-internal-guid-ff90c31c-7fff-ce33-4523-9596ca40526d\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXd1dTSQno1uQAYLfbrAtGcM9tPz0twjr6DzBtMY580fYz1N3UiCm9D0jimaeXqjYNNCaN359jfqBSJKHjMMWGlgYBGAaIPxc3bQGIznWLkXNjQYk2vXM2DOiEHWOg8bBt1YDtqugw?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"151\" height=\"16\"></strong></strong></p>",
+                                "<p><strong id=\"docs-internal-guid-fc0614a2-7fff-e66f-7d95-199e5b41153c\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXd3vGEv_cOcjQ4I-zYoBRuWXYFBaN9aoSXzsqOYt6MM28CtRDtKYcvO-J_t4nTUvyp-i-goEW96a_8lLok2BAOlClu1wbUYWUd0PwXAl1c4X4lP_PvRj3wRcvShQlSBrT_X1aG4?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"151\" height=\"16\"></strong></p>", "<p><strong id=\"docs-internal-guid-2470326f-7fff-7a84-f63d-7e496be0d20b\"><strong id=\"docs-internal-guid-7f5d8cfa-7fff-f965-69cc-af966da70b05\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXd8f_Can_0pa7di46a_KYxscmYfL2bogFDoIG3rGNSUqqp6EhvaXtSGS5vWKmMpb1zX9MKQoDNhvzEMZytbz-Fpgb7F2pLhsVliufTFIUsH72lPEdAFkBI-5fEuNhZ7RME8nIyd?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"155\" height=\"17\"></strong></strong></p>"],
+                    solution_en: "<p>2.(d)<br><strong id=\"docs-internal-guid-0669cd41-7fff-a6b4-d51e-1359e2708aeb\"><strong id=\"docs-internal-guid-2470326f-7fff-7a84-f63d-7e496be0d20b\"><strong id=\"docs-internal-guid-7f5d8cfa-7fff-f965-69cc-af966da70b05\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXd8f_Can_0pa7di46a_KYxscmYfL2bogFDoIG3rGNSUqqp6EhvaXtSGS5vWKmMpb1zX9MKQoDNhvzEMZytbz-Fpgb7F2pLhsVliufTFIUsH72lPEdAFkBI-5fEuNhZ7RME8nIyd?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"155\" height=\"17\"></strong></strong></strong></p>",
+                    solution_hi: "<p>2.(d)<br><strong id=\"docs-internal-guid-0669cd41-7fff-a6b4-d51e-1359e2708aeb\"><strong id=\"docs-internal-guid-2470326f-7fff-7a84-f63d-7e496be0d20b\"><strong id=\"docs-internal-guid-7f5d8cfa-7fff-f965-69cc-af966da70b05\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXd8f_Can_0pa7di46a_KYxscmYfL2bogFDoIG3rGNSUqqp6EhvaXtSGS5vWKmMpb1zX9MKQoDNhvzEMZytbz-Fpgb7F2pLhsVliufTFIUsH72lPEdAFkBI-5fEuNhZ7RME8nIyd?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"155\" height=\"17\"></strong></strong></strong></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "3",
+                    section: "6",
+                    question_en: "<p>3. <span style=\"font-family: Palanquin Dark;\">Select the correct mirror image of the given combination when mirror is place at PQ as shown<br></span><strong id=\"docs-internal-guid-bd509a55-7fff-5497-46ec-b31b0f994d67\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXc58EGcMag-jLR1eBPdaAJh9__acUa8-iN80SjwUkS4yH-gVNxdTaQQc7f7Lrnzs2Iv1MutxFvrUzNoyVWMIoUgAAC3zPKLYrZDIN-KwdW7V_Ta9PASGqN9bBBwuYCYGStGjIFr4Q?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"117\" height=\"76\"></strong></p>",
+                    question_hi: "<p>3. <span style=\"font-family: Palanquin Dark;\">दिए गए संयोजन की सही दर्पण प्रतिबिम्ब का चयन कीजिये जब दर्पण को निम्न अनुसार PQ पर रखा गया है।<br></span><strong id=\"docs-internal-guid-725c57a5-7fff-325b-6ade-ac9f6d94121d\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXc58EGcMag-jLR1eBPdaAJh9__acUa8-iN80SjwUkS4yH-gVNxdTaQQc7f7Lrnzs2Iv1MutxFvrUzNoyVWMIoUgAAC3zPKLYrZDIN-KwdW7V_Ta9PASGqN9bBBwuYCYGStGjIFr4Q?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"117\" height=\"76\"></strong></p>",
+                    options_en: ["<p><strong id=\"docs-internal-guid-0d95ee5e-7fff-7269-8e49-ece15fa5ed66\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXc_hxpaQc3KEThnKUPg_W6vL9WhsMVeH9HLw8eURKuAvCoJLjSMekhVZyqpnh9Pf3FWgnPDTAR9Ur-bRjFy_Ykoo8GnDXTk9z6v04xMrYp-q8zSfM_1tqLYijRUFENpjC4M0bB8xQ?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"126\" height=\"16\"></strong></p>", "<p><strong id=\"docs-internal-guid-018582d2-7fff-884d-af6c-2233bbc1663a\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdjiTj8XpOVy7N5y5sPifLv9ek0fjg_5pr9ZlqWF9ryzxKX8_3JGmgFbtFXZXk-UW0UC8qgMU6oK4rJrHI5GdQEYsXWqvSHr1_8TCz7aRUKM2wRPItjYyX6xciRkCoVn3TW9hG2mQ?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"128\" height=\"20\"></strong></p>", 
+                                "<p><strong id=\"docs-internal-guid-c3d8d58f-7fff-f7b3-8d19-2b04834b70fe\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdd8sjOxfy9hHU6TdknjYDH61gw-k--GDjI5iU96WmwjqdTK7feh7LfO1twpc6VhxVWJZQvRHWnKGyRgsWXshBPCRWCxarHrwcXgu3cZbt0lWVCc0ltFR_t806Yl5OcIRcbSbO8Wg?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"128\" height=\"20\"></strong></p>", "<p><strong id=\"docs-internal-guid-c3d8d58f-7fff-f7b3-8d19-2b04834b70fe\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdd8sjOxfy9hHU6TdknjYDH61gw-k--GDjI5iU96WmwjqdTK7feh7LfO1twpc6VhxVWJZQvRHWnKGyRgsWXshBPCRWCxarHrwcXgu3cZbt0lWVCc0ltFR_t806Yl5OcIRcbSbO8Wg?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"128\" height=\"20\"></strong></p>"],
+                    options_hi: ["<p><strong id=\"docs-internal-guid-82f82a52-7fff-4e49-982a-95a84b40faaf\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXc_hxpaQc3KEThnKUPg_W6vL9WhsMVeH9HLw8eURKuAvCoJLjSMekhVZyqpnh9Pf3FWgnPDTAR9Ur-bRjFy_Ykoo8GnDXTk9z6v04xMrYp-q8zSfM_1tqLYijRUFENpjC4M0bB8xQ?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"133\" height=\"17\"></strong></p>", "<p><strong id=\"docs-internal-guid-ec7a16e7-7fff-6cb8-a0fc-6fb4cecfd488\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdjiTj8XpOVy7N5y5sPifLv9ek0fjg_5pr9ZlqWF9ryzxKX8_3JGmgFbtFXZXk-UW0UC8qgMU6oK4rJrHI5GdQEYsXWqvSHr1_8TCz7aRUKM2wRPItjYyX6xciRkCoVn3TW9hG2mQ?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"128\" height=\"20\"></strong></p>",
+                                "<p><strong id=\"docs-internal-guid-4b3fdec8-7fff-8b0d-e252-03ed598f08bd\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdd8sjOxfy9hHU6TdknjYDH61gw-k--GDjI5iU96WmwjqdTK7feh7LfO1twpc6VhxVWJZQvRHWnKGyRgsWXshBPCRWCxarHrwcXgu3cZbt0lWVCc0ltFR_t806Yl5OcIRcbSbO8Wg?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"128\" height=\"20\"></strong></p>", "<p><strong id=\"docs-internal-guid-7fdda9f6-7fff-9dcd-d10e-a20bd06acb1c\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdd8sjOxfy9hHU6TdknjYDH61gw-k--GDjI5iU96WmwjqdTK7feh7LfO1twpc6VhxVWJZQvRHWnKGyRgsWXshBPCRWCxarHrwcXgu3cZbt0lWVCc0ltFR_t806Yl5OcIRcbSbO8Wg?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"128\" height=\"20\"></strong></p>"],
+                    solution_en: "<p>3.(d)<br><strong id=\"docs-internal-guid-7fdda9f6-7fff-9dcd-d10e-a20bd06acb1c\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdd8sjOxfy9hHU6TdknjYDH61gw-k--GDjI5iU96WmwjqdTK7feh7LfO1twpc6VhxVWJZQvRHWnKGyRgsWXshBPCRWCxarHrwcXgu3cZbt0lWVCc0ltFR_t806Yl5OcIRcbSbO8Wg?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"128\" height=\"20\"></strong></p>",
+                    solution_hi: "<p>3.(d)<br><strong id=\"docs-internal-guid-7fdda9f6-7fff-9dcd-d10e-a20bd06acb1c\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdd8sjOxfy9hHU6TdknjYDH61gw-k--GDjI5iU96WmwjqdTK7feh7LfO1twpc6VhxVWJZQvRHWnKGyRgsWXshBPCRWCxarHrwcXgu3cZbt0lWVCc0ltFR_t806Yl5OcIRcbSbO8Wg?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"128\" height=\"20\"></strong></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "4",
+                    section: "6",
+                    question_en: "<p>4.<span style=\"font-family: Palanquin Dark;\"> Select the correct mirror image of the given combination when the mirror is placed at &lsquo;PQ&rsquo; as shown<br></span><strong id=\"docs-internal-guid-f7bdce2e-7fff-15ad-a51d-fa6fbdc9d61f\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdo4Aq2Ij-_EPz0-_9IEtA8tb6jYlweD3gN7XQZsXsrZfksTsmDaP-_Uar_igrHX-F_dGLqaeDy9uYC6vUuR2bJEEv8fXLAHr5WJMQYGvwgeoFcEOp_RFrXN50txx86Yupoq72I?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"108\" height=\"88\"></strong></p>",
+                    question_hi: "<p>4.<span style=\"font-family: Palanquin Dark;\"> दिए गए संयोजन की सही दर्पण छवि का चयन करें जब दर्पण को \'PQ\' पर रखा गया है जैसा कि दिखाया गया है<br></span><strong id=\"docs-internal-guid-f7bdce2e-7fff-15ad-a51d-fa6fbdc9d61f\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdo4Aq2Ij-_EPz0-_9IEtA8tb6jYlweD3gN7XQZsXsrZfksTsmDaP-_Uar_igrHX-F_dGLqaeDy9uYC6vUuR2bJEEv8fXLAHr5WJMQYGvwgeoFcEOp_RFrXN50txx86Yupoq72I?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"108\" height=\"88\"></strong></p>",
+                    options_en: ["<p><strong id=\"docs-internal-guid-d8defd2d-7fff-66b4-7309-1680c5bf0ddc\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcrYyawVj40agTa-7_JHe_sIFvkZzDjoma36SeVSE5NgWmmZLILWKEhT6pueA-hkKL_wLLcbDZgYqDNNpJ7341jtV35RWSjaovnEaVYKLPuyvEX3q70QhfdBITIdck3AKqQXjaCxg?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"122\" height=\"17\"></strong></p>", "<p><strong id=\"docs-internal-guid-27eca392-7fff-78d4-d45f-7278173427b3\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXekA8nNuz1tJdCr1PKohq4o7vZ7Vs86zw7Ql8lG14Ejzby77L8WGz0Uj4zBoDOdhOyZLg00f6z3UGjPIhqsKCv1uDjvAZ63wWLNx_qipagJ6vOKxNgwRIDZSyjEyj-7XJtj_cGw5g?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"123\" height=\"22\"></strong></p>", 
+                                "<p><strong id=\"docs-internal-guid-b2d5cdf4-7fff-928a-22e2-d76c8b9681f7\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXd41rhYlsIOeYaYQhLbvHkJ9VMb61HvLFlDU5gX_yY9hG7SShet2T-OUi6xIZv5kewV9VYLwHJJYJP1W2mFQn2jXCOuGYCGF_XmK3wohF8MJxbAVnrnI0FC9P6caZDw1EK2jtdkDQ?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"123\" height=\"21\"></strong></p>", "<p><strong id=\"docs-internal-guid-4574bdf4-7fff-a3e4-b3c0-88deaf7860e3\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXc6-YDKSbZVwM99FErWfNp1LI8IGdokQVRlQz-XXaIByuo9yYRG7hyrusxu-Ip_Bbo7gq4G8dQEn0YnNDmbvIMzV3EdtiX8UD_Y7gjzX2AzPrCkJA-1VJNiDUTNvfpMB1C3QMyU8A?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"123\" height=\"21\"></strong></p>"],
+                    options_hi: ["<p><strong id=\"docs-internal-guid-b52e2d7d-7fff-7092-bb07-c308206f7e2c\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcrYyawVj40agTa-7_JHe_sIFvkZzDjoma36SeVSE5NgWmmZLILWKEhT6pueA-hkKL_wLLcbDZgYqDNNpJ7341jtV35RWSjaovnEaVYKLPuyvEX3q70QhfdBITIdck3AKqQXjaCxg?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"122\" height=\"17\"></strong></p>", "<p><strong id=\"docs-internal-guid-139a13d8-7fff-92f0-05f8-a5fe7bb1cd54\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXekA8nNuz1tJdCr1PKohq4o7vZ7Vs86zw7Ql8lG14Ejzby77L8WGz0Uj4zBoDOdhOyZLg00f6z3UGjPIhqsKCv1uDjvAZ63wWLNx_qipagJ6vOKxNgwRIDZSyjEyj-7XJtj_cGw5g?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"122\" height=\"22\"></strong></p>",
+                                "<p><strong id=\"docs-internal-guid-84fcbe83-7fff-c659-32ac-1ee3b73ff9fc\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXd41rhYlsIOeYaYQhLbvHkJ9VMb61HvLFlDU5gX_yY9hG7SShet2T-OUi6xIZv5kewV9VYLwHJJYJP1W2mFQn2jXCOuGYCGF_XmK3wohF8MJxbAVnrnI0FC9P6caZDw1EK2jtdkDQ?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"124\" height=\"21\"></strong></p>", "<p><strong id=\"docs-internal-guid-7b321b47-7fff-fde3-7388-34e2160dd773\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXc6-YDKSbZVwM99FErWfNp1LI8IGdokQVRlQz-XXaIByuo9yYRG7hyrusxu-Ip_Bbo7gq4G8dQEn0YnNDmbvIMzV3EdtiX8UD_Y7gjzX2AzPrCkJA-1VJNiDUTNvfpMB1C3QMyU8A?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"123\" height=\"21\"></strong></p>"],
+                    solution_en: "<p>4.(b)<br><strong id=\"docs-internal-guid-b7b8e21f-7fff-2252-51e1-afbbd1b31678\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXekA8nNuz1tJdCr1PKohq4o7vZ7Vs86zw7Ql8lG14Ejzby77L8WGz0Uj4zBoDOdhOyZLg00f6z3UGjPIhqsKCv1uDjvAZ63wWLNx_qipagJ6vOKxNgwRIDZSyjEyj-7XJtj_cGw5g?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"123\" height=\"22\"></strong></p>",
+                    solution_hi: "<p>4.(b)<br><strong id=\"docs-internal-guid-b7b8e21f-7fff-2252-51e1-afbbd1b31678\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXekA8nNuz1tJdCr1PKohq4o7vZ7Vs86zw7Ql8lG14Ejzby77L8WGz0Uj4zBoDOdhOyZLg00f6z3UGjPIhqsKCv1uDjvAZ63wWLNx_qipagJ6vOKxNgwRIDZSyjEyj-7XJtj_cGw5g?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"123\" height=\"22\"></strong></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "5",
+                    section: "6",
+                    question_en: "<p>5. <span style=\"font-family: Palanquin Dark;\">Select the correct mirror image of the given figure when the mirror is placed at &lsquo;AB&rsquo; as shown.<br></span><strong id=\"docs-internal-guid-c5559356-7fff-cf68-5bbd-f1d1314b8c54\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfDj1H5KVbOn-6Yf3qWQ-FJdOuzPk1iI6xWW39ZqFzJVwLb5OGmuJfycDsk3naB5nWD7NiyTHL0TaZwcW2poqaKfMFe7geiAK-Zjr-ne1GTCQ10BlOS2Am0PtA6Jrfic4RzRcXxjQ?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"112\" height=\"118\"></strong></p>",
+                    question_hi: "<p>5. <span style=\"font-family: Palanquin Dark;\">&nbsp;दी गई आकृति की सही दर्पण छवि का चयन करें जब दर्पण को \'AB\' पर रखा गया है जैसा कि दिखाया गया है।<br></span><strong id=\"docs-internal-guid-2acc07c9-7fff-52fe-f976-5e9683ac29e8\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfDj1H5KVbOn-6Yf3qWQ-FJdOuzPk1iI6xWW39ZqFzJVwLb5OGmuJfycDsk3naB5nWD7NiyTHL0TaZwcW2poqaKfMFe7geiAK-Zjr-ne1GTCQ10BlOS2Am0PtA6Jrfic4RzRcXxjQ?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"112\" height=\"118\"></strong></p>",
+                    options_en: ["<p><strong id=\"docs-internal-guid-7d1d35b2-7fff-eb66-8c1d-9a32d1460373\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfK_CvllPxAxboP6bMiTc6FR5uN_xAzI8jh9QpL11WKmWKGATS6x-xNwf26lt25HVIXLxBoGVsaRWagZ-qkslX0EMcHvZv7L5qjugaKDXu1H6xkLYktZb7dCwpmrsxXx5EeauR7cQ?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"81\" height=\"78\"></strong></p>", "<p><strong id=\"docs-internal-guid-1b72265c-7fff-ffed-3004-75048bfc9bfb\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcKwHRXaqyHtexgTY-pKGdewiv9WOyKn7mRJfV8QYc5DSNeAZoiZ5HNxBEwns5caHUepoPm--7GgFmHPFlZFMUuWcDEzAdwgt0tzhcHs8oqSKBjKskHawNopi5tOhwm8gf_S546dw?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"78\" height=\"77\"></strong></p>", 
+                                "<p><strong id=\"docs-internal-guid-c784091e-7fff-1fb1-64e0-a63d443bf4aa\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXedSDZfVuqOqB7NbCKS3sq2LOiAd7aahB9kroqEt6REgC9timeUdn0a6Ps7SCz0rL8t_D5wqftSdhYdZ_UwgoYCC9EQZC3FA2JhLdnePCG87EbEE3yLljp1zZYmhR95c9SuyT4i?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"82\" height=\"79\"></strong></p>", "<p><strong id=\"docs-internal-guid-84bc6c49-7fff-2d8e-b860-7616dd993ecb\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcGO3-TXfmCQb24rfFLpUA6UyowYxILxVMi77IkF2BAUhJnQNedB52U2hi2VMC71619dZjxgafv5CjDlIcTRmZB5V2X7G4qHNdnCigRpA2B805yWX65E562qoayM3_j0LpLNxe0Jw?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"82\" height=\"81\"></strong></p>"],
+                    options_hi: ["<p><strong id=\"docs-internal-guid-c6a6e84a-7fff-6c16-e82b-cb6c646f8609\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfK_CvllPxAxboP6bMiTc6FR5uN_xAzI8jh9QpL11WKmWKGATS6x-xNwf26lt25HVIXLxBoGVsaRWagZ-qkslX0EMcHvZv7L5qjugaKDXu1H6xkLYktZb7dCwpmrsxXx5EeauR7cQ?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"81\" height=\"78\"></strong></p>", "<p><strong id=\"docs-internal-guid-1ec32c38-7fff-79d3-3e78-9a30ab13ed5d\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcKwHRXaqyHtexgTY-pKGdewiv9WOyKn7mRJfV8QYc5DSNeAZoiZ5HNxBEwns5caHUepoPm--7GgFmHPFlZFMUuWcDEzAdwgt0tzhcHs8oqSKBjKskHawNopi5tOhwm8gf_S546dw?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"78\" height=\"77\"></strong></p>",
+                                "<p><strong id=\"docs-internal-guid-c3f2f8a2-7fff-8bb4-ac18-de3739415260\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXedSDZfVuqOqB7NbCKS3sq2LOiAd7aahB9kroqEt6REgC9timeUdn0a6Ps7SCz0rL8t_D5wqftSdhYdZ_UwgoYCC9EQZC3FA2JhLdnePCG87EbEE3yLljp1zZYmhR95c9SuyT4i?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"82\" height=\"79\"></strong></p>", "<p><strong id=\"docs-internal-guid-4fe01fd4-7fff-acb8-9369-529ee1a78673\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcGO3-TXfmCQb24rfFLpUA6UyowYxILxVMi77IkF2BAUhJnQNedB52U2hi2VMC71619dZjxgafv5CjDlIcTRmZB5V2X7G4qHNdnCigRpA2B805yWX65E562qoayM3_j0LpLNxe0Jw?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"82\" height=\"81\"></strong></p>"],
+                    solution_en: "<p>5.(b)<br><strong id=\"docs-internal-guid-c1da3ec2-7fff-d3f0-a6f7-cb4717b2a1ac\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcKwHRXaqyHtexgTY-pKGdewiv9WOyKn7mRJfV8QYc5DSNeAZoiZ5HNxBEwns5caHUepoPm--7GgFmHPFlZFMUuWcDEzAdwgt0tzhcHs8oqSKBjKskHawNopi5tOhwm8gf_S546dw?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"78\" height=\"77\"></strong></p>",
+                    solution_hi: "<p>5.(b)<br><strong id=\"docs-internal-guid-c1da3ec2-7fff-d3f0-a6f7-cb4717b2a1ac\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcKwHRXaqyHtexgTY-pKGdewiv9WOyKn7mRJfV8QYc5DSNeAZoiZ5HNxBEwns5caHUepoPm--7GgFmHPFlZFMUuWcDEzAdwgt0tzhcHs8oqSKBjKskHawNopi5tOhwm8gf_S546dw?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"78\" height=\"77\"></strong></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "6",
+                    section: "6",
+                    question_en: "<p>6.<span style=\"font-family: Palanquin Dark;\"> Which of the option figures when rotated 270&deg; anticlockwise and then 45&deg; clockwise will result in the given figure ?</span></p>\n<p><strong id=\"docs-internal-guid-b11c4510-7fff-8c7a-8010-acffdb109fec\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeAanQre7g8XbCGvkyKM4YvcsCdmliFy3tfsx9okTtp-t-9vHXsAZAMpfSRSHrCJHkPGrHWHht_LslYjOD15k_YxCrpII67Ia9pSGVBEV4b1ax0QRehdOGLIWmD3jyOLxnoBrQC3Q?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"102\" height=\"87\"></strong></p>",
+                    question_hi: "<p>6.<span style=\"font-family: Palanquin Dark;\"> 270&deg; वामावर्त और फिर 45&deg; दक्षिणावर्त घुमाने पर कौन सी विकल्प आकृति दी गई आकृति में परिणत होगी ?<br></span><strong id=\"docs-internal-guid-a4c8ef35-7fff-058f-f8bb-ed4365996865\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeAanQre7g8XbCGvkyKM4YvcsCdmliFy3tfsx9okTtp-t-9vHXsAZAMpfSRSHrCJHkPGrHWHht_LslYjOD15k_YxCrpII67Ia9pSGVBEV4b1ax0QRehdOGLIWmD3jyOLxnoBrQC3Q?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"102\" height=\"87\"></strong></p>",
+                    options_en: ["<p><strong id=\"docs-internal-guid-987cc110-7fff-9f8e-92b8-ad59fd05e8ee\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeYv6b1ethXWmeXw90DfuMRqu2eAUB_KVLpqWMoq4kYS6R6d93bZtZAIkRRqa9mKC2FxbCYPzrmJXH4O47nkbLJM3tegQl1IItKtbvBdqcNa9eVnw_IKJvU9RxHOqh2uL7AauiGVQ?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"101\" height=\"65\"></strong></p>", "<p><strong id=\"docs-internal-guid-15e6008f-7fff-af6c-28c6-809eb75a97fe\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXePvFU4shJOLCOTFKBMbCyTEWEu4lWUlwkxGWo1NJ3VJegPI7MZTWBFzy9ebxBXX-AhDvAb9LRSWxr6-mf8MKzERETGq4PaQtlPEgsPA0N7vwmqRRCgsWN0oRUwYbN390eYDEwVsg?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"81\" height=\"95\"></strong></p>", 
+                                "<p><strong id=\"docs-internal-guid-821dd932-7fff-c323-3caa-87df046ce4c0\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcmq0siKP7M4SIlZAvxjb7zAlH41tEMVF9BwUQ5n28XBIub32fXGb67E1rK6kdbOl6LHRSrIzkMnGEftzLglqzL15WZylYwO2VZT4d8wkCgoYMnd6Qq33lsw9sxYqCLE9qIJuty-A?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"63\" height=\"97\"></strong></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image63.png\"></p>"],
+                    options_hi: ["<p><strong id=\"docs-internal-guid-cd37d795-7fff-1cb5-eb5a-f9b3f2203680\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeYv6b1ethXWmeXw90DfuMRqu2eAUB_KVLpqWMoq4kYS6R6d93bZtZAIkRRqa9mKC2FxbCYPzrmJXH4O47nkbLJM3tegQl1IItKtbvBdqcNa9eVnw_IKJvU9RxHOqh2uL7AauiGVQ?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"101\" height=\"65\"></strong></p>", "<p><strong id=\"docs-internal-guid-38adcc3b-7fff-27f9-640d-6f7382cab328\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXePvFU4shJOLCOTFKBMbCyTEWEu4lWUlwkxGWo1NJ3VJegPI7MZTWBFzy9ebxBXX-AhDvAb9LRSWxr6-mf8MKzERETGq4PaQtlPEgsPA0N7vwmqRRCgsWN0oRUwYbN390eYDEwVsg?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"81\" height=\"95\"></strong></p>",
+                                "<p><strong id=\"docs-internal-guid-148a6adf-7fff-3d8a-842b-7c7e544b2e85\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcmq0siKP7M4SIlZAvxjb7zAlH41tEMVF9BwUQ5n28XBIub32fXGb67E1rK6kdbOl6LHRSrIzkMnGEftzLglqzL15WZylYwO2VZT4d8wkCgoYMnd6Qq33lsw9sxYqCLE9qIJuty-A?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"63\" height=\"97\"></strong></p>", "<p><strong id=\"docs-internal-guid-3725031a-7fff-5ef7-5af8-3cf1b3df0e95\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXd92oeEq-5r-9kmIEJ2XALPs_ylaH7TsLedPm4j-Dlpti0rOBGElLiW11kOt1tiIQk0ZMdYAP6EQIOyg5uefVhFKFjCyjBTJu-lR5iBGDfKaS9IgqCwohoL5-8LVQVBPe9fGGMz?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"92\" height=\"93\"></strong></p>"],
+                    solution_en: "<p>6.(c)<br><strong id=\"docs-internal-guid-a8eeb27b-7fff-7a67-4c8f-03cd8615bc4b\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcmq0siKP7M4SIlZAvxjb7zAlH41tEMVF9BwUQ5n28XBIub32fXGb67E1rK6kdbOl6LHRSrIzkMnGEftzLglqzL15WZylYwO2VZT4d8wkCgoYMnd6Qq33lsw9sxYqCLE9qIJuty-A?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"63\" height=\"97\"></strong></p>",
+                    solution_hi: "<p>6.(c)<br><strong id=\"docs-internal-guid-a8eeb27b-7fff-7a67-4c8f-03cd8615bc4b\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcmq0siKP7M4SIlZAvxjb7zAlH41tEMVF9BwUQ5n28XBIub32fXGb67E1rK6kdbOl6LHRSrIzkMnGEftzLglqzL15WZylYwO2VZT4d8wkCgoYMnd6Qq33lsw9sxYqCLE9qIJuty-A?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"63\" height=\"97\"></strong></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "7",
+                    section: "6",
+                    question_en: "<p>7.<span style=\"font-family: Palanquin Dark;\"> Select the correct mirror image of the given figure when the mirror is placed at &lsquo;AB&rsquo; as shown.<br></span><strong id=\"docs-internal-guid-6c942225-7fff-21fd-51c3-1efc3225e855\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdhbNacaavuDoJJ4nHbgWkJGZKbihhcGxWOUSBpAQ4HiarRK7HLuiNka-08uSNjq085DcO5EV4cqqWIajx43wAaPOS7-jCf9uCBYmxOUAm2qw2juBTuvESAQK5A-WbpYPgovVocMg?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"68\" height=\"127\"></strong></p>",
+                    question_hi: "<p>7.<span style=\"font-family: Palanquin Dark;\"> दिए गए संयोजन की सही दर्पण छवि का चयन करें जब दर्पण को AB पर रखा गया है&nbsp;<br></span><strong id=\"docs-internal-guid-1cd66695-7fff-d084-f442-bc4f15acd91c\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdhbNacaavuDoJJ4nHbgWkJGZKbihhcGxWOUSBpAQ4HiarRK7HLuiNka-08uSNjq085DcO5EV4cqqWIajx43wAaPOS7-jCf9uCBYmxOUAm2qw2juBTuvESAQK5A-WbpYPgovVocMg?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"68\" height=\"127\"></strong></p>",
+                    options_en: ["<p><strong id=\"docs-internal-guid-7ea22e86-7fff-7796-2e03-f9d7a19a3565\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfA7GnzCeUKIYNwxaP1wDa0HZACbMdHQ79OIUz5uNnsrYpjd2_DHy1O6_smzffCu0U9oCeT5nJlZ_viwaYjiNtdbPq-gIsaEfuVJnZ83Mdq88pDLftlRRb4TSHhK83rWqdTnJMrTA?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"52\" height=\"101\"></strong></p>", "<p><strong id=\"docs-internal-guid-fc6f25a0-7fff-933e-db0e-9ade610eaa49\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeNfijjtRMheHdNbmjf4xjoLP2i-vgBYAX3accgpuT-u58eLROOtc9Et7uPKb38ZqrkJTkt4-ThhvWPq5PRawDv9XZlrUwM2I3dv5cAsAXNulv-R-ip0jMPpkVMr_wvaUMYFJblpA?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"52\" height=\"102\"></strong></p>", 
+                                "<p><strong id=\"docs-internal-guid-0cd3885d-7fff-a20b-5065-066a79b34f74\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfEA7TTk4z-6KkWRMfJilznfGdilAbbJrR6TSRt5hULxjS4zlMznZEU2g5O15fArhpE76dANfvCiVQ56Q3BTfnxlrYie_NK7G8oA60gQn_El14GowrTc8x3G_rtnHFBgLTWB3Oxbw?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"57\" height=\"112\"></strong></p>", "<p><strong id=\"docs-internal-guid-07dd1d9a-7fff-ac17-48c8-e7805d4e4bc0\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeXINMEFP3PAzW4PZDnDUMjwezYhb_AmQ5m1P41uUdvznitToAthioL9Ntw18TE0ZPBcwZJY-As3RS28H1TFqUhgRj9rpLZlZLZpom_ivaBoy5Aph_Prrp1Z5X8e_baphxu9ge4ug?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"56\" height=\"110\"></strong></p>"],
+                    options_hi: ["<p><strong id=\"docs-internal-guid-89d9dc46-7fff-52e5-27c0-d920a53406e2\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfA7GnzCeUKIYNwxaP1wDa0HZACbMdHQ79OIUz5uNnsrYpjd2_DHy1O6_smzffCu0U9oCeT5nJlZ_viwaYjiNtdbPq-gIsaEfuVJnZ83Mdq88pDLftlRRb4TSHhK83rWqdTnJMrTA?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"52\" height=\"101\"></strong></p>", "<p><strong id=\"docs-internal-guid-a932d025-7fff-6678-9ba0-729b4961613b\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeNfijjtRMheHdNbmjf4xjoLP2i-vgBYAX3accgpuT-u58eLROOtc9Et7uPKb38ZqrkJTkt4-ThhvWPq5PRawDv9XZlrUwM2I3dv5cAsAXNulv-R-ip0jMPpkVMr_wvaUMYFJblpA?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"52\" height=\"102\"></strong></p>",
+                                "<p><strong id=\"docs-internal-guid-5c33725f-7fff-7333-6e57-099312cfcb41\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfEA7TTk4z-6KkWRMfJilznfGdilAbbJrR6TSRt5hULxjS4zlMznZEU2g5O15fArhpE76dANfvCiVQ56Q3BTfnxlrYie_NK7G8oA60gQn_El14GowrTc8x3G_rtnHFBgLTWB3Oxbw?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"57\" height=\"112\"></strong></p>", "<p><strong id=\"docs-internal-guid-163ece02-7fff-821e-4499-39fe31fc83dd\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeXINMEFP3PAzW4PZDnDUMjwezYhb_AmQ5m1P41uUdvznitToAthioL9Ntw18TE0ZPBcwZJY-As3RS28H1TFqUhgRj9rpLZlZLZpom_ivaBoy5Aph_Prrp1Z5X8e_baphxu9ge4ug?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"56\" height=\"110\"></strong></p>"],
+                    solution_en: "<p>7.(c)</p>\n<p><strong id=\"docs-internal-guid-321a5454-7fff-a4c1-2f83-ba61e397cd84\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfEA7TTk4z-6KkWRMfJilznfGdilAbbJrR6TSRt5hULxjS4zlMznZEU2g5O15fArhpE76dANfvCiVQ56Q3BTfnxlrYie_NK7G8oA60gQn_El14GowrTc8x3G_rtnHFBgLTWB3Oxbw?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"57\" height=\"112\"></strong></p>",
+                    solution_hi: "<p>7.(c)</p>\n<p><strong id=\"docs-internal-guid-321a5454-7fff-a4c1-2f83-ba61e397cd84\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfEA7TTk4z-6KkWRMfJilznfGdilAbbJrR6TSRt5hULxjS4zlMznZEU2g5O15fArhpE76dANfvCiVQ56Q3BTfnxlrYie_NK7G8oA60gQn_El14GowrTc8x3G_rtnHFBgLTWB3Oxbw?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"57\" height=\"112\"></strong></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "8",
+                    section: "6",
+                    question_en: "<p>8.<span style=\"font-family: Palanquin Dark;\"> Select the correct mirror image of the given figure when the mirror is placed at AB as shown.</span></p>\n<p><strong id=\"docs-internal-guid-6c8642d7-7fff-2c09-1a9f-a89eda2a6019\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXczZzHBxZHR1VZuE6SJbekMRa-N2NzgF8YnG34oPFZe0nNCn9IQdvVET-CT0VrmIo4m5GpSfsakn2DiaCr_VUYb23yft1UwWFgMVAAMX8bcYyNE7Mr4zm25WSidut8HCgS_ZPDnzM561zVZY9hAv4FCPco?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"88\" height=\"149\"></strong></p>",
+                    question_hi: "<p>8. <span style=\"font-family: Palanquin Dark;\">दी गई आकृति की सही दर्पण छवि का चयन कीजिये जब दर्पण को AB पर दर्शाया गया है।</span></p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image7.png\" width=\"81\" height=\"137\"></p>",
+                    options_en: ["<p><strong id=\"docs-internal-guid-2ace25aa-7fff-499b-e084-7de7a1411b2e\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfJTPzA4-OjYIrwAS5DcUsNby1AeNpzvfzbgXCEoSIdme471A76vRlGMBpNcpVCZSkBQcVOrwSIj382AuqK9xbzl_5_9pypF3Eil8O9hGvZYe7EoZUgf5iBY9Vs0fNcvnMY-Wdbt8skn2gFEAbA-8Gz9g?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"74\" height=\"65\"></strong></p>", "<p><strong id=\"docs-internal-guid-0da96c2d-7fff-65db-e9a5-7ec2918e16c8\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXc6I0B5z0PpFPDnpn4pWIJ94JD7Rbmb3pEWg6ZoUx8HtDqMmPGcI4KA0e75XO0fphcFA901vGLuxJso1HJR1X5YkVPKQlnEKExcbFPofqi6NT0xmEL77lvzJnyj_30k9Q3Pm6hTP6u7_cJI87mYiij0nOQ?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"74\" height=\"65\"></strong></p>", 
+                                "<p><strong id=\"docs-internal-guid-b2b8749b-7fff-80ec-16d2-8ba5f842d142\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXe52BpyMqIZie2eqiQQdd5YUUU9jLtMIEqhqLi-9FqPlif40_yrJI3cvyMSyAHtnCdfAnKxLBoM4bPTZwRwNUqEEzZOnMEkZp6SsItQ-IWvfuXTkEjpiOxLylbZlA3jPVeB-aBXaksGvi08uN5zOzcDlg?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"74\" height=\"65\"></strong></p>", "<p><strong id=\"docs-internal-guid-7bcf6134-7fff-9bbe-9852-ba881f9a159f\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcJ6r1mrpBilpSaMs5Nmf02EF3J3JHTPlXl8BfuLYHw7BtjhGR_Y-PhlM2jcCaaYUrgSm-9bI7M1dJKeUDi9rGxRG7ru7jzZJn7QLS-EEMci2lHKLbgpCI332rRztjdHmIp311yYDwRTBqOTNILOm6Sp_o?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"74\" height=\"65\"></strong></p>"],
+                    options_hi: ["<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image100.png\" width=\"74\" height=\"65\"></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image43.png\" width=\"74\" height=\"65\"></p>",
+                                "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image110.png\" width=\"74\" height=\"65\"></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image131.png\" width=\"74\" height=\"65\"></p>"],
+                    solution_en: "<p>8.(b)</p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image43.png\" width=\"74\" height=\"65\"></p>",
+                    solution_hi: "<p>8.(b)</p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image43.png\" width=\"74\" height=\"65\"></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "9",
+                    section: "6",
+                    question_en: "<p>9. <span style=\"font-family: Palanquin Dark;\">Select the correct mirror image of the given figure when the mirror is placed at &lsquo;AB&rsquo; as shown.</span></p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image46.png\" width=\"83\" height=\"131\"></p>",
+                    question_hi: "<p>9. <span style=\"font-family: Palanquin Dark;\">दी गई आकृति की सही दर्पण छवि का चयन कीजिये जब दर्पण को \'AB\' पर रखा जाता है, जैसा कि दिखाया गया है.</span></p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image46.png\" width=\"75\" height=\"119\"></p>",
+                    options_en: ["<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image22.png\" width=\"58\" height=\"89\"></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image57.png\" width=\"58\" height=\"89\"></p>", 
+                                "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image51.png\" width=\"58\" height=\"89\"></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image34.png\" width=\"58\" height=\"89\"></p>"],
+                    options_hi: ["<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image22.png\" width=\"58\" height=\"89\"></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image57.png\" width=\"58\" height=\"89\"></p>",
+                                "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image51.png\" width=\"58\" height=\"89\"></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image34.png\" width=\"58\" height=\"89\"></p>"],
+                    solution_en: "<p>9.(a)</p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image22.png\" width=\"58\" height=\"89\"></p>",
+                    solution_hi: "<p>9.(a)</p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image22.png\" width=\"58\" height=\"89\"></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "10",
+                    section: "6",
+                    question_en: "<p>10. <span style=\"font-family: Palanquin Dark;\">Select the correct water image of the given combination of numbers.</span></p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image113.png\" width=\"116\" height=\"16\"></p>",
+                    question_hi: "<p>10. <span style=\"font-family: Palanquin Dark;\">दिए गए संख्याओं के संयोजन के सही जल प्रतिबिम्ब का चयन कीजिये ।</span></p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image113.png\" width=\"120\" height=\"19\"></p>",
+                    options_en: ["<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image114.png\" width=\"120\" height=\"19\"></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image48.png\" width=\"120\" height=\"19\"></p>", 
+                                "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image55.png\" width=\"120\" height=\"19\"></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image86.png\" width=\"120\" height=\"19\"></p>"],
+                    options_hi: ["<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image114.png\" width=\"120\" height=\"19\"></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image55.png\" width=\"120\" height=\"19\"></p>",
+                                "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image48.png\" width=\"120\" height=\"19\"></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image86.png\" width=\"120\" height=\"19\"></p>"],
+                    solution_en: "<p>10.(c)</p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image84.png\" width=\"120\" height=\"19\"></p>",
+                    solution_hi: "<p>10.(c)</p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image84.png\" width=\"120\" height=\"19\"></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "11",
+                    section: "6",
+                    question_en: "<p>11. <span style=\"font-family: Palanquin Dark;\">Which of the options figure when rotated 180&deg; clockwise and then 45&deg; anticlockwise will result in the given question figure?</span></p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image127.png\" width=\"90\" height=\"92\"></p>",
+                    question_hi: "<p>11.<span style=\"font-family: Palanquin Dark;\"> 180&deg; दक्षिणावर्त घुमाने पर और फिर 45&deg; वामावर्त घुमाने पर दिए गए विकल्प में से कौन सा विकल्प दिए गए प्रश्न आकृति में परिणाम होगा?&nbsp;</span></p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image127.png\" width=\"81\" height=\"68\"></p>",
+                    options_en: ["<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image13.png\" width=\"81\" height=\"68\"></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image62.png\" width=\"81\" height=\"68\"></p>", 
+                                "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image135.png\" width=\"81\" height=\"68\"></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image19.png\" width=\"81\" height=\"68\"></p>\n<p><span style=\"font-family: Palanquin Dark;\"> </span></p>"],
+                    options_hi: ["<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image13.png\" width=\"81\" height=\"68\"></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image62.png\" width=\"81\" height=\"68\"></p>",
+                                "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image135.png\" width=\"81\" height=\"68\"></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image19.png\" width=\"81\" height=\"68\"></p>\n<p><span style=\"font-family: Palanquin Dark;\"> </span></p>"],
+                    solution_en: "<p>11.(a)</p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image13.png\" width=\"81\" height=\"68\"></p>",
+                    solution_hi: "<p>11.(a)</p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image13.png\" width=\"81\" height=\"68\"></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "12",
+                    section: "6",
+                    question_en: "<p>12.<span style=\"font-family: Palanquin Dark;\"> Select the correct mirror image of the given figure when the mirror is placed at &lsquo;PQ&rsquo; as shown.</span></p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image109.png\" width=\"102\" height=\"145\"></p>",
+                    question_hi: "<p>12.<span style=\"font-family: Palanquin Dark;\"> जब दर्पण को निम्नलिखित चित्र के अनुसार PQ पर रखा गया हो, तब दिए गए संयोजन का दर्पण में प्रतिबिम्ब चयनित करे</span></p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image109.png\" width=\"99\" height=\"141\"></p>",
+                    options_en: ["<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image6.png\" width=\"73\" height=\"71\"></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image75.png\" width=\"73\" height=\"71\"></p>", 
+                                "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image61.png\" width=\"73\" height=\"71\"></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image124.png\" width=\"73\" height=\"71\"></p>"],
+                    options_hi: ["<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image6.png\" width=\"73\" height=\"71\"></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image75.png\" width=\"73\" height=\"71\"></p>",
+                                "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image61.png\" width=\"73\" height=\"71\"></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image124.png\" width=\"73\" height=\"71\"></p>"],
+                    solution_en: "<p>12.(b) <span style=\"font-family: Palanquin Dark;\">The correct mirror image is </span></p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image112.png\" width=\"73\" height=\"71\"></p>",
+                    solution_hi: "<p>12.(b) <span style=\"font-family: Palanquin Dark;\">सही दर्पण प्रतिबिम्ब है</span></p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image112.png\" width=\"73\" height=\"71\"></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "13",
+                    section: "6",
+                    question_en: "<p>13.<span style=\"font-family: Palanquin Dark;\"> Select the correct mirror image of the given figure when the mirror is placed at &lsquo;AB&rsquo; as shown.</span></p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image3.png\" width=\"90\" height=\"151\"></p>",
+                    question_hi: "<p>13. <span style=\"font-family: Palanquin Dark;\">दी गई आकृति की सही दर्पण छवि का चयन करें जब दर्पण को \'AB\' पर रखा गया है जैसा कि दिखाया गया है।</span></p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image3.png\" width=\"88\" height=\"147\"></p>",
+                    options_en: ["<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image97.png\" width=\"72\" height=\"116\"></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image116.png\" width=\"72\" height=\"116\"></p>", 
+                                "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image103.png\" width=\"72\" height=\"116\"></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image81.png\" width=\"113\" height=\"71\"></p>"],
+                    options_hi: ["<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image97.png\" width=\"72\" height=\"116\"></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image116.png\" width=\"72\" height=\"116\"></p>",
+                                "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image103.png\" width=\"72\" height=\"116\"></p>", "<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image81.png\" width=\"97\" height=\"61\"></p>"],
+                    solution_en: "<p>13.(a) <span style=\"font-family: Palanquin Dark;\">The correct mirror image is :</span></p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image33.png\" width=\"72\" height=\"116\"></p>",
+                    solution_hi: "<p>13.(a) <span style=\"font-family: Palanquin Dark;\">सही दर्पण प्रतिबिम्ब है :</span></p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1654687031/word/media/image33.png\" width=\"72\" height=\"116\"></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "14",
+                    section: "6",
+                    question_en: "<p>14.<span style=\"font-family: Palanquin Dark;\"> Select the correct mirror image of the given combination whent the mirror is place at &lsquo;PQ&rsquo; as shown </span></p>\n<p><strong id=\"docs-internal-guid-53d7b764-7fff-e794-9155-d6f2a2a57dc4\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfX8JOEU6hY71g-mBtfa5KSrJpGz7g9E5YtrVU4KcVKQ6ovLMAEjwVO_p45lDvgQmxvJ7VuHdBjCeIwpeXuoA_bfsyAKsPPqISGuMec0EHeRXdCPWB9MKVvgteRqmSg_MQ0QCBU2w?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"125\" height=\"87\"></strong></p>",
+                    question_hi: "<p>14.<span style=\"font-family: Palanquin Dark;\"> जब दर्पण को निम्नलिखित चित्र के अनुसार PQ पर रखा गया हो, तब दिए गए संयोजन का दर्पण में प्रतिबिम्ब चयनित करे<br></span><strong id=\"docs-internal-guid-53d7b764-7fff-e794-9155-d6f2a2a57dc4\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfX8JOEU6hY71g-mBtfa5KSrJpGz7g9E5YtrVU4KcVKQ6ovLMAEjwVO_p45lDvgQmxvJ7VuHdBjCeIwpeXuoA_bfsyAKsPPqISGuMec0EHeRXdCPWB9MKVvgteRqmSg_MQ0QCBU2w?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"125\" height=\"87\"></strong></p>",
+                    options_en: ["<p><strong id=\"docs-internal-guid-405cbdf9-7fff-42dc-23b6-178b592232d6\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeaXBpNABcSKt-709uYtxaRZX0JsUjfHaEO-4jvFY9gP3TuQ61v3VfLLXv3dcgtNI3sefUxtKhiEV8Vkccft0o90FwfyybF3Wa87t_CxlzGcjSafaZtCHMrLfj5ZK5JYF2qor2h?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"142\" height=\"16\"></strong></p>", "<p><strong id=\"docs-internal-guid-cc36bfc4-7fff-574e-6a71-9a1a661265ac\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcpHAXGiRp7QCxJkXz0zkZxHUA1QSgN_GsOBXyYb7tfA_kTToluaLJvPpyjK7X64VkKa6EslKLXVi8t5Nc2SjmTdPv2uOdBphyXV0F8iWtZ-35sjRw6KFtHeTDd24Bi6hYTLTpSkw?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"140\" height=\"15\"></strong></p>", 
+                                "<p><strong id=\"docs-internal-guid-b08d6d07-7fff-66fb-caa8-8e5a8e6e8d06\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdYDL2TMvdRk_hOvDIdkfuV4JMNAkqZB3ArYgmBLrJJN27tazx-l4Q2bolhmOksbUCQuspmvew0rVQFy93fwAR24EbSb_xdtTil7l5qu3lCSmRW2HlMus00mUrT_Um80Tc86Y3A?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"142\" height=\"16\"></strong></p>", "<p><strong id=\"docs-internal-guid-0b84133f-7fff-7614-0f7d-86ff11ff6947\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXe3RtHZ6WdUi1LSXmRpROkFeyX-7twbt13IdgtHh0uLDZqsTXR3poJasybnkJmueMWBE-VdNKhzMRvQln7VgSEMWsTzpQ_C-JOpbDdFhZ1yzohjI3aU9cLekjEFgk7DKH4HD9wTJg?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"148\" height=\"16\"></strong></p>"],
+                    options_hi: ["<p><strong id=\"docs-internal-guid-405cbdf9-7fff-42dc-23b6-178b592232d6\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeaXBpNABcSKt-709uYtxaRZX0JsUjfHaEO-4jvFY9gP3TuQ61v3VfLLXv3dcgtNI3sefUxtKhiEV8Vkccft0o90FwfyybF3Wa87t_CxlzGcjSafaZtCHMrLfj5ZK5JYF2qor2h?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"142\" height=\"16\"></strong></p>", "<p><strong id=\"docs-internal-guid-cc36bfc4-7fff-574e-6a71-9a1a661265ac\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcpHAXGiRp7QCxJkXz0zkZxHUA1QSgN_GsOBXyYb7tfA_kTToluaLJvPpyjK7X64VkKa6EslKLXVi8t5Nc2SjmTdPv2uOdBphyXV0F8iWtZ-35sjRw6KFtHeTDd24Bi6hYTLTpSkw?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"140\" height=\"15\"></strong></p>",
+                                "<p><strong id=\"docs-internal-guid-b08d6d07-7fff-66fb-caa8-8e5a8e6e8d06\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdYDL2TMvdRk_hOvDIdkfuV4JMNAkqZB3ArYgmBLrJJN27tazx-l4Q2bolhmOksbUCQuspmvew0rVQFy93fwAR24EbSb_xdtTil7l5qu3lCSmRW2HlMus00mUrT_Um80Tc86Y3A?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"142\" height=\"16\"></strong></p>", "<p><strong id=\"docs-internal-guid-0b84133f-7fff-7614-0f7d-86ff11ff6947\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXe3RtHZ6WdUi1LSXmRpROkFeyX-7twbt13IdgtHh0uLDZqsTXR3poJasybnkJmueMWBE-VdNKhzMRvQln7VgSEMWsTzpQ_C-JOpbDdFhZ1yzohjI3aU9cLekjEFgk7DKH4HD9wTJg?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"148\" height=\"16\"></strong></p>"],
+                    solution_en: "<p>14.(d)<span style=\"font-family: Palanquin Dark;\"> The correct mirror image is&nbsp;<br></span><strong id=\"docs-internal-guid-0b84133f-7fff-7614-0f7d-86ff11ff6947\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXe3RtHZ6WdUi1LSXmRpROkFeyX-7twbt13IdgtHh0uLDZqsTXR3poJasybnkJmueMWBE-VdNKhzMRvQln7VgSEMWsTzpQ_C-JOpbDdFhZ1yzohjI3aU9cLekjEFgk7DKH4HD9wTJg?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"148\" height=\"16\"></strong><span style=\"font-family: Palanquin Dark;\"> </span></p>",
+                    solution_hi: "<p>14.(d)<span style=\"font-family: Palanquin Dark;\"> सही दर्पण प्रतिबिम्ब है<br></span><strong id=\"docs-internal-guid-0b84133f-7fff-7614-0f7d-86ff11ff6947\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXe3RtHZ6WdUi1LSXmRpROkFeyX-7twbt13IdgtHh0uLDZqsTXR3poJasybnkJmueMWBE-VdNKhzMRvQln7VgSEMWsTzpQ_C-JOpbDdFhZ1yzohjI3aU9cLekjEFgk7DKH4HD9wTJg?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"148\" height=\"16\"></strong></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "15",
+                    section: "6",
+                    question_en: "<p>15.<span style=\"font-family: Palanquin Dark;\"> Select the correct mirror image of the given combination when the mirror is placed at PQ as shown.<br></span><strong id=\"docs-internal-guid-620d11ac-7fff-a808-6bb7-2b9100ee91df\"><strong id=\"docs-internal-guid-63d1104a-7fff-63c8-1a09-7acafe6c0214\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeciTglRma3cK-MSRH-K4OA1IOFRjY_Nnd3cvwifAVA5hQ-XCsnOTJpSijh1x-Kz4ReTDY__f1SJa9CAGydWBGdk7HOo8KwSVjbQmatK6j1ntqTLcaLJrW8EbL7Fj0RGc1Az-wUZQ?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"131\" height=\"99\"></strong></strong></p>",
+                    question_hi: "<p>15. <span style=\"font-family: Palanquin Dark;\">&nbsp;जब दर्पण को निम्लिखित चित्र के अनुसार \'PQ\' पर रखा गया हो तब दिए गए सयोजनो का दर्पण में निर्मित सही <br></span><strong id=\"docs-internal-guid-5dcc0660-7fff-60ac-9641-6c863f37dc54\"><strong id=\"docs-internal-guid-620d11ac-7fff-a808-6bb7-2b9100ee91df\"><strong id=\"docs-internal-guid-63d1104a-7fff-63c8-1a09-7acafe6c0214\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeciTglRma3cK-MSRH-K4OA1IOFRjY_Nnd3cvwifAVA5hQ-XCsnOTJpSijh1x-Kz4ReTDY__f1SJa9CAGydWBGdk7HOo8KwSVjbQmatK6j1ntqTLcaLJrW8EbL7Fj0RGc1Az-wUZQ?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"131\" height=\"99\"></strong></strong></strong></p>",
+                    options_en: ["<p><strong id=\"docs-internal-guid-790a4afb-7fff-d38e-ca2b-89f39e040cb7\"><strong id=\"docs-internal-guid-dc3f3140-7fff-be19-d6d8-89147f62b2e2\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcFwZ0xNzGwlGIGx8DzsCKkszXXRQIuGSs-c2X_nm4MLtFgx572OTBN20iczmpihImDmS-HNw7gV88V3Bxz7LglXCKYrd4txj95iYZTJq9SnHfmb_OkGx4tRY2bItwSNpxDUn3R?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"145\" height=\"17\"></strong></strong></p>", "<p><strong id=\"docs-internal-guid-64676a3c-7fff-f162-87e4-29fd1a5d6b56\"><strong id=\"docs-internal-guid-03df53fe-7fff-308e-419d-805724c73dc4\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcUYosDBOQUtn5iU9SuCGJBYnwDwYGrOs_pw6MW5xjyilDiYuU_IxUcOYmysWOPSv6i4_fSFstVOWFJ8puN2YWi8CodISKdbvEwV0f34fexobxFjsoawN77htzjQPU9Ja1tTSqZYw?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"143\" height=\"17\"></strong></strong></p>", 
+                                "<p><strong id=\"docs-internal-guid-ca69a7c8-7fff-0f57-bc4c-1b8c2543df4a\"><strong id=\"docs-internal-guid-d724d094-7fff-a5e5-97c7-b0d11a7f6501\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXehaZ0_Cz786dXQ1n_I9N8GrYFuptRLkwKQ0SKpJET-l96HXDTSlRX5KQDpf1uxCxJTAIUcmXaxFgSGYoF-ZTFic1aVvxNY_51JJvPZPbamlK3FFHKZelOxde6WQKKJJJuSNhpc?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"139\" height=\"17\"></strong></strong></p>", "<p><strong id=\"docs-internal-guid-b7240986-7fff-3388-55f6-a1e1e1674195\"><strong id=\"docs-internal-guid-5e4a2230-7fff-2b0d-a190-7f5487a50507\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXf7fq3mVsilfLBAfZBipemg0JdNpZ6-o_b7SkisZixnZoY1KW7C3yVuwFZ96Cq6gIilSznDlG5gS1yN-GIVmdwVFMMtUmXp8uesvHv8gcANSDhI6Fiy8IRSo8U2xb0IRff8A21K?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"139\" height=\"17\"></strong></strong></p>"],
+                    options_hi: ["<p><strong id=\"docs-internal-guid-790a4afb-7fff-d38e-ca2b-89f39e040cb7\"><strong id=\"docs-internal-guid-dc3f3140-7fff-be19-d6d8-89147f62b2e2\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcFwZ0xNzGwlGIGx8DzsCKkszXXRQIuGSs-c2X_nm4MLtFgx572OTBN20iczmpihImDmS-HNw7gV88V3Bxz7LglXCKYrd4txj95iYZTJq9SnHfmb_OkGx4tRY2bItwSNpxDUn3R?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"145\" height=\"17\"></strong></strong></p>", "<p><strong id=\"docs-internal-guid-03df53fe-7fff-308e-419d-805724c73dc4\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcUYosDBOQUtn5iU9SuCGJBYnwDwYGrOs_pw6MW5xjyilDiYuU_IxUcOYmysWOPSv6i4_fSFstVOWFJ8puN2YWi8CodISKdbvEwV0f34fexobxFjsoawN77htzjQPU9Ja1tTSqZYw?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"143\" height=\"17\"></strong></p>",
+                                "<p><strong id=\"docs-internal-guid-5ecca719-7fff-d048-35ba-c11a11b86289\"><strong id=\"docs-internal-guid-ca69a7c8-7fff-0f57-bc4c-1b8c2543df4a\"><strong id=\"docs-internal-guid-d724d094-7fff-a5e5-97c7-b0d11a7f6501\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXehaZ0_Cz786dXQ1n_I9N8GrYFuptRLkwKQ0SKpJET-l96HXDTSlRX5KQDpf1uxCxJTAIUcmXaxFgSGYoF-ZTFic1aVvxNY_51JJvPZPbamlK3FFHKZelOxde6WQKKJJJuSNhpc?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"139\" height=\"17\"></strong></strong></strong></p>", "<p><strong id=\"docs-internal-guid-3715c041-7fff-f57d-7144-0413d19b63d2\"><strong id=\"docs-internal-guid-b7240986-7fff-3388-55f6-a1e1e1674195\"><strong id=\"docs-internal-guid-5e4a2230-7fff-2b0d-a190-7f5487a50507\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXf7fq3mVsilfLBAfZBipemg0JdNpZ6-o_b7SkisZixnZoY1KW7C3yVuwFZ96Cq6gIilSznDlG5gS1yN-GIVmdwVFMMtUmXp8uesvHv8gcANSDhI6Fiy8IRSo8U2xb0IRff8A21K?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"139\" height=\"17\"></strong></strong></strong></p>"],
+                    solution_en: "<p>15.(d) <span style=\"font-family: Palanquin Dark;\">The correct mirror image is<br></span><strong id=\"docs-internal-guid-3715c041-7fff-f57d-7144-0413d19b63d2\"><strong id=\"docs-internal-guid-b7240986-7fff-3388-55f6-a1e1e1674195\"><strong id=\"docs-internal-guid-5e4a2230-7fff-2b0d-a190-7f5487a50507\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXf7fq3mVsilfLBAfZBipemg0JdNpZ6-o_b7SkisZixnZoY1KW7C3yVuwFZ96Cq6gIilSznDlG5gS1yN-GIVmdwVFMMtUmXp8uesvHv8gcANSDhI6Fiy8IRSo8U2xb0IRff8A21K?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"139\" height=\"17\"></strong></strong></strong></p>",
+                    solution_hi: "<p>15.(d) <span style=\"font-family: Palanquin Dark;\">सही दर्पण प्रतिबिम्ब है<br></span><strong id=\"docs-internal-guid-3715c041-7fff-f57d-7144-0413d19b63d2\"><strong id=\"docs-internal-guid-b7240986-7fff-3388-55f6-a1e1e1674195\"><strong id=\"docs-internal-guid-5e4a2230-7fff-2b0d-a190-7f5487a50507\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXf7fq3mVsilfLBAfZBipemg0JdNpZ6-o_b7SkisZixnZoY1KW7C3yVuwFZ96Cq6gIilSznDlG5gS1yN-GIVmdwVFMMtUmXp8uesvHv8gcANSDhI6Fiy8IRSo8U2xb0IRff8A21K?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"139\" height=\"17\"></strong></strong></strong></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "16",
+                    section: "6",
+                    question_en: "<p>16.<span style=\"font-family: Palanquin Dark;\"> Select the correct mirror image of the given combination when the mirror is placed at &lsquo;PQ&rsquo; as shown.<br></span><strong id=\"docs-internal-guid-b1159e29-7fff-4723-a398-96e59536e83c\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdsZnk4lEa19si924jf8d0Y8Y7jxfMnFf5lwnyw65empr59x-dHX1-bzBOmWq9E7JKkeklEkEQMAhOvgJR9-vLxQ_-bs6YVZwTQ-a8L1b13VEBRiCJl9Mcfjfd8liAAGtGbqKEe?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"97\" height=\"77\"></strong></p>",
+                    question_hi: "<p>16. <span style=\"font-family: Palanquin Dark;\">दिए गए संयोजन की सही दर्पण छवि का चयन कीजिये जब दर्पण को निम्न अनुसार \'PQ\' पर रखा गया है।<br></span><strong id=\"docs-internal-guid-b1159e29-7fff-4723-a398-96e59536e83c\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdsZnk4lEa19si924jf8d0Y8Y7jxfMnFf5lwnyw65empr59x-dHX1-bzBOmWq9E7JKkeklEkEQMAhOvgJR9-vLxQ_-bs6YVZwTQ-a8L1b13VEBRiCJl9Mcfjfd8liAAGtGbqKEe?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"97\" height=\"77\"></strong></p>",
+                    options_en: ["<p><strong id=\"docs-internal-guid-013252be-7fff-c222-519c-3c9812a9cafc\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXe8rAJ69bj9-ofqR5VymXY2Z1hTMvilQUzMu_f-kta_2qGvNN4eDyaW34tocfveY-Uq6gPT7xyj83t0p7npj13q9ODXtMOFvBhurRv76xRo_DpjXJq7GLF7UtFuaoUsqE6gdaGJGg?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"123\" height=\"19\"></strong></p>", "<p><strong id=\"docs-internal-guid-bc162573-7fff-43e9-e7bb-915ef6887248\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXczPMAMCmugD6UiaF4EKUiiMnnWf7UvrOb02qAJ6YPthLvlHJOP0x5Jsi4SL9CrPKCoZyuVZ7MPpL7eDguJCSEBL4kK3gIYzQzAQqCW8HC091r3mVWe0EoPIEUNPyijYZShXWlymQ?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"123\" height=\"20\"></strong></p>", 
+                                "<p><strong id=\"docs-internal-guid-cedda60b-7fff-88c9-9edf-7f3c8af64108\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfIycYgZar-5tQBjV7tk7AdilTJF6nSigFMEmNk_rPlhJQg5c156TRtL9QsgwOtwEpW5RG0LP9xm7ErUTd0p6JZUL4bm5l9Tm1tiogQStX0Lvz4KqBhyO1S1svlyHzIPIfAQZKN2Q?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"126\" height=\"20\"></strong></p>", "<p><strong id=\"docs-internal-guid-13d80e9b-7fff-aed7-b6cf-441154a0861f\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfwJzpbPPY5qc_mj-le7hreXO9YvAtMgHQJX5Fo0O0lfKnEXeMrKGsMqxmDWYUznSbBq2TRICGxiOHMvWn5YJQ-Lw5hnokiLoSsQ1iCBkLsuOpOSninhBzfRdrKpLwYLBo-sURl?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"122\" height=\"19\"></strong></p>"],
+                    options_hi: ["<p><strong id=\"docs-internal-guid-013252be-7fff-c222-519c-3c9812a9cafc\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXe8rAJ69bj9-ofqR5VymXY2Z1hTMvilQUzMu_f-kta_2qGvNN4eDyaW34tocfveY-Uq6gPT7xyj83t0p7npj13q9ODXtMOFvBhurRv76xRo_DpjXJq7GLF7UtFuaoUsqE6gdaGJGg?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"123\" height=\"19\"></strong></p>", "<p><strong id=\"docs-internal-guid-bc162573-7fff-43e9-e7bb-915ef6887248\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXczPMAMCmugD6UiaF4EKUiiMnnWf7UvrOb02qAJ6YPthLvlHJOP0x5Jsi4SL9CrPKCoZyuVZ7MPpL7eDguJCSEBL4kK3gIYzQzAQqCW8HC091r3mVWe0EoPIEUNPyijYZShXWlymQ?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"123\" height=\"20\"></strong></p>",
+                                "<p><strong id=\"docs-internal-guid-cedda60b-7fff-88c9-9edf-7f3c8af64108\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfIycYgZar-5tQBjV7tk7AdilTJF6nSigFMEmNk_rPlhJQg5c156TRtL9QsgwOtwEpW5RG0LP9xm7ErUTd0p6JZUL4bm5l9Tm1tiogQStX0Lvz4KqBhyO1S1svlyHzIPIfAQZKN2Q?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"126\" height=\"20\"></strong></p>", "<p><strong id=\"docs-internal-guid-13d80e9b-7fff-aed7-b6cf-441154a0861f\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfwJzpbPPY5qc_mj-le7hreXO9YvAtMgHQJX5Fo0O0lfKnEXeMrKGsMqxmDWYUznSbBq2TRICGxiOHMvWn5YJQ-Lw5hnokiLoSsQ1iCBkLsuOpOSninhBzfRdrKpLwYLBo-sURl?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"122\" height=\"19\"></strong></p>"],
+                    solution_en: "<p>16.(a)<br><strong id=\"docs-internal-guid-f6863377-7fff-0ff2-0a00-7762192c7e79\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXe8rAJ69bj9-ofqR5VymXY2Z1hTMvilQUzMu_f-kta_2qGvNN4eDyaW34tocfveY-Uq6gPT7xyj83t0p7npj13q9ODXtMOFvBhurRv76xRo_DpjXJq7GLF7UtFuaoUsqE6gdaGJGg?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"129\" height=\"20\"></strong></p>",
+                    solution_hi: "<p>16.(a)<br><strong id=\"docs-internal-guid-f6863377-7fff-0ff2-0a00-7762192c7e79\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXe8rAJ69bj9-ofqR5VymXY2Z1hTMvilQUzMu_f-kta_2qGvNN4eDyaW34tocfveY-Uq6gPT7xyj83t0p7npj13q9ODXtMOFvBhurRv76xRo_DpjXJq7GLF7UtFuaoUsqE6gdaGJGg?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"129\" height=\"20\"></strong></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "17",
+                    section: "6",
+                    question_en: "<p>17.<span style=\"font-family: Palanquin Dark;\"> Select the correct mirror image of the given figure when the mirror is placed at &lsquo;AB&rsquo; as shown<br></span><strong id=\"docs-internal-guid-1935f05e-7fff-314e-2a4e-46500fee6deb\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXch5hyulcW-JQmVz3ZkZj73jmqTdOfwc7sV_9y3sXqdSz-DabwNGJOjd4EUCoBAlED8JUmDdWMserORnWLGoEUT0t319wpAxiqpadJ4flrSKxuSZpfIO7Dm8mTf6-Ja0_ehVBywwA?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"103\" height=\"117\"></strong></p>",
+                    question_hi: "<p>17.<span style=\"font-family: Palanquin Dark;\"> जब दर्पण को निम्लिखित चित्र के अनुसार \'AB\' पर रखा गया हो तब दिए गए सयोजनो का दर्पण में निर्मित सही&nbsp;<br></span><strong id=\"docs-internal-guid-7a44095d-7fff-d4ce-52f8-cd2dfc2f739f\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXch5hyulcW-JQmVz3ZkZj73jmqTdOfwc7sV_9y3sXqdSz-DabwNGJOjd4EUCoBAlED8JUmDdWMserORnWLGoEUT0t319wpAxiqpadJ4flrSKxuSZpfIO7Dm8mTf6-Ja0_ehVBywwA?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"103\" height=\"117\"></strong></p>",
+                    options_en: ["<p><strong id=\"docs-internal-guid-9367d73d-7fff-79c5-74d3-9a6ea78095b9\"><strong id=\"docs-internal-guid-a4696a2f-7fff-458a-1922-e44933112938\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXc3HwzVyaRaS6tAagps9I0l_MSW9ar3tceIDkdcJ5X0dJ_nEFFbv82dWKOek6YQ7iMctDJBQR7vFNQJVQ1Rxrdu8lyUOP1hEh2zAD0YhGn87_hHmAa6PKCvfvxeMgc1GsEM8oxQAg?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"94\" height=\"91\"></strong></strong></p>", "<p><strong id=\"docs-internal-guid-d70ae878-7fff-9150-18cc-123fa6603c6d\"><strong id=\"docs-internal-guid-bcd158ef-7fff-9601-a28a-c36daeed64f5\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfGxSv_HpExU-pp6f5idTvBT9cFW0PnzArG9Q-_doYsERzS_Oi0pqUEu0NWG7Cdyq7WmJkprSeRr867bO5YNYtJrIxn_YYSrEes2zz3JhTcTHNam7GzWKwfG3AJ-LTJmszkg7s6EA?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"97\" height=\"94\"></strong></strong></p>", 
+                                "<p><strong id=\"docs-internal-guid-7c82b56c-7fff-ab46-0e28-f1ec12579abe\"><strong id=\"docs-internal-guid-869285b4-7fff-a2c6-03a5-c20e1b4dbf61\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeKDuMWltD5W_bzrmSKmoRQQQEEc-a1z57XfnHWyu_QeGRrbI5I551iDNLCrmAWWvKuXBvNB-TiK8hOAuznvUO3pjhQlmRj2bMcd_3ZTT0i8JdKhhtHnYTMVg3QswJk7uaOI9LTbg?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"98\" height=\"95\"></strong></strong></p>", "<p><strong id=\"docs-internal-guid-bc7684ee-7fff-c62d-f9ff-0f74a3626ca9\"><strong id=\"docs-internal-guid-44c40e4a-7fff-b3c6-d81a-ca9f67d9b00a\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdHTlUke-2GuqemsBYacSSmGXqcUWMJtdl0vMwbHgCspwTcKTzcBnh6HG7RaVPZ23JDXZpkXVer9UJayajgOQDRUIRcqWzM3yS2qCUXEkBmTFQHKpYZllH56ueyWS_Ss2qjSor2hg?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"94\" height=\"91\"></strong></strong></p>"],
+                    options_hi: ["<p><strong id=\"docs-internal-guid-66c00371-7fff-8278-58ed-cb27f835d5ed\"><strong id=\"docs-internal-guid-fcc4bddf-7fff-e7db-5cca-2acd43e4cae5\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXc3HwzVyaRaS6tAagps9I0l_MSW9ar3tceIDkdcJ5X0dJ_nEFFbv82dWKOek6YQ7iMctDJBQR7vFNQJVQ1Rxrdu8lyUOP1hEh2zAD0YhGn87_hHmAa6PKCvfvxeMgc1GsEM8oxQAg?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"94\" height=\"91\"></strong></strong></p>", "<p><strong id=\"docs-internal-guid-88733233-7fff-4623-3398-e80ad9565859\"><strong id=\"docs-internal-guid-7db5e362-7fff-f73b-f910-ac347e1b8b35\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfGxSv_HpExU-pp6f5idTvBT9cFW0PnzArG9Q-_doYsERzS_Oi0pqUEu0NWG7Cdyq7WmJkprSeRr867bO5YNYtJrIxn_YYSrEes2zz3JhTcTHNam7GzWKwfG3AJ-LTJmszkg7s6EA?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"97\" height=\"94\"></strong></strong></p>",
+                                "<p><strong id=\"docs-internal-guid-d53ddfda-7fff-6656-c4aa-23895e1e501e\"><strong id=\"docs-internal-guid-70e0ab4b-7fff-0d7f-2e62-73c6dc901044\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeKDuMWltD5W_bzrmSKmoRQQQEEc-a1z57XfnHWyu_QeGRrbI5I551iDNLCrmAWWvKuXBvNB-TiK8hOAuznvUO3pjhQlmRj2bMcd_3ZTT0i8JdKhhtHnYTMVg3QswJk7uaOI9LTbg?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"98\" height=\"95\"></strong></strong></p>", "<p><strong id=\"docs-internal-guid-734c94cf-7fff-7ce6-e6be-c10eb51c8b48\"><strong id=\"docs-internal-guid-b3cbdcb8-7fff-344d-9718-5f494bacff83\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdHTlUke-2GuqemsBYacSSmGXqcUWMJtdl0vMwbHgCspwTcKTzcBnh6HG7RaVPZ23JDXZpkXVer9UJayajgOQDRUIRcqWzM3yS2qCUXEkBmTFQHKpYZllH56ueyWS_Ss2qjSor2hg?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"94\" height=\"91\"></strong></strong></p>"],
+                    solution_en: "<p>17.(d) <span style=\"font-family: Palanquin Dark;\">The correct mirror image is as follows.&nbsp;<br></span><strong id=\"docs-internal-guid-442fb9a4-7fff-9c68-829b-8cc33797b1ed\"><strong id=\"docs-internal-guid-734c94cf-7fff-7ce6-e6be-c10eb51c8b48\"><strong id=\"docs-internal-guid-b3cbdcb8-7fff-344d-9718-5f494bacff83\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdHTlUke-2GuqemsBYacSSmGXqcUWMJtdl0vMwbHgCspwTcKTzcBnh6HG7RaVPZ23JDXZpkXVer9UJayajgOQDRUIRcqWzM3yS2qCUXEkBmTFQHKpYZllH56ueyWS_Ss2qjSor2hg?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"94\" height=\"91\"></strong></strong></strong></p>",
+                    solution_hi: "<p>17.(d) <span style=\"font-family: Palanquin Dark;\">सही दर्पण प्रतिबिम्ब इस प्रकार है।<br></span><strong id=\"docs-internal-guid-442fb9a4-7fff-9c68-829b-8cc33797b1ed\"><strong id=\"docs-internal-guid-734c94cf-7fff-7ce6-e6be-c10eb51c8b48\"><strong id=\"docs-internal-guid-b3cbdcb8-7fff-344d-9718-5f494bacff83\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdHTlUke-2GuqemsBYacSSmGXqcUWMJtdl0vMwbHgCspwTcKTzcBnh6HG7RaVPZ23JDXZpkXVer9UJayajgOQDRUIRcqWzM3yS2qCUXEkBmTFQHKpYZllH56ueyWS_Ss2qjSor2hg?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"94\" height=\"91\"></strong></strong></strong></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "18",
+                    section: "6",
+                    question_en: "<p>18. <span style=\"font-family: Palanquin Dark;\">Select the correct mirror image of the given figure when the mirror is placed at &lsquo;AB&rsquo; as shown.<br></span><strong id=\"docs-internal-guid-28851bcd-7fff-41d9-a946-b3617048ab4d\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdi54aG6DAKzz4R7HmJIVrYDQDTCf2KfQkvv_B-uibM7_uIgnU2UDYm2H91op9fgiCaFLawXXRlylEp6JhI7s3Z48h20kkiNi-_XYHNSU58p84togEqNYbD3qEqVIrTI_Nkjaqhmw?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"78\" height=\"108\"></strong></p>",
+                    question_hi: "<p>18. <span style=\"font-family: Palanquin Dark;\">दी गई आकृति की सही दर्पण छवि का चयन करें जब दर्पण को \'AB\' पर रखा गया है जैसा कि दिखाया गया है।<br></span><strong id=\"docs-internal-guid-28851bcd-7fff-41d9-a946-b3617048ab4d\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdi54aG6DAKzz4R7HmJIVrYDQDTCf2KfQkvv_B-uibM7_uIgnU2UDYm2H91op9fgiCaFLawXXRlylEp6JhI7s3Z48h20kkiNi-_XYHNSU58p84togEqNYbD3qEqVIrTI_Nkjaqhmw?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"78\" height=\"108\"></strong></p>",
+                    options_en: ["<p><strong id=\"docs-internal-guid-5f6bd546-7fff-48c1-3ca9-62b7163e1169\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXc3H5AHzicKU5YjJPUYc_sbl8xA_TW8VKT7_KpJ19rRAdYxp1loRYAqFJW5fvzzJG10tKSABxy6VQYUZq8UKnwzM3wEZVpiY5BG1F3H66m7bC2GMTL4uqspBosU-aw9lLTJkjYx?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"60\" height=\"92\"></strong></p>", "<p><strong id=\"docs-internal-guid-a4ea32ec-7fff-fc37-be95-7196c5818299\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcDFLRg6R1jPyxr6ycaheah6kJ-lFgoXHdd-05eatIb6g65nmRIrJLs9iz9WxcgjcPTU2npAcrCK9E1mbt8_Q4TjP296gWQ3gs3SVSXEs9dJK6c09LC0BNZdgrQannVYrcre6Q0UQ?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"60\" height=\"92\"></strong></p>", 
+                                "<p><strong id=\"docs-internal-guid-ecf4ad43-7fff-38f1-49dc-fb12f75c60c0\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcRzw-AOYQAK5scI71hGXTjSSDLaSbRNgz53mABUCCOIb97v5Drq6HZ5RABQ_81OBJp4vbji6g97iG2vBirZDG0sR_EUJzvQaVJEQWEuWqtTYXu7s6N2psnhqxTHh2u4kaUuWAS?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"94\" height=\"61\"></strong></p>", "<p><strong id=\"docs-internal-guid-a3676611-7fff-7911-b634-8ec389b037b9\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXf6BLwaaIhZ_M3fhPMWkLpbYPhD7LxYy8x0YszZHFMbM8zn9s6Jj3IwPmBUw5VdoqFsJXw7DPRy2Pq8gpygxXfGWfNU-F3XFrTcTjgTZnFO5JYZtT7PXtzvw81Ogai9kkE13SZdow?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"97\" height=\"62\"></strong></p>"],
+                    options_hi: ["<p><strong id=\"docs-internal-guid-5f6bd546-7fff-48c1-3ca9-62b7163e1169\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXc3H5AHzicKU5YjJPUYc_sbl8xA_TW8VKT7_KpJ19rRAdYxp1loRYAqFJW5fvzzJG10tKSABxy6VQYUZq8UKnwzM3wEZVpiY5BG1F3H66m7bC2GMTL4uqspBosU-aw9lLTJkjYx?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"60\" height=\"92\"></strong></p>", "<p><strong id=\"docs-internal-guid-a4ea32ec-7fff-fc37-be95-7196c5818299\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcDFLRg6R1jPyxr6ycaheah6kJ-lFgoXHdd-05eatIb6g65nmRIrJLs9iz9WxcgjcPTU2npAcrCK9E1mbt8_Q4TjP296gWQ3gs3SVSXEs9dJK6c09LC0BNZdgrQannVYrcre6Q0UQ?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"60\" height=\"92\"></strong></p>\n<p><span style=\"font-family: Palanquin Dark;\"> </span></p>",
+                                "<p><strong id=\"docs-internal-guid-ecf4ad43-7fff-38f1-49dc-fb12f75c60c0\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcRzw-AOYQAK5scI71hGXTjSSDLaSbRNgz53mABUCCOIb97v5Drq6HZ5RABQ_81OBJp4vbji6g97iG2vBirZDG0sR_EUJzvQaVJEQWEuWqtTYXu7s6N2psnhqxTHh2u4kaUuWAS?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"94\" height=\"61\"></strong></p>\n<p><span style=\"font-family: Palanquin Dark;\"> </span></p>", "<p><strong id=\"docs-internal-guid-a3676611-7fff-7911-b634-8ec389b037b9\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXf6BLwaaIhZ_M3fhPMWkLpbYPhD7LxYy8x0YszZHFMbM8zn9s6Jj3IwPmBUw5VdoqFsJXw7DPRy2Pq8gpygxXfGWfNU-F3XFrTcTjgTZnFO5JYZtT7PXtzvw81Ogai9kkE13SZdow?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"97\" height=\"62\"></strong></p>"],
+                    solution_en: "<p>18.(b)</p>\n<p><strong id=\"docs-internal-guid-a4ea32ec-7fff-fc37-be95-7196c5818299\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcDFLRg6R1jPyxr6ycaheah6kJ-lFgoXHdd-05eatIb6g65nmRIrJLs9iz9WxcgjcPTU2npAcrCK9E1mbt8_Q4TjP296gWQ3gs3SVSXEs9dJK6c09LC0BNZdgrQannVYrcre6Q0UQ?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"60\" height=\"92\"></strong></p>",
+                    solution_hi: "<p>18. (b)</p>\n<p><strong id=\"docs-internal-guid-a4ea32ec-7fff-fc37-be95-7196c5818299\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcDFLRg6R1jPyxr6ycaheah6kJ-lFgoXHdd-05eatIb6g65nmRIrJLs9iz9WxcgjcPTU2npAcrCK9E1mbt8_Q4TjP296gWQ3gs3SVSXEs9dJK6c09LC0BNZdgrQannVYrcre6Q0UQ?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"60\" height=\"92\"></strong></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "19",
+                    section: "6",
+                    question_en: "<p>19. <span style=\"font-family: Times New Roman;\">Select the correct mirror image of the given combination when the mirror is placed at &lsquo;PQ&rsquo; as shown&nbsp;<br></span><strong id=\"docs-internal-guid-a9a993be-7fff-0923-3044-433978bc8cee\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXehb4BNnDYdhyanEVaDg8HliIC4889F3BMIqq72Y42SwupMwSR0Sm8yTGSm4cdFciQBiyroKPUsmMt_N_dfzhTDSufaiepzFvORjGzdxG7Eq3E2khNBZ2CpJJB6SzPkoJWXZkOxNg?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"107\" height=\"97\"></strong></p>",
+                    question_hi: "<p>19. <span style=\"font-family: Baloo;\">दिए गए संयोजन की सही दर्पण छवि का चयन करें जब दर्पण को \'PQ\' पर दिखाया गया है।<br></span><strong id=\"docs-internal-guid-a9a993be-7fff-0923-3044-433978bc8cee\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXehb4BNnDYdhyanEVaDg8HliIC4889F3BMIqq72Y42SwupMwSR0Sm8yTGSm4cdFciQBiyroKPUsmMt_N_dfzhTDSufaiepzFvORjGzdxG7Eq3E2khNBZ2CpJJB6SzPkoJWXZkOxNg?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"107\" height=\"97\"></strong></p>",
+                    options_en: ["<p><strong id=\"docs-internal-guid-8d62c61b-7fff-5fc3-8f3f-5c4717611129\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXc9EjJpDu1_5b3j6D9__LeqjtEek1HAe13VEdDCIx-LiigfuyhZRg0mZfnxnSqyz6yK8d2jPoeiF4WukzrhSNTHxYWsZ4ydH3zLW_atxQgouQw9vjgJSWYJDuo7XBmsCD6vCRB0?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"102\" height=\"17\"></strong></p>", "<p><strong id=\"docs-internal-guid-c27cb833-7fff-8204-c80f-b9b429256dcf\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXds9SBJzcAcSRiaq05nDKtY0N--U3-6ZFhdiP8Wta8l9k6BwnEHIKZUyDyAFDDEbKk2Jxg5Lp_C4_rJJXWJIz87N0q6Llr41oM1wPlp3J7RoqDMaRFtrUb8uvj4rz3_1gS_Nvpg5A?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"102\" height=\"17\"></strong></p>", 
+                                "<p><strong id=\"docs-internal-guid-7a8facd8-7fff-a8ef-d441-d4e7658c8bdf\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXd0bm6Gzce67qk990sjleztgb2YmGanaBqvRu16AVxWxVEN5XvxoUIy_MmniOeTrS6-w-iyL0Fs57ogS0OYZ8VsjGE8jPuh16Ju8uTdNL7OUuyCzv8xXapFaI77jDK9S2m0gxUm-w?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"105\" height=\"17\"></strong></p>", "<p><strong id=\"docs-internal-guid-0963e95e-7fff-cb48-86a2-2513d7e4d987\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeao5eO4lebgx759B2U4BQL1ZNVPhLJNR9qGCBydQp6MKYqEmAkjzA19TtqH9izkKIJbQfXpyjC9ctId8WwJAhHNKLE-BtV1p2oXnHnlk1xXmoCsdQcpMq2ps_LLw43wxwkLEwDAw?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"105\" height=\"17\"></strong></p>"],
+                    options_hi: ["<p><strong id=\"docs-internal-guid-8c4e0031-7fff-f8f6-e627-77a944a7d8f8\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXc9EjJpDu1_5b3j6D9__LeqjtEek1HAe13VEdDCIx-LiigfuyhZRg0mZfnxnSqyz6yK8d2jPoeiF4WukzrhSNTHxYWsZ4ydH3zLW_atxQgouQw9vjgJSWYJDuo7XBmsCD6vCRB0?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"102\" height=\"17\"></strong></p>", "<p><strong id=\"docs-internal-guid-7770b942-7fff-122f-172b-23471db9b4af\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXds9SBJzcAcSRiaq05nDKtY0N--U3-6ZFhdiP8Wta8l9k6BwnEHIKZUyDyAFDDEbKk2Jxg5Lp_C4_rJJXWJIz87N0q6Llr41oM1wPlp3J7RoqDMaRFtrUb8uvj4rz3_1gS_Nvpg5A?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"102\" height=\"17\"></strong></p>",
+                                "<p><strong id=\"docs-internal-guid-a1e6df0a-7fff-32e3-6e21-c47552c2bfdd\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXd0bm6Gzce67qk990sjleztgb2YmGanaBqvRu16AVxWxVEN5XvxoUIy_MmniOeTrS6-w-iyL0Fs57ogS0OYZ8VsjGE8jPuh16Ju8uTdNL7OUuyCzv8xXapFaI77jDK9S2m0gxUm-w?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"105\" height=\"17\"></strong></p>", "<p><strong id=\"docs-internal-guid-e67eb2df-7fff-5a69-17ba-b0c713250ca5\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeao5eO4lebgx759B2U4BQL1ZNVPhLJNR9qGCBydQp6MKYqEmAkjzA19TtqH9izkKIJbQfXpyjC9ctId8WwJAhHNKLE-BtV1p2oXnHnlk1xXmoCsdQcpMq2ps_LLw43wxwkLEwDAw?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"105\" height=\"17\"></strong></p>"],
+                    solution_en: "<p>19.(b) <span style=\"font-family: Times New Roman;\">The correct water image of the given figure is&nbsp;<br></span><strong id=\"docs-internal-guid-31c6746b-7fff-13f9-3ee5-cf27a4b40d0d\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXds9SBJzcAcSRiaq05nDKtY0N--U3-6ZFhdiP8Wta8l9k6BwnEHIKZUyDyAFDDEbKk2Jxg5Lp_C4_rJJXWJIz87N0q6Llr41oM1wPlp3J7RoqDMaRFtrUb8uvj4rz3_1gS_Nvpg5A?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"108\" height=\"18\"></strong></p>",
+                    solution_hi: "<p>19.(b) <span style=\"font-family: Baloo;\">दी गई आकृति का सही जल प्रतिबिम्ब है:<br></span><strong id=\"docs-internal-guid-31c6746b-7fff-13f9-3ee5-cf27a4b40d0d\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXds9SBJzcAcSRiaq05nDKtY0N--U3-6ZFhdiP8Wta8l9k6BwnEHIKZUyDyAFDDEbKk2Jxg5Lp_C4_rJJXWJIz87N0q6Llr41oM1wPlp3J7RoqDMaRFtrUb8uvj4rz3_1gS_Nvpg5A?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"108\" height=\"18\"></strong></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "20",
+                    section: "6",
+                    question_en: "<p>20.<span style=\"font-family: Times New Roman;\"> Select the correct mirror image of the given figure when the mirror is placed at &lsquo;AB&rsquo; as shown.<br></span><strong id=\"docs-internal-guid-a535dcdd-7fff-0787-2804-58f7fc5390e2\"><strong id=\"docs-internal-guid-d0a1e0fc-7fff-a309-e6a5-272dae10882c\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcbEEAENmxSfeEQVhmWtXY-mkwBsyWJa7mpN8itoVFFxu0hdDXOAbPkw_Trjag2kBYLmDypxgReKSA1VntBQav2lnQXQTF_MxWTv5b0JHFjmW7Psd8gFwgjnA9LrodJxgzbk5gmhw?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"74\" height=\"114\"></strong></strong></p>",
+                    question_hi: "<p>20.<span style=\"font-family: Palanquin Dark;\"> दी गई आकृति की सही दर्पण छवि का चयन करें जब दर्पण को \'AB\' पर रखा गया है जैसा कि दिखाया गया है।<br></span><strong id=\"docs-internal-guid-1cb0fa3a-7fff-cc54-6723-5591d2e3b890\"><strong id=\"docs-internal-guid-a535dcdd-7fff-0787-2804-58f7fc5390e2\"><strong id=\"docs-internal-guid-d0a1e0fc-7fff-a309-e6a5-272dae10882c\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcbEEAENmxSfeEQVhmWtXY-mkwBsyWJa7mpN8itoVFFxu0hdDXOAbPkw_Trjag2kBYLmDypxgReKSA1VntBQav2lnQXQTF_MxWTv5b0JHFjmW7Psd8gFwgjnA9LrodJxgzbk5gmhw?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"74\" height=\"114\"></strong></strong></strong></p>",
+                    options_en: ["<p><strong id=\"docs-internal-guid-469ff90f-7fff-3b7d-7d35-6bd3b53183c0\"><strong id=\"docs-internal-guid-5b365708-7fff-d430-f057-1c11b5d2147e\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXc2kmd4ocQJ4bX-BgijF5XaOGcy9T-SAa-2t5qeA4K2s9T9uWhULGV30Ao0cO6d977pDKYHMkGfLmfMQ8c7Q24Phxhe6t-h07HIQKelNtCWc_qHhuaEjD3wtUJxJI3n9tW6_8qgLA?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"60\" height=\"94\"></strong></strong></p>", "<p><strong id=\"docs-internal-guid-86ae9a8c-7fff-e9c5-749b-cd88f06517dc\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXc8QQIyq-GdwQ8dYwZOK5J2dL6pA3GLmkXjpqLrf126AWpSxi2ji7KrZQSBLK26Qadl4GYzCV5nFKnvVx1aA5h3_KuU0s1gRSma9x1htiKL9AAFA7ascNasAy6D_AN5PtLJ_FAtgA?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"95\" height=\"59\"></strong></p>", 
+                                "<p><strong id=\"docs-internal-guid-7f51d54e-7fff-fa20-11d7-fa6583171e2c\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdSmuLvCHdymnN2C72Whh49IHAPmlrDOkiz7riavTZ88OcojOWidgwtYVdgS7p34Gw8x7uQ64Z5qZDrDPYHQgpq-w9T_D2yslCDVc_oLKOB3ONgf5IaxVSk5CA9YRgn4wFKosNKSA?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"59\" height=\"94\"></strong></p>", "<p><strong id=\"docs-internal-guid-6a6b59bb-7fff-08ef-1997-94662262e4b6\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXegi87Z7tlOtCw93bXH7bZUiz-wYbP4tTSqJsYr2SsXqVsryM-LSxVcWycQue4wvIDkLQO9Dp9CZfAUwg8aj-slFKvVPrDrrR2KybNUhVmsxdQzov92jEBzb3s87undajfuIf3oNw?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"61\" height=\"98\"></strong></p>"],
+                    options_hi: ["<p><strong id=\"docs-internal-guid-2c702f0e-7fff-277d-7ab1-8e5366f6f8b2\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXc2kmd4ocQJ4bX-BgijF5XaOGcy9T-SAa-2t5qeA4K2s9T9uWhULGV30Ao0cO6d977pDKYHMkGfLmfMQ8c7Q24Phxhe6t-h07HIQKelNtCWc_qHhuaEjD3wtUJxJI3n9tW6_8qgLA?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"60\" height=\"94\"></strong></p>", "<p><strong id=\"docs-internal-guid-9859deb6-7fff-5075-424c-364006139dcd\"><strong id=\"docs-internal-guid-f112c612-7fff-2ed6-3892-a6b2c59e3fb2\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXc8QQIyq-GdwQ8dYwZOK5J2dL6pA3GLmkXjpqLrf126AWpSxi2ji7KrZQSBLK26Qadl4GYzCV5nFKnvVx1aA5h3_KuU0s1gRSma9x1htiKL9AAFA7ascNasAy6D_AN5PtLJ_FAtgA?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"95\" height=\"59\"></strong></strong></p>",
+                                "<p><strong id=\"docs-internal-guid-7ed7a4d3-7fff-72fc-eea3-1b209518a480\"><strong id=\"docs-internal-guid-12307081-7fff-3f11-ef2b-e24ea071e039\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdSmuLvCHdymnN2C72Whh49IHAPmlrDOkiz7riavTZ88OcojOWidgwtYVdgS7p34Gw8x7uQ64Z5qZDrDPYHQgpq-w9T_D2yslCDVc_oLKOB3ONgf5IaxVSk5CA9YRgn4wFKosNKSA?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"59\" height=\"94\"></strong></strong></p>", "<p><strong id=\"docs-internal-guid-d8677f52-7fff-88a1-321d-6c9fa389eeba\"><strong id=\"docs-internal-guid-dd6e26db-7fff-4ed7-2f71-f3a78ed511c4\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXegi87Z7tlOtCw93bXH7bZUiz-wYbP4tTSqJsYr2SsXqVsryM-LSxVcWycQue4wvIDkLQO9Dp9CZfAUwg8aj-slFKvVPrDrrR2KybNUhVmsxdQzov92jEBzb3s87undajfuIf3oNw?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"61\" height=\"98\"></strong></strong></p>"],
+                    solution_en: "<p>20.(a) <span style=\"font-family: Times New Roman;\">The correct mirror image of the given figure is<br></span><strong id=\"docs-internal-guid-77c455cb-7fff-bf1c-94c8-e05fe49ce706\"><strong id=\"docs-internal-guid-2c702f0e-7fff-277d-7ab1-8e5366f6f8b2\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXc2kmd4ocQJ4bX-BgijF5XaOGcy9T-SAa-2t5qeA4K2s9T9uWhULGV30Ao0cO6d977pDKYHMkGfLmfMQ8c7Q24Phxhe6t-h07HIQKelNtCWc_qHhuaEjD3wtUJxJI3n9tW6_8qgLA?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"60\" height=\"94\"></strong></strong></p>",
+                    solution_hi: "<p>20.(a) <span style=\"font-family: Baloo;\">दी गई आकृति का सही दर्पण प्रतिबिम्ब&nbsp;<br></span><strong id=\"docs-internal-guid-77c455cb-7fff-bf1c-94c8-e05fe49ce706\"><strong id=\"docs-internal-guid-2c702f0e-7fff-277d-7ab1-8e5366f6f8b2\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXc2kmd4ocQJ4bX-BgijF5XaOGcy9T-SAa-2t5qeA4K2s9T9uWhULGV30Ao0cO6d977pDKYHMkGfLmfMQ8c7Q24Phxhe6t-h07HIQKelNtCWc_qHhuaEjD3wtUJxJI3n9tW6_8qgLA?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"60\" height=\"94\"></strong></strong></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "21",
+                    section: "6",
+                    question_en: "<p>21. <span style=\"font-family: Times New Roman;\">Select the correct water image of the given combination.<br></span><strong id=\"docs-internal-guid-89dac974-7fff-24c1-200e-4cca0ceeb963\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeWDNxaLQipu5a_xyW20PHWZDOg0lLKzncThsCEemLOwb4P6P1c4YbDT0nqasKOaOdHMP6eaRDCzgiOEdo7KGuDbdF0U22SHTnFwnP2jjxG-OUiZPZNclG7Ngkw0tc670Tl4koSRw?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"141\" height=\"20\"></strong></p>",
+                    question_hi: "<p>21. <span style=\"font-family: Palanquin Dark;\">दिए गए संयोजन की सही पानी की छवि का चयन करें।<br></span><strong id=\"docs-internal-guid-2f22adf1-7fff-b9cd-f773-0e75f4aa4035\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeWDNxaLQipu5a_xyW20PHWZDOg0lLKzncThsCEemLOwb4P6P1c4YbDT0nqasKOaOdHMP6eaRDCzgiOEdo7KGuDbdF0U22SHTnFwnP2jjxG-OUiZPZNclG7Ngkw0tc670Tl4koSRw?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"141\" height=\"20\"></strong></p>",
+                    options_en: ["<p><strong id=\"docs-internal-guid-e89dd498-7fff-3f1c-7d89-27382dce7575\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcTxJwz_rdLFJyLU9YrzaOOJ0VafTBVXkz8g6Q0kkvIxlk5ZXK_q3GKAJoSZ_XEaU7XZNDE78UtwQmIt_HauqQMRaim10aeqkiqhYPnyXeqPjxuBrPNfu2gwVNlm6QMaReNDwHX?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"153\" height=\"20\"></strong></p>", "<p><strong id=\"docs-internal-guid-bd387414-7fff-4e9a-73d4-18493223b069\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeYgp5ax58-5BNHqjfZ9st4E6c_nI3Pn7U1YRlTswOuCTXlJeiEnEXwnYF-MAR8lKh85TOGs_gooHsGn-FZcyJ2RIi2F_KOmT0gNcskFSdPknEI9J5r0vMDfGTgnILRfryN7aXN?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"139\" height=\"20\"></strong></p>", 
+                                "<p><strong id=\"docs-internal-guid-db0f5834-7fff-60a5-9ac2-238e591f548b\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXefUzTITUQ3JS3NzcV4k3Lu43SlUYCjVqoPMyE6wfftZ5vjMX6daL7AYfYvZjZKjQ7tVoL6qKUPy6VuScqpvwZ2MpCwwhmMlOKU9q0x_bwNyv7yJUWjPk96Mid1aD-x5Pp7k7hI9w?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"141\" height=\"20\"></strong></p>", "<p><strong id=\"docs-internal-guid-679fed0a-7fff-7340-d471-2dc3914c95b9\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfneVChhg4jeOmJUKYq31eJ76Fvp0Vp5TwhqoVkgvjk4XcQEp0PpXDUG4cj9NuSJuoVbKpj6v_tqx2FjRgjLHEBNFCcWQjXB-WY_QoSmXAnucoymVRc8bKTY5nDWnpVJZ8J-mVC9A?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"141\" height=\"20\"></strong></p>"],
+                    options_hi: ["<p><strong id=\"docs-internal-guid-00e4c32d-7fff-d65e-66f3-b2521830710b\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcTxJwz_rdLFJyLU9YrzaOOJ0VafTBVXkz8g6Q0kkvIxlk5ZXK_q3GKAJoSZ_XEaU7XZNDE78UtwQmIt_HauqQMRaim10aeqkiqhYPnyXeqPjxuBrPNfu2gwVNlm6QMaReNDwHX?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"153\" height=\"20\"></strong></p>", "<p><strong id=\"docs-internal-guid-4595dbc4-7fff-e102-4802-7003c9100b42\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeYgp5ax58-5BNHqjfZ9st4E6c_nI3Pn7U1YRlTswOuCTXlJeiEnEXwnYF-MAR8lKh85TOGs_gooHsGn-FZcyJ2RIi2F_KOmT0gNcskFSdPknEI9J5r0vMDfGTgnILRfryN7aXN?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"139\" height=\"20\"></strong></p>",
+                                "<p><strong id=\"docs-internal-guid-6da91377-7fff-4925-20ed-57e2c04064a4\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXefUzTITUQ3JS3NzcV4k3Lu43SlUYCjVqoPMyE6wfftZ5vjMX6daL7AYfYvZjZKjQ7tVoL6qKUPy6VuScqpvwZ2MpCwwhmMlOKU9q0x_bwNyv7yJUWjPk96Mid1aD-x5Pp7k7hI9w?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"141\" height=\"20\"></strong></p>", "<p><strong id=\"docs-internal-guid-5b176ed6-7fff-566a-6f49-e35d9a0e4b19\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfneVChhg4jeOmJUKYq31eJ76Fvp0Vp5TwhqoVkgvjk4XcQEp0PpXDUG4cj9NuSJuoVbKpj6v_tqx2FjRgjLHEBNFCcWQjXB-WY_QoSmXAnucoymVRc8bKTY5nDWnpVJZ8J-mVC9A?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"141\" height=\"20\"></strong></p>"],
+                    solution_en: "<p>21.(d) <span style=\"font-family: \'Times New Roman\';\">the correct water image is<br></span><strong id=\"docs-internal-guid-5b176ed6-7fff-566a-6f49-e35d9a0e4b19\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfneVChhg4jeOmJUKYq31eJ76Fvp0Vp5TwhqoVkgvjk4XcQEp0PpXDUG4cj9NuSJuoVbKpj6v_tqx2FjRgjLHEBNFCcWQjXB-WY_QoSmXAnucoymVRc8bKTY5nDWnpVJZ8J-mVC9A?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"141\" height=\"20\"></strong></p>",
+                    solution_hi: "<p>21.(d) <span style=\"font-family: Baloo;\">सही पानी की छवि है: <br></span><strong id=\"docs-internal-guid-5b176ed6-7fff-566a-6f49-e35d9a0e4b19\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfneVChhg4jeOmJUKYq31eJ76Fvp0Vp5TwhqoVkgvjk4XcQEp0PpXDUG4cj9NuSJuoVbKpj6v_tqx2FjRgjLHEBNFCcWQjXB-WY_QoSmXAnucoymVRc8bKTY5nDWnpVJZ8J-mVC9A?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"141\" height=\"20\"></strong></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "22",
+                    section: "6",
+                    question_en: "<p>22. <span style=\"font-family: Times New Roman;\">Select the correct mirror image of the given figure when the mirror is placed at &lsquo;AB&rsquo; as shown.</span></p>\n<p><strong id=\"docs-internal-guid-96b1557c-7fff-a075-aa3e-dac5747541a4\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdaAj1kYigEpxx0Oia3CF1ecdQpvJ49VSN7gOkBRdAII_kh7JdbQAksQKWZnTasZLOjU9aX3pUGSW-S-g0NQwMiqhuVkQY8BNAKYYyt3b7lE66vXv9t4wniodaT9LbHSzVfBr26Ms4azJHLAQO6CwkfslQ?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"90\" height=\"101\"></strong></p>",
+                    question_hi: "<p>22. <span style=\"font-family: Baloo;\">दी गई आकृति की सही दर्पण छवि का चयन करें जब दर्पण को \'AB\' पर रखा गया है जैसा कि दिखाया गया है।</span></p>\n<p><strong id=\"docs-internal-guid-8ac9f421-7fff-a494-238d-73247e767f2a\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdaAj1kYigEpxx0Oia3CF1ecdQpvJ49VSN7gOkBRdAII_kh7JdbQAksQKWZnTasZLOjU9aX3pUGSW-S-g0NQwMiqhuVkQY8BNAKYYyt3b7lE66vXv9t4wniodaT9LbHSzVfBr26Ms4azJHLAQO6CwkfslQ?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"92\" height=\"103\"></strong></p>",
+                    options_en: ["<p><strong id=\"docs-internal-guid-21c4a93e-7fff-1888-0323-582f6baa01a2\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXei7oQsuNQEZls-3cQgWbejGWw7qgwxkWUjziCyNK826aFGi8haKekeWlHjsjc_d-msd2Qf2kXR8JTk3kGStDqDj6EFczFNZnymTxdO-PZJd8h6AXmemZor8biGxYhyRbH58Ra7Y78J7nF4lDLFAwgie7I?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"86\" height=\"76\"></strong></p>", "<p><strong id=\"docs-internal-guid-e4e1af1a-7fff-424d-0458-5f9287270279\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXd3idqlpO2y7d3Xl1P2kHPdhmREZa83560eFHm4ZGRztIIUUjq_QRPRWMnE3QreiL6bzqBDXEldyn6QlF_IfCVEAgtDPm-StB9-tAEX4U0ijFdp-OB1r6D8AWkBPsF5hU9zbbzQ3eo6KmKZQ0YLAm_llA?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"86\" height=\"76\"></strong></p>", 
+                                "<p><strong id=\"docs-internal-guid-8584b906-7fff-5a4a-2198-b205d686d59e\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeQCe_NcfnljTHbMR__Z0PCMBT9AUpHc_eg52VYBZueqk6gjlOehl4Yq1O4tQbDq96VwDhaRryoj8wYvq7JrTkkx7X0csm660xG41fvwp5gHCF7hi07kTIsqBhsWQP4PLY99uSwAhVGR4f8Jnh2c3aYYQ?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"86\" height=\"76\"></strong></p>", "<p><strong id=\"docs-internal-guid-63f7043d-7fff-72c0-e674-a74898778214\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdTfU0rCZjywpS24yPx88lYd4H7KumzQ4WYnuFSAxG_nIKBGVZQ3fYicvf-DR3U5o_KsFZ5HdolF-xpf0iGZDcliRPl74YCT6CfQC5zI04Kvdm1R4MjOStjTsE1UPLmL-Ej3wRPmBqyKHBGCe8Od2iihA0?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"86\" height=\"76\"></strong></p>"],
+                    options_hi: ["<p><strong id=\"docs-internal-guid-f0d8c6c3-7fff-e8f2-c713-89376dbfb77c\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXei7oQsuNQEZls-3cQgWbejGWw7qgwxkWUjziCyNK826aFGi8haKekeWlHjsjc_d-msd2Qf2kXR8JTk3kGStDqDj6EFczFNZnymTxdO-PZJd8h6AXmemZor8biGxYhyRbH58Ra7Y78J7nF4lDLFAwgie7I?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"86\" height=\"76\"></strong></p>", "<p><strong id=\"docs-internal-guid-71b3a65e-7fff-fdda-8a70-603a0390ee3f\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXd3idqlpO2y7d3Xl1P2kHPdhmREZa83560eFHm4ZGRztIIUUjq_QRPRWMnE3QreiL6bzqBDXEldyn6QlF_IfCVEAgtDPm-StB9-tAEX4U0ijFdp-OB1r6D8AWkBPsF5hU9zbbzQ3eo6KmKZQ0YLAm_llA?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"86\" height=\"76\"></strong></p>",
+                                "<p><strong id=\"docs-internal-guid-2cea6e1e-7fff-134a-fc96-5fb2e3ef777d\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeQCe_NcfnljTHbMR__Z0PCMBT9AUpHc_eg52VYBZueqk6gjlOehl4Yq1O4tQbDq96VwDhaRryoj8wYvq7JrTkkx7X0csm660xG41fvwp5gHCF7hi07kTIsqBhsWQP4PLY99uSwAhVGR4f8Jnh2c3aYYQ?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"86\" height=\"76\"></strong></p>", "<p><strong id=\"docs-internal-guid-c3ad06a9-7fff-29a7-a338-abee585b7bf7\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdTfU0rCZjywpS24yPx88lYd4H7KumzQ4WYnuFSAxG_nIKBGVZQ3fYicvf-DR3U5o_KsFZ5HdolF-xpf0iGZDcliRPl74YCT6CfQC5zI04Kvdm1R4MjOStjTsE1UPLmL-Ej3wRPmBqyKHBGCe8Od2iihA0?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"86\" height=\"76\"></strong></p>"],
+                    solution_en: "<p>22. (a) <span style=\"font-family: \'Times New Roman\';\">The correct mirror image is</span></p>\n<p><strong id=\"docs-internal-guid-d4232d23-7fff-55b0-2164-195c70640317\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXei7oQsuNQEZls-3cQgWbejGWw7qgwxkWUjziCyNK826aFGi8haKekeWlHjsjc_d-msd2Qf2kXR8JTk3kGStDqDj6EFczFNZnymTxdO-PZJd8h6AXmemZor8biGxYhyRbH58Ra7Y78J7nF4lDLFAwgie7I?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"86\" height=\"76\"></strong></p>",
+                    solution_hi: "<p>22. (a) <span style=\"font-family: Baloo;\">सही दर्पण प्रतिबिम्ब है:</span></p>\n<p><strong id=\"docs-internal-guid-d4232d23-7fff-55b0-2164-195c70640317\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXei7oQsuNQEZls-3cQgWbejGWw7qgwxkWUjziCyNK826aFGi8haKekeWlHjsjc_d-msd2Qf2kXR8JTk3kGStDqDj6EFczFNZnymTxdO-PZJd8h6AXmemZor8biGxYhyRbH58Ra7Y78J7nF4lDLFAwgie7I?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"86\" height=\"76\"></strong></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "23",
+                    section: "misc",
+                    question_en: "<p><span style=\"font-family: Times New Roman;\">23. </span><span style=\"font-family: Times New Roman;\">Select the correct water image of the given combination.&nbsp;<br></span><strong id=\"docs-internal-guid-df2d37f2-7fff-18c2-174c-3805084557bd\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfCak-QtgfSqbbzPQ7Zva3O_yVKJ55P9Kw4HC-qHEYcz-a6TqxAPDMDHi3RASmLvOnHdxChwysjeTUjOhVxBF5ttoXHWe3_3KXAo5BnLj7XiDdMqW9G6MxcyBgpRoFp8FEMKBLZGg?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"102\" height=\"21\"></strong></p>",
+                    question_hi: "<p>23. <span style=\"font-family: Palanquin Dark;\">दिए गए संयोजन के जल प्रतिबिम्ब का चयन करें।<br></span><strong id=\"docs-internal-guid-423374d7-7fff-b069-c06c-2fa3a714aa8c\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfCak-QtgfSqbbzPQ7Zva3O_yVKJ55P9Kw4HC-qHEYcz-a6TqxAPDMDHi3RASmLvOnHdxChwysjeTUjOhVxBF5ttoXHWe3_3KXAo5BnLj7XiDdMqW9G6MxcyBgpRoFp8FEMKBLZGg?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"102\" height=\"21\"></strong></p>",
+                    options_en: ["<p><strong id=\"docs-internal-guid-ed53014c-7fff-3364-b216-a6c6726c2dad\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcDbM-IpywrQQpUo80mwcqtxM1zoGMV5b8ebQqn6LXn-RJSND-TipckjzzBq7b7ZR5V0JsEpvC0lQB2qLJB2-dZYDqr5D3l5X28okUYm2nX1wYTxNSm7RynpIXkoxS9DsQ43vzNGg?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"100\" height=\"20\"></strong></p>", "<p><strong id=\"docs-internal-guid-22f6616f-7fff-4d21-cce5-ba4fb729fac9\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeP9MN9ydftsuQmZPgEBGcdXXk4t9vAsvnaCxLq9a4z47t_rGaxwvWA_bNSXsgo0ZU44RL__9jAfwigttn8vOPIzCdqXzx-FNGXUmLWxvjq9V0vozwfq116CxxWMBZt9WtjYUiktQ?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"96\" height=\"20\"></strong></p>", 
+                                "<p><strong id=\"docs-internal-guid-30479a14-7fff-66d6-d74b-3a9b18f2183c\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdy2sv2v5eq3GUKphyjN8W7gv2ytgMv0UM4vnhNsFUJUdZjXytx1Ky4qXTei0vylx63hQm8B4OqPUD9vbPRfmJ23ye3Maz0ZoXw0p9P4NGKoO2bMNpe7MM7gGjAUJMBSy66BgKL?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"94\" height=\"20\"></strong></p>", "<p><strong id=\"docs-internal-guid-cd19838d-7fff-88a3-7bab-299733dfe6fd\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeu5YJ1Ky8IX2bBonrSSIVCAqenLQyRQcRly7tmxiRqG8Lm0ydixK4CaFojl0SKUJBbT7QcAeUaQugSFN1XRjhCYe0V_lTiMI1rUkgahEXE5v1TdEukS53akGVqBk4QEOuTxt1F1g?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"98\" height=\"20\"></strong></p>"],
+                    options_hi: ["<p><strong id=\"docs-internal-guid-51267416-7fff-ca66-ae1e-624f7301fa8a\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcDbM-IpywrQQpUo80mwcqtxM1zoGMV5b8ebQqn6LXn-RJSND-TipckjzzBq7b7ZR5V0JsEpvC0lQB2qLJB2-dZYDqr5D3l5X28okUYm2nX1wYTxNSm7RynpIXkoxS9DsQ43vzNGg?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"100\" height=\"20\"></strong></p>", "<p><strong id=\"docs-internal-guid-bf3d14c0-7fff-db8e-9192-66a3119e0ab7\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeP9MN9ydftsuQmZPgEBGcdXXk4t9vAsvnaCxLq9a4z47t_rGaxwvWA_bNSXsgo0ZU44RL__9jAfwigttn8vOPIzCdqXzx-FNGXUmLWxvjq9V0vozwfq116CxxWMBZt9WtjYUiktQ?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"96\" height=\"20\"></strong></p>",
+                                "<p><strong id=\"docs-internal-guid-ded2b174-7fff-f599-3eb0-a958d1563d68\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdy2sv2v5eq3GUKphyjN8W7gv2ytgMv0UM4vnhNsFUJUdZjXytx1Ky4qXTei0vylx63hQm8B4OqPUD9vbPRfmJ23ye3Maz0ZoXw0p9P4NGKoO2bMNpe7MM7gGjAUJMBSy66BgKL?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"94\" height=\"20\"></strong></p>", "<p><strong id=\"docs-internal-guid-0999d3a9-7fff-0ee4-e149-0eb9162e093a\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeu5YJ1Ky8IX2bBonrSSIVCAqenLQyRQcRly7tmxiRqG8Lm0ydixK4CaFojl0SKUJBbT7QcAeUaQugSFN1XRjhCYe0V_lTiMI1rUkgahEXE5v1TdEukS53akGVqBk4QEOuTxt1F1g?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"98\" height=\"20\"></strong></p>"],
+                    solution_en: "<p>23.(c)<br><strong id=\"docs-internal-guid-35239dbe-7fff-618f-3a5b-c4ef00b10e7d\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdy2sv2v5eq3GUKphyjN8W7gv2ytgMv0UM4vnhNsFUJUdZjXytx1Ky4qXTei0vylx63hQm8B4OqPUD9vbPRfmJ23ye3Maz0ZoXw0p9P4NGKoO2bMNpe7MM7gGjAUJMBSy66BgKL?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"94\" height=\"20\"><br></strong><span style=\"font-family: Palanquin Dark;\">is the correct water image.</span></p>",
+                    solution_hi: "<p>23.(c)<br><strong id=\"docs-internal-guid-35239dbe-7fff-618f-3a5b-c4ef00b10e7d\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdy2sv2v5eq3GUKphyjN8W7gv2ytgMv0UM4vnhNsFUJUdZjXytx1Ky4qXTei0vylx63hQm8B4OqPUD9vbPRfmJ23ye3Maz0ZoXw0p9P4NGKoO2bMNpe7MM7gGjAUJMBSy66BgKL?key=6z_6NvXfmAFQpwwAEEcEDYNF\" width=\"94\" height=\"20\"><br></strong><span style=\"font-family: Palanquin Dark;\">पानी का सही जल प्रतिबिम्ब है:&nbsp;</span></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+            
+            // Generate question boxes
+            const boxesContainer = document.getElementById('question-boxes');
+            questions.forEach((q, index) => {
+                const box = document.createElement('div');
+                box.className = 'q-box';
+                box.textContent = index + 1;
+                box.onclick = () => showQuestion(index);
+                box.id = `box-${index}`;
+                boxesContainer.appendChild(box);
+            });
+            
+            // Show first question
+            showQuestion(0);
+            updateProgress();
+        }
+        
+        // Show a specific question
+        
+        function formatContent(text) {
+            if (!text) return '';
+            return text.replace(/<img/g, '<img style="max-width:100%;height:auto;"');
+        }
+        
+        function showQuestion(index) {
+            if (index < 0 || index >= questions.length) return;
+            
+            currentQuestion = index;
+            const question = questions[index];
+            
+            // Update question counter
+            document.getElementById('question-counter').textContent = `Question ${index + 1} of ${questions.length}`;
+            
+            // Update question boxes
+            document.querySelectorAll('.q-box').forEach(box => box.classList.remove('current'));
+            document.getElementById(`box-${index}`).classList.add('current');
+            
+            // Generate question HTML
+            let html = `
+                <div class="question-card">
+                    <div class="question-text">
+                        <div class="en">${formatContent(question.question_en)}</div>
+                        <div class="hi" style="display:none">${formatContent(question.question_hi)} </div>
+                    </div>
+                    <div class="options" id="options-container">`;
+            
+            // Add options
+            ['a', 'b', 'c', 'd'].forEach((opt, i) => {
+                let optionClass = '';
+                let isCorrectAnswer = opt === question.correct;
+                let isUserAnswer = answers[question.id] === opt;
+                
+                // When reviewing, add appropriate classes
+                if (submitted) {
+                    if (isCorrectAnswer) {
+                        optionClass += ' correct-answer';
+                    } else if (isUserAnswer && !isCorrectAnswer) {
+                        optionClass += ' incorrect';
+                    }
+                }
+                
+                html += `
+                    <div class="option-item">
+                        <input class="option-input" type="radio" name="q${index}" 
+                            id="opt-${index}-${opt}" value="${opt}" 
+                            ${isUserAnswer ? 'checked' : ''}
+                            onclick="selectAnswer('${question.id}', '${opt}')">
+                       <label class="option-label${optionClass}" for="opt-${index}-${opt}">
+                            <div class="en">${question.options_en[i]}</div>
+                            <div class="hi" style="display:none">${question.options_hi[i]}</div>
+                        </label>
+                    </div>`;
+            });
+            
+            // Add solution if submitted
+            if (submitted) {
+                const isCorrect = answers[question.id] === question.correct;
+                const resultText = answers[question.id] ? (isCorrect ? 'Correct!' : 'Incorrect!') : 'Not attempted';
+                
+                html += `
+                    <div class="solution-container">
+                        <div class="solution-title">${resultText}</div>
+                        <div class="solution-text">
+                            <div class="en">${question.solution_en}</div>
+                            <div class="hi" style="display:none">${question.solution_hi}</div>
+                        </div>
+                    </div>`;
+            }
+            
+            html += `</div></div>`;
+            
+            document.getElementById('questions-container').innerHTML = html;
+            
+            // Apply language settings
+            applyLanguage();
+            
+            // If in mobile view, close the menu
+            if (window.innerWidth < 992) {
+                toggleNav(false);
+            }
+            
+            // Add review mode class if submitted
+            if (submitted) {
+                document.getElementById('options-container').classList.add('review-mode');
+            }
+        }
+        
+        // Apply current language
+        function applyLanguage() {
+            document.querySelectorAll(`.${currentLang}`).forEach(el => el.style.display = 'block');
+            document.querySelectorAll(`.${currentLang === 'en' ? 'hi' : 'en'}`).forEach(el => el.style.display = 'none');
+            
+            // Update language button text
+            document.getElementById('lang-text').textContent = currentLang === 'en' ? 'Hi' : 'En';
+        }
+        
+        // Select an answer
+        function selectAnswer(qId, option) {
+            if (submitted) return;
+            
+            answers[qId] = option;
+            updateProgress();
+            
+            // Mark question as attempted in the navigation
+            const index = questions.findIndex(q => q.id === qId);
+            if (index >= 0) {
+                const box = document.getElementById(`box-${index}`);
+                box.classList.add('attempted');
+                box.classList.remove('unattempted');
+            }
+        }
+        
+        // Navigate to previous/next question
+        function prevQuestion() { 
+            if (currentQuestion > 0) showQuestion(currentQuestion - 1); 
+        }
+        
+        function nextQuestion() { 
+            if (currentQuestion < questions.length - 1) showQuestion(currentQuestion + 1); 
+        }
+        
+        // Switch section
+        function switchSection(sectionId) {
+            if (sectionId === 'all') {
+                showQuestion(0);
+                return;
+            }
+            
+            const section = sections[sectionId];
+            if (section) showQuestion(section.start);
+        }
+        
+        // Toggle language
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'hi' : 'en';
+            applyLanguage();
+        }
+        
+        // Toggle navigation sidebar
+        function toggleNav(show) {
+            const nav = document.getElementById('question-nav');
+            const overlay = document.getElementById('nav-overlay');
+            
+            if (show === undefined) {
+                show = !nav.classList.contains('show');
+            }
+            
+            if (show) {
+                nav.classList.add('show');
+                overlay.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            } else {
+                nav.classList.remove('show');
+                overlay.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+        }
+        
+        // Update progress
+        function updateProgress() {
+            const attempted = Object.keys(answers).length;
+            document.getElementById('attempted-count').textContent = attempted;
+        }
+        
+        // Start timer
+        function startTimer() {
+            const timerDisplay = document.getElementById('timer-display');
+            let timeLeft = totalTime;
+            
+            const timerInterval = setInterval(() => {
+                if (timeLeft <= 0 || submitted) {
+                    clearInterval(timerInterval);
+                    if (!submitted) submitTest();
+                    return;
+                }
+                
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                timeLeft--;
+            }, 1000);
+        }
+        
+        // Confirm before submitting
+        function confirmSubmit() {
+            if (submitted) return;
+            
+            const attempted = Object.keys(answers).length;
+            const remaining = questions.length - attempted;
+            
+            // Create a more modern confirmation dialog
+            const confirmHtml = `
+                <div style="text-align: center; padding: 20px;">
+                    <h4 style="margin-bottom: 16px; color: var(--dark);">Confirm Submission</h4>
+                    <p style="margin-bottom: 24px; color: var(--gray);">
+                        You have attempted ${attempted} of ${questions.length} questions.<br>
+                        ${remaining} questions are unattempted.
+                    </p>
+                    <div style="display: flex; justify-content: center; gap: 12px;">
+                        <button onclick="this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; border: 1px solid var(--light-gray); background: white; border-radius: 8px; cursor: pointer;">
+                            Cancel
+                        </button>
+                        <button onclick="submitTest(); this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer;">
+                            Submit Test
+                        </button>
+                    </div>
+                </div>`;
+            
+            // Create modal element
+            const modal = document.createElement('div');
+            modal.className = 'results-modal show';
+            modal.innerHTML = `
+                <div class="results-card" style="max-width: 400px;">
+                    <button class="cancel-btn" style="position: absolute; top: 12px; right: 12px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--gray);" onclick="this.closest('.results-modal').remove()">
+                        ×
+                    </button>
+                    ${confirmHtml}
+                </div>`;
+            
+            document.body.appendChild(modal);
+        }
+        
+        // Submit test
+        function submitTest() {
+            if (submitted) return;
+            
+            submitted = true;
+            
+            let score = 0;
+            let correctCount = 0;
+            let incorrectCount = 0;
+            let unattemptedCount = 0;
+            
+            questions.forEach((q, index) => {
+                const userAns = answers[q.id];
+                const box = document.getElementById(`box-${index}`);
+                
+                box.classList.remove('attempted');
+                
+                if (!userAns) {
+                    unattemptedCount++;
+                    box.classList.add('unattempted');
+                } else if (userAns === q.correct) {
+                    correctCount++;
+                    score += q.pos_marks;
+                    box.classList.add('correct');
+                } else {
+                    incorrectCount++;
+                    score -= q.neg_marks;
+                    box.classList.add('incorrect');
+                }
+            });
+            
+            // Update result values
+            document.getElementById('score-value').textContent = score.toFixed(2);
+            document.getElementById('correct-value').textContent = correctCount;
+            document.getElementById('incorrect-value').textContent = incorrectCount;
+            document.getElementById('unattempted-value').textContent = unattemptedCount;
+            
+            // Show the results modal
+            document.getElementById('results-modal').classList.add('show');
+            
+            // Disable submit button
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-check"></i>';
+            submitBtn.style.backgroundColor = 'var(--success)';
+            
+            // Refresh current question view to show solution
+            showQuestion(currentQuestion);
+        }
+        
+        // Review test
+        function reviewTest() {
+            document.getElementById('results-modal').classList.remove('show');
+            showQuestion(0);
+        }
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target === document.getElementById('results-modal')) {
+                document.getElementById('results-modal').classList.remove('show');
+            }
+        });
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') prevQuestion();
+            if (e.key === 'ArrowRight') nextQuestion();
+        });
+    </script>
+</body>
+</html>
