@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mocks Wallah</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --primary-light: #a29bfe;
+            --primary-dark: #5649c0;
+            --secondary: #00cec9;
+            --accent: #fd79a8;
+            --success: #00b894;
+            --warning: #fdcb6e;
+            --danger: #d63031;
+            --light: #f8f9fa;
+            --dark: #2d3436;
+            --gray: #636e72;
+            --light-gray: #dfe6e9;
+            --card-bg: #ffffff;
+            --body-bg: #f5f6fa;
+            --header-bg: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            --footer-bg: #ffffff;
+            --box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            --box-shadow-sm: 0 2px 10px rgba(0,0,0,0.05);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background-color: var(--body-bg);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            color: var(--dark);
+            line-height: 1.6;
+            padding-bottom: 80px; /* Space for fixed navigation */
+            overflow-x: hidden;
+        }
+        
+        /* Header Styles */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: var(--header-bg);
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            z-index: 1000;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .header-brand {
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .header-brand i {
+            margin-right: 8px;
+            font-size: 1.2rem;
+        }
+        
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .control-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .control-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .control-btn.active {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .timer-display {
+            background: rgba(0,0,0,0.2);
+            border-radius: 18px;
+            padding: 4px 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+        
+        .timer-display i {
+            margin-right: 6px;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-top: 60px;
+            padding: 16px;
+            min-height: calc(100vh - 140px);
+        }
+        
+        .question-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--box-shadow-sm);
+            border: none;
+            transition: var(--transition);
+        }
+        
+        .question-counter {
+            font-size: 0.9rem;
+            color: var(--gray);
+            text-align: center;
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+        
+        .question-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+        
+        .option-item {
+            margin-bottom: 12px;
+            position: relative;
+        }
+        
+        .option-input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+            .question-text {
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        hyphens: auto;
+        max-width: 100%;
+    }
+
+    .question-text img,
+    .option-label img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 8px 0;
+        border-radius: 8px;
+    }
+
+    .option-label {
+        overflow: hidden;
+    }
+
+    .question-card {
+        overflow: hidden;
+    }
+        
+        .option-label {
+            display: block;
+            padding: 14px 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--light-gray);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .option-label:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .option-input:checked + .option-label {
+            border-color: var(--primary);
+            background: rgba(108, 92, 231, 0.05);
+            box-shadow: 0 0 0 1px var(--primary);
+        }
+        
+        .option-input:checked + .option-label::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--primary);
+        }
+        
+        /* When reviewing answers */
+        .review-mode .option-input:checked + .option-label.correct {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.correct::after {
+            background: var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.incorrect {
+            border-color: var(--danger);
+            background: rgba(214, 48, 49, 0.05);
+            box-shadow: 0 0 0 1px var(--danger);
+        }
+        
+        .MathJax, .mjx-chtml {
+            overflow-x: auto;
+            max-width: 100%;
+            display: inline-block;
+        }
+
+        
+        .review-mode .option-input:checked + .option-label.incorrect::after {
+            background: var(--danger);
+        }
+        
+        .review-mode .option-label.correct-answer {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-label.correct-answer::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--success);
+        }
+        
+        .solution-container {
+            margin-top: 20px;
+            padding: 16px;
+            background: rgba(108, 92, 231, 0.05);
+            border-radius: 12px;
+            border-left: 3px solid var(--primary);
+        }
+        
+        .solution-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+        
+        /* Question Navigation */
+        .question-nav {
+            position: fixed;
+            top: 60px;
+            right: 0;
+            bottom: 80px;
+            width: 100%;
+            max-width: 320px;
+            background: var(--card-bg);
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            transform: translateX(100%);
+            transition: var(--transition);
+            z-index: 900;
+            overflow-y: auto;
+            padding: 16px;
+        }
+        
+        .question-nav.show {
+            transform: translateX(0);
+        }
+        
+        .nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .nav-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+        
+        .question-stats {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .stat-badge {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        
+        .section-selector {
+            width: 100%;
+            margin-bottom: 16px;
+            border-radius: 12px;
+            padding: 10px 16px;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            font-size: 0.9rem;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 16px;
+        }
+        
+        .question-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+            gap: 8px;
+        }
+        
+        .q-box {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .q-box:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .q-box.attempted {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .q-box.correct {
+            background-color: var(--success);
+            color: white;
+            border-color: var(--success);
+        }
+        
+        .q-box.incorrect {
+            background-color: var(--danger);
+            color: white;
+            border-color: var(--danger);
+        }
+        
+        .q-box.current {
+            border: 2px solid var(--accent) !important;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .q-box.unattempted {
+            background-color: var(--gray);
+            color: white;
+            border-color: var(--gray);
+        }
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: var(--footer-bg);
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            z-index: 800;
+        }
+        
+        .nav-btn {
+            height: 48px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 20px;
+            transition: var(--transition);
+            gap: 8px;
+        }
+        
+        .nav-btn i {
+            font-size: 1rem;
+        }
+        
+        .nav-btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .nav-btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+        
+        .nav-btn-outline:hover {
+            background: rgba(108, 92, 231, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        /* Overlay when nav is open */
+        .nav-overlay {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            bottom: 80px;
+            background: rgba(0,0,0,0.5);
+            z-index: 800;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+        }
+        
+        .nav-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        /* Results Modal */
+        .results-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1100;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+            padding: 16px;
+        }
+        
+        .results-modal.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .results-card {
+            background: white;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+            transform: translateY(20px);
+            transition: var(--transition);
+        }
+        
+        .results-modal.show .results-card {
+            transform: translateY(0);
+        }
+        
+        .results-header {
+            background: var(--header-bg);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .results-title {
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .results-body {
+            padding: 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            color: white;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+        
+        .results-footer {
+            padding: 16px 20px;
+            display: flex;
+            justify-content: center;
+            border-top: 1px solid var(--light-gray);
+        }
+        
+        /* Responsive Adjustments */
+        @media (min-width: 992px) {
+            .question-nav {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-right: 320px;
+            }
+            
+            .nav-overlay {
+                display: none;
+            }
+            
+            .bottom-nav {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .question-grid {
+                grid-template-columns: repeat(auto-fill, minmax(36px, 1fr));
+                gap: 6px;
+            }
+            
+            .q-box {
+                width: 36px;
+                height: 36px;
+                font-size: 0.9rem;
+            }
+            
+            .option-label {
+                padding: 12px 14px;
+            }
+            
+            .question-text {
+                font-size: 1rem;
+            }
+            
+            .header-brand {
+                font-size: 1rem;
+            }
+            
+            .control-btn {
+                width: 32px;
+                height: 32px;
+            }
+            
+            .timer-display {
+                font-size: 0.8rem;
+                padding: 4px 10px;
+            }
+            
+            .nav-btn {
+                height: 44px;
+                padding: 0 16px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="#" class="header-brand">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Mocks Wallah</span>
+            </a>
+            
+            <div class="header-controls">
+                <!-- Timer -->
+                <div class="timer-display">
+                    <i class="far fa-clock"></i>
+                    <span id="timer-display">6:00</span>
+                </div>
+                
+                <!-- Language toggle -->
+                <button class="control-btn" id="lang-btn" onclick="toggleLanguage()">
+                    <span id="lang-text">En</span>
+                </button>
+                
+                <!-- Submit button -->
+                <button class="control-btn" id="submit-btn" onclick="confirmSubmit()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+                
+                <!-- Questions toggle for mobile -->
+                <button class="control-btn nav-toggle-btn" id="nav-toggle" onclick="toggleNav()">
+                    <i class="fas fa-th"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main content -->
+    <main class="main-content" id="main-content">
+        <div class="question-counter" id="question-counter">Question 1 of 20</div>
+        
+        <!-- Questions will be displayed here -->
+        <div id="questions-container"></div>
+    </main>
+    
+    <!-- Overlay for mobile nav -->
+    <div class="nav-overlay" id="nav-overlay" onclick="toggleNav(false)"></div>
+    
+    <!-- Question navigation sidebar -->
+    <aside class="question-nav" id="question-nav">
+        <div class="nav-header">
+            <h3 class="nav-title">Questions</h3>
+            <div class="question-stats">
+                <span class="stat-badge bg-primary" id="attempted-count">0</span>
+                <span class="stat-badge bg-gray" id="total-count">20</span>
+                <button class="control-btn d-lg-none" onclick="toggleNav(false)">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Section selector -->
+        <select class="section-selector" id="section-selector" onchange="switchSection(this.value)">
+            <option value="all">All Sections</option>
+        </select>
+        
+        <!-- Question grid -->
+        <div class="question-grid" id="question-boxes"></div>
+    </aside>
+    
+    <!-- Bottom navigation for mobile -->
+    <nav class="bottom-nav d-lg-none">
+        <button class="nav-btn nav-btn-outline" onclick="prevQuestion()">
+            <i class="fas fa-chevron-left"></i>
+            <span>Previous</span>
+        </button>
+        <button class="nav-btn nav-btn-outline" onclick="nextQuestion()">
+            <span>Next</span>
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </nav>
+    
+    <!-- Results modal -->
+    <div class="results-modal" id="results-modal">
+        <div class="results-card">
+            <div class="results-header">
+                <h3 class="results-title">Test Results</h3>
+            </div>
+            <div class="results-body">
+                <div class="stats-grid">
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark))">
+                        <div class="stat-value" id="score-value">0</div>
+                        <div class="stat-label">Score</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--success), #1b9aaa)">
+                        <div class="stat-value" id="correct-value">0</div>
+                        <div class="stat-label">Correct</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--danger), var(--accent))">
+                        <div class="stat-value" id="incorrect-value">0</div>
+                        <div class="stat-label">Incorrect</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--gray), var(--dark))">
+                        <div class="stat-value" id="unattempted-value">0</div>
+                        <div class="stat-label">Unattempted</div>
+                    </div>
+                </div>
+            </div>
+            <div class="results-footer">
+                <button class="nav-btn nav-btn-primary" onclick="reviewTest()">
+                    <i class="fas fa-search me-1"></i>
+                    <span>Review Test</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Questions data
+        const questions = [];
+        const sections = {};
+        let currentLang = "en";
+        let currentQuestion = 0;
+        let answers = {};
+        let submitted = false;
+        let totalTime = 6 * 60;
+        
+        // Initialize the test
+        window.onload = function() {
+            initializeTest();
+            startTimer();
+            
+            // If on desktop, show the question navigation by default
+            if (window.innerWidth >= 992) {
+                document.getElementById('question-nav').classList.add('show');
+                document.getElementById('main-content').classList.add('with-nav');
+            }
+        };
+        
+        // Initialize test data
+        function initializeTest() {
+            // Add sections and questions
+            
+            sections["18"] = {
+                name: "General Awareness",
+                start: 0,
+                end: 18
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="18">General Awareness</option>`;
+            
+            sections["misc"] = {
+                name: "Miscellaneous",
+                start: 19,
+                end: 19
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="misc">Miscellaneous</option>`;
+            
+            
+                questions.push({
+                    id: "1",
+                    section: "18",
+                    question_en: "<p>1. Which of the following is an Indirect Tax in India?</p>",
+                    question_hi: "<p>1.<span style=\"font-family: Palanquin Dark;\"> निम्नलिखित में से कौन भारत में एक अप्रत्यक्ष कर है?</span></p>\n<p>&nbsp;</p>",
+                    options_en: ["<p>Goods and Services Tax</p>", "<p>Income Tax</p>", 
+                                "<p>Corporation Tax</p>", "<p>Capital Gains Tax</p>"],
+                    options_hi: ["<p>वस्तु और सेवा कर</p>", "<p>आयकर</p>",
+                                "<p>निगम कर</p>", "<p>पूंजीगत लाभ कर</p>"],
+                    solution_en: "<p>1.(a) <strong><span style=\"font-family: Palanquin Dark;\">Direct taxes</span></strong><span style=\"font-family: Palanquin Dark;\"> - Income tax, corporate tax, wealth tax, gift tax, expenditure tax etc.</span><span style=\"font-family: Palanquin Dark;\"> <strong>Indirect taxes</strong></span><span style=\"font-family: Palanquin Dark;\"> - </span><span style=\"font-family: Palanquin Dark;\">Goods and Services Tax, </span><span style=\"font-family: Palanquin Dark;\">sales tax, excise duty, VAT, service tax, entertainment tax, custom duty etc.</span></p>\n<p><span style=\"font-family: Palanquin Dark;\"> </span></p>",
+                    solution_hi: "<p>1.(a) <strong>प्रत्यक्ष कर</strong><span style=\"font-family: Palanquin Dark;\"> - आयकर, कॉर्पोरेट कर, संपत्ति कर, उपहार कर, व्यय कर आदि। </span><strong><span style=\"font-family: Palanquin Dark;\">अप्रत्यक्ष कर</span></strong><span style=\"font-family: Palanquin Dark;\"> - वस्तु एवं सेवा कर, बिक्री कर, उत्पाद शुल्क, वैट, सेवा कर, मनोरंजन कर, सीमा शुल्क आदि।</span></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "2",
+                    section: "18",
+                    question_en: "<p>2.<span style=\"font-family: Palanquin Dark;\"> Which of the following statements is/are correct?<br></span><span style=\"font-family: Palanquin Dark;\">I.Only marketed goods are considered while estimating Gross Domestic Product<br></span><span style=\"font-family: Palanquin Dark;\">II. The work done by a woman at her home is outside the purview of Gross Domestic </span><span style=\"font-family: Palanquin Dark;\">Product.<br></span><span style=\"font-family: Palanquin Dark;\">III. In estimating GDP, only final goods and services are considered.</span></p>",
+                    question_hi: "<p>2.<span style=\"font-family: Palanquin Dark;\"> निम्नलिखित में से कौन सा कथन सही है?<br></span><span style=\"font-family: Palanquin Dark;\">I.सकल घरेलू उत्पाद (GDP) का अनुमान लगाते समय केवल विपणन की गई वस्तुओं पर विचार किया जाता है<br></span><span style=\"font-family: Palanquin Dark;\">II. एक महिला द्वारा अपने घर पर किया गया कार्य सकल घरेलू उत्पाद के दायरे से बाहर है।<br></span><span style=\"font-family: Palanquin Dark;\">III. सकल घरेलू उत्पाद का अनुमान लगाने में, केवल अंतिम वस्तुओं और सेवाओं पर विचार किया जाता है।</span></p>",
+                    options_en: ["<p>Only II and III</p>", "<p>I, II and III</p>", 
+                                "<p>Only I and III</p>", "<p>Only II</p>"],
+                    options_hi: ["<p>केवल II और III</p>", "<p>I, II और III</p>",
+                                "<p>केवल I और III</p>", "<p>केवल II</p>"],
+                    solution_en: "<p>2.(b) <strong><span style=\"font-family: Palanquin Dark;\">Gross domestic product (GDP)</span></strong><span style=\"font-family: Palanquin Dark;\"><strong> </strong>is the monetary value of all finished goods and services made within a country during a specific period. </span><span style=\"font-family: Palanquin Dark;\">Three types of GDP . </span><strong><span style=\"font-family: Palanquin Dark;\">Nominal GDP</span></strong><span style=\"font-family: Palanquin Dark;\"> &ndash; the total value of all goods and services produced at current market prices. </span><strong><span style=\"font-family: Palanquin Dark;\">Real GDP</span></strong><span style=\"font-family: Palanquin Dark;\"><strong> </strong>&ndash; the sum of all goods and services produced at constant prices.</span><span style=\"font-family: Palanquin Dark;\"> <strong>Actual GDP</strong> </span><span style=\"font-family: Palanquin Dark;\">real-time measurement of all outputs at any interval or any given time.</span><span style=\"font-family: Palanquin Dark;\"> </span></p>",
+                    solution_hi: "<p>2.(b) <strong>सकल घरेलू उत्पाद (GDP)</strong><span style=\"font-family: Palanquin Dark;\"> एक विशिष्ट अवधि के दौरान किसी देश के भीतर किए गए सभी तैयार माल और सेवाओं का मौद्रिक मूल्य है। GDP के तीन प्रकार हैं। </span><strong><span style=\"font-family: Palanquin Dark;\">सांकेतिक GDP</span></strong><span style=\"font-family: Palanquin Dark;\"> </span><span style=\"font-family: Palanquin Dark;\"> </span><span style=\"font-family: Palanquin Dark;\">- मौजूदा बाजार कीमतों पर उत्पादित सभी वस्तुओं और सेवाओं का कुल मूल्य। </span><strong><span style=\"font-family: Palanquin Dark;\">यथार्थ GDP</span></strong><span style=\"font-family: Palanquin Dark;\"> - स्थिर कीमतों पर उत्पादित सभी वस्तुओं और सेवाओं का योग। </span><strong><span style=\"font-family: Palanquin Dark;\">वास्तविक GDP </span></strong><span style=\"font-family: Palanquin Dark;\">= किसी भी अंतराल या किसी भी समय पर सभी आउटपुट का वास्तविक समय माप।</span></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "3",
+                    section: "18",
+                    question_en: "<p>3.<span style=\"font-family: Palanquin Dark;\"> The &lsquo;Pradhan Mantri Annadata Aay SanraksHan Abhiyan&rsquo; (PM-AASHA) has ______ components to </span><span style=\"font-family: Palanquin Dark;\">rationalise</span><span style=\"font-family: Palanquin Dark;\"> the government agricultural produce price and policy for efficiency, savings by way of reduction of wastages and leakages in storage and make fiscal gains.</span></p>",
+                    question_hi: "<p>3.<span style=\"font-family: Palanquin Dark;\"> \'प्रधान मंत्री अन्नदाता आय संरक्षण अभियान\' (PM-AASHA) में ________ घटक हैं जो सरकारी कृषि उपज की कीमत और दक्षता के लिए नीति, भंडारण में अपव्यय और रिसाव को कम करने और वित्तीय लाभ कमाने के लिए बचत करते हैं।</span></p>",
+                    options_en: ["<p>five</p>", "<p>three</p>", 
+                                "<p>two</p>", "<p>eight</p>"],
+                    options_hi: ["<p>पांच</p>", "<p>तीन</p>",
+                                "<p>दो</p>", "<p>आठ</p>"],
+                    solution_en: "<p>3.(b) <span style=\"font-family: Palanquin Dark;\">The </span><span style=\"font-family: Palanquin Dark;\">PM-AASHA</span><span style=\"font-family: Palanquin Dark;\"> scheme has </span><strong><span style=\"font-family: Palanquin Dark;\">three</span></strong><span style=\"font-family: Palanquin Dark;\"><strong> </strong>components and states can choose out of them. These three components complement the existing schemes of the Department of Food and Public Distribution. Schemes related to wheat, paddy and other cereals and coarse grains where procurement is at MSP.</span><span style=\"font-family: Palanquin Dark;\"> </span></p>",
+                    solution_hi: "<p>3.(b) <span style=\"font-family: Palanquin Dark;\">PM-AASHA योजना के <strong>तीन </strong>घटक हैं और राज्य उनमें से चुन सकते हैं। ये तीन घटक खाद्य और सार्वजनिक वितरण विभाग की मौजूदा योजनाओं के पूरक हैं। गेहूं, धान और अन्य अनाज और मोटे अनाज से संबंधित योजनाएं जहां खरीद MSP पर है।</span></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "4",
+                    section: "18",
+                    question_en: "<p>4. <span style=\"font-family: Palanquin Dark;\">Which bank is referred to as &lsquo;The lender of last resort&rsquo;?</span></p>\n<p>&nbsp;</p>",
+                    question_hi: "<p>4.<span style=\"font-family: Palanquin Dark;\"> किस बैंक को \'अंतिम उपाय का ऋणदाता\' (&lsquo;The lender of last resort&rsquo;) कहा जाता है?</span></p>",
+                    options_en: ["<p>Central Bank</p>", "<p>State Bank</p>", 
+                                "<p>Dena Bank</p>", "<p>World Bank</p>"],
+                    options_hi: ["<p>सेंट्रल बैंक</p>", "<p>स्टेट बैंक</p>",
+                                "<p>देना बैंक</p>", "<p>विश्व बैंक</p>"],
+                    solution_en: "<p>4.(a) <span style=\"font-family: Palanquin Dark;\">Central Bank is </span><span style=\"font-family: Palanquin Dark;\">referred</span><span style=\"font-family: Palanquin Dark;\"> to as \'The lender of last resort&rsquo;. </span><span style=\"font-family: Palanquin Dark;\">A</span><span style=\"font-family: Palanquin Dark;\"> <strong>lender of last resort (LoR)</strong></span><span style=\"font-family: Palanquin Dark;\"> is an institution, usually a country\'s central bank, that offers loans to banks or other eligible institutions that are experiencing financial difficulty or are considered highly risky or near collapse.</span></p>\n<p><span style=\"font-family: Palanquin Dark;\"> </span></p>",
+                    solution_hi: "<p>4.(a) <span style=\"font-family: Palanquin Dark;\">सेंट्रल बैंक को \'अंतिम उपाय का ऋणदाता\' कहा जाता है। </span><strong><span style=\"font-family: Palanquin Dark;\">अंतिम उपाय का एक ऋणदाता (</span><span style=\"font-family: Palanquin Dark;\">lender of last resort </span></strong><span style=\"font-family: Palanquin Dark;\"><strong>)</strong> </span><span style=\"font-family: Palanquin Dark;\">एक संस्था है, आमतौर पर एक देश का केंद्रीय बैंक, जो बैंकों या अन्य पात्र संस्थानों को ऋण प्रदान करता है जो वित्तीय कठिनाई का सामना कर रहे हैं या अत्यधिक जोखिम भरा या निकट पतन माना जाता है।</span></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "5",
+                    section: "18",
+                    question_en: "<p>5. <span style=\"font-family: Palanquin Dark;\">Who among the following first argued that in the face of high deficits, people save </span><span style=\"font-family: Palanquin Dark;\">More?</span></p>",
+                    question_hi: "<p>5. <span style=\"font-family: Palanquin Dark;\">निम्नलिखित में से किसने सबसे पहले यह तर्क दिया कि उच्च घाटे की स्थिति में लोग अधिक बचत करते हैं?</span></p>",
+                    options_en: ["<p>Amartya Sen</p>", "<p>Esther Duflo</p>", 
+                                "<p>Adam Smith</p>", "<p>David Ricardo</p>"],
+                    options_hi: ["<p>अमर्त्य सेन</p>", "<p>एस्तेर डुफ्लो</p>",
+                                "<p>एडम स्मिथ</p>", "<p>डेविड रिकार्डो</p>"],
+                    solution_en: "<p>5.(d) <strong>David Ricardo</strong><span style=\"font-family: Palanquin Dark;\"> first argued that in the face of High deficits, people save more. </span><span style=\"font-family: Palanquin Dark;\">David Ricardo was a classical economist best known for his theory on wages and profit, the labor theory of value, the theory of comparative advantage, and the theory of rents. </span><strong><span style=\"font-family: Palanquin Dark;\">Amartya Sen</span></strong><span style=\"font-family: Palanquin Dark;\"> is famous for his significant contributions to welfare economics. </span><span style=\"font-family: Palanquin Dark;\"><strong>Esther Duflo</strong> </span><span style=\"font-family: Palanquin Dark;\">(Nobel Prize 2019) is a French economist who is renowned for committing her work towards finding solutions to end poverty and improve the welfare of the poor. </span><strong><span style=\"font-family: Palanquin Dark;\">Adam Smith</span></strong><span style=\"font-family: Palanquin Dark;\"> became famous for his influential book The Wealth of Nations (1776). </span></p>\n<p><span style=\"font-family: Palanquin Dark;\"> </span></p>",
+                    solution_hi: "<p>5.(d) <strong>डेविड रिकार्डो</strong><span style=\"font-family: Palanquin Dark;\"> ने पहले तर्क दिया कि उच्च घाटे की स्थिति में, लोग अधिक बचत करते हैं। डेविड रिकार्डो एक शास्त्रीय अर्थशास्त्री थे जो मजदूरी और लाभ पर अपने सिद्धांत, मूल्य के श्रम सिद्धांत, तुलनात्मक लाभ के सिद्धांत और किराए के सिद्धांत के लिए जाने जाते थे। </span><strong><span style=\"font-family: Palanquin Dark;\">अमर्त्य सेन</span></strong><span style=\"font-family: Palanquin Dark;\"> कल्याणकारी अर्थशास्त्र में उनके महत्वपूर्ण योगदान के लिए प्रसिद्ध हैं।</span><strong><span style=\"font-family: Palanquin Dark;\">एस्तेर डुफ्लो</span></strong><span style=\"font-family: Palanquin Dark;\"> (नोबेल पुरस्कार 2019) एक फ्रांसीसी अर्थशास्त्री हैं, जो गरीबी को समाप्त करने और गरीबों के कल्याण में सुधार के समाधान खोजने की दिशा में अपना काम करने के लिए प्रसिद्ध हैं। </span><strong><span style=\"font-family: Palanquin Dark;\">एडम स्मिथ</span></strong><span style=\"font-family: Palanquin Dark;\"> अपनी प्रभावशाली पुस्तक द वेल्थ ऑफ नेशंस (1776) के लिए प्रसिद्ध हुए।</span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "6",
+                    section: "18",
+                    question_en: "<p>6.<span style=\"font-family: Palanquin Dark;\"> The value of the Gross Domestic Product (GDP) of India is published by PIB in ______.</span></p>",
+                    question_hi: "<p>6. <span style=\"font-family: Palanquin Dark;\">भारत के सकल घरेलू उत्पाद (GDP) का मूल्य PIB द्वारा ______ में प्रकाशित किया जाता है।</span></p>",
+                    options_en: ["<p>US Dollar</p>", "<p>Yen</p>", 
+                                "<p>Yuan</p>", "<p>Indian Rupee</p>"],
+                    options_hi: ["<p>US डॉलर</p>", "<p><span style=\"font-weight: 400;\">&nbsp;येन (Yen)</span></p>",
+                                "<p><span style=\"font-weight: 400;\">युआन (Yuan)</span></p>", "<p>भारतीय रुपया</p>"],
+                    solution_en: "<p>6.(d) <span style=\"font-family: Palanquin Dark;\">The value of Gross Domestic Product (GDP) of India is published by PIB in Indian Rupee. </span><strong><span style=\"font-family: Palanquin Dark;\">Gross domestic product (GDP)</span></strong><span style=\"font-family: Palanquin Dark;\"> is the standard measure of the value added created through the production of goods and services in a country during a certain period. GDP is defined by the following formula: </span><strong><span style=\"font-family: Palanquin Dark;\">GDP</span></strong><span style=\"font-family: Palanquin Dark;\"><strong> </strong>= Consumption + Investment + Government Spending + Net Exports .</span><span style=\"font-family: Palanquin Dark;\"> </span></p>",
+                    solution_hi: "<p>6.(d)&nbsp;<span style=\"font-family: Palanquin Dark;\">भारत के सकल घरेलू उत्पाद (GDP) का मूल्य PIB द्वारा भारतीय रुपये में प्रकाशित किया जाता है। </span><strong><span style=\"font-family: Palanquin Dark;\">सकल घरेलू उत्पाद (GDP)</span></strong><span style=\"font-family: Palanquin Dark;\"> एक निश्चित अवधि के दौरान किसी देश में वस्तुओं और सेवाओं के उत्पादन के माध्यम से बनाए गए मूल्य वर्धित मूल्य का मानक उपाय है। जी.डी.पी. को निम्नलिखित सूत्र द्वारा परिभाषित किया गया है: </span><strong><span style=\"font-family: Palanquin Dark;\">GDP</span></strong><span style=\"font-family: Palanquin Dark;\"><strong> </strong>= खपत + निवेश + सरकारी खर्च + शुद्ध निर्यात ।</span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "7",
+                    section: "18",
+                    question_en: "<p>7. <span style=\"font-family: Palanquin Dark;\">&nbsp;What is the emigration of a significant proportion of a country&rsquo;s highly skilled, highly educated professional population to other countries offering better economic and social opportunities called?</span></p>",
+                    question_hi: "<p>7.<span style=\"font-family: Palanquin Dark;\"> बेहतर आर्थिक और सामाजिक अवसरों की पेशकश करने वाले अन्य देशों में देश की अत्यधिक कुशल, उच्च शिक्षित पेशेवर आबादी के एक महत्वपूर्ण अनुपात के उत्प्रवास को क्या कहा जाता है?</span></p>",
+                    options_en: ["<p>Carrying capacity</p>", "<p>Brain drain</p>", 
+                                "<p>Demographic transition</p>", "<p>Closed population</p>"],
+                    options_hi: ["<p>वहन क्षमता</p>", "<p>प्रतिभा पलायन</p>",
+                                "<p>जनसांख्यिकीय संक्रमण</p>", "<p>बंद जनसंख्या</p>"],
+                    solution_en: "<p>7.(b) <strong>Brain Drain</strong><span style=\"font-family: Palanquin Dark;\"> is </span><span style=\"font-family: Palanquin Dark;\">the movement of highly skilled and educated people to a country where they can work in better conditions and earn more money. </span><strong><span style=\"font-family: Palanquin Dark;\">Carrying capacity</span></strong><span style=\"font-family: Palanquin Dark;\"> can be defined as a species\' average population size in a particular habitat. </span><strong><span style=\"font-family: Palanquin Dark;\">Demographic transition</span></strong><span style=\"font-family: Palanquin Dark;\"> is a long-term trend of declining birth and death rates, resulting in substantive change in the age distribution of a population. A </span><strong><span style=\"font-family: Palanquin Dark;\">closed population</span></strong><span style=\"font-family: Palanquin Dark;\"> is a group that is not able to exchange members with different populations over time.</span></p>\n<p><span style=\"font-family: Palanquin Dark;\"> </span></p>",
+                    solution_hi: "<p>7.(b) <strong><span style=\"font-family: Palanquin Dark;\">प्रतिभा पलायन</span><span style=\"font-family: Palanquin Dark;\"> (</span></strong><span style=\"font-family: Palanquin Dark;\"><strong>ब्रेन ड्रेन)</strong> </span><span style=\"font-family: Palanquin Dark;\">अत्यधिक कुशल और शिक्षित लोगों का एक ऐसे देश में आवागमन है जहां वे बेहतर परिस्थितियों में काम कर सकते हैं और अधिक पैसा कमा सकते हैं। </span><span style=\"font-family: Palanquin Dark;\"><strong>वहन क्षमता</strong> </span><span style=\"font-family: Palanquin Dark;\">को एक विशेष आवास में एक प्रजाति की औसत आबादी के आकार के रूप में परिभाषित किया जा सकता है। </span><strong><span style=\"font-family: Palanquin Dark;\">जनसांख्यिकीय संक्रमण</span></strong><span style=\"font-family: Palanquin Dark;\"> जन्म और मृत्यु दर में गिरावट की एक दीर्घकालिक प्रवृत्ति है, जिसके परिणामस्वरूप आबादी के आयु वितरण में महत्वपूर्ण परिवर्तन होता है। एक </span><strong><span style=\"font-family: Palanquin Dark;\">बंद आबादी</span></strong><span style=\"font-family: Palanquin Dark;\"> एक समूह है जो समय के साथ विभिन्न आबादी वाले सदस्यों का आदान-प्रदान करने में सक्षम नहीं है।</span></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "8",
+                    section: "18",
+                    question_en: "<p>8. <span style=\"font-family: Palanquin Dark;\">&nbsp;In which year had India\'s ratio of public debt to GDP gone up to a record 84.2%?</span></p>",
+                    question_hi: "<p>8. <span style=\"font-family: Palanquin Dark;\">&nbsp;किस वर्ष में भारत का सकल घरेलू उत्पाद के लिए सार्वजनिक ऋण का अनुपात रिकॉर्ड 84.2% तक बढ़ गया था?</span></p>",
+                    options_en: ["<p>1991</p>", "<p>1999</p>", 
+                                "<p>2003</p>", "<p>2001</p>"],
+                    options_hi: ["<p>1991</p>", "<p>1999</p>",
+                                "<p>2003</p>", "<p>2001</p>"],
+                    solution_en: "<p>8.(c) <span style=\"font-family: Palanquin Dark;\">In <strong>2003 </strong>India\'s ratio of public debt to GDP went up to a record 84.2%. </span><span style=\"font-family: Palanquin Dark;\">Gross domestic product (GDP) is a monetary measure of the market value of all the final goods and services produced in a specific time period by countries.</span></p>\n<p><span style=\"font-family: Palanquin Dark;\"> </span></p>",
+                    solution_hi: "<p>8.(c) <span style=\"font-family: Palanquin Dark;\"><strong>2003 </strong>में भारत के सार्वजनिक ऋण का सकल घरेलू उत्पाद से अनुपात बढ़कर 84.2% हो गया। सकल घरेलू उत्पाद (GDP) देशों द्वारा एक विशिष्ट समय अवधि में उत्पादित सभी अंतिम वस्तुओं और सेवाओं के बाजार मूल्य का एक मौद्रिक उपाय है।</span></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "9",
+                    section: "18",
+                    question_en: "<p>9. <span style=\"font-family: Palanquin Dark;\">As per the Economic Survey, 2020, how many banks of India are there in the list of the top global 100?</span></p>",
+                    question_hi: "<p>9. <span style=\"font-family: Palanquin Dark;\">आर्थिक सर्वेक्षण, 2020 के अनुसार, शीर्ष वैश्विक 100 की सूची में भारत के कितने बैंक हैं?</span></p>",
+                    options_en: ["<p>None</p>", "<p>One</p>", 
+                                "<p>Three</p>", "<p>Two</p>"],
+                    options_hi: ["<p>कोई नहीं</p>", "<p>एक</p>",
+                                "<p>तीन</p>", "<p>दो</p>"],
+                    solution_en: "<p>9.(b) <span style=\"font-family: Palanquin Dark;\">State Bank of India was at the 55th position. SBI was founded on 1st July 1955. SBI Chairman(May 2022)- Dinesh Kumar Khara.</span></p>\n<p><span style=\"font-family: Palanquin Dark;\"> </span></p>",
+                    solution_hi: "<p>9.(b) <span style=\"font-family: Palanquin Dark;\">भारतीय स्टेट बैंक 55वें स्थान पर था। SBI की स्थापना 1 जुलाई 1955 को हुई थी। एसबीआई के अध्यक्ष (मई 2022) - दिनेश कुमार खारा।</span></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "10",
+                    section: "18",
+                    question_en: "<p>10. <span style=\"font-family: Palanquin Dark;\">Which of the following Sustainable Development Goals (SDG) seeks to &lsquo;Protect, restore and promote sustainable use of terrestrial ecosystems, sustainably manage forests, combat desertification, and halt and reverse land degradation and halt biodiversity loss&rsquo;?</span></p>",
+                    question_hi: "<p>10. <span style=\"font-family: Palanquin Dark;\">निम्नलिखित सतत विकास लक्ष्यों में से कौन सा (SDG) \'स्थलीय पारिस्थितिक तंत्र के सतत उपयोग की रक्षा, पुनर्स्थापना और बढ़ावा देने, वनों का स्थायी रूप से प्रबंधन करने, मरुस्थलीकरण का मुकाबला करने और भूमि क्षरण को रोकने और रिवर्स करने और जैव विविधता के नुकसान को रोकने\' का प्रयास करता है?</span></p>",
+                    options_en: ["<p>SDG12</p>", "<p>SDG 7</p>", 
+                                "<p>SDG 17</p>", "<p>SDG 15</p>"],
+                    options_hi: ["<p>SDG12</p>", "<p>SDG 7</p>",
+                                "<p>SDG 17 <span style=\"font-family: Palanquin Dark;\"> </span></p>", "<p>SDG 15</p>"],
+                    solution_en: "<p>10.(d)&nbsp;<strong><span style=\"font-family: Palanquin Dark;\">Sustainable Development Goal 15</span></strong><span style=\"font-family: Palanquin Dark;\"> seeks to protect, restore and promote sustainable use of terrestrial ecosystems, sustainably manage forests,combat desertification, and halt and reverse land degradation and halt biodiversity loss. </span><strong><span style=\"font-family: Palanquin Dark;\">SDG 12</span></strong><span style=\"font-family: Palanquin Dark;\">: Ensure sustainable consumption and production patterns. </span><strong><span style=\"font-family: Palanquin Dark;\">SDG 7</span></strong><span style=\"font-family: Palanquin Dark;\"> focuses on global efforts to ensure access to affordable, reliable, sustainable and modern energy for all. </span><strong><span style=\"font-family: Palanquin Dark;\">SDG 17</span></strong><span style=\"font-family: Palanquin Dark;\">- \"Strengthen the means of implementation and revitalize the global partnership for sustainable development\". </span></p>\n<p><span style=\"font-family: Palanquin Dark;\"> </span></p>",
+                    solution_hi: "<p>10.(d) <strong><span style=\"font-family: Palanquin Dark;\">सतत विकास लक्ष्य 15</span></strong><span style=\"font-family: Palanquin Dark;\"> का उद्देश्य स्थलीय पारिस्थितिक तंत्र के सतत उपयोग की रक्षा करना, पुनर्स्थापित करना और बढ़ावा देना, जंगलों का स्थायी प्रबंधन करना, मरुस्थलीकरण का मुकाबला करना और भूमि क्षरण को रोकना और जैव विविधता के नुकसान को रोकना है। </span><strong><span style=\"font-family: Palanquin Dark;\">एसडीजी 12</span></strong><span style=\"font-family: Palanquin Dark;\">: टिकाऊ खपत और उत्पादन पैटर्न सुनिश्चित करें। </span><strong><span style=\"font-family: Palanquin Dark;\">SDG </span></strong><span style=\"font-family: Palanquin Dark;\"><strong>7</strong> सभी के लिए सस्ती, विश्वसनीय, टिकाऊ और आधुनिक ऊर्जा तक पहुंच सुनिश्चित करने के वैश्विक प्रयासों पर केंद्रित है। </span><strong><span style=\"font-family: Palanquin Dark;\">SDG </span></strong><span style=\"font-family: Palanquin Dark;\"><strong>17</strong>- \"कार्यान्वयन के साधनों को मजबूत करना और सतत विकास के लिए वैश्विक साझेदारी को पुनर्जीवित करना\"।</span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "11",
+                    section: "18",
+                    question_en: "<p>11.<span style=\"font-family: Palanquin Dark;\"> ______ is a tax system that collects a greater share of income from those with high incomes than from those with lower incomes.&nbsp;</span></p>",
+                    question_hi: "<p>11.<span style=\"font-family: Arial Rounded;\"> </span><span style=\"font-family: Arial Rounded;\">________ एक कर प्रणाली है जो कम आय वाले लोगों की तुलना में उच्च आय वाले लोगों से आय का अधिक हिस्सा एकत्र करती है।</span></p>",
+                    options_en: ["<p>Proportional tax</p>", "<p>Regressive tax</p>", 
+                                "<p>Payroll tax</p>", "<p>Progressive tax</p>"],
+                    options_hi: ["<p>आनुपातिक कर</p>", "<p>प्रतिगामी कर</p>",
+                                "<p>पेरोल टैक्स</p>", "<p>आरोही कर</p>"],
+                    solution_en: "<p>11.(d) <strong>Progressive tax</strong><span style=\"font-family: Palanquin Dark;\"> is a tax system that collects a greater share of income from those with high </span><span style=\"font-family: Palanquin Dark;\">incomes than from those with lower incomes. A </span><strong><span style=\"font-family: Palanquin Dark;\">proportional tax</span></strong><span style=\"font-family: Palanquin Dark;\"> is an income tax system that levies the same percentage tax to everyone regardless of income. A </span><strong><span style=\"font-family: Palanquin Dark;\">regressive tax</span></strong><span style=\"font-family: Palanquin Dark;\"> is a tax applied uniformly, taking a larger percentage of income from low-income earners than from high-income earners. </span><strong><span style=\"font-family: Palanquin Dark;\">Payroll tax</span></strong><span style=\"font-family: Palanquin Dark;\"> can be defined as the tax that is withheld, charged, or levied on the payroll of the employer.</span></p>\n<p><span style=\"font-family: Palanquin Dark;\"> </span></p>",
+                    solution_hi: "<p>11.(d) <strong>आरोही कर</strong> <span style=\"font-family: Palanquin Dark;\">एक ऐसी कर प्रणाली है जो कम आय वाले लोगों की तुलना में उच्च आय वाले लोगों से आय का अधिक हिस्सा एकत्र करती है। </span><strong><span style=\"font-family: Palanquin Dark;\">आनुपातिक कर</span></strong><span style=\"font-family: Palanquin Dark;\"> एक आयकर प्रणाली है जो आय की परवाह किए बिना सभी पर समान प्रतिशत कर लगाता है। एक </span><strong><span style=\"font-family: Palanquin Dark;\">प्रतिगामी कर</span></strong><span style=\"font-family: Palanquin Dark;\"> एक समान रूप से लागू किया गया कर है, जो उच्च आय वाले लोगों की तुलना में कम आय वाले लोगों की आय का एक बड़ा प्रतिशत लेता है। </span><span style=\"font-family: Palanquin Dark;\"><strong>पेरोल टैक्स</strong></span><span style=\"font-family: Palanquin Dark;\"><strong> </strong>को उस टैक्स के रूप में परिभाषित किया जा सकता है जिसे नियोक्ता के पेरोल पर रोक दिया जाता है, चार्ज किया जाता है या लगाया जाता है।</span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "12",
+                    section: "18",
+                    question_en: "<p>12.<span style=\"font-family: Palanquin Dark;\"> The Cabinet Committee on Economic Affairs (CCEA) approved an increase in the Minimum Support Prices (MSPs) for all mandated Rabi crops for the marketing season&nbsp; </span><span style=\"font-family: Palanquin Dark;\">2021&ndash;22 in line with the recommendations of the ______ Commission.</span></p>",
+                    question_hi: "<p>12. <span style=\"font-family: Palanquin Dark;\">आर्थिक मामलों की मंत्रिमंडलीय समिति (सीसीईए) ने ______ आयोग की सिफारिशों के अनुरूप विपणन सीजन 2021-22 के लिए सभी अनिवार्य रबी फसलों के लिए न्यूनतम समर्थन मूल्य (एमएसपी) में वृद्धि को मंजूरी दी।</span></p>",
+                    options_en: ["<p>Kothari</p>", "<p>Nanavati</p>", 
+                                "<p>Swaminathan</p>", "<p>Mukherjee</p>"],
+                    options_hi: ["<p>कोठारी</p>", "<p>नानावती</p>",
+                                "<p>स्वामीनाथन <span style=\"font-family: Palanquin Dark;\"> </span></p>", "<p>मुखर्जी</p>"],
+                    solution_en: "<p>12.(c) <strong>Swaminathan Commission</strong><span style=\"font-family: Palanquin Dark;\"><strong>-</strong> The</span><span style=\"font-family: Palanquin Dark;\"> <strong>National Commission on Farmers (NCF)</strong></span><span style=\"font-family: Palanquin Dark;\"> was constituted on November 18, 2004 under the chairmanship of Professor</span><span style=\"font-family: Palanquin Dark;\"> </span><span style=\"font-family: Palanquin Dark;\">M.S. Swaminathan</span><span style=\"font-family: Palanquin Dark;\">. </span><span style=\"font-family: Palanquin Dark;\"><strong>Kothari Commission</strong> </span><span style=\"font-family: Palanquin Dark;\">(National Education Commission), was an ad hoc commission set up by the Government of India to examine all aspects of the educational sector in India, to evolve a general pattern of education and to advise guidelines and policies for the development of education in India. </span><strong><span style=\"font-family: Palanquin Dark;\">Nanavati commission</span></strong><span style=\"font-family: Palanquin Dark;\"> appointed to investigate the \"killing of innocent sikhs\" during the 1984 anti-Sikh riots. </span><strong><span style=\"font-family: Palanquin Dark;\">Mukherjee Commission</span></strong><span style=\"font-family: Palanquin Dark;\">- The Commission shall inquire into all the facts and circumstances related to the. disappearance of Netaji Subhas Chandra Bose in 1945 and subsequent developments.</span></p>\n<p><span style=\"font-family: Palanquin Dark;\"> </span></p>",
+                    solution_hi: "<p>12.(c) <strong>स्वामीनाथन आयोग</strong>-&nbsp;<span style=\"font-family: Palanquin Dark;\"> प्रोफेसर </span><strong><span style=\"font-family: Palanquin Dark;\">एम.एस. स्वामीनाथन</span></strong><span style=\"font-family: Palanquin Dark;\"> की अध्यक्षता में </span><strong><span style=\"font-family: Palanquin Dark;\">राष्ट्रीय किसान आयोग</span></strong><span style=\"font-family: Palanquin Dark;\"> (एनसीएफ) का गठन 18 नवंबर, 2004 को किया गया था</span><span style=\"font-family: Palanquin Dark;\"> </span><span style=\"font-family: Palanquin Dark;\">।</span><span style=\"font-family: Palanquin Dark;\"> <strong>कोठारी आयोग</strong></span><span style=\"font-family: Palanquin Dark;\"> (राष्ट्रीय शिक्षा आयोग), भारत में शिक्षा के सामान्य पैटर्न को विकसित करने और भारत में शिक्षा के विकास के लिए दिशा-निर्देशों और नीतियों की सलाह देने के लिए भारत में शैक्षिक क्षेत्र के सभी पहलुओं की जांच करने के लिए भारत सरकार द्वारा स्थापित एक तदर्थ आयोग था। 1984 के सिख विरोधी दंगों के दौरान \"निर्दोष सिखों की हत्या\" की जांच के लिए <strong>नानावती आयोग</strong> नियुक्त किया गया। <strong>मुखर्जी आयोग</strong>- आयोग 1945 में नेताजी सुभाष चंद्र बोस के लापता होने और उसके बाद के घटनाक्रम से संबंधित सभी तथ्यों और परिस्थितियों की जांच करेगा।</span></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "13",
+                    section: "18",
+                    question_en: "<p>13.<span style=\"font-family: Palanquin Dark;\"> The UN&rsquo;s Sustainable Development Goal 6 aims to ______.&nbsp;</span></p>",
+                    question_hi: "<p>13.<span style=\"font-family: Palanquin Dark;\"> संयुक्त राष्ट्र के सतत विकास लक्ष्य 6 का उद्देश्य ________ है।</span></p>",
+                    options_en: ["<p>ensure healthy lives and promote well-being for all at all ages</p>", "<p>ensure availability and sustainable management of water and sanitation for all</p>", 
+                                "<p>end poverty in all forms everywhere</p>", "<p>take urgent action to combat climate change and its impact</p>"],
+                    options_hi: ["<p>स्वस्थ जीवन सुनिश्चित करना और सभी उम्र में सभी के लिए कल्याण को बढ़ावा देना</p>", "<p>सभी के लिए पानी और स्वच्छता की उपलब्धता और टिकाऊ प्रबंधन सुनिश्चित करना</p>",
+                                "<p>हर जगह सभी रूपों में गरीबी खत्म करो</p>", "<p>जलवायु परिवर्तन और इसके प्रभाव से निपटने के लिए तत्काल कार्रवाई करें</p>"],
+                    solution_en: "<p>13.(b) <strong>The UN&rsquo;s Sustainable Development Goal 6 aims</strong> to <span style=\"font-family: Palanquin Dark;\">ensure availability and sustainable management of water and sanitation for all . </span><strong><span style=\"font-family: Palanquin Dark;\">SDG 3</span></strong><span style=\"font-family: Palanquin Dark;\">: Ensure healthy lives and promote well-being for all at all ages, profiles health as a desirable outcome in its own right. </span><strong><span style=\"font-family: Palanquin Dark;\">SDG 1</span></strong><span style=\"font-family: Palanquin Dark;\">- </span><span style=\"font-family: Palanquin Dark;\">end poverty in all forms everywhere. </span><strong><span style=\"font-family: Palanquin Dark;\">SDG 13</span></strong><span style=\"font-family: Palanquin Dark;\">- take urgent action to combat climate change and its impact . </span><span style=\"font-family: Palanquin Dark;\">The United Nations Sustainable Development Goals (UN SDGs, also known as the Global Goals) are </span><strong><span style=\"font-family: Palanquin Dark;\">17 goals</span></strong><span style=\"font-family: Palanquin Dark;\">.</span></p>\n<p><span style=\"font-family: Palanquin Dark;\"> </span></p>",
+                    solution_hi: "<p>13.(b) <strong>संयुक्त राष्ट्र के सतत विकास लक्ष्य </strong><span style=\"font-family: Palanquin Dark;\"><strong>6</strong> का उद्देश्य सभी के लिए पानी और स्वच्छता की उपलब्धता और सतत प्रबंधन सुनिश्चित करना है। </span><strong><span style=\"font-family: Palanquin Dark;\">SDG 3</span></strong><span style=\"font-family: Palanquin Dark;\">: स्वस्थ जीवन सुनिश्चित करें और सभी उम्र में सभी के लिए कल्याण को बढ़ावा दें, स्वास्थ्य को अपने आप में एक वांछनीय परिणाम के रूप में प्रस्तुत करता है। </span><strong><span style=\"font-family: Palanquin Dark;\">SDG 1</span></strong><span style=\"font-family: Palanquin Dark;\">- हर जगह सभी रूपों में गरीबी समाप्त करें। </span><strong><span style=\"font-family: Palanquin Dark;\">SDG 13</span></strong><span style=\"font-family: Palanquin Dark;\">- जलवायु परिवर्तन और उसके प्रभाव से निपटने के लिए तत्काल कार्रवाई करें। संयुक्त राष्ट्र सतत विकास लक्ष्य (</span><span style=\"font-family: Palanquin Dark;\">UN SDGs</span><span style=\"font-family: Palanquin Dark;\">, जिसे वैश्विक लक्ष्य भी कहा जाता है) </span><strong><span style=\"font-family: Palanquin Dark;\">17 लक्ष्य</span></strong><span style=\"font-family: Palanquin Dark;\"> हैं।</span></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "14",
+                    section: "18",
+                    question_en: "<p>14.<span style=\"font-family: Palanquin Dark;\"> In which year was the Immunization Programme introduced in India as &lsquo;Expanded Programme of Immunization&rsquo; (EPI) by the Ministry of Health and Family Welfare?</span></p>",
+                    question_hi: "<p>14.<span style=\"font-family: Palanquin Dark;\"> स्वास्थ्य और परिवार कल्याण मंत्रालय द्वारा भारत में टीकाकरण कार्यक्रम को \'विस्तारित टीकाकरण कार्यक्रम\' (EPI) के रूप में किस वर्ष शुरू किया गया था?</span></p>",
+                    options_en: ["<p>1982</p>", "<p>1974</p>", 
+                                "<p>1978</p>", "<p>1980</p>"],
+                    options_hi: ["<p>1982</p>", "<p>1974</p>",
+                                "<p>1978</p>", "<p>1980</p>"],
+                    solution_en: "<p>14.(c) <span style=\"font-family: Palanquin Dark;\">The </span><strong><span style=\"font-family: Palanquin Dark;\">Expanded Programme on Immunization (EPI)</span></strong><span style=\"font-family: Palanquin Dark;\"> was started in India in </span><strong><span style=\"font-family: Palanquin Dark;\">1978 </span></strong><span style=\"font-family: Palanquin Dark;\">with the objective to reduce morbidity and mortality from tetanus, poliomyelitis, diphtheria, pertussis, and childhood tuberculosis by providing immunization services to all eligible children and pregnant women by 1990.</span><span style=\"font-family: Palanquin Dark;\"> </span></p>",
+                    solution_hi: "<p>14.(c) <strong>टीकाकरण पर विस्तारित कार्यक्रम (EPI)</strong><span style=\"font-family: Palanquin Dark;\"><strong> </strong>भारत में </span><strong><span style=\"font-family: Palanquin Dark;\">1978 </span></strong><span style=\"font-family: Palanquin Dark;\">में शुरू किया गया था, जिसका उद्देश्य 1990 तक सभी योग्य बच्चों और गर्भवती महिलाओं को टीकाकरण सेवाएं प्रदान करके टेटनस, पोलियोमाइलाइटिस, डिप्थीरिया, पर्टुसिस और बचपन के तपेदिक से रुग्णता और मृत्यु दर को कम करना था।</span></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "15",
+                    section: "18",
+                    question_en: "<p>15.<span style=\"font-family: Palanquin Dark;\"> According to the Output Method, GDP is calculated as:</span></p>",
+                    question_hi: "<p>15.<span style=\"font-family: Palanquin Dark;\"> आउटपुट मेथड के अनुसार, GDP की गणना इस प्रकार की जाती है:</span></p>",
+                    options_en: ["<p>GDP at Constant Prices &ndash; Taxes + Subsidies</p>", "<p>GDP at Constant Prices + Subsidies</p>", 
+                                "<p>GDP at Constant Prices &ndash; Taxes</p>", "<p>GDP at Constant Prices + Taxes &ndash; Subsidies</p>"],
+                    options_hi: ["<p>स्थिर कीमतों पर GDP - कर + सब्सिडी</p>", "<p>स्थिर कीमतों पर GDP + सब्सिडी</p>",
+                                "<p>स्थिर कीमतों पर GDP - कर</p>", "<p>स्थिर कीमतों पर GDP + कर - सब्सिडी</p>"],
+                    solution_en: "<p>15.(a) <span style=\"font-family: Palanquin Dark;\">GDP can be calculated in three ways, using expenditures, production, or incomes. </span><span style=\"font-family: Palanquin Dark;\">According to the Output Method, GDP is calculated as GDP at Constant Prices &ndash; Taxes + Subsidies. </span><span style=\"font-family: Palanquin Dark;\">GDP is defined by the following formula: GDP = Consumption + Investment + Government Spending + Net Exports </span><span style=\"font-family: Palanquin Dark;\"> </span></p>",
+                    solution_hi: "<p>15.(a) <span style=\"font-family: Palanquin Dark;\">GDP की गणना तीन तरीकों से की जा सकती है, व्यय, उत्पादन या आय का उपयोग करके। </span><span style=\"font-family: Palanquin Dark;\">आउटपुट मेथड के अनुसार, GDP की गणना स्थिर कीमतों पर GDP के रूप में की जाती है - टैक्स + सब्सिडी। </span><span style=\"font-family: Palanquin Dark;\">GDP को निम्न सूत्र द्वारा परिभाषित किया गया है: GDP = उपभोग + निवेश + सरकारी खर्च + शुद्ध निर्यात</span></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "16",
+                    section: "18",
+                    question_en: "<p>16. <span style=\"font-family: Palanquin Dark;\">&nbsp;Which of the following is India&rsquo;s first Paperless Budget?</span></p>",
+                    question_hi: "<p>16. <span style=\"font-family: Palanquin Dark;\">&nbsp;निम्नलिखित में से कौन भारत का पहला पेपरलेस बजट है?</span></p>",
+                    options_en: [" <p> Union Budget 2018-19</span></p>", " <p> Union Budget 2020-21</span></p>", 
+                                " <p> Union Budget 2019-20</span></p>", " <p> Union Budget 2021-22 </span></p>"],
+                    options_hi: ["<p>केंद्रीय बजट 2018-19</p>", "<p>केंद्रीय बजट 2020-21</p>",
+                                "<p>केंद्रीय बजट 2019-20</p>", "<p>केंद्रीय बजट 2021-22</p>"],
+                    solution_en: "<p>16.(d) <span style=\"font-family: Palanquin Dark;\">Union Budget 2021-22 is India&rsquo;s first Paperless Budget. 2022-21 was also a paperless budget for the second year in a row. </span><span style=\"font-family: Palanquin Dark;\">Finance Minister Nirmala Sitharaman presented the first paperless budget. </span><strong><span style=\"font-family: Palanquin Dark;\">Article 112</span></strong><span style=\"font-family: Palanquin Dark;\"> tells about the Union Budget. </span><strong><span style=\"font-family: Palanquin Dark;\">Article 202</span></strong><span style=\"font-family: Palanquin Dark;\"> tells about the state budget.</span></p>\n<p><span style=\"font-family: Palanquin Dark;\"> </span></p>",
+                    solution_hi: "<p>16.(d) <span style=\"font-family: Palanquin Dark;\">केंद्रीय बजट 2021-22 भारत का पहला पेपरलेस बजट है। 2022-21 भी लगातार दूसरे साल पेपरलेस बजट रहा। वित्त मंत्री निर्मला सीतारमण ने पहला पेपरलेस बजट पेश किया। </span><strong><span style=\"font-family: Palanquin Dark;\">अनुच्छेद 112</span></strong><span style=\"font-family: Palanquin Dark;\"> केंद्रीय बजट के बारे में बताता है। </span><strong><span style=\"font-family: Palanquin Dark;\">अनुच्छेद 202</span></strong><span style=\"font-family: Palanquin Dark;\"> राज्य के बजट के बारे में बताता है।</span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "17",
+                    section: "18",
+                    question_en: "<p>17.<span style=\"font-family: Palanquin Dark;\"> At a Regional Rural Bank, the share of the Government of India is ______.</span></p>",
+                    question_hi: "<p>17. <span style=\"font-family: Palanquin Dark;\">एक क्षेत्रीय ग्रामीण बैंक में, भारत सरकार का हिस्सा ______ है।</span></p>",
+                    options_en: ["<p>40%</p>", "<p>60%</p>", 
+                                "<p>50%</p>", "<p>20%</p>"],
+                    options_hi: ["<p>40%</p>", "<p>60%</p>",
+                                "<p>50%</p>", "<p>20%</p>"],
+                    solution_en: "<p>17.(c) <span style=\"font-family: Palanquin Dark;\">At a Regional Rural Bank, the share of the Government of India is <strong>50%, </strong>Nationalised bank share is 35%, and state Government share is 15%. Regional Rural Bank was founded on 2nd October 1975. </span><span style=\"font-family: Palanquin Dark;\">Regional Rural Banks (RRBs) are government owned scheduled commercial banksScheduled banks are banks that are listed in the 2nd schedule of the Reserve Bank of India Act, 1934. </span></p>\n<p><span style=\"font-family: Palanquin Dark;\"> </span></p>",
+                    solution_hi: "<p>17.(c) <span style=\"font-family: Palanquin Dark;\">एक क्षेत्रीय ग्रामीण बैंक में, भारत सरकार का हिस्सा <strong>50%,</strong> राष्ट्रीयकृत बैंक का हिस्सा 35% और राज्य सरकार का हिस्सा 15% है। क्षेत्रीय ग्रामीण बैंक की स्थापना 2 अक्टूबर 1975 को हुई थी। क्षेत्रीय ग्रामीण बैंक (RRB) सरकारी स्वामित्व वाले अनुसूचित वाणिज्यिक बैंक हैं अनुसूचित बैंक वे बैंक हैं जो भारतीय रिज़र्व बैंक अधिनियम, 1934 की दूसरी अनुसूची में सूचीबद्ध हैं।</span></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "18",
+                    section: "18",
+                    question_en: "<p>18.<span style=\"font-family: Palanquin Dark;\"> In the year ______, Indira Gandhi, the then Prime Minister of India, issued special stamps titled &lsquo;Wheat Revolution&rsquo; to usher in the Green Revolution.&nbsp;</span></p>",
+                    question_hi: "<p>18.<span style=\"font-family: Palanquin Dark;\"> वर्ष ______ में, भारत की तत्कालीन प्रधान मंत्री इंदिरा गांधी ने हरित क्रांति की शुरुआत करने के लिए \'गेहूं क्रांति\' शीर्षक से विशेष डाक टिकट जारी किया था।</span></p>",
+                    options_en: [" <p> 1987 </span></p>", " <p> 1975 </span></p>", 
+                                " <p> 1943 </span></p>", " <p> 1968</span></p>"],
+                    options_hi: [" <p> 1987 </span></p>", " <p> 1975 </span></p>",
+                                " <p> 1943 </span></p>", " <p> 1968</span></p>"],
+                    solution_en: "<p>18.(d) <span style=\"font-family: Palanquin Dark;\">In the year <strong>1968</strong>, Indira Gandhi, the then Prime Minister of India, issued special stamps titled &lsquo;Wheat Revolution&rsquo; to usher in the Green Revolution. M.S Swaminathan is known as the father of the Green Revolution. Punjab is the largest producer of wheat in India. </span></p>\n<p><span style=\"font-family: Palanquin Dark;\"> </span></p>",
+                    solution_hi: "<p>18.(d) <span style=\"font-family: Palanquin Dark;\">वर्ष <strong>1968 </strong>में, भारत की तत्कालीन प्रधान मंत्री, इंदिरा गांधी ने हरित क्रांति की शुरुआत करने के लिए \'गेहूं क्रांति\' शीर्षक से विशेष डाक टिकट जारी किए। एम.एस.स्वामीनाथन को हरित क्रांति के जनक के रूप में जाना जाता है। पंजाब भारत में गेहूं का सबसे बड़ा उत्पादक है।</span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "19",
+                    section: "18",
+                    question_en: "<p>19.<span style=\"font-family: Palanquin Dark;\"> Which of the following does NOT come under the category of Public Goods?&nbsp;</span></p>",
+                    question_hi: "<p>19.<span style=\"font-family: Palanquin Dark;\"> निम्नलिखित में से कौन सा सार्वजनिक सामान की श्रेणी में नहीं आता है?</span></p>",
+                    options_en: ["<p>Government administration</p>", "<p>Food items</p>", 
+                                "<p>National <span style=\"font-family: Palanquin Dark;\">defence</span><span style=\"font-family: Palanquin Dark;\"> </span></p>", "<p>Roads</p>"],
+                    options_hi: ["<p>सरकारी प्रशासन</p>", "<p>खाद्य पदार्थ</p>",
+                                "<p>राष्ट्रीय रक्षा</p>", "<p>सड़कें</p>"],
+                    solution_en: "<p>19.(b)<span style=\"font-family: Palanquin Dark;\"> </span><span style=\"font-family: Palanquin Dark;\">In economics, a </span><strong><span style=\"font-family: Palanquin Dark;\">public good</span></strong><span style=\"font-family: Palanquin Dark;\"> refers to a commodity or service that is made available to all members of a society. Examples of public goods include fresh air, knowledge, lighthouses, national defense, flood control systems, and street lighting.</span><span style=\"font-family: Palanquin Dark;\"> </span></p>\n<p><span style=\"font-family: Palanquin Dark;\"> </span></p>",
+                    solution_hi: "<p>19.(b) <span style=\"font-family: Palanquin Dark;\">अर्थशास्त्र में, एक सार्वजनिक अच्छा एक वस्तु या सेवा को संदर्भित करता है जो एक समाज के सभी सदस्यों को उपलब्ध कराया जाता है। सार्वजनिक वस्तुओं के उदाहरणों में ताजी हवा, ज्ञान, प्रकाशस्तंभ, राष्ट्रीय रक्षा, बाढ़ नियंत्रण प्रणाली और स्ट्रीट लाइटिंग शामिल हैं।</span></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "20",
+                    section: "misc",
+                    question_en: "<p>20.<span style=\"font-family: Palanquin Dark;\"> As per the theory of demographic transition, the post-transitional stage of demographic transition is </span><span style=\"font-family: Palanquin Dark;\">characterised</span><span style=\"font-family: Palanquin Dark;\"> by ______.</span></p>",
+                    question_hi: "<p>20. <span style=\"font-family: Palanquin Dark;\">जनसांख्यिकीय संक्रमण के सिद्धांत के अनुसार, जनसांख्यिकीय संक्रमण के बाद संक्रमणकालीन चरण को इनमें से किसके द्वारा परिभाषित किया जाता है&nbsp;</span></p>",
+                    options_en: ["<p>low and nearly equal birth and death rates</p>", "<p>falling birth rates and high death rates</p>", 
+                                "<p>high and nearly equal birth and death rates</p>", "<p>falling death rates and high birth rates</p>"],
+                    options_hi: ["<p>निम्न और लगभग समान जन्म और मृत्यु दर</p>", "<p>गिरती जन्म दर और उच्च मृत्यु दर</p>",
+                                "<p>उच्च और लगभग समान जन्म और मृत्यु दर</p>", "<p>गिरती मृत्यु दर और उच्च जन्म दर</p>"],
+                    solution_en: "<p>20.(a) <span style=\"font-family: Palanquin Dark;\">As per the theory of demographic transition, the post-transitional stage of </span><span style=\"font-family: Palanquin Dark;\"><strong>demographic transition</strong></span><span style=\"font-family: Palanquin Dark;\"><strong> </strong>is </span><span style=\"font-family: Palanquin Dark;\">characterised</span><span style=\"font-family: Palanquin Dark;\"> by low and nearly equal birth and death rates. </span><span style=\"font-family: Palanquin Dark;\">The model has four stages: pre-industrial, urbanizing/industrializing, mature industrial, and post-industrial.</span></p>\n<p><span style=\"font-family: Palanquin Dark;\"> </span></p>",
+                    solution_hi: "<p>20.(a) <span style=\"font-family: Palanquin Dark;\">जनसांख्यिकीय संक्रमण के सिद्धांत के अनुसार, <strong>जनसांख्यिकीय संक्रमण</strong> के बाद के संक्रमणकालीन चरण को निम्न और लगभग समान जन्म और मृत्यु दर की विशेषता है। मॉडल के चार चरण हैं: पूर्व-औद्योगिक, शहरीकरण/औद्योगिकीकरण, परिपक्व औद्योगिक और उत्तर-औद्योगिक।</span></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+            
+            // Generate question boxes
+            const boxesContainer = document.getElementById('question-boxes');
+            questions.forEach((q, index) => {
+                const box = document.createElement('div');
+                box.className = 'q-box';
+                box.textContent = index + 1;
+                box.onclick = () => showQuestion(index);
+                box.id = `box-${index}`;
+                boxesContainer.appendChild(box);
+            });
+            
+            // Show first question
+            showQuestion(0);
+            updateProgress();
+        }
+        
+        // Show a specific question
+        
+        function formatContent(text) {
+            if (!text) return '';
+            return text.replace(/<img/g, '<img style="max-width:100%;height:auto;"');
+        }
+        
+        function showQuestion(index) {
+            if (index < 0 || index >= questions.length) return;
+            
+            currentQuestion = index;
+            const question = questions[index];
+            
+            // Update question counter
+            document.getElementById('question-counter').textContent = `Question ${index + 1} of ${questions.length}`;
+            
+            // Update question boxes
+            document.querySelectorAll('.q-box').forEach(box => box.classList.remove('current'));
+            document.getElementById(`box-${index}`).classList.add('current');
+            
+            // Generate question HTML
+            let html = `
+                <div class="question-card">
+                    <div class="question-text">
+                        <div class="en">${formatContent(question.question_en)}</div>
+                        <div class="hi" style="display:none">${formatContent(question.question_hi)} </div>
+                    </div>
+                    <div class="options" id="options-container">`;
+            
+            // Add options
+            ['a', 'b', 'c', 'd'].forEach((opt, i) => {
+                let optionClass = '';
+                let isCorrectAnswer = opt === question.correct;
+                let isUserAnswer = answers[question.id] === opt;
+                
+                // When reviewing, add appropriate classes
+                if (submitted) {
+                    if (isCorrectAnswer) {
+                        optionClass += ' correct-answer';
+                    } else if (isUserAnswer && !isCorrectAnswer) {
+                        optionClass += ' incorrect';
+                    }
+                }
+                
+                html += `
+                    <div class="option-item">
+                        <input class="option-input" type="radio" name="q${index}" 
+                            id="opt-${index}-${opt}" value="${opt}" 
+                            ${isUserAnswer ? 'checked' : ''}
+                            onclick="selectAnswer('${question.id}', '${opt}')">
+                       <label class="option-label${optionClass}" for="opt-${index}-${opt}">
+                            <div class="en">${question.options_en[i]}</div>
+                            <div class="hi" style="display:none">${question.options_hi[i]}</div>
+                        </label>
+                    </div>`;
+            });
+            
+            // Add solution if submitted
+            if (submitted) {
+                const isCorrect = answers[question.id] === question.correct;
+                const resultText = answers[question.id] ? (isCorrect ? 'Correct!' : 'Incorrect!') : 'Not attempted';
+                
+                html += `
+                    <div class="solution-container">
+                        <div class="solution-title">${resultText}</div>
+                        <div class="solution-text">
+                            <div class="en">${question.solution_en}</div>
+                            <div class="hi" style="display:none">${question.solution_hi}</div>
+                        </div>
+                    </div>`;
+            }
+            
+            html += `</div></div>`;
+            
+            document.getElementById('questions-container').innerHTML = html;
+            
+            // Apply language settings
+            applyLanguage();
+            
+            // If in mobile view, close the menu
+            if (window.innerWidth < 992) {
+                toggleNav(false);
+            }
+            
+            // Add review mode class if submitted
+            if (submitted) {
+                document.getElementById('options-container').classList.add('review-mode');
+            }
+        }
+        
+        // Apply current language
+        function applyLanguage() {
+            document.querySelectorAll(`.${currentLang}`).forEach(el => el.style.display = 'block');
+            document.querySelectorAll(`.${currentLang === 'en' ? 'hi' : 'en'}`).forEach(el => el.style.display = 'none');
+            
+            // Update language button text
+            document.getElementById('lang-text').textContent = currentLang === 'en' ? 'Hi' : 'En';
+        }
+        
+        // Select an answer
+        function selectAnswer(qId, option) {
+            if (submitted) return;
+            
+            answers[qId] = option;
+            updateProgress();
+            
+            // Mark question as attempted in the navigation
+            const index = questions.findIndex(q => q.id === qId);
+            if (index >= 0) {
+                const box = document.getElementById(`box-${index}`);
+                box.classList.add('attempted');
+                box.classList.remove('unattempted');
+            }
+        }
+        
+        // Navigate to previous/next question
+        function prevQuestion() { 
+            if (currentQuestion > 0) showQuestion(currentQuestion - 1); 
+        }
+        
+        function nextQuestion() { 
+            if (currentQuestion < questions.length - 1) showQuestion(currentQuestion + 1); 
+        }
+        
+        // Switch section
+        function switchSection(sectionId) {
+            if (sectionId === 'all') {
+                showQuestion(0);
+                return;
+            }
+            
+            const section = sections[sectionId];
+            if (section) showQuestion(section.start);
+        }
+        
+        // Toggle language
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'hi' : 'en';
+            applyLanguage();
+        }
+        
+        // Toggle navigation sidebar
+        function toggleNav(show) {
+            const nav = document.getElementById('question-nav');
+            const overlay = document.getElementById('nav-overlay');
+            
+            if (show === undefined) {
+                show = !nav.classList.contains('show');
+            }
+            
+            if (show) {
+                nav.classList.add('show');
+                overlay.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            } else {
+                nav.classList.remove('show');
+                overlay.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+        }
+        
+        // Update progress
+        function updateProgress() {
+            const attempted = Object.keys(answers).length;
+            document.getElementById('attempted-count').textContent = attempted;
+        }
+        
+        // Start timer
+        function startTimer() {
+            const timerDisplay = document.getElementById('timer-display');
+            let timeLeft = totalTime;
+            
+            const timerInterval = setInterval(() => {
+                if (timeLeft <= 0 || submitted) {
+                    clearInterval(timerInterval);
+                    if (!submitted) submitTest();
+                    return;
+                }
+                
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                timeLeft--;
+            }, 1000);
+        }
+        
+        // Confirm before submitting
+        function confirmSubmit() {
+            if (submitted) return;
+            
+            const attempted = Object.keys(answers).length;
+            const remaining = questions.length - attempted;
+            
+            // Create a more modern confirmation dialog
+            const confirmHtml = `
+                <div style="text-align: center; padding: 20px;">
+                    <h4 style="margin-bottom: 16px; color: var(--dark);">Confirm Submission</h4>
+                    <p style="margin-bottom: 24px; color: var(--gray);">
+                        You have attempted ${attempted} of ${questions.length} questions.<br>
+                        ${remaining} questions are unattempted.
+                    </p>
+                    <div style="display: flex; justify-content: center; gap: 12px;">
+                        <button onclick="this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; border: 1px solid var(--light-gray); background: white; border-radius: 8px; cursor: pointer;">
+                            Cancel
+                        </button>
+                        <button onclick="submitTest(); this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer;">
+                            Submit Test
+                        </button>
+                    </div>
+                </div>`;
+            
+            // Create modal element
+            const modal = document.createElement('div');
+            modal.className = 'results-modal show';
+            modal.innerHTML = `
+                <div class="results-card" style="max-width: 400px;">
+                    <button class="cancel-btn" style="position: absolute; top: 12px; right: 12px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--gray);" onclick="this.closest('.results-modal').remove()">
+                        ×
+                    </button>
+                    ${confirmHtml}
+                </div>`;
+            
+            document.body.appendChild(modal);
+        }
+        
+        // Submit test
+        function submitTest() {
+            if (submitted) return;
+            
+            submitted = true;
+            
+            let score = 0;
+            let correctCount = 0;
+            let incorrectCount = 0;
+            let unattemptedCount = 0;
+            
+            questions.forEach((q, index) => {
+                const userAns = answers[q.id];
+                const box = document.getElementById(`box-${index}`);
+                
+                box.classList.remove('attempted');
+                
+                if (!userAns) {
+                    unattemptedCount++;
+                    box.classList.add('unattempted');
+                } else if (userAns === q.correct) {
+                    correctCount++;
+                    score += q.pos_marks;
+                    box.classList.add('correct');
+                } else {
+                    incorrectCount++;
+                    score -= q.neg_marks;
+                    box.classList.add('incorrect');
+                }
+            });
+            
+            // Update result values
+            document.getElementById('score-value').textContent = score.toFixed(2);
+            document.getElementById('correct-value').textContent = correctCount;
+            document.getElementById('incorrect-value').textContent = incorrectCount;
+            document.getElementById('unattempted-value').textContent = unattemptedCount;
+            
+            // Show the results modal
+            document.getElementById('results-modal').classList.add('show');
+            
+            // Disable submit button
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-check"></i>';
+            submitBtn.style.backgroundColor = 'var(--success)';
+            
+            // Refresh current question view to show solution
+            showQuestion(currentQuestion);
+        }
+        
+        // Review test
+        function reviewTest() {
+            document.getElementById('results-modal').classList.remove('show');
+            showQuestion(0);
+        }
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target === document.getElementById('results-modal')) {
+                document.getElementById('results-modal').classList.remove('show');
+            }
+        });
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') prevQuestion();
+            if (e.key === 'ArrowRight') nextQuestion();
+        });
+    </script>
+</body>
+</html>
