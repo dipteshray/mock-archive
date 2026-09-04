@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mocks Wallah</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --primary-light: #a29bfe;
+            --primary-dark: #5649c0;
+            --secondary: #00cec9;
+            --accent: #fd79a8;
+            --success: #00b894;
+            --warning: #fdcb6e;
+            --danger: #d63031;
+            --light: #f8f9fa;
+            --dark: #2d3436;
+            --gray: #636e72;
+            --light-gray: #dfe6e9;
+            --card-bg: #ffffff;
+            --body-bg: #f5f6fa;
+            --header-bg: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            --footer-bg: #ffffff;
+            --box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            --box-shadow-sm: 0 2px 10px rgba(0,0,0,0.05);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background-color: var(--body-bg);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            color: var(--dark);
+            line-height: 1.6;
+            padding-bottom: 80px; /* Space for fixed navigation */
+            overflow-x: hidden;
+        }
+        
+        /* Header Styles */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: var(--header-bg);
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            z-index: 1000;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .header-brand {
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .header-brand i {
+            margin-right: 8px;
+            font-size: 1.2rem;
+        }
+        
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .control-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .control-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .control-btn.active {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .timer-display {
+            background: rgba(0,0,0,0.2);
+            border-radius: 18px;
+            padding: 4px 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+        
+        .timer-display i {
+            margin-right: 6px;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-top: 60px;
+            padding: 16px;
+            min-height: calc(100vh - 140px);
+        }
+        
+        .question-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--box-shadow-sm);
+            border: none;
+            transition: var(--transition);
+        }
+        
+        .question-counter {
+            font-size: 0.9rem;
+            color: var(--gray);
+            text-align: center;
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+        
+        .question-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+        
+        .option-item {
+            margin-bottom: 12px;
+            position: relative;
+        }
+        
+        .option-input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+            .question-text {
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        hyphens: auto;
+        max-width: 100%;
+    }
+
+    .question-text img,
+    .option-label img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 8px 0;
+        border-radius: 8px;
+    }
+
+    .option-label {
+        overflow: hidden;
+    }
+
+    .question-card {
+        overflow: hidden;
+    }
+        
+        .option-label {
+            display: block;
+            padding: 14px 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--light-gray);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .option-label:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .option-input:checked + .option-label {
+            border-color: var(--primary);
+            background: rgba(108, 92, 231, 0.05);
+            box-shadow: 0 0 0 1px var(--primary);
+        }
+        
+        .option-input:checked + .option-label::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--primary);
+        }
+        
+        /* When reviewing answers */
+        .review-mode .option-input:checked + .option-label.correct {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.correct::after {
+            background: var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.incorrect {
+            border-color: var(--danger);
+            background: rgba(214, 48, 49, 0.05);
+            box-shadow: 0 0 0 1px var(--danger);
+        }
+        
+        .MathJax, .mjx-chtml {
+            overflow-x: auto;
+            max-width: 100%;
+            display: inline-block;
+        }
+
+        
+        .review-mode .option-input:checked + .option-label.incorrect::after {
+            background: var(--danger);
+        }
+        
+        .review-mode .option-label.correct-answer {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-label.correct-answer::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--success);
+        }
+        
+        .solution-container {
+            margin-top: 20px;
+            padding: 16px;
+            background: rgba(108, 92, 231, 0.05);
+            border-radius: 12px;
+            border-left: 3px solid var(--primary);
+        }
+        
+        .solution-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+        
+        /* Question Navigation */
+        .question-nav {
+            position: fixed;
+            top: 60px;
+            right: 0;
+            bottom: 80px;
+            width: 100%;
+            max-width: 320px;
+            background: var(--card-bg);
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            transform: translateX(100%);
+            transition: var(--transition);
+            z-index: 900;
+            overflow-y: auto;
+            padding: 16px;
+        }
+        
+        .question-nav.show {
+            transform: translateX(0);
+        }
+        
+        .nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .nav-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+        
+        .question-stats {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .stat-badge {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        
+        .section-selector {
+            width: 100%;
+            margin-bottom: 16px;
+            border-radius: 12px;
+            padding: 10px 16px;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            font-size: 0.9rem;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 16px;
+        }
+        
+        .question-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+            gap: 8px;
+        }
+        
+        .q-box {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .q-box:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .q-box.attempted {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .q-box.correct {
+            background-color: var(--success);
+            color: white;
+            border-color: var(--success);
+        }
+        
+        .q-box.incorrect {
+            background-color: var(--danger);
+            color: white;
+            border-color: var(--danger);
+        }
+        
+        .q-box.current {
+            border: 2px solid var(--accent) !important;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .q-box.unattempted {
+            background-color: var(--gray);
+            color: white;
+            border-color: var(--gray);
+        }
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: var(--footer-bg);
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            z-index: 800;
+        }
+        
+        .nav-btn {
+            height: 48px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 20px;
+            transition: var(--transition);
+            gap: 8px;
+        }
+        
+        .nav-btn i {
+            font-size: 1rem;
+        }
+        
+        .nav-btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .nav-btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+        
+        .nav-btn-outline:hover {
+            background: rgba(108, 92, 231, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        /* Overlay when nav is open */
+        .nav-overlay {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            bottom: 80px;
+            background: rgba(0,0,0,0.5);
+            z-index: 800;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+        }
+        
+        .nav-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        /* Results Modal */
+        .results-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1100;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+            padding: 16px;
+        }
+        
+        .results-modal.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .results-card {
+            background: white;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+            transform: translateY(20px);
+            transition: var(--transition);
+        }
+        
+        .results-modal.show .results-card {
+            transform: translateY(0);
+        }
+        
+        .results-header {
+            background: var(--header-bg);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .results-title {
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .results-body {
+            padding: 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            color: white;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+        
+        .results-footer {
+            padding: 16px 20px;
+            display: flex;
+            justify-content: center;
+            border-top: 1px solid var(--light-gray);
+        }
+        
+        /* Responsive Adjustments */
+        @media (min-width: 992px) {
+            .question-nav {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-right: 320px;
+            }
+            
+            .nav-overlay {
+                display: none;
+            }
+            
+            .bottom-nav {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .question-grid {
+                grid-template-columns: repeat(auto-fill, minmax(36px, 1fr));
+                gap: 6px;
+            }
+            
+            .q-box {
+                width: 36px;
+                height: 36px;
+                font-size: 0.9rem;
+            }
+            
+            .option-label {
+                padding: 12px 14px;
+            }
+            
+            .question-text {
+                font-size: 1rem;
+            }
+            
+            .header-brand {
+                font-size: 1rem;
+            }
+            
+            .control-btn {
+                width: 32px;
+                height: 32px;
+            }
+            
+            .timer-display {
+                font-size: 0.8rem;
+                padding: 4px 10px;
+            }
+            
+            .nav-btn {
+                height: 44px;
+                padding: 0 16px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="#" class="header-brand">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Mocks Wallah</span>
+            </a>
+            
+            <div class="header-controls">
+                <!-- Timer -->
+                <div class="timer-display">
+                    <i class="far fa-clock"></i>
+                    <span id="timer-display">15:00</span>
+                </div>
+                
+                <!-- Language toggle -->
+                <button class="control-btn" id="lang-btn" onclick="toggleLanguage()">
+                    <span id="lang-text">En</span>
+                </button>
+                
+                <!-- Submit button -->
+                <button class="control-btn" id="submit-btn" onclick="confirmSubmit()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+                
+                <!-- Questions toggle for mobile -->
+                <button class="control-btn nav-toggle-btn" id="nav-toggle" onclick="toggleNav()">
+                    <i class="fas fa-th"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main content -->
+    <main class="main-content" id="main-content">
+        <div class="question-counter" id="question-counter">Question 1 of 20</div>
+        
+        <!-- Questions will be displayed here -->
+        <div id="questions-container"></div>
+    </main>
+    
+    <!-- Overlay for mobile nav -->
+    <div class="nav-overlay" id="nav-overlay" onclick="toggleNav(false)"></div>
+    
+    <!-- Question navigation sidebar -->
+    <aside class="question-nav" id="question-nav">
+        <div class="nav-header">
+            <h3 class="nav-title">Questions</h3>
+            <div class="question-stats">
+                <span class="stat-badge bg-primary" id="attempted-count">0</span>
+                <span class="stat-badge bg-gray" id="total-count">20</span>
+                <button class="control-btn d-lg-none" onclick="toggleNav(false)">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Section selector -->
+        <select class="section-selector" id="section-selector" onchange="switchSection(this.value)">
+            <option value="all">All Sections</option>
+        </select>
+        
+        <!-- Question grid -->
+        <div class="question-grid" id="question-boxes"></div>
+    </aside>
+    
+    <!-- Bottom navigation for mobile -->
+    <nav class="bottom-nav d-lg-none">
+        <button class="nav-btn nav-btn-outline" onclick="prevQuestion()">
+            <i class="fas fa-chevron-left"></i>
+            <span>Previous</span>
+        </button>
+        <button class="nav-btn nav-btn-outline" onclick="nextQuestion()">
+            <span>Next</span>
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </nav>
+    
+    <!-- Results modal -->
+    <div class="results-modal" id="results-modal">
+        <div class="results-card">
+            <div class="results-header">
+                <h3 class="results-title">Test Results</h3>
+            </div>
+            <div class="results-body">
+                <div class="stats-grid">
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark))">
+                        <div class="stat-value" id="score-value">0</div>
+                        <div class="stat-label">Score</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--success), #1b9aaa)">
+                        <div class="stat-value" id="correct-value">0</div>
+                        <div class="stat-label">Correct</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--danger), var(--accent))">
+                        <div class="stat-value" id="incorrect-value">0</div>
+                        <div class="stat-label">Incorrect</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--gray), var(--dark))">
+                        <div class="stat-value" id="unattempted-value">0</div>
+                        <div class="stat-label">Unattempted</div>
+                    </div>
+                </div>
+            </div>
+            <div class="results-footer">
+                <button class="nav-btn nav-btn-primary" onclick="reviewTest()">
+                    <i class="fas fa-search me-1"></i>
+                    <span>Review Test</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Questions data
+        const questions = [];
+        const sections = {};
+        let currentLang = "en";
+        let currentQuestion = 0;
+        let answers = {};
+        let submitted = false;
+        let totalTime = 15 * 60;
+        
+        // Initialize the test
+        window.onload = function() {
+            initializeTest();
+            startTimer();
+            
+            // If on desktop, show the question navigation by default
+            if (window.innerWidth >= 992) {
+                document.getElementById('question-nav').classList.add('show');
+                document.getElementById('main-content').classList.add('with-nav');
+            }
+        };
+        
+        // Initialize test data
+        function initializeTest() {
+            // Add sections and questions
+            
+            sections["31"] = {
+                name: "Computer Knowledge",
+                start: 0,
+                end: 18
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="31">Computer Knowledge</option>`;
+            
+            sections["misc"] = {
+                name: "Miscellaneous",
+                start: 19,
+                end: 19
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="misc">Miscellaneous</option>`;
+            
+            
+                questions.push({
+                    id: "1",
+                    section: "31",
+                    question_en: " <p>1. </span><span style=\"font-family:Cambria Math\">Which of the following statements is true?</span></p>",
+                    question_hi: "<p>1. <span style=\"font-family: Kokila;\">निम्नलिखित</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">से</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">कौन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">से</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">कथन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">सत्य</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">हैं</span><span style=\"font-family: Cambria Math;\">?</span></p>",
+                    options_en: [" <p> An email id cannot have both,  lower-case and upper-case letters.</span></p>", " <p> An email id is always unique.</span></p>", 
+                                " <p> An email id is generally case-sensitive. </span></p>", " <p> An email id cannot use dot (.)  Character.</span></p>"],
+                    options_hi: ["<p><span style=\"font-family: Kokila;\">ईमेल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">आईडी</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">लोअर</span><span style=\"font-family: Cambria Math;\">-</span><span style=\"font-family: Kokila;\">केस ( Lower Case )&nbsp;</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">और</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">अपर</span><span style=\"font-family: Cambria Math;\">-</span><span style=\"font-family: Kokila;\">केस ( Upper Case )&nbsp;</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">दोनों</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">लेटर</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">नहीं</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">हो</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">सकते</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">हैं।</span></p>", "<p><span style=\"font-family: Kokila;\">ईमेल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">आईडी</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">हमेशा</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">यूनिक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">होती</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">है।</span></p>",
+                                "<p><span style=\"font-family: Kokila;\">ईमेल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">आईडी</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">आम</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">तौर</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">पर</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">केस</span><span style=\"font-family: Cambria Math;\">-</span><span style=\"font-family: Kokila;\">सेंसिटिव ( case sensitive )&nbsp;</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">होती</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">है।</span></p>", "<p><span style=\"font-family: Kokila;\">ईमेल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">आईडी &nbsp;में&nbsp;</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">डॉट</span><span style=\"font-family: Cambria Math;\"> (.) character </span><span style=\"font-family: Kokila;\">का</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">उपयोग</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">नहीं</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">कर</span><span style=\"font-family: Cambria Math;\"> <span style=\"font-size: 8pt;\">सकते हे</span> </span><span style=\"font-family: Kokila;\">।</span></p>"],
+                    solution_en: " <p>1.(b)</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Cambria Math\">A unique email address is an email that only you can access (i.e. is not shared with other people). Every email address consists of 3 elements:</span></p> <p><span style=\"font-family:Cambria Math\"> local-part, </span></p> <p><span style=\"font-family:Cambria Math\">@ symbol (pronounced as “at”),</span></p> <p><span style=\"font-family:Cambria Math\"> and domain name.      </span></p> <p><span style=\"font-family:Cambria Math\">Examples of email service providers include Gmail, outlook, yahoo mail etc.</span></p>",
+                    solution_hi: "<p>1.(b)<span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">एक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">यूनिक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">ईमेल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">एड्रेस</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">एक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">ईमेल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">है</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">जिसे</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">केवल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">आप</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">ही</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">एक्सेस</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">कर</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">सकते</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">हैं</span><span style=\"font-family: Cambria Math;\"> (</span><span style=\"font-family: Kokila;\">अर्थात</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">अन्य</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">लोगों</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">साथ</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">साझा</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">नहीं</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">किया</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">जाता</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">है</span><span style=\"font-family: Cambria Math;\">)</span><span style=\"font-family: Kokila;\">।</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">प्रत्येक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">ईमेल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">एड्रेस</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">में</span><span style=\"font-family: Cambria Math;\"> 3 </span><span style=\"font-family: Cambria Math;\">elements </span><span style=\"font-family: Kokila;\">होते</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">हैं</span><span style=\"font-family: Cambria Math;\">:</span></p>\r\n<p><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">Local-part,</span></p>\r\n<p><span style=\"font-family: Cambria Math;\"> @ symbol</span><span style=\"font-family: Cambria Math;\"> (\"</span><span style=\"font-family: Kokila;\">ऐट</span><span style=\"font-family: Cambria Math;\">\" </span><span style=\"font-family: Kokila;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">रूप</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">उच्चारित</span><span style=\"font-family: Cambria Math;\">), </span></p>\r\n<p><span style=\"font-family: Kokila;\">और</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">डोमेन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">नेम</span><span style=\"font-family: Cambria Math;\"> | </span></p>\r\n<p><span style=\"font-family: Kokila;\">ईमेल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">सेवा</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">प्रदाताओं</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">उदाहरणों</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">Gmail, outlook, yahoo mail</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">आदि</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">शामिल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">हैं।</span></p>",
+                    correct: "b",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "2",
+                    section: "31",
+                    question_en: " <p>2. </span><span style=\"font-family:Cambria Math\">Which of the following is called binary file format and used by the older versions of MS Word, such as MS Word 97 to 2003?</span></p>",
+                    question_hi: "<p>2. <span style=\"font-family: Kokila;\">निम्नलिखित</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">से</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">किसे</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">बाइनरी</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">फ़ाइल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">फॉर्मेट</span><span style=\"font-family: Cambria Math;\"> ( binary file format ) </span><span style=\"font-family: Kokila;\">कहा</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">जाता</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">है</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">और</span><span style=\"font-family: Cambria Math;\"> MS Word </span><span style=\"font-family: Kokila;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">पुराने</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">संस्करणों</span><span style=\"font-family: Cambria Math;\">&nbsp; ( versions ) </span><span style=\"font-family: Kokila;\">जैसे</span><span style=\"font-family: Cambria Math;\"> MS Word 97 </span><span style=\"font-family: Kokila;\">से</span><span style=\"font-family: Cambria Math;\"> 2003 </span><span style=\"font-family: Kokila;\">तक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">उपयोग</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">किया</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">जाता</span><span style=\"font-family: Cambria Math;\"> <span style=\"font-size: 8pt;\">था</span> </span><span style=\"font-family: Cambria Math;\">?</span></p>",
+                    options_en: [" <p> .docm </span></p>", " <p> .doc </span></p>", 
+                                " <p> .docxx </span></p>", " <p>  docx</span></p>"],
+                    options_hi: ["<p>.docm</p>", "<p>.doc</p>",
+                                "<p>.docxx</p>", "<p>docx</p>"],
+                    solution_en: " <p>2.(b)</span><span style=\"font-family:Cambria Math\"> .doc  is called binary file format and used by the older versions of MS Word, such as MS Word 97 to 2003</span></p>",
+                    solution_hi: "<p>2.(b)<span style=\"font-family: Cambria Math;\"> .doc </span><span style=\"font-family: Kokila;\">को</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">बाइनरी</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">फ़ाइल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">फॉर्मेट</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">कहा</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">जाता</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">है</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">और</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">इसका</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">उपयोग</span><span style=\"font-family: Cambria Math;\"> MS Word </span><span style=\"font-family: Kokila;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">पुराने</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">संस्करणों</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">जैसे</span><span style=\"font-family: Cambria Math;\"> MS Word 97 </span><span style=\"font-family: Kokila;\">से</span><span style=\"font-family: Cambria Math;\"> 2003 </span><span style=\"font-family: Kokila;\">तक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">किया</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">जाता</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">था&nbsp;।</span></p>",
+                    correct: "b",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "3",
+                    section: "31",
+                    question_en: "<p>3.<span style=\"font-family: Cambria Math;\"> Which of the following statements is/are true?</span></p>\r\n<p><strong>(i)</strong><span style=\"font-weight: 400;\"> In MS Word, an 18-point font size is&nbsp; approximately equivalent to 0.5 inch.</span></p>\r\n<p><strong>(ii)</strong><span style=\"font-weight: 400;\"> In MS Word, a paragraph cannot have more than 24-points spacing.</span></p>",
+                    question_hi: "<p>3.<span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">निम्नलिखित</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">से</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">कौन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">सा</span><span style=\"font-family: Cambria Math;\">/</span><span style=\"font-family: Kokila;\">से</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">कथन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">सत्य</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">है</span><span style=\"font-family: Cambria Math;\">/</span><span style=\"font-family: Kokila;\">हैं</span><span style=\"font-family: Cambria Math;\">?</span></p>\r\n<p><span style=\"font-weight: 400;\">(i) MS Word में, 18-पॉइंट्स फ़ॉन्ट आकार लगभग 0.5 इंच के बराबर होता है।</span></p>\r\n<p><span style=\"font-weight: 400;\">(ii) MS Word में, एक पैराग्राफ में 24-पॉइंट्स से अधिक स्पेसिंग नहीं हो सकती है।</span></p>",
+                    options_en: ["<p>(ii) only</p>", "<p><span style=\"font-weight: 400;\">Both (i) and (ii)</span></p>", 
+                                "<p>Neither (i) nor (ii)</p>", "<p>(i) only</p>"],
+                    options_hi: ["<p><span style=\"font-family: Kokila;\">केवल</span><span style=\"font-family: Cambria Math;\"> (ii) </span></p>", "<p>(i) <span style=\"font-family: Kokila;\">और</span><span style=\"font-family: Cambria Math;\"> (ii) </span><span style=\"font-family: Kokila;\">दोनों</span></p>",
+                                "<p><span style=\"font-weight: 400;\">न तो (i) और न ही (ii)</span></p>", "<p><span style=\"font-weight: 400;\">केवल (i)</span></p>"],
+                    solution_en: "<p>3.(a) <span style=\"font-family: Cambria Math;\"> In MS Word, a paragraph cannot have more than 24-points spacing.</span></p>",
+                    solution_hi: "<p>3.(a)<span style=\"font-family: Cambria Math;\"> MS Word </span><span style=\"font-family: Kokila;\">में</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Kokila;\">एक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">पैराग्राफ</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">में</span><span style=\"font-family: Cambria Math;\"> 24-</span><span style=\"font-family: Kokila;\">पॉइंट्स</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">से</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">अधिक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">स्पेसिंग</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">नहीं</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">हो</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">सकती</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">है।</span></p>",
+                    correct: "a",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "4",
+                    section: "31",
+                    question_en: " <p>4. </span><span style=\"font-family:Cambria Math\">Which of the following statements related to MS Word is FALSE? </span></p>",
+                    question_hi: "<p>4. <span style=\"font-family: Cambria Math;\">MS Word </span><span style=\"font-family: Kokila;\">से</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">संबंधित</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">निम्नलिखित</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">से</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">कौन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">सा</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">कथन</span><span style=\"font-family: Cambria Math;\"> FALSE </span><span style=\"font-family: Kokila;\">है</span><span style=\"font-family: Cambria Math;\">?</span></p>",
+                    options_en: [" <p> Number of columns in a table cannot be more than the number of rows. </span></p>", " <p> A table can have even number of  rows and columns.</span></p>", 
+                                " <p> A table can have different number of rows and columns. </span></p>", " <p> A table can have odd number of rows and columns.</span></p>"],
+                    options_hi: ["<p><span style=\"font-family: Kokila;\">किसी</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">टेबल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">कॉलम</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">की</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">संख्या</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">रो</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">की</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">संख्या</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">से</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">अधिक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">नहीं</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">हो</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">सकती</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">है।</span></p>", "<p><span style=\"font-family: Kokila;\">एक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">टेबल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">रो</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">और</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">कॉलम</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">की</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">संख्या</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">समान</span><span style=\"font-family: Kokila;\"> </span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">हो</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">सकती</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">है।</span></p>",
+                                "<p><span style=\"font-family: Kokila;\">एक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">टेबल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">रो</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">और</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">कॉलम</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">की</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">अलग</span><span style=\"font-family: Cambria Math;\">-</span><span style=\"font-family: Kokila;\">अलग</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">संख्या</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">हो</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">सकती</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">है।</span></p>", "<p><span style=\"font-family: Kokila;\">एक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">टेबल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">रो</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">और</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">कॉलम</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">की</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">विषम</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">संख्या</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">हो</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">सकती</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">है।</span></p>"],
+                    solution_en: " <p>4.(a) </span><span style=\"font-family:Cambria Math\">Number of columns in a table can be more than the number of rows in MS Word. </span></p>",
+                    solution_hi: "<p>4.(a) <span style=\"font-family: Kokila;\">किसी</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">टेबल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">स्तंभों</span><span style=\"font-family: Cambria Math;\"> (columns) </span><span style=\"font-family: Kokila;\">की</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">संख्या</span><span style=\"font-family: Cambria Math;\"> MS Word </span><span style=\"font-family: Kokila;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">पंक्तियों</span><span style=\"font-family: Cambria Math;\"> (rows) </span><span style=\"font-family: Kokila;\">की</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">संख्या</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">से</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">अधिक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">हो</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">सकती</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">है।</span></p>",
+                    correct: "a",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "5",
+                    section: "31",
+                    question_en: " <p>5. </span><span style=\"font-family:Cambria Math\">Which of the following keyboard shortcuts is used to open the Downloads window in Chrome browser?</span></p>",
+                    question_hi: "<p>5. <span style=\"font-family: Kokila;\">क्रोम</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">ब्राउज़र</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">डाउनलोड</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">विंडो</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">खोलने</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">लिए</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">निम्न</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">से</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">किस</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">कीबोर्ड</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">शॉर्टकट</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">का</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">उपयोग</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">किया</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">जाता</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">है</span><span style=\"font-family: Cambria Math;\">?</span></p>",
+                    options_en: [" <p> Ctrl + J </span></p>", " <p> Alt + D</span></p>", 
+                                " <p> Alt + J </span></p>", " <p> Ctrl + D</span></p>"],
+                    options_hi: ["<p>Ctrl + J</p>", "<p>Alt + D</p>",
+                                "<p>Alt + J</p>", "<p>Ctrl + D</p>"],
+                    solution_en: " <p>5.(a) Ctrl + J </span><span style=\"font-family:Cambria Math\">is used to open the Downloads window in Chrome browser. </span></p> <p><span style=\"font-family:Cambria Math\">Alt+D</span><span style=\"font-family:Cambria Math\"> is a keyboard shortcut most often used to select the URL in the address bar in Internet browsers. </span></p> <p><span style=\"font-family:Cambria Math\">Alt+J </span><span style=\"font-family:Cambria Math\">is a keyboard shortcut most often used to adjust the justification of text in a file. </span></p> <p><span style=\"font-family:Cambria Math\">Ctrl + D</span><span style=\"font-family:Cambria Math\"> creates a new bookmark or favourite for the current page.</span></p>",
+                    solution_hi: "<p>5.(a)<span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">Ctrl + J</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">का</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">प्रयोग</span><span style=\"font-family: Cambria Math;\"> Chrome </span><span style=\"font-family: Kokila;\">ब्राउजर</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">डाउनलोड</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">विंडो</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">को</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">खोलने</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">लिए</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">किया</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">जाता</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">है।</span></p>\r\n<p><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">Alt + D</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">एक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">कीबोर्ड</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">शॉर्टकट</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">है</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">जिसका</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">उपयोग</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">अक्सर</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">इंटरनेट</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">ब्राउज़र</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">एड्रेस</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">बार</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">में</span><span style=\"font-family: Cambria Math;\"> URL </span><span style=\"font-family: Kokila;\">चुनने</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">लिए</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">किया</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">जाता</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">है।</span></p>\r\n<p><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">Alt + J</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">एक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">कीबोर्ड</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">शॉर्टकट</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">है</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">जिसका</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">उपयोग</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">अक्सर</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">किसी</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">फ़ाइल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">में</span><span style=\"font-family: Cambria Math;\"> <span style=\"font-size: 8pt;\">Text को </span></span><span style=\"font-size: 8pt;\"><span style=\"font-family: Cambria Math;\">&nbsp;justify करने के लिए किया जाता हे </span><span style=\"font-family: Kokila;\">।</span></span></p>\r\n<p><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">Ctrl + D</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">वर्तमान</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">पेज</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">लिए</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">एक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">नया</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">बुकमार्क</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">या</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">फेवरेट</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">बनाता</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">है।</span></p>",
+                    correct: "a",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "6",
+                    section: "31",
+                    question_en: " <p>6. </span><span style=\"font-family:Cambria Math\">What is the default horizontal alignment of numbers in the cell of an MS Excel worksheet?</span></p>",
+                    question_hi: "<p>6. <span style=\"font-family: Cambria Math;\">MS Excel </span><span style=\"font-family: Kokila;\">वर्कशीट</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">सेल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">संख्याओं</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">का</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">डिफ़ॉल्ट</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">हॉरिजॉन्टल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">एलाइनमेंट ( Horizontal allignment )&nbsp;</span><span style=\"font-family: Kokila;\">क्या रहता </span><span style=\"font-family: Cambria Math;\">&nbsp;</span><span style=\"font-family: Kokila;\">है</span><span style=\"font-family: Cambria Math;\">?</span></p>",
+                    options_en: [" <p> Justify </span></p>", " <p> Left</span></p>", 
+                                " <p> Right </span></p>", " <p> Centre</span></p>"],
+                    options_hi: ["<p><span style=\"font-family: Kokila;\">जस्टिफाई ( justify )</span></p>", "<p><span style=\"font-family: Kokila;\">लेफ्ट ( left )</span></p>",
+                                "<p><span style=\"font-family: Kokila;\">राइट ( right )</span></p>", "<p><span style=\"font-family: Kokila;\">सेंटर ( center )</span></p>"],
+                    solution_en: " <p>6.(c) </span><span style=\"font-family:Cambria Math\">Right is the default horizontal alignment of numbers in the cell of an MS Excel worksheet.</span></p>",
+                    solution_hi: "<p>6.(c) <span style=\"font-family: Kokila;\">एक</span><span style=\"font-family: Cambria Math;\"> MS Excel </span><span style=\"font-family: Kokila;\">वर्कशीट</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">सेल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">संख्याओं</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">का</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">डिफ़ॉल्ट</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">हॉरिजॉन्टल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">एलाइनमेंट (&nbsp;Horizontal allignment )</span><span style=\"font-family: Kokila;\"> &ldquo; </span><span style=\"font-family: Kokila;\">राइट</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">&ldquo; ( Right )&nbsp;</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">है।</span></p>",
+                    correct: "c",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "7",
+                    section: "31",
+                    question_en: " <p>7. </span><span style=\"font-family:Cambria Math\">What is the keyboard shortcut to open an already existing doc file in MS Word?  </span></p>",
+                    question_hi: "<p>7. <span style=\"font-family: Cambria Math;\">MS Word </span><span style=\"font-family: Kokila;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">पहले</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">से</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">मौजूद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">दस्तावेज़</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">फ़ाइल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">को</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">खोलने</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">लिए</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">कीबोर्ड</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">शॉर्टकट</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">क्या</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">है</span><span style=\"font-family: Cambria Math;\">?</span></p>",
+                    options_en: [" <p> Alt + Ctrl + O  </span></p>", " <p> Ctrl + O </span></p>", 
+                                " <p> Ctrl + N</span><span style=\"font-family:Cambria Math\">  </span></p>", " <p> Alt + N</span></p>"],
+                    options_hi: ["<p>Alt + Ctrl + O</p>", "<p>Ctrl + O</p>",
+                                "<p>Ctrl + N</p>", "<p>Alt + N</p>"],
+                    solution_en: " <p>7.(b) </span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Cambria Math\">Ctrl + O</span><span style=\"font-family:Cambria Math\"> is the keyboard shortcut to open an already existing doc file in MS Word.  </span></p> <p><span style=\"font-family:Cambria Math\">Ctrl + N </span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Cambria Math\">creates a new document, window, workbook, or other type of file.</span><span style=\"font-family:Cambria Math\"> </span></p> <p><span style=\"font-family:Cambria Math\">Alt+N</span><span style=\"font-family:Cambria Math\"> is a keyboard shortcut most often used to open the Insert option in a file menu or the Ribbon.</span></p>",
+                    solution_hi: "<p>7.(b) Ctrl + O<span style=\"font-family: Cambria Math;\">, MS Word </span><span style=\"font-family: Kokila;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">पहले</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">से</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">मौजूद</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">दस्तावेज़</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">फ़ाइल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">को</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">खोलने</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">लिए</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">कीबोर्ड</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">शॉर्टकट</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">है।</span></p>\r\n<p><span style=\"font-family: Cambria Math;\">Ctrl + N</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">एक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">नया</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">दस्तावेज़</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Kokila;\">विंडो</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Kokila;\">वर्कबुक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">या</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">अन्य</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">प्रकार</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">की</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">फ़ाइल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">बनाता</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">है।</span></p>\r\n<p><span style=\"font-family: Cambria Math;\"> Alt + N </span><span style=\"font-family: Kokila;\">एक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">कीबोर्ड</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">शॉर्टकट</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">है</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">जिसका</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">उपयोग</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">अक्सर</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">फ़ाइल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">मेनू</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">या</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">रिबन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">में</span><span style=\"font-family: Cambria Math;\"> Insert option </span><span style=\"font-family: Kokila;\">खोलने</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">लिए</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">किया</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">जाता</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">है।</span></p>",
+                    correct: "b",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "8",
+                    section: "31",
+                    question_en: "<p>8.&nbsp;<span style=\"font-weight: 400;\">Data in the database at a particular point of time is called as?</span></p>\n",
+                    question_hi: "<p>8.&nbsp;<span style=\"font-weight: 400;\">&#2325;&#2367;&#2360;&#2368; &#2357;&#2367;&#2358;&#2375;&#2359; &#2360;&#2350;&#2351; &#2348;&#2367;&#2306;&#2342;&#2369; &#2346;&#2352; &#2337;&#2375;&#2335;&#2366;&#2348;&#2375;&#2360; &#2350;&#2375;&#2306; &#2337;&#2375;&#2335;&#2366; &#2325;&#2379; &#2325;&#2381;&#2351;&#2366; &#2325;&#2361;&#2366; &#2332;&#2366;&#2340;&#2366; &#2361;&#2376;?</span></p>\n",
+                    options_en: ["<p><span style=\"font-weight: 400;\">Intension&nbsp;</span></p>\n", "<p><span style=\"font-weight: 400;\">Extension </span></p>\n", 
+                                "<p><span style=\"font-weight: 400;\">Backup</span></p>\n", "<p><span style=\"font-weight: 400;\">Application </span></p>\n"],
+                    options_hi: ["<p><span style=\"font-weight: 400;\">&nbsp;&#2311;&#2306;&#2335;&#2375;&#2306;&#2358;&#2344; (Intension)</span></p>\n", "<p><span style=\"font-weight: 400;\">&#2319;&#2325;&#2381;&#2360;&#2335;&#2375;&#2306;&#2358;&#2344;&nbsp; (Extension)</span></p>\n",
+                                "<p><span style=\"font-weight: 400;\">&#2348;&#2376;&#2325;&#2309;&#2346; (Backup)</span></p>\n", "<p><span style=\"font-weight: 400;\">&#2319;&#2346;&#2381;&#2354;&#2368;&#2325;&#2375;&#2358;&#2344; (Application)</span></p>\n"],
+                    solution_en: "<p>8.(b)&nbsp;<strong>Extension </strong><span style=\"font-weight: 400;\">of a given relation is the set of tuples appearing in that relationship at any given instance/ or any point in time. </span><strong>Intension&rarr;</strong><span style=\"font-weight: 400;\">It corresponds to what is specified in the relational schema. The intention of a given relation is independent of time. </span><strong>Back up&rarr;</strong><span style=\"font-weight: 400;\">A backup is a copy of data from your database that can be used to reconstruct that data. </span><strong>Application &rarr;</strong><span style=\"font-weight: 400;\">A database application is a computer program whose primary purpose is retrieving information from a computerized database.&nbsp;</span></p>\n",
+                    solution_hi: "<p>8.(b)&nbsp;<span style=\"font-weight: 400;\">&#2325;&#2367;&#2360;&#2368; &#2342;&#2367;&#2319; &#2327;&#2319; &#2360;&#2306;&#2348;&#2306;&#2343; &#2325;&#2366; </span><strong>&#2319;&#2325;&#2381;&#2360;&#2335;&#2375;&#2306;&#2358;&#2344; </strong><span style=\"font-weight: 400;\">&nbsp;(Extension) &#2313;&#2360; &#2360;&#2306;&#2348;&#2306;&#2343; &#2350;&#2375;&#2306; &#2325;&#2367;&#2360;&#2368; &#2349;&#2368; &#2360;&#2350;&#2351;/&#2351;&#2366; &#2325;&#2367;&#2360;&#2368; &#2349;&#2368; &#2360;&#2350;&#2351; &#2350;&#2375;&#2306; &#2342;&#2367;&#2326;&#2366;&#2312; &#2342;&#2375;&#2344;&#2375; &#2357;&#2366;&#2354;&#2375; &#2335;&#2346;&#2354;&#2381;&#2360; &#2325;&#2366; &#2360;&#2375;&#2335; &#2361;&#2376;&#2404;</span><strong>&#2311;&#2306;&#2335;&#2375;&#2306;&#2358;&#2344;</strong><span style=\"font-weight: 400;\">&rarr; &#2351;&#2361; &#2352;&#2367;&#2354;&#2375;&#2358;&#2344;&#2354; &#2360;&#2381;&#2325;&#2368;&#2350;&#2366; &#2350;&#2375;&#2306; &#2344;&#2367;&#2352;&#2381;&#2342;&#2367;&#2359;&#2381;&#2335; &#2325;&#2375; &#2309;&#2344;&#2369;&#2352;&#2370;&#2346; &#2361;&#2376;&#2404; &#2325;&#2367;&#2360;&#2368; &#2342;&#2367;&#2319; &#2327;&#2319; &#2360;&#2306;&#2348;&#2306;&#2343; &#2325;&#2366;&nbsp; &#2311;&#2306;&#2335;&#2375;&#2306;&#2358;&#2344;(Intension) &#2360;&#2350;&#2351; &#2360;&#2375; &#2360;&#2381;&#2357;&#2340;&#2306;&#2340;&#2381;&#2352; &#2361;&#2376;&#2404; </span><strong>&#2348;&#2376;&#2325; &#2309;&#2346;</strong><span style=\"font-weight: 400;\"> &rarr; &#2348;&#2376;&#2325;&#2309;&#2346; &#2310;&#2346;&#2325;&#2375; &#2337;&#2375;&#2335;&#2366;&#2348;&#2375;&#2360; &#2360;&#2375; &#2337;&#2375;&#2335;&#2366; &#2325;&#2368; &#2319;&#2325; &#2346;&#2381;&#2352;&#2340;&#2367; &#2361;&#2376; &#2332;&#2367;&#2360;&#2325;&#2366; &#2313;&#2346;&#2351;&#2379;&#2327; &#2313;&#2360; &#2337;&#2375;&#2335;&#2366; &#2325;&#2375; &#2346;&#2369;&#2344;&#2352;&#2381;&#2344;&#2367;&#2352;&#2381;&#2350;&#2366;&#2339; &#2325;&#2375; &#2354;&#2367;&#2319; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366; &#2360;&#2325;&#2340;&#2366; &#2361;&#2376;&#2404; </span><strong>&#2319;&#2346;&#2381;&#2354;&#2368;&#2325;&#2375;&#2358;&#2344;</strong><span style=\"font-weight: 400;\"> &rarr; &#2319;&#2325; &#2337;&#2375;&#2335;&#2366;&#2348;&#2375;&#2360; &#2319;&#2346;&#2381;&#2354;&#2368;&#2325;&#2375;&#2358;&#2344; &#2319;&#2325; &#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352; &#2346;&#2381;&#2352;&#2379;&#2327;&#2381;&#2352;&#2366;&#2350; &#2361;&#2376; &#2332;&#2367;&#2360;&#2325;&#2366; &#2346;&#2381;&#2352;&#2366;&#2341;&#2350;&#2367;&#2325; &#2313;&#2342;&#2381;&#2342;&#2375;&#2358;&#2381;&#2351; &#2325;&#2350;&#2381;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352;&#2368;&#2325;&#2371;&#2340;(computerized) &#2337;&#2375;&#2335;&#2366;&#2348;&#2375;&#2360; &#2360;&#2375; &#2332;&#2366;&#2344;&#2325;&#2366;&#2352;&#2368; &#2346;&#2381;&#2352;&#2366;&#2346;&#2381;&#2340; &#2325;&#2352;&#2344;&#2366; &#2361;&#2376;&#2404;</span></p>\r\n<p>&nbsp;</p>\n",
+                    correct: "b",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "9",
+                    section: "31",
+                    question_en: " <p>9. </span><span style=\"font-family:Cambria Math\">Who was the inventor of the World Wide Web (WWW)?</span></p>",
+                    question_hi: " <p>9. </span><span style=\"font-family:Kokila\">वर्ल्ड</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">वाइड</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">वेब</span><span style=\"font-family:Cambria Math\"> (WWW) </span><span style=\"font-family:Kokila\">के</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">आविष्कारक</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">कौन</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">थे</span><span style=\"font-family:Cambria Math\">?</span></p>",
+                    options_en: [" <p> Steve Jobs</span></p>", " <p> Tim Berners-Lee </span></p>", 
+                                " <p> Alan Turing</span></p>", " <p> Bill Gates</span></p>"],
+                    options_hi: [" <p> </span><span style=\"font-family:Kokila\">स्टीव</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">जॉब्स</span></p>", " <p> </span><span style=\"font-family:Kokila\">टिम</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">बर्नर्स</span><span style=\"font-family:Cambria Math\">-</span><span style=\"font-family:Kokila\">ली</span></p>",
+                                " <p> </span><span style=\"font-family:Kokila\">एलन</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">ट्यूरिंग</span></p>", " <p> </span><span style=\"font-family:Kokila\">बिल</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">गेट्स</span></p>"],
+                    solution_en: " <p>9.(b)</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Cambria Math\">Tim Berners-Lee </span><span style=\"font-family:Cambria Math\">was the inventor of the World Wide Web (WWW).</span></p> <p><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Cambria Math\">Steve Jobs - </span><span style=\"font-family:Cambria Math\">founder of Apple inc.</span><span style=\"font-family:Cambria Math\"> </span></p> <p><span style=\"font-family:Cambria Math\">Alan Turing</span><span style=\"font-family:Cambria Math\"> is known to the world as the \'Father of Computer Science\'. </span></p> <p><span style=\"font-family:Cambria Math\">Bill Gates,</span><span style=\"font-family:Cambria Math\"> co-founder of Microsoft. </span></p>",
+                    solution_hi: " <p><span style=\"font-family:Cambria Math\">9.(b) </span><span style=\"font-family:Kokila\">टिम</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">बर्नर्स</span><span style=\"font-family:Cambria Math\">-</span><span style=\"font-family:Kokila\">ली</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">वर्ल्ड</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">वाइड</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">वेब</span><span style=\"font-family:Cambria Math\"> (WWW) </span><span style=\"font-family:Kokila\">के</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">आविष्कारक</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">थे।</span></p> <p><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">स्टीव</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">जॉब्स</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">एप्पल</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">इंक</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">के</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">संस्थापक</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">हैं।</span></p> <p><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">एलन</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">ट्यूरिंग</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">को</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">दुनिया</span><span style=\"font-family:Cambria Math\"> \'</span><span style=\"font-family:Kokila\">कंप्यूटर</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">साइंस</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">के</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">जनक</span><span style=\"font-family:Cambria Math\">\' </span><span style=\"font-family:Kokila\">के</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">रूप</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">में</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">जानती</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">है।</span><span style=\"font-family:Cambria Math\"> </span></p> <p><span style=\"font-family:Kokila\">बिल</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">गेट्स</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">माइक्रोसॉफ्ट</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">के</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">सह</span><span style=\"font-family:Cambria Math\">-</span><span style=\"font-family:Kokila\">संस्थापक</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">हैं।</span></p>",
+                    correct: "b",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "10",
+                    section: "31",
+                    question_en: " <p>10.</span><span style=\"font-family:Cambria Math\"> What will be the result of the following MS Excel formula?</span></p> <p><span style=\"font-family:Cambria Math\">=8/4^2</span></p>",
+                    question_hi: " <p>10.</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">निम्नलिखित</span><span style=\"font-family:Cambria Math\"> MS Excel </span><span style=\"font-family:Kokila\">फार्मूला</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">का</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">परिणाम</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">क्या</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">होगा</span><span style=\"font-family:Cambria Math\">?</span></p> <p><span style=\"font-family:Cambria Math\">=8/4^2</span></p>",
+                    options_en: [" <p> Error  </span></p>", " <p> 4 </span></p>", 
+                                " <p> 0.5 </span></p>", " <p> 0</span></p>"],
+                    options_hi: [" <p> </span><span style=\"font-family:Kokila\">एरर</span><span style=\"font-family:Cambria Math\"> (Error) </span></p>", " <p> 4 </span></p>",
+                                " <p> 0.5  </span></p>", " <p> 0</span></p>"],
+                    solution_en: " <p>10.(c) </span><span style=\"font-family:Cambria Math\">The result of 8/4^2= 0.5</span></p>",
+                    solution_hi: " <p>10.(c) </span><span style=\"font-family:Cambria Math\">8/4^2 </span><span style=\"font-family:Kokila\">का</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">परिणाम</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">है</span><span style=\"font-family:Cambria Math\"> = 0.5</span></p>",
+                    correct: "c",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "11",
+                    section: "31",
+                    question_en: "<p><span style=\"font-family: Cambria Math;\">11. </span><span style=\"font-family: Cambria Math;\">Consider a formula \"=A3+B4\" in cell A5. If cell A5 is copied and pasted into E9, then </span><span style=\"font-family: Cambria Math;\">What will be the formula in cell E9?</span></p>",
+                    question_hi: "<p><span style=\"font-family: Cambria Math;\">11. </span><span style=\"font-family: Kokila;\">सेल</span><span style=\"font-family: Cambria Math;\"> A5 </span><span style=\"font-family: Kokila;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">फार्मूला</span><span style=\"font-family: Cambria Math;\"> \"=A3+B4\" </span><span style=\"font-family: Kokila;\">पर</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">विचार</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">करें।</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">यदि</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">सेल</span><span style=\"font-family: Cambria Math;\"> A5 </span><span style=\"font-family: Kokila;\">को</span><span style=\"font-family: Cambria Math;\"> E9 </span><span style=\"font-family: Kokila;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">कॉपी</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">और</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">पेस्ट</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">किया</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">जाता</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">है</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Kokila;\">तो </span><span style=\"font-family: Kokila;\">सेल</span><span style=\"font-family: Cambria Math;\"> E9 </span><span style=\"font-family: Kokila;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">फॉर्मूला</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">क्या</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">होगा</span><span style=\"font-family: Cambria Math;\">?</span></p>",
+                    options_en: ["<p>=B4+C5</p>", "<p>=A3+B4</p>", 
+                                "<p>=E7+F8</p>", "<p>=E8+F7</p>"],
+                    options_hi: ["<p>=B4+C5</p>", "<p>=A3+B4</p>",
+                                "<p>=E7+F8</p>", "<p>=E8+F7</p>"],
+                    solution_en: "<p><span style=\"font-family: Cambria Math;\">11.(c)</span><span style=\"font-family: Cambria Math;\"> If cell A5 is copied and pasted into E9, then the formula in cell E9 will be =E7+F8.</span></p>",
+                    solution_hi: "<p><span style=\"font-family: Cambria Math;\">11.(c)</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">यदि</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">सेल</span><span style=\"font-family: Cambria Math;\"> A5 </span><span style=\"font-family: Kokila;\">को</span><span style=\"font-family: Cambria Math;\"> E9 </span><span style=\"font-family: Kokila;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">कॉपी</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">और</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">पेस्ट</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">किया</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">जाता</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">है</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Kokila;\">तो</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">सेल</span><span style=\"font-family: Cambria Math;\"> E9 </span><span style=\"font-family: Kokila;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">फॉर्मूला</span><span style=\"font-family: Cambria Math;\"> =E7+F8 </span><span style=\"font-family: Kokila;\">होगा।</span></p>",
+                    correct: "c",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "12",
+                    section: "31",
+                    question_en: "<p>12. <span style=\"font-family: Cambria Math;\">State whether the following statements related to MS Word are true or false.</span></p>\r\n<p><span style=\"font-weight: 400;\">(i) When you open a new file in MS Word, by default it has Landscape orientation.</span></p>\r\n<p><span style=\"font-weight: 400;\">(ii) When you open a new file in MS Word, by default it has Portrait orientation</span></p>",
+                    question_hi: "<p>1<span style=\"font-family: Cambria Math;\">2. </span><span style=\"font-family: Kokila;\">बताएं</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">कि</span><span style=\"font-family: Cambria Math;\"> MS Word </span><span style=\"font-family: Kokila;\">से</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">संबंधित</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">निम्नलिखित</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">कथन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">सही</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">हैं</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">या</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">गलत।</span></p>\r\n<p><span style=\"font-weight: 400;\">(i) जब आप MS Word में कोई नई फ़ाइल खोलते हैं, तो डिफ़ॉल्ट रूप से उसमें लैंडस्केप ओरिएंटेशन(Landscape orientation) होता है।</span></p>\r\n<p>(ii) जब आप MS Word में कोई नई फ़ाइल खोलते हैं, तो डिफ़ॉल्ट रूप से उसमें पोर्ट्रेट ओरिएंटेशन (Portrait orientation) होता है।</p>",
+                    options_en: ["<p>(i) False, (ii) True</p>", "<p>(i) False, (ii) False</p>", 
+                                "<p>(i) True, (ii) False</p>", "<p>(i) True, (ii) True</p>"],
+                    options_hi: ["<p>(i) <span style=\"font-family: Kokila;\">गलत</span><span style=\"font-family: Cambria Math;\">, (ii) </span><span style=\"font-family: Kokila;\">सही</span></p>", "<p>(i) <span style=\"font-family: Kokila;\">गलत</span><span style=\"font-family: Cambria Math;\">, (ii) </span><span style=\"font-family: Kokila;\">गलत</span></p>",
+                                "<p>(i) <span style=\"font-family: Kokila;\">सही</span><span style=\"font-family: Cambria Math;\">, (ii) </span><span style=\"font-family: Kokila;\">गलत</span></p>", "<p>(i) <span style=\"font-family: Kokila;\">सही</span><span style=\"font-family: Cambria Math;\">, (ii) </span><span style=\"font-family: Kokila;\">सही</span></p>"],
+                    solution_en: "<p>1<span style=\"font-family: Cambria Math;\">2.(a)</span><span style=\"font-family: Cambria Math;\"> When we open a new file in MS Word, by default it has Portrait orientation. </span><span style=\"font-family: Cambria Math;\">Page Orientation refers to the direction in which a document is displayed. It is of two types; portrait (vertical) and landscape (horizontal). </span></p>",
+                    solution_hi: "<p>1<span style=\"font-family: Cambria Math;\">2.(a)</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">जब</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">हम</span><span style=\"font-family: Cambria Math;\"> MS </span><span style=\"font-family: Kokila;\">वर्ड</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">कोई</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">नई</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">फ़ाइल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">खोलते</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">हैं</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Kokila;\">तो</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">डिफ़ॉल्ट</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">रूप</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">से</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">उसमें</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">पोर्ट्रेट</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">ओरिएंटेशन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">होता</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">है।</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">पेज</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">ओरिएंटेशन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">उस</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">दिशा</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">को</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">संदर्भित</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">करता</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">है</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">जिसमें</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">एक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">डॉक्यूमेंट</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">प्रदर्शित</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">होता</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">है।</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">यह</span><span style=\"font-family: Cambria Math;\"> 2 </span><span style=\"font-family: Kokila;\">प्रकार</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">का</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">होता</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">है</span><span style=\"font-family: Cambria Math;\">; </span><span style=\"font-family: Kokila;\">पोर्ट्रेट</span><span style=\"font-family: Cambria Math;\"> (</span><span style=\"font-family: Kokila;\">ऊर्ध्वाधर</span><span style=\"font-family: Cambria Math;\">) </span><span style=\"font-family: Kokila;\">और</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">लैंडस्केप</span><span style=\"font-family: Cambria Math;\">(</span><span style=\"font-family: Kokila;\">क्षैतिज</span><span style=\"font-family: Cambria Math;\">)</span><span style=\"font-family: Kokila;\">।</span><span style=\"font-family: Cambria Math;\"> </span></p>",
+                    correct: "a",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "13",
+                    section: "31",
+                    question_en: " <p>1</span><span style=\"font-family:Cambria Math\">3. </span><span style=\"font-family:Cambria Math\">Which of the following appears as a part of the \'Editing\' command group within the Home menu in recent versions of MS Word, such as Word 2016?</span></p>",
+                    question_hi: "<p><span style=\"font-family: Cambria Math;\">13. </span><span style=\"font-family: Kokila;\">निम्नलिखित</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">से</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">कौन</span><span style=\"font-family: Cambria Math;\"> MS Word <span style=\"font-family: Kokila;\">के</span> <span style=\"font-family: Kokila;\">हाल</span> <span style=\"font-family: Kokila;\">के</span> <span style=\"font-family: Kokila;\">संस्करणों ( </span>&nbsp;<span style=\"font-family: Kokila;\">जैसे</span> <span style=\"font-family: Kokila;\">वर्ड</span> 2016)&nbsp; <span style=\"font-family: Kokila;\">में</span>&nbsp; \'</span><span style=\"font-family: Kokila;\">एडिटिंग</span><span style=\"font-family: Cambria Math;\">\' </span><span style=\"font-family: Kokila;\">कमांड</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">ग्रुप</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">एक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">भाग</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">रूप</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">दिखाई</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">देता</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">है </span><span style=\"font-family: Cambria Math;\">?</span></p>",
+                    options_en: [" <p> Font color </span></p>", " <p> Change case  </span></p>", 
+                                " <p> Replace </span></p>", " <p> Format Painter</span></p>"],
+                    options_hi: ["<p><span style=\"font-family: Kokila;\">फॉण्ट</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">कलर ( font color )</span></p>", "<p><span style=\"font-family: Kokila;\">चेंज</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">केस (change case )</span></p>",
+                                "<p><span style=\"font-family: Kokila;\">रिप्लेस(replace)</span></p>", "<p><span style=\"font-family: Kokila;\">फॉर्मेट</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">पेंटर (format painter )</span></p>"],
+                    solution_en: " <p>1</span><span style=\"font-family:Cambria Math\">3.(c)</span><span style=\"font-family:Cambria Math\"> Replace appears as a part of the \'Editing\' command group within the Home menu in recent versions of MS Word, such as Word 2016.</span></p>",
+                    solution_hi: "<p>1<span style=\"font-family: Cambria Math;\">3.(c) </span><span style=\"font-family: Kokila;\">रिप्लेस ( replace )</span><span style=\"font-family: Cambria Math;\"> , MS </span><span style=\"font-family: Kokila;\">वर्ड</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">हाल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">संस्करणों</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Kokila;\">जैसे</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">वर्ड</span><span style=\"font-family: Cambria Math;\"> 2016 </span><span style=\"font-family: Kokila;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">होम</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">मेनू</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">भीतर</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">एडिटिंग</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">कमांड</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">समूह</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">एक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">ग्रुप</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">रूप</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">दिखाई</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">होता</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">है।</span></p>",
+                    correct: "c",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "14",
+                    section: "31",
+                    question_en: " <p>1</span><span style=\"font-family:Cambria Math\">4. </span><span style=\"font-family:Cambria Math\">Which of the following protocols pushes email messages to the server?</span></p>",
+                    question_hi: " <p><span style=\"font-family:Cambria Math\">14. </span><span style=\"font-family:Kokila\">निम्नलिखित</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">में</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">से</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">कौन</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">सा</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">प्रोटोकॉल</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">ईमेल</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">संदेशों</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">को</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">सर्वर</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">पर</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">पुश</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">करता</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">है</span><span style=\"font-family:Cambria Math\">?</span></p>",
+                    options_en: [" <p> HTTP</span></p>", " <p> Both, POP and HTTP </span></p>", 
+                                " <p> POP  </span></p>", " <p> SMTP</span></p>"],
+                    options_hi: [" <p> HTTP</span></p>", " <p> </span><span style=\"font-family:Kokila\">दोनों</span><span style=\"font-family:Cambria Math\">, POP </span><span style=\"font-family:Kokila\">और</span><span style=\"font-family:Cambria Math\"> HTTP </span></p>",
+                                " <p> POP  </span></p>", " <p> SMTP</span></p>"],
+                    solution_en: " <p>1</span><span style=\"font-family:Cambria Math\">4.(d) </span><span style=\"font-family:Cambria Math\">Simple Mail Transfer Protocol (SMTP)</span><span style=\"font-family:Cambria Math\"> is a TCP/IP protocol used in sending and receiving e-mail. </span></p> <p><span style=\"font-family:Cambria Math\">Hypertext Transfer Protocol (HTTP)</span><span style=\"font-family:Cambria Math\"> is an application-layer protocol for transmitting hypermedia documents, such as HTML (Hypertext Markup Language). </span></p> <p><span style=\"font-family:Cambria Math\">The post office protocol (POP)</span><span style=\"font-family:Cambria Math\"> is the most commonly used message request protocol in the Internet world for transferring messages from an e-mail server to an e-mail client.</span></p>",
+                    solution_hi: " <p>1</span><span style=\"font-family:Cambria Math\">4.(d) </span><span style=\"font-family:Kokila\">सिंपल</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">मेल</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">ट्रांसफर</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">प्रोटोकॉल</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Cambria Math\">(</span><span style=\"font-family:Cambria Math\">SMTP</span><span style=\"font-family:Cambria Math\">) </span><span style=\"font-family:Kokila\">एक</span><span style=\"font-family:Cambria Math\"> TCP/IP </span><span style=\"font-family:Kokila\">प्रोटोकॉल</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">है</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">जिसका</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">इस्तेमाल</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">ई</span><span style=\"font-family:Cambria Math\">-</span><span style=\"font-family:Kokila\">मेल</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">भेजने</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">और</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">प्राप्त</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">करने</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">में</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">किया</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">जाता</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">है।</span><span style=\"font-family:Cambria Math\"> </span></p> <p><span style=\"font-family:Kokila\">हाइपरटेक्स्ट</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">ट्रांसफर</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">प्रोटोकॉल</span><span style=\"font-family:Cambria Math\"> (HTTP) </span><span style=\"font-family:Kokila\">हाइपरमीडिया</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">दस्तावेज़ों</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">को</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">प्रसारित</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">करने</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">के</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">लिए</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">एक</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">एप्लिकेशन</span><span style=\"font-family:Cambria Math\">-</span><span style=\"font-family:Kokila\">लेयर</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">प्रोटोकॉल</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">है</span><span style=\"font-family:Cambria Math\">, </span><span style=\"font-family:Kokila\">जैसे</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">कि</span><span style=\"font-family:Cambria Math\"> HTML (</span><span style=\"font-family:Kokila\">हाइपरटेक्स्ट</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">मार्कअप</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">लैंग्वेज</span><span style=\"font-family:Cambria Math\">)</span><span style=\"font-family:Kokila\">।</span><span style=\"font-family:Cambria Math\"> </span></p> <p><span style=\"font-family:Kokila\">पोस्ट</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">ऑफिस</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">प्रोटोकॉल</span><span style=\"font-family:Cambria Math\"> (</span><span style=\"font-family:Cambria Math\">POP</span><span style=\"font-family:Cambria Math\">) </span><span style=\"font-family:Kokila\">इंटरनेट</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">की</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">दुनिया</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">में</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">सबसे</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">अधिक</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">इस्तेमाल</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">किया</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">जाने</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">वाला</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">संदेश</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">रिक्वेस्ट</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">प्रोटोकॉल</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">है</span><span style=\"font-family:Cambria Math\">, </span><span style=\"font-family:Kokila\">जो</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">ई</span><span style=\"font-family:Cambria Math\">-</span><span style=\"font-family:Kokila\">मेल</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">सर्वर</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">से</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">ई</span><span style=\"font-family:Cambria Math\">-</span><span style=\"font-family:Kokila\">मेल</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">क्लाइंट</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">के</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">संदेशों</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">को</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">ट्रांसफर</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">करने</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">के</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">लिए</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">उपयोग</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">किया</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">जाता</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">है।</span></p>",
+                    correct: "d",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "15",
+                    section: "31",
+                    question_en: " <p>15. </span><span style=\"font-family:Cambria Math\">Which of the following is NOT a valid \'Change case\' option in MS Word?  </span></p>",
+                    question_hi: "<p><span style=\"font-family: Cambria Math;\">15. </span><span style=\"font-family: Kokila;\">निम्नलिखित</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">से</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">कौन</span><span style=\"font-family: Cambria Math;\"> MS Word </span><span style=\"font-family: Kokila;\">में</span><span style=\"font-family: Cambria Math;\"> valid</span><span style=\"font-family: Cambria Math;\">&nbsp;\'</span><span style=\"font-family: Kokila;\">चेंज</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">केस ( change case ) </span><span style=\"font-family: Cambria Math;\">\' </span><span style=\"font-family: Kokila;\">विकल्प</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">नहीं</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">है</span><span style=\"font-family: Cambria Math;\">?</span></p>",
+                    options_en: [" <p> Toggle case</span></p>", " <p> Uppercase </span></p>", 
+                                " <p> Pascal case </span></p>", " <p> Lowercase</span></p>"],
+                    options_hi: ["<p><span style=\"font-weight: 400;\">टॉगल केस (Toggle case)</span></p>", "<p><span style=\"font-family: Kokila;\">अपरकेस</span><span style=\"font-family: Cambria Math;\"> (Uppercase) </span></p>",
+                                "<p><span style=\"font-family: Kokila;\">पास्कल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">केस</span><span style=\"font-family: Cambria Math;\"> (Pascal case) </span></p>", "<p><span style=\"font-weight: 400;\">लोअरकेस (Lowercase)</span></p>"],
+                    solution_en: " <p>1</span><span style=\"font-family:Cambria Math\">5.(c) </span><span style=\"font-family:Cambria Math\">Pascal case</span><span style=\"font-family:Cambria Math\"> is a programming naming convention where the first letter of each compound word in a variable is capitalized. </span></p> <p><span style=\"font-family:Cambria Math\">ToggleCase</span><span style=\"font-family:Cambria Math\"> is text that is converted to a mixed case version of the text. </span></p> <p><span style=\"font-family:Cambria Math\">Uppercase</span><span style=\"font-family:Cambria Math\"> - letters that are written or printed in their large form; capital letters.</span></p> <p><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Cambria Math\">Lowercase</span><span style=\"font-family:Cambria Math\">- letters that are written or printed in their small form; not in capital letters. </span></p>",
+                    solution_hi: "<p>1<span style=\"font-family: Cambria Math;\">5.(c) </span><span style=\"font-family: Kokila;\">पास्कल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">केस <span style=\"font-family: Cambria Math;\">(Pascal case)</span></span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">एक</span><span style=\"font-family: Cambria Math;\"> &nbsp;programming naming convention</span><span style=\"font-family: Kokila;\">&nbsp;</span><span style=\"font-family: Kokila;\">है</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">जहां</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">एक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">वेरिएबल</span><span style=\"font-family: Kokila;\"> </span><span style=\"font-family: Kokila;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">प्रत्येक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">कंपाउंड</span><span style=\"font-family: Kokila;\"> </span><span style=\"font-family: Kokila;\">वर्ड</span><span style=\"font-family: Kokila;\">&nbsp; ( compound word ) </span><span style=\"font-family: Kokila;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">पहले</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">लेटर</span><span style=\"font-family: Kokila;\"> </span><span style=\"font-family: Kokila;\">को</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">capitalized </span><span style=\"font-family: Kokila;\">किया</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">जाता</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">है।</span></p>\r\n<p><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">टोगल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">केस</span><span style=\"font-family: Cambria Math;\"> <span style=\"font-weight: 400;\">(Toggle case) </span></span><span style=\"font-family: Kokila;\">वह </span><span style=\"font-family: Kokila;\"><span style=\"font-family: Cambria Math;\">text </span></span><span style=\"font-family: Kokila;\">है</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">जो </span><span style=\"font-family: Kokila;\"><span style=\"font-family: Cambria Math;\">text </span></span><span style=\"font-family: Kokila;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">मिश्रित</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">केस</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">संस्करण</span><span style=\"font-family: Kokila;\"> ( </span><span style=\"font-family: Cambria Math;\">mixed case version</span><span style=\"font-family: Cambria Math;\"> ) </span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">कनवर्ट</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">किया</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">जाता</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">है</span><span style=\"font-family: Cambria Math;\">. </span></p>\r\n<p><span style=\"font-family: Kokila;\">अपर</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">केस</span><span style=\"font-family: Cambria Math;\"> ( upper case )</span><span style=\"font-family: Cambria Math;\">- </span><span style=\"font-family: Kokila;\">अक्षर</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">जो</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">अपने</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">बड़े</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">रूप</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">( large form ) </span><span style=\"font-family: Kokila;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">लिखे</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">या</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">मुद्रित</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">( printed ) </span><span style=\"font-family: Kokila;\">किए</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">जाते</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">हैं</span></p>\r\n<p><span style=\"font-family: Kokila;\">लोअर</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">केस ( lower case ) </span><span style=\"font-family: Cambria Math;\">- </span><span style=\"font-family: Kokila;\">अक्षर</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">जो</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">अपने</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">छोटे</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">रूप</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">लिखे</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">या</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">मुद्रित</span><span style=\"font-family: Kokila;\"> ( printed ) </span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">किए</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">जाते</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">हैं</span><span style=\"font-family: Cambria Math;\">; </span><span style=\"font-family: Kokila;\">बड़े</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">अक्षरों</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">नहीं।</span><span style=\"font-family: Cambria Math;\"> </span></p>",
+                    correct: "c",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "16",
+                    section: "31",
+                    question_en: "<p>1<span style=\"font-family: Cambria Math;\">6. </span><span style=\"font-family: Cambria Math;\">When you open a new workbook in MS Excel, which of the following appears on the </span><span style=\"font-family: Cambria Math;\">topmost portion of the screen?</span></p>",
+                    question_hi: "<p>1<span style=\"font-family: Cambria Math;\">6. </span><span style=\"font-family: Kokila;\">जब</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">आप</span><span style=\"font-family: Cambria Math;\"> MS Excel </span><span style=\"font-family: Kokila;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">एक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">नई</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">वर्कबुक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">खोलते</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">हैं</span><span style=\"font-family: Cambria Math;\">, </span><span style=\"font-family: Kokila;\">तो</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">निम्न</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">से</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">कौन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">स्क्रीन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">सबसे</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">ऊपरी</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">भाग</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">पर</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">दिखाई</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">देता</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">है</span><span style=\"font-family: Cambria Math;\">?</span></p>",
+                    options_en: ["<p>Title bar</p>", "<p>Horizontal scroll bar</p>", 
+                                "<p>Vertical scroll bar</p>", "<p>Status bar</p>"],
+                    options_hi: ["<p><span style=\"font-family: Kokila;\">टाइटल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">बार</span><span style=\"font-family: Cambria Math;\"> </span></p>", "<p><span style=\"font-family: Kokila;\">हॉरिजॉन्टल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">स्क्रॉल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">बार</span><span style=\"font-family: Cambria Math;\"> </span></p>",
+                                "<p><span style=\"font-family: Kokila;\">वर्टीकल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">स्क्रॉल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">बार</span><span style=\"font-family: Cambria Math;\"> </span></p>", "<p><span style=\"font-family: Kokila;\">स्टेटस</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">बार</span><span style=\"font-family: Cambria Math;\"> </span></p>"],
+                    solution_en: "<p>1<span style=\"font-family: Cambria Math;\">6.(a) Title bar </span><span style=\"font-family: Cambria Math;\">appears on the topmost portion of the screen When we open a new workbook in MS Excel. </span></p>\r\n<p><span style=\"font-family: Cambria Math;\">Horizontal scrolling</span><span style=\"font-family: Cambria Math;\"> is the ability of a program to allow a user to scroll horizontally using the window scroll bar. </span></p>\r\n<p><span style=\"font-family: Cambria Math;\">A </span><span style=\"font-family: Cambria Math;\">vertical scroll</span><span style=\"font-family: Cambria Math;\"> bar enables the user to scroll the content up or down.</span></p>\r\n<p><span style=\"font-family: Cambria Math;\"> A </span><span style=\"font-family: Cambria Math;\">status bar </span><span style=\"font-family: Cambria Math;\">is a horizontal window at the bottom of a parent window in which an application can display various kinds of status information.</span></p>",
+                    solution_hi: "<p>1<span style=\"font-family: Cambria Math;\">6.(a) </span><span style=\"font-family: Kokila;\">जब</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">हम</span><span style=\"font-family: Cambria Math;\"> MS </span><span style=\"font-family: Kokila;\">एक्सेल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">एक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">नई</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">वर्कबुक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">खोलते</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">हैं</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">तो</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">टाइटल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">बार</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">स्क्रीन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">सबसे</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">ऊपरी</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">भाग</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">पर</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">दिखाई</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">देता</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">है।</span><span style=\"font-family: Cambria Math;\"> </span></p>\r\n<p><span style=\"font-family: Kokila;\">हॉरिजॉन्टल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">स्क्रॉलिंग</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">एक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">प्रोग्राम</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">की</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">क्षमता</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">है</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">जो</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">उपयोगकर्ता</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">को</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">विंडो</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">स्क्रॉल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">बार</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">का</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">उपयोग</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">करके</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">हॉरिजॉन्टल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">स्क्रॉल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">करने</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">की</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">अनुमति</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">देता</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">है।</span><span style=\"font-family: Cambria Math;\"> </span></p>\r\n<p><span style=\"font-family: Kokila;\">एक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">वर्टिकल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">स्क्रॉल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">बार</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">उपयोगकर्ता</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">को</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">सामग्री</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">को</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">ऊपर</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">या</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">नीचे</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">स्क्रॉल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">करने</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">सक्षम</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">बनाता</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">है।</span><span style=\"font-family: Cambria Math;\"> </span></p>\r\n<p><span style=\"font-family: Kokila;\">स्टेटस</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">बार</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">पैरेंट</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">विंडो</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">नीचे</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">एक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">हॉरिजॉन्टल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">विंडो</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">है</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">जिसमें</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">कोई</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">एप्लिकेशन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">विभिन्न</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">प्रकार</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">की</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">स्टेटस</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">जानकारी</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">प्रदर्शित</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">कर</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">सकता</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">है।</span></p>",
+                    correct: "a",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "17",
+                    section: "31",
+                    question_en: "<p>1<span style=\"font-family: Cambria Math;\">7. </span><span style=\"font-family: Cambria Math;\">Which of the following keyboard shortcuts is used to activate a browser tab to the </span><span style=\"font-family: Cambria Math;\">right of the current tab in a Chrome browser?</span></p>",
+                    question_hi: "<p><span style=\"font-family: Cambria Math;\">17. </span><span style=\"font-family: Kokila;\">निम्न</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">से</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">कौन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">सा</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">कीबोर्ड</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">शॉर्टकट</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">क्रोमब्राउज़र</span><span style=\"font-family: Cambria Math;\"> ( chrome brower ) </span><span style=\"font-family: Kokila;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">वर्तमान</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">टैब</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">दाईं</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">ओर</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">एक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">ब्राउज़र</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">टैब</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">को</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">सक्रिय ( active )&nbsp;</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">करने</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">लिए</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">उपयोग</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">किया</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">जाता</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">है</span><span style=\"font-family: Cambria Math;\">?</span></p>",
+                    options_en: ["<p>Ctrl + Page up</p>", "<p>Ctrl + Right arrow</p>", 
+                                "<p>Alt + Left arrow</p>", "<p>Ctrl + Page down</p>"],
+                    options_hi: ["<p>Ctrl + Page up</p>", "<p>Ctrl + Right arrow</p>",
+                                "<p>Alt + Left arrow</p>", "<p>Ctrl + Page down</p>"],
+                    solution_en: "<p>1<span style=\"font-family: Cambria Math;\">7.(d) Ctrl + Page down</span><span style=\"font-family: Cambria Math;\"> shortcuts is used to activate a browser tab to the right of the current tab in a Chrome browser. </span></p>\r\n<p><span style=\"font-family: Cambria Math;\">Ctrl + Page up</span><span style=\"font-family: Cambria Math;\"> - </span><span style=\"font-family: Cambria Math;\">Move the cursor to the top of the previous page.</span></p>\r\n<p><span style=\"font-family: Cambria Math;\"> Alt + Left arrow key</span><span style=\"font-family: Cambria Math;\">- Go back.</span></p>\r\n<p><span style=\"font-family: Cambria Math;\"> Alt + Right arrow key</span><span style=\"font-family: Cambria Math;\">- Go forward. </span></p>\r\n<p><span style=\"font-family: Cambria Math;\">Alt + Page Up-</span><span style=\"font-family: Cambria Math;\"> Move up one screen.</span><span style=\"font-family: Cambria Math;\"> </span></p>\r\n<p><span style=\"font-family: Cambria Math;\">Alt + Page down - </span><span style=\"font-family: Cambria Math;\">Move down one screen. </span></p>\r\n<p><span style=\"font-family: Cambria Math;\">Ctrl + Right Arrow- is used to move the cursor one word right at a time.</span></p>",
+                    solution_hi: "<p>1<span style=\"font-family: Cambria Math;\">7.(d) </span><span style=\"font-family: Kokila;\">क्रोम</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">ब्राउज़र</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">वर्तमान</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">टैब</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">दाईं</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">ओर</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">एक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">ब्राउज़र</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">टैब</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">को</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">सक्रिय</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">करने</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">लिए</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">Ctrl + Page down</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">शॉर्टकट</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">का</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">उपयोग</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">किया</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">जाता</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">है।</span><span style=\"font-family: Cambria Math;\"> </span></p>\r\n<p><span style=\"font-family: Cambria Math;\">Ctrl + Page up</span><span style=\"font-family: Cambria Math;\"> - </span><span style=\"font-family: Kokila;\">कर्सर ( cursor )&nbsp;</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">को</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">पिछले</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">पेज</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">शीर्ष</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">पर</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">ले</span><span style=\"font-family: Cambria Math;\">&nbsp;<span style=\"font-size: 8pt;\"> जाने के लिए</span> <span style=\"font-family: Kokila;\">उपयोग</span> <span style=\"font-family: Kokila;\">किया</span> <span style=\"font-family: Kokila;\">जाता</span> <span style=\"font-family: Kokila;\">है।</span></span></p>\r\n<p><span style=\"font-family: Cambria Math;\">Alt + Left arrow key</span><span style=\"font-family: Cambria Math;\">- </span><span style=\"font-family: Kokila;\">वापस</span><span style=\"font-family: Cambria Math;\"> <span style=\"font-size: 8pt;\">जाने के लिए</span> <span style=\"font-family: Kokila;\">उपयोग</span> <span style=\"font-family: Kokila;\">किया</span> <span style=\"font-family: Kokila;\">जाता</span> <span style=\"font-family: Kokila;\">है।</span></span></p>\r\n<p><span style=\"font-family: Cambria Math;\">Alt + Right arrow key</span><span style=\"font-family: Cambria Math;\">- <span style=\"font-size: 8pt;\">अगले&nbsp; </span><span style=\"font-family: Kokila;\">पेज&nbsp;<span style=\"font-family: Cambria Math;\"> </span>पर&nbsp;<span style=\"font-family: Cambria Math;\"><span style=\"font-size: 8pt;\"> जाने के लिए</span> <span style=\"font-family: Kokila;\">उपयोग</span> <span style=\"font-family: Kokila;\">किया</span> <span style=\"font-family: Kokila;\">जाता</span> <span style=\"font-family: Kokila;\">है।</span></span></span></span></p>\r\n<p><span style=\"font-family: Cambria Math;\">Alt+Page Up</span><span style=\"font-family: Cambria Math;\">- </span><span style=\"font-family: Kokila;\">एक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">स्क्रीन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">को</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">ऊपर</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">ले</span><span style=\"font-family: Cambria Math;\"> <span style=\"font-family: Kokila;\"><span style=\"font-family: Cambria Math;\"><span style=\"font-size: 8pt;\">जाने के लिए</span> <span style=\"font-family: Kokila;\">उपयोग</span> <span style=\"font-family: Kokila;\">किया</span> <span style=\"font-family: Kokila;\">जाता</span> <span style=\"font-family: Kokila;\">है।</span></span></span></span></p>\r\n<p><span style=\"font-family: Cambria Math;\">Alt + Right arrow key</span><span style=\"font-family: Cambria Math;\"> - </span><span style=\"font-family: Kokila;\">एक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">स्क्रीन</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">को</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">नीचे</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">ले <span style=\"font-family: Cambria Math;\"><span style=\"font-family: Kokila;\"><span style=\"font-family: Cambria Math;\"><span style=\"font-size: 8pt;\">जाने के लिए</span> <span style=\"font-family: Kokila;\">उपयोग</span> <span style=\"font-family: Kokila;\">किया</span> <span style=\"font-family: Kokila;\">जाता</span> <span style=\"font-family: Kokila;\">है।</span></span></span></span></span></p>\r\n<p><span style=\"font-family: Cambria Math;\">Ctrl+Right Arrow</span><span style=\"font-family: Cambria Math;\">- </span><span style=\"font-family: Kokila;\">कर्सर</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">को</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">एक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">बार</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">एक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">शब्द</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">को</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">दायीं</span><span style=\"font-family: Cambria Math;\">&nbsp; ( right ) </span><span style=\"font-family: Kokila;\">ओर</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">ले</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">जाने</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">लिए</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">प्रयोग</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">किया</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">जाता</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">है।</span></p>",
+                    correct: "d",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "18",
+                    section: "31",
+                    question_en: "<p>1<span style=\"font-family: Cambria Math;\">8. </span><span style=\"font-family: Cambria Math;\">Which of the following keyboard shortcuts can be used to indent paragraphs in an MS </span><span style=\"font-family: Cambria Math;\">Word document?</span></p>",
+                    question_hi: "<p><span style=\"font-family: Cambria Math;\">18. </span><span style=\"font-family: Cambria Math;\">MS Word </span><span style=\"font-family: Kokila;\">दस्तावेज़</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">पैराग्राफ</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">को</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">इंडेंट</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">करने</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">लिए</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">निम्नलिखित</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">से</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">किस</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">कीबोर्ड</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">शॉर्टकट</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">का</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">उपयोग</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">किया</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">जा</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">सकता</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">है</span><span style=\"font-family: Cambria Math;\">?</span></p>",
+                    options_en: ["<p>Ctrl + M</p>", "<p>Ctrl + I</p>", 
+                                "<p>Alt + T</p>", "<p>Alt + I</p>"],
+                    options_hi: ["<p>Ctrl + M</p>", "<p>Ctrl + I</p>",
+                                "<p>Alt + T</p>", "<p>Alt + I</p>"],
+                    solution_en: "<p>1<span style=\"font-family: Cambria Math;\">8.(a)</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">Ctrl + M</span><span style=\"font-family: Cambria Math;\"> shortcuts can be used to indent paragraphs in an MS Word document. </span></p>\r\n<p><span style=\"font-family: Cambria Math;\">Ctrl+I </span><span style=\"font-family: Cambria Math;\">is a keyboard shortcut most often used to italicize and unitalicize text.</span><span style=\"font-family: Cambria Math;\"> </span></p>\r\n<p><span style=\"font-family: Cambria Math;\">Alt+T </span><span style=\"font-family: Cambria Math;\">is a keyboard shortcut most often used to open the Tools in the file menu. </span></p>\r\n<p><span style=\"font-family: Cambria Math;\">Alt+I </span><span style=\"font-family: Cambria Math;\">is a keyboard shortcut most often used to open the Insert file menu.</span></p>",
+                    solution_hi: "<p>1<span style=\"font-family: Cambria Math;\">8.(a)</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">MS </span><span style=\"font-family: Kokila;\">वर्ड</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">डॉक्यूमेंट</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">पैराग्राफ</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">को</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">इंडेंट</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">करने</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">लिए</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">Ctrl + M </span><span style=\"font-family: Kokila;\">शॉर्टकट</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">का</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">उपयोग</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">किया</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">जा</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">सकता</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">है।</span><span style=\"font-family: Cambria Math;\"> </span></p>\r\n<p><span style=\"font-family: Cambria Math;\">Ctrl+I</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">एक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">कीबोर्ड</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">शॉर्टकट</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">है</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">जिसका</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">उपयोग</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">अक्सर</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">टेक्स्ट</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">को</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">इटैलिक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">और</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">यूनिटलाइज़</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">करने</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">लिए</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">किया</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">जाता</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">है।</span><span style=\"font-family: Cambria Math;\"> </span></p>\r\n<p><span style=\"font-family: Cambria Math;\">Alt+T</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">एक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">कीबोर्ड</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">शॉर्टकट</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">है</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">जिसका</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">उपयोग</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">अक्सर</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">फ़ाइल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">मेनू</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">में</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">टूल्स</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">को</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">खोलने</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">लिए</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">किया</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">जाता</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">है।</span></p>\r\n<p><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Cambria Math;\">Alt+I</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">एक</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">कीबोर्ड</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">शॉर्टकट</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">है</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">जिसका</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">उपयोग</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">अक्सर</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">इन्सर्ट</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">फाइल</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">मेन्यू</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">को</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">खोलने</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">के</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">लिए</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">किया</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">जाता</span><span style=\"font-family: Cambria Math;\"> </span><span style=\"font-family: Kokila;\">है।</span></p>",
+                    correct: "a",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "19",
+                    section: "31",
+                    question_en: " <p>1</span><span style=\"font-family:Cambria Math\">9. </span><span style=\"font-family:Cambria Math\">In dotted-decimal notation, an IP version 4 address is represented by using exactly</span></p> <p><span style=\"font-family:Cambria Math\">______ dot (.) symbols.</span></p>",
+                    question_hi: " <p>1</span><span style=\"font-family:Cambria Math\">9. </span><span style=\"font-family:Cambria Math\">dotted-decimal notation </span><span style=\"font-family:Kokila\">में</span><span style=\"font-family:Cambria Math\">, </span><span style=\"font-family:Kokila\">एक</span><span style=\"font-family:Cambria Math\"> IP </span><span style=\"font-family:Kokila\">संस्करण</span><span style=\"font-family:Cambria Math\"> 4 address </span><span style=\"font-family:Kokila\">सटीक</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">रूप</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">से</span><span style=\"font-family:Cambria Math\"> _________ </span><span style=\"font-family:Kokila\">डॉट</span><span style=\"font-family:Cambria Math\"> (.) </span><span style=\"font-family:Kokila\">प्रतीकों</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">का</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">उपयोग</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">करके</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">दर्शाया</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">जाता</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">है।</span></p>",
+                    options_en: [" <p> three </span></p>", " <p> five </span></p>", 
+                                " <p> two  </span></p>", " <p> four</span></p>"],
+                    options_hi: [" <p> </span><span style=\"font-family:Kokila\">तीन</span></p>", " <p> </span><span style=\"font-family:Kokila\">पांच</span></p>",
+                                " <p> </span><span style=\"font-family:Kokila\">दो</span></p>", " <p> </span><span style=\"font-family:Kokila\">चार</span></p>"],
+                    solution_en: " <p>1</span><span style=\"font-family:Cambria Math\">9.(a)  </span><span style=\"font-family:Cambria Math\">In dotted-decimal notation, an IP version 4 address is represented by using exactly</span></p> <p><span style=\"font-family:Cambria Math\">three dot (.) symbols. </span></p>",
+                    solution_hi: " <p>1</span><span style=\"font-family:Cambria Math\">9.(a)  </span><span style=\"font-family:Kokila\">डॉटेड</span><span style=\"font-family:Cambria Math\">-</span><span style=\"font-family:Kokila\">दशमलव</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">नोटेशन</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">में</span><span style=\"font-family:Cambria Math\">, IP </span><span style=\"font-family:Kokila\">संस्करण</span><span style=\"font-family:Cambria Math\"> 4 </span><span style=\"font-family:Kokila\">एड्रेस</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">को</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">ठीक</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">तीन</span><span style=\"font-family:Cambria Math\"> dot (.) symbols </span><span style=\"font-family:Kokila\">का</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">उपयोग</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">करके</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">दर्शाया</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">जाता</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">है।</span><span style=\"font-family:Cambria Math\"> </span></p>",
+                    correct: "a",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "20",
+                    section: "misc",
+                    question_en: " <p>20. </span><span style=\"font-family:Cambria Math\">What will be the result of the following MS Excel formula?</span></p> <p><span style=\"font-family:Cambria Math\">=FACT(0) + FACT(3) + FACT(5)</span></p>",
+                    question_hi: " <p><span style=\"font-family:Cambria Math\">20. </span><span style=\"font-family:Kokila\">निम्नलिखित</span><span style=\"font-family:Cambria Math\"> MS Excel </span><span style=\"font-family:Kokila\">फार्मूला</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">का</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">परिणाम</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">क्या</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">होगा</span><span style=\"font-family:Cambria Math\">?</span></p> <p><span style=\"font-family:Cambria Math\">=FACT(0) + FACT(3) + FACT(5)</span></p>",
+                    options_en: [" <p> 127  </span></p>", " <p> 8  </span></p>", 
+                                " <p> 126 </span></p>", " <p> 9</span></p>"],
+                    options_hi: [" <p> 127  </span></p>", " <p> 8  </span></p>",
+                                " <p> 126 </span></p>", " <p> 9</span></p>"],
+                    solution_en: " <p><span style=\"font-family:Cambria Math\">20.(a) </span><span style=\"font-family:Cambria Math\">The result of  =FACT(0) + FACT(3) + FACT(5) is 127. </span><span style=\"font-family:Cambria Math\">The Excel FACT function returns the factorial of a given number.</span></p>",
+                    solution_hi: " <p><span style=\"font-family:Cambria Math\">20.(a) </span><span style=\"font-family:Cambria Math\">=FACT(0) + FACT(3) + FACT(5)</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">का</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">परिणाम</span><span style=\"font-family:Cambria Math\"> 127 </span><span style=\"font-family:Kokila\">है।</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">एक्सेल</span><span style=\"font-family:Cambria Math\"> FACT </span><span style=\"font-family:Kokila\">फ़ंक्शन</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">किसी</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">दिए</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">गए</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">संख्या</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">का</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">फैक्टोरियल</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">देता</span><span style=\"font-family:Cambria Math\"> </span><span style=\"font-family:Kokila\">है।</span></p>",
+                    correct: "a",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+            
+            // Generate question boxes
+            const boxesContainer = document.getElementById('question-boxes');
+            questions.forEach((q, index) => {
+                const box = document.createElement('div');
+                box.className = 'q-box';
+                box.textContent = index + 1;
+                box.onclick = () => showQuestion(index);
+                box.id = `box-${index}`;
+                boxesContainer.appendChild(box);
+            });
+            
+            // Show first question
+            showQuestion(0);
+            updateProgress();
+        }
+        
+        // Show a specific question
+        
+        function formatContent(text) {
+            if (!text) return '';
+            return text.replace(/<img/g, '<img style="max-width:100%;height:auto;"');
+        }
+        
+        function showQuestion(index) {
+            if (index < 0 || index >= questions.length) return;
+            
+            currentQuestion = index;
+            const question = questions[index];
+            
+            // Update question counter
+            document.getElementById('question-counter').textContent = `Question ${index + 1} of ${questions.length}`;
+            
+            // Update question boxes
+            document.querySelectorAll('.q-box').forEach(box => box.classList.remove('current'));
+            document.getElementById(`box-${index}`).classList.add('current');
+            
+            // Generate question HTML
+            let html = `
+                <div class="question-card">
+                    <div class="question-text">
+                        <div class="en">${formatContent(question.question_en)}</div>
+                        <div class="hi" style="display:none">${formatContent(question.question_hi)} </div>
+                    </div>
+                    <div class="options" id="options-container">`;
+            
+            // Add options
+            ['a', 'b', 'c', 'd'].forEach((opt, i) => {
+                let optionClass = '';
+                let isCorrectAnswer = opt === question.correct;
+                let isUserAnswer = answers[question.id] === opt;
+                
+                // When reviewing, add appropriate classes
+                if (submitted) {
+                    if (isCorrectAnswer) {
+                        optionClass += ' correct-answer';
+                    } else if (isUserAnswer && !isCorrectAnswer) {
+                        optionClass += ' incorrect';
+                    }
+                }
+                
+                html += `
+                    <div class="option-item">
+                        <input class="option-input" type="radio" name="q${index}" 
+                            id="opt-${index}-${opt}" value="${opt}" 
+                            ${isUserAnswer ? 'checked' : ''}
+                            onclick="selectAnswer('${question.id}', '${opt}')">
+                       <label class="option-label${optionClass}" for="opt-${index}-${opt}">
+                            <div class="en">${question.options_en[i]}</div>
+                            <div class="hi" style="display:none">${question.options_hi[i]}</div>
+                        </label>
+                    </div>`;
+            });
+            
+            // Add solution if submitted
+            if (submitted) {
+                const isCorrect = answers[question.id] === question.correct;
+                const resultText = answers[question.id] ? (isCorrect ? 'Correct!' : 'Incorrect!') : 'Not attempted';
+                
+                html += `
+                    <div class="solution-container">
+                        <div class="solution-title">${resultText}</div>
+                        <div class="solution-text">
+                            <div class="en">${question.solution_en}</div>
+                            <div class="hi" style="display:none">${question.solution_hi}</div>
+                        </div>
+                    </div>`;
+            }
+            
+            html += `</div></div>`;
+            
+            document.getElementById('questions-container').innerHTML = html;
+            
+            // Apply language settings
+            applyLanguage();
+            
+            // If in mobile view, close the menu
+            if (window.innerWidth < 992) {
+                toggleNav(false);
+            }
+            
+            // Add review mode class if submitted
+            if (submitted) {
+                document.getElementById('options-container').classList.add('review-mode');
+            }
+        }
+        
+        // Apply current language
+        function applyLanguage() {
+            document.querySelectorAll(`.${currentLang}`).forEach(el => el.style.display = 'block');
+            document.querySelectorAll(`.${currentLang === 'en' ? 'hi' : 'en'}`).forEach(el => el.style.display = 'none');
+            
+            // Update language button text
+            document.getElementById('lang-text').textContent = currentLang === 'en' ? 'Hi' : 'En';
+        }
+        
+        // Select an answer
+        function selectAnswer(qId, option) {
+            if (submitted) return;
+            
+            answers[qId] = option;
+            updateProgress();
+            
+            // Mark question as attempted in the navigation
+            const index = questions.findIndex(q => q.id === qId);
+            if (index >= 0) {
+                const box = document.getElementById(`box-${index}`);
+                box.classList.add('attempted');
+                box.classList.remove('unattempted');
+            }
+        }
+        
+        // Navigate to previous/next question
+        function prevQuestion() { 
+            if (currentQuestion > 0) showQuestion(currentQuestion - 1); 
+        }
+        
+        function nextQuestion() { 
+            if (currentQuestion < questions.length - 1) showQuestion(currentQuestion + 1); 
+        }
+        
+        // Switch section
+        function switchSection(sectionId) {
+            if (sectionId === 'all') {
+                showQuestion(0);
+                return;
+            }
+            
+            const section = sections[sectionId];
+            if (section) showQuestion(section.start);
+        }
+        
+        // Toggle language
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'hi' : 'en';
+            applyLanguage();
+        }
+        
+        // Toggle navigation sidebar
+        function toggleNav(show) {
+            const nav = document.getElementById('question-nav');
+            const overlay = document.getElementById('nav-overlay');
+            
+            if (show === undefined) {
+                show = !nav.classList.contains('show');
+            }
+            
+            if (show) {
+                nav.classList.add('show');
+                overlay.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            } else {
+                nav.classList.remove('show');
+                overlay.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+        }
+        
+        // Update progress
+        function updateProgress() {
+            const attempted = Object.keys(answers).length;
+            document.getElementById('attempted-count').textContent = attempted;
+        }
+        
+        // Start timer
+        function startTimer() {
+            const timerDisplay = document.getElementById('timer-display');
+            let timeLeft = totalTime;
+            
+            const timerInterval = setInterval(() => {
+                if (timeLeft <= 0 || submitted) {
+                    clearInterval(timerInterval);
+                    if (!submitted) submitTest();
+                    return;
+                }
+                
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                timeLeft--;
+            }, 1000);
+        }
+        
+        // Confirm before submitting
+        function confirmSubmit() {
+            if (submitted) return;
+            
+            const attempted = Object.keys(answers).length;
+            const remaining = questions.length - attempted;
+            
+            // Create a more modern confirmation dialog
+            const confirmHtml = `
+                <div style="text-align: center; padding: 20px;">
+                    <h4 style="margin-bottom: 16px; color: var(--dark);">Confirm Submission</h4>
+                    <p style="margin-bottom: 24px; color: var(--gray);">
+                        You have attempted ${attempted} of ${questions.length} questions.<br>
+                        ${remaining} questions are unattempted.
+                    </p>
+                    <div style="display: flex; justify-content: center; gap: 12px;">
+                        <button onclick="this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; border: 1px solid var(--light-gray); background: white; border-radius: 8px; cursor: pointer;">
+                            Cancel
+                        </button>
+                        <button onclick="submitTest(); this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer;">
+                            Submit Test
+                        </button>
+                    </div>
+                </div>`;
+            
+            // Create modal element
+            const modal = document.createElement('div');
+            modal.className = 'results-modal show';
+            modal.innerHTML = `
+                <div class="results-card" style="max-width: 400px;">
+                    <button class="cancel-btn" style="position: absolute; top: 12px; right: 12px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--gray);" onclick="this.closest('.results-modal').remove()">
+                        ×
+                    </button>
+                    ${confirmHtml}
+                </div>`;
+            
+            document.body.appendChild(modal);
+        }
+        
+        // Submit test
+        function submitTest() {
+            if (submitted) return;
+            
+            submitted = true;
+            
+            let score = 0;
+            let correctCount = 0;
+            let incorrectCount = 0;
+            let unattemptedCount = 0;
+            
+            questions.forEach((q, index) => {
+                const userAns = answers[q.id];
+                const box = document.getElementById(`box-${index}`);
+                
+                box.classList.remove('attempted');
+                
+                if (!userAns) {
+                    unattemptedCount++;
+                    box.classList.add('unattempted');
+                } else if (userAns === q.correct) {
+                    correctCount++;
+                    score += q.pos_marks;
+                    box.classList.add('correct');
+                } else {
+                    incorrectCount++;
+                    score -= q.neg_marks;
+                    box.classList.add('incorrect');
+                }
+            });
+            
+            // Update result values
+            document.getElementById('score-value').textContent = score.toFixed(2);
+            document.getElementById('correct-value').textContent = correctCount;
+            document.getElementById('incorrect-value').textContent = incorrectCount;
+            document.getElementById('unattempted-value').textContent = unattemptedCount;
+            
+            // Show the results modal
+            document.getElementById('results-modal').classList.add('show');
+            
+            // Disable submit button
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-check"></i>';
+            submitBtn.style.backgroundColor = 'var(--success)';
+            
+            // Refresh current question view to show solution
+            showQuestion(currentQuestion);
+        }
+        
+        // Review test
+        function reviewTest() {
+            document.getElementById('results-modal').classList.remove('show');
+            showQuestion(0);
+        }
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target === document.getElementById('results-modal')) {
+                document.getElementById('results-modal').classList.remove('show');
+            }
+        });
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') prevQuestion();
+            if (e.key === 'ArrowRight') nextQuestion();
+        });
+    </script>
+</body>
+</html>
