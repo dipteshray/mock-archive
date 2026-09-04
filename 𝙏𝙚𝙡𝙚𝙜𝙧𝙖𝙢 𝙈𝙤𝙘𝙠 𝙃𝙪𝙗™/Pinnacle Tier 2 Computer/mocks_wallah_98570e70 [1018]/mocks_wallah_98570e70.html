@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mocks Wallah</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --primary-light: #a29bfe;
+            --primary-dark: #5649c0;
+            --secondary: #00cec9;
+            --accent: #fd79a8;
+            --success: #00b894;
+            --warning: #fdcb6e;
+            --danger: #d63031;
+            --light: #f8f9fa;
+            --dark: #2d3436;
+            --gray: #636e72;
+            --light-gray: #dfe6e9;
+            --card-bg: #ffffff;
+            --body-bg: #f5f6fa;
+            --header-bg: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            --footer-bg: #ffffff;
+            --box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            --box-shadow-sm: 0 2px 10px rgba(0,0,0,0.05);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background-color: var(--body-bg);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            color: var(--dark);
+            line-height: 1.6;
+            padding-bottom: 80px; /* Space for fixed navigation */
+            overflow-x: hidden;
+        }
+        
+        /* Header Styles */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: var(--header-bg);
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            z-index: 1000;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .header-brand {
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .header-brand i {
+            margin-right: 8px;
+            font-size: 1.2rem;
+        }
+        
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .control-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .control-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .control-btn.active {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .timer-display {
+            background: rgba(0,0,0,0.2);
+            border-radius: 18px;
+            padding: 4px 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+        
+        .timer-display i {
+            margin-right: 6px;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-top: 60px;
+            padding: 16px;
+            min-height: calc(100vh - 140px);
+        }
+        
+        .question-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--box-shadow-sm);
+            border: none;
+            transition: var(--transition);
+        }
+        
+        .question-counter {
+            font-size: 0.9rem;
+            color: var(--gray);
+            text-align: center;
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+        
+        .question-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+        
+        .option-item {
+            margin-bottom: 12px;
+            position: relative;
+        }
+        
+        .option-input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+            .question-text {
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        hyphens: auto;
+        max-width: 100%;
+    }
+
+    .question-text img,
+    .option-label img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 8px 0;
+        border-radius: 8px;
+    }
+
+    .option-label {
+        overflow: hidden;
+    }
+
+    .question-card {
+        overflow: hidden;
+    }
+        
+        .option-label {
+            display: block;
+            padding: 14px 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--light-gray);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .option-label:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .option-input:checked + .option-label {
+            border-color: var(--primary);
+            background: rgba(108, 92, 231, 0.05);
+            box-shadow: 0 0 0 1px var(--primary);
+        }
+        
+        .option-input:checked + .option-label::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--primary);
+        }
+        
+        /* When reviewing answers */
+        .review-mode .option-input:checked + .option-label.correct {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.correct::after {
+            background: var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.incorrect {
+            border-color: var(--danger);
+            background: rgba(214, 48, 49, 0.05);
+            box-shadow: 0 0 0 1px var(--danger);
+        }
+        
+        .MathJax, .mjx-chtml {
+            overflow-x: auto;
+            max-width: 100%;
+            display: inline-block;
+        }
+
+        
+        .review-mode .option-input:checked + .option-label.incorrect::after {
+            background: var(--danger);
+        }
+        
+        .review-mode .option-label.correct-answer {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-label.correct-answer::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--success);
+        }
+        
+        .solution-container {
+            margin-top: 20px;
+            padding: 16px;
+            background: rgba(108, 92, 231, 0.05);
+            border-radius: 12px;
+            border-left: 3px solid var(--primary);
+        }
+        
+        .solution-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+        
+        /* Question Navigation */
+        .question-nav {
+            position: fixed;
+            top: 60px;
+            right: 0;
+            bottom: 80px;
+            width: 100%;
+            max-width: 320px;
+            background: var(--card-bg);
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            transform: translateX(100%);
+            transition: var(--transition);
+            z-index: 900;
+            overflow-y: auto;
+            padding: 16px;
+        }
+        
+        .question-nav.show {
+            transform: translateX(0);
+        }
+        
+        .nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .nav-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+        
+        .question-stats {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .stat-badge {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        
+        .section-selector {
+            width: 100%;
+            margin-bottom: 16px;
+            border-radius: 12px;
+            padding: 10px 16px;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            font-size: 0.9rem;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 16px;
+        }
+        
+        .question-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+            gap: 8px;
+        }
+        
+        .q-box {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .q-box:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .q-box.attempted {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .q-box.correct {
+            background-color: var(--success);
+            color: white;
+            border-color: var(--success);
+        }
+        
+        .q-box.incorrect {
+            background-color: var(--danger);
+            color: white;
+            border-color: var(--danger);
+        }
+        
+        .q-box.current {
+            border: 2px solid var(--accent) !important;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .q-box.unattempted {
+            background-color: var(--gray);
+            color: white;
+            border-color: var(--gray);
+        }
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: var(--footer-bg);
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            z-index: 800;
+        }
+        
+        .nav-btn {
+            height: 48px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 20px;
+            transition: var(--transition);
+            gap: 8px;
+        }
+        
+        .nav-btn i {
+            font-size: 1rem;
+        }
+        
+        .nav-btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .nav-btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+        
+        .nav-btn-outline:hover {
+            background: rgba(108, 92, 231, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        /* Overlay when nav is open */
+        .nav-overlay {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            bottom: 80px;
+            background: rgba(0,0,0,0.5);
+            z-index: 800;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+        }
+        
+        .nav-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        /* Results Modal */
+        .results-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1100;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+            padding: 16px;
+        }
+        
+        .results-modal.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .results-card {
+            background: white;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+            transform: translateY(20px);
+            transition: var(--transition);
+        }
+        
+        .results-modal.show .results-card {
+            transform: translateY(0);
+        }
+        
+        .results-header {
+            background: var(--header-bg);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .results-title {
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .results-body {
+            padding: 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            color: white;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+        
+        .results-footer {
+            padding: 16px 20px;
+            display: flex;
+            justify-content: center;
+            border-top: 1px solid var(--light-gray);
+        }
+        
+        /* Responsive Adjustments */
+        @media (min-width: 992px) {
+            .question-nav {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-right: 320px;
+            }
+            
+            .nav-overlay {
+                display: none;
+            }
+            
+            .bottom-nav {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .question-grid {
+                grid-template-columns: repeat(auto-fill, minmax(36px, 1fr));
+                gap: 6px;
+            }
+            
+            .q-box {
+                width: 36px;
+                height: 36px;
+                font-size: 0.9rem;
+            }
+            
+            .option-label {
+                padding: 12px 14px;
+            }
+            
+            .question-text {
+                font-size: 1rem;
+            }
+            
+            .header-brand {
+                font-size: 1rem;
+            }
+            
+            .control-btn {
+                width: 32px;
+                height: 32px;
+            }
+            
+            .timer-display {
+                font-size: 0.8rem;
+                padding: 4px 10px;
+            }
+            
+            .nav-btn {
+                height: 44px;
+                padding: 0 16px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="#" class="header-brand">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Mocks Wallah</span>
+            </a>
+            
+            <div class="header-controls">
+                <!-- Timer -->
+                <div class="timer-display">
+                    <i class="far fa-clock"></i>
+                    <span id="timer-display">15:00</span>
+                </div>
+                
+                <!-- Language toggle -->
+                <button class="control-btn" id="lang-btn" onclick="toggleLanguage()">
+                    <span id="lang-text">En</span>
+                </button>
+                
+                <!-- Submit button -->
+                <button class="control-btn" id="submit-btn" onclick="confirmSubmit()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+                
+                <!-- Questions toggle for mobile -->
+                <button class="control-btn nav-toggle-btn" id="nav-toggle" onclick="toggleNav()">
+                    <i class="fas fa-th"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main content -->
+    <main class="main-content" id="main-content">
+        <div class="question-counter" id="question-counter">Question 1 of 20</div>
+        
+        <!-- Questions will be displayed here -->
+        <div id="questions-container"></div>
+    </main>
+    
+    <!-- Overlay for mobile nav -->
+    <div class="nav-overlay" id="nav-overlay" onclick="toggleNav(false)"></div>
+    
+    <!-- Question navigation sidebar -->
+    <aside class="question-nav" id="question-nav">
+        <div class="nav-header">
+            <h3 class="nav-title">Questions</h3>
+            <div class="question-stats">
+                <span class="stat-badge bg-primary" id="attempted-count">0</span>
+                <span class="stat-badge bg-gray" id="total-count">20</span>
+                <button class="control-btn d-lg-none" onclick="toggleNav(false)">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Section selector -->
+        <select class="section-selector" id="section-selector" onchange="switchSection(this.value)">
+            <option value="all">All Sections</option>
+        </select>
+        
+        <!-- Question grid -->
+        <div class="question-grid" id="question-boxes"></div>
+    </aside>
+    
+    <!-- Bottom navigation for mobile -->
+    <nav class="bottom-nav d-lg-none">
+        <button class="nav-btn nav-btn-outline" onclick="prevQuestion()">
+            <i class="fas fa-chevron-left"></i>
+            <span>Previous</span>
+        </button>
+        <button class="nav-btn nav-btn-outline" onclick="nextQuestion()">
+            <span>Next</span>
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </nav>
+    
+    <!-- Results modal -->
+    <div class="results-modal" id="results-modal">
+        <div class="results-card">
+            <div class="results-header">
+                <h3 class="results-title">Test Results</h3>
+            </div>
+            <div class="results-body">
+                <div class="stats-grid">
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark))">
+                        <div class="stat-value" id="score-value">0</div>
+                        <div class="stat-label">Score</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--success), #1b9aaa)">
+                        <div class="stat-value" id="correct-value">0</div>
+                        <div class="stat-label">Correct</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--danger), var(--accent))">
+                        <div class="stat-value" id="incorrect-value">0</div>
+                        <div class="stat-label">Incorrect</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--gray), var(--dark))">
+                        <div class="stat-value" id="unattempted-value">0</div>
+                        <div class="stat-label">Unattempted</div>
+                    </div>
+                </div>
+            </div>
+            <div class="results-footer">
+                <button class="nav-btn nav-btn-primary" onclick="reviewTest()">
+                    <i class="fas fa-search me-1"></i>
+                    <span>Review Test</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Questions data
+        const questions = [];
+        const sections = {};
+        let currentLang = "en";
+        let currentQuestion = 0;
+        let answers = {};
+        let submitted = false;
+        let totalTime = 15 * 60;
+        
+        // Initialize the test
+        window.onload = function() {
+            initializeTest();
+            startTimer();
+            
+            // If on desktop, show the question navigation by default
+            if (window.innerWidth >= 992) {
+                document.getElementById('question-nav').classList.add('show');
+                document.getElementById('main-content').classList.add('with-nav');
+            }
+        };
+        
+        // Initialize test data
+        function initializeTest() {
+            // Add sections and questions
+            
+            sections["31"] = {
+                name: "Computer Knowledge",
+                start: 0,
+                end: 18
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="31">Computer Knowledge</option>`;
+            
+            sections["misc"] = {
+                name: "Miscellaneous",
+                start: 19,
+                end: 19
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="misc">Miscellaneous</option>`;
+            
+            
+                questions.push({
+                    id: "1",
+                    section: "31",
+                    question_en: "<p>1. <span style=\"font-weight: 400;\">&nbsp;Which of the following is an audio file extension</span>?</p>",
+                    question_hi: "<p>1.<span style=\"font-weight: 400;\">निम्न में से कौन एक ऑडियो फ़ाइल एक्सटेंशन है?</span></p>",
+                    options_en: ["<p>WMA</p>", "<p>MOV</p>", 
+                                "<p>WMV</p>", "<p>MP5</p>"],
+                    options_hi: ["<p>WMA</p>", "<p>MOV</p>",
+                                "<p>WMV</p>", "<p>MP5</p>"],
+                    solution_en: "<p>1.(a)&nbsp;</p>\r\n<p><span style=\"font-weight: 400;\">Windows Media Audio (WMA) is a series of audio codes and their corresponding audio coding formats , developed by Microsoft. </span></p>\r\n<p><span style=\"font-weight: 400;\">MOV- Developed by Apple, the MOV file extension represents QuickTime video format. </span></p>\r\n<p><span style=\"font-weight: 400;\">WMV is a \"Windows Media Video\" developed by Microsoft.</span></p>",
+                    solution_hi: "<p>1.(a) विंडोज मीडिया ऑडियो (WMA) माइक्रोसॉफ्ट द्वारा विकसित ऑडियो कोड और उनसे संबंधित ऑडियो कोडिंग प्रारूपों ( audio coding format ) की एक&nbsp; series हे&nbsp;।</p>\r\n<p>MOV- Apple द्वारा विकसित, MOV फ़ाइल एक्सटेंशन QuickTime वीडियो प्रारूप ( format )&nbsp; का प्रतिनिधित्व ( represent ) करता है।</p>\r\n<p>WMV माइक्रोसॉफ्ट द्वारा विकसित <span style=\"font-weight: 400;\">\"Windows Media Video\" </span>है।</p>",
+                    correct: "a",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "2",
+                    section: "31",
+                    question_en: "<p>2.<span style=\"font-weight: 400;\">In the field of computing, what does ENIAC stand for ?</span></p>",
+                    question_hi: "<p>2. <span style=\"font-weight: 400;\">कंप्यूटिंग के क्षेत्र में, ENIAC का पूर्ण रूप क्या है ?&nbsp;</span></p>",
+                    options_en: ["<p><span style=\"font-weight: 400;\">&nbsp;Electronic Numerical Integrator and Computer </span></p>", "<p><span style=\"font-weight: 400;\">Electronic Numerical Integrated Advanced Computer&nbsp;</span></p>", 
+                                "<p><span style=\"font-weight: 400;\">&nbsp;Electronic Numerals Integration and Computing </span></p>", "<p><span style=\"font-weight: 400;\">Electronic Numbers Integration and Computer</span></p>"],
+                    options_hi: ["<p><span style=\"font-weight: 400;\">Electronic Numerical Integrator and Computer&nbsp;</span></p>", "<p><span style=\"font-weight: 400;\">Electronic Numerical Integrated Advanced Computer</span></p>",
+                                "<p><span style=\"font-weight: 400;\">Electronic Numerals Integration and Computing&nbsp;</span></p>", "<p><span style=\"font-weight: 400;\">Electronic Numbers Integration and Computer&nbsp;</span></p>"],
+                    solution_en: "<p>2.(a)</p>\r\n<p><span style=\"font-weight: 400;\">ENIAC stands for Electronic Numerical Integrator and Computer. It was the first programmable, electronic, general - purpose digital computer. It was Turing-complete and able to solve a large class of numerical problems through reprogramming.</span></p>",
+                    solution_hi: "<p>2.(a)&nbsp;</p>\r\n<p><span style=\"font-weight: 400;\">&nbsp;ENIAC का मतलब इलेक्ट्रॉनिक न्यूमेरिकल इंटीग्रेटर ( Electronic Numerical Integrator) और कंप्यूटर( Electronic Numerical Integrator and Computer) है । यह पहला &nbsp;programmable, &nbsp;इलेक्ट्रॉनिक,general - purpose&nbsp; वाला डिजिटल कंप्यूटर था। यह ट्यूरिंग-पूर्ण (Turing-complete) था और रिप्रोग्रामिंग (reprogramming)के माध्यम से संख्यात्मक समस्याओं (numerical problems) के एक बड़े वर्ग ( large class ) को हल करने में सक्षम था।</span></p>",
+                    correct: "a",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "3",
+                    section: "31",
+                    question_en: "<p>3.<strong>&nbsp;</strong><span style=\"font-weight: 400;\">In the context of computers, tracker balls is a/an ______device.</span><span style=\"font-family: Palanquin Dark;\">?</span></p>",
+                    question_hi: "<p>3.<span style=\"font-weight: 400;\">कंप्यूटर के संदर्भ में, ट्रैकर बॉल ( tracker ball) एक ______ device है।</span><span style=\"font-family: Palanquin Dark;\">?</span></p>",
+                    options_en: ["<p><span style=\"font-weight: 400;\">storage</span></p>", "<p><span style=\"font-weight: 400;\">processing </span></p>", 
+                                "<p><span style=\"font-weight: 400;\">input </span></p>", "<p><span style=\"font-weight: 400;\">output&nbsp;</span></p>"],
+                    options_hi: ["<p><span style=\"font-weight: 400;\">storage </span></p>", "<p><span style=\"font-weight: 400;\">&nbsp;processing </span></p>",
+                                "<p><span style=\"font-weight: 400;\">&nbsp;input </span></p>", "<p><span style=\"font-weight: 400;\">output </span></p>"],
+                    solution_en: "<p>3.(c) <span style=\"font-weight: 400;\">In the context of computers, tracker balls is an input device. Some other examples of input devices are keyboard, mouse, joystick, light pen, scanner, graphic tablet, microphone, magnetic ink card reader, optical character reader, bar code reader etc.</span></p>",
+                    solution_hi: "<p>3.(c)</p>\r\n<p><span style=\"font-weight: 400;\">कंप्यूटर के संदर्भ में, ट्रैकर बॉल एक इनपुट डिवाइस है। इनपुट डिवाइस के कुछ अन्य उदाहरण keyboard, mouse, joystick, light pen, scanner, graphic tablet, microphone, magnetic ink card reader, optical character reader, bar code reader&nbsp;</span><span style=\"font-weight: 400;\">आदि हैं।</span></p>",
+                    correct: "c",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "4",
+                    section: "31",
+                    question_en: "<p>4. <span style=\"font-weight: 400;\">Which of the following is an input device </span><span style=\"font-family: Palanquin Dark;\">?</span></p>",
+                    question_hi: "<p>4. <span style=\"font-weight: 400;\">निम्न में से कौन एक इनपुट device&nbsp; है ?&nbsp;</span></p>",
+                    options_en: ["<p><span style=\"font-weight: 400;\">Inkjet printer </span></p>", "<p><span style=\"font-weight: 400;\">Optical character reader </span></p>", 
+                                "<p><span style=\"font-weight: 400;\">Headphones </span></p>", "<p><span style=\"font-weight: 400;\">&nbsp;Projector</span></p>"],
+                    options_hi: ["<p><span style=\"font-weight: 400;\">Inkjet printer </span></p>", "<p><span style=\"font-weight: 400;\">ऑप्टिकल कैरेक्टर रीडर (Optical character reader )</span></p>",
+                                "<p><span style=\"font-weight: 400;\">Headphones </span></p>", "<p><span style=\"font-weight: 400;\">Projector </span></p>"],
+                    solution_en: "<p>4.(b)<span style=\"font-family: Palanquin Dark;\">&nbsp;</span></p>\r\n<p><strong>Optical character reader</strong><span style=\"font-weight: 400;\"> is an input device. Optical character reader(OCR) is a device that detects pencil marks or any printed text&nbsp; and converts them into computer readable codes. </span></p>\r\n<p><span style=\"font-weight: 400;\">Inkjet printers(Output Device), as the name implies, use ink to print text, graphics, and images onto various types of paper.</span></p>\r\n<p>&nbsp;</p>",
+                    solution_hi: "<p>4.(b)<span style=\"font-family: Palanquin Dark;\">&nbsp;</span></p>\r\n<p><strong>ऑप्टिकल कैरेक्टर रीडर <span style=\"font-weight: 400;\">(Optical character reader )</span></strong><span style=\"font-weight: 400;\"> एक इनपुट डिवाइस है। ऑप्टिकल कैरेक्टर रीडर (OCR) एक ऐसा उपकरण है जो पेंसिल के निशान या किसी मुद्रित पाठ (printed text )का पता लगाता है और उन्हें कंप्यूटर readable codes में परिवर्तित करता है।</span></p>\r\n<p><strong> इंकजेट प्रिंटर </strong><span style=\"font-weight: 400;\">(आउटपुट डिवाइस), जैसा कि नाम से ही स्पष्ट है, विभिन्न प्रकार के कागज पर टेक्स्ट, ग्राफिक्स और छवियों को प्रिंट करने के लिए स्याही का उपयोग करता है।</span></p>",
+                    correct: "b",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "5",
+                    section: "31",
+                    question_en: " <p>5. </span><span style=\"font-family:Palanquin Dark\">Which of the following services is most commonly used with mobile phones to access the internet?</span></p>",
+                    question_hi: "<p>5.<span style=\"font-family: Palanquin Dark;\"> इंटरनेट का उपयोग करने के लिए मोबाइल फोन के साथ सबसे अधिक उपयोग की जाने वाली निम्नलिखित में से कौन सी सेवा है?</span></p>",
+                    options_en: [" <p>  DSL</span></p>", " <p> 3G-4G</span></p>", 
+                                " <p> Dial up</span></p>", " <p> Cable</span></p>"],
+                    options_hi: ["<p>DSL</p>", "<p>3G-4G</p>",
+                                "<p>Dial up</p>", "<p>Cable</p>"],
+                    solution_en: " <p>5.(b) 3G and 4G </span><span style=\"font-family:Palanquin Dark\">service is most commonly used with mobile phones, and it connects wirelessly through your ISP\'s network, these connections aren\'t always as fast as DSL or cable. </span></p> <p><span style=\"font-family:Palanquin Dark\">A digital subscriber line</span><span style=\"font-family:Palanquin Dark\"> is a family of technologies that are used to transmit digital data over telephone lines.</span></p> <p><span style=\"font-family:Palanquin Dark\"> </span><span style=\"font-family:Palanquin Dark\">Dial-up </span><span style=\"font-family:Palanquin Dark\">is related to or is a standard telephone line used for computer communications. </span></p>",
+                    solution_hi: "<p>5.(b) 3G और 4G <span style=\"font-family: Palanquin Dark;\">सेवा का सबसे अधिक उपयोग मोबाइल फोन के साथ किया जाता है, और यह आपके ISP के नेटवर्क के माध्यम से वायरलेस तरीके से कनेक्ट होता है, ये कनेक्शन हमेशा DSL या केबल की तरह तेज़ नहीं होते हैं। </span></p>\r\n<p><span style=\"font-family: Palanquin Dark;\">एक डिजिटल सब्सक्राइबर लाइन प्रौद्योगिकियों का एक परिवार ( family of technology ) है जिसका उपयोग टेलीफोन लाइनों पर डिजिटल डेटा ट्रांसफर करने के लिए किया जाता है। डायल-अप (&nbsp; Dial Up )&nbsp; कंप्यूटर संचार के लिए उपयोग की जाने वाली एक स्टैण्डर्ड टेलीफोन लाइन से संबंधित है </span></p>",
+                    correct: "b",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "6",
+                    section: "31",
+                    question_en: "<p>6.<span style=\"font-family: Palanquin Dark;\"> <span style=\"font-weight: 400;\">What is the other name for \'transistor computer \' </span>?</span></p>\n",
+                    question_hi: "<p>6.<span style=\"font-weight: 400;\">\'transistor computer\' &#2325;&#2366; &#2342;&#2370;&#2360;&#2352;&#2366; &#2344;&#2366;&#2350; &#2325;&#2381;&#2351;&#2366; &#2361;&#2376; ?</span></p>\n",
+                    options_en: ["<p><span style=\"font-weight: 400;\">First Generation Computer </span></p>\n", "<p><span style=\"font-weight: 400;\">Third Generation Computer </span></p>\n", 
+                                "<p><span style=\"font-weight: 400;\">Second Generation Computer </span></p>\n", "<p><span style=\"font-weight: 400;\">Fourth Generation Computer&nbsp;</span></p>\n"],
+                    options_hi: ["<p><span style=\"font-weight: 400;\">&#2346;&#2361;&#2354;&#2368; &#2346;&#2368;&#2338;&#2364;&#2368; &#2325;&#2366; &#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352; (</span><span style=\"font-weight: 400;\">First Generation Computer )</span></p>\n", "<p><span style=\"font-weight: 400;\">&#2340;&#2368;&#2360;&#2352;&#2368; &#2346;&#2368;&#2338;&#2364;&#2368; &#2325;&#2366; &#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352; ( Third Generation Computer )&nbsp;</span></p>\n",
+                                "<p><span style=\"font-weight: 400;\">&#2342;&#2370;&#2360;&#2352;&#2368; &#2346;&#2368;&#2338;&#2364;&#2368; &#2325;&#2375; &#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352; ( Second Generation Computer )&nbsp;</span></p>\n", "<p><span style=\"font-weight: 400;\">&#2330;&#2380;&#2341;&#2368; &#2346;&#2368;&#2338;&#2364;&#2368; &#2325;&#2375; &#2325;&#2306;&#2346;&#2381;&#2351;&#2370;&#2335;&#2352; ( Fourth Generation Computer )&nbsp;</span></p>\n"],
+                    solution_en: "<p>6.(c)<span style=\"font-family: Palanquin Dark;\">&nbsp;</span></p>\r\n<p><span style=\"font-weight: 400;\">First Generation: &nbsp; 1946-1959. Vacuum tube-based.&nbsp;</span></p>\r\n<p><span style=\"font-weight: 400;\">Second Generation: 1959-1965. <strong>Transistor-based.&nbsp;</strong></span></p>\r\n<p><span style=\"font-weight: 400;\">Third Generation: 1965-1971. Integrated Circuit based.</span></p>\r\n<p><span style=\"font-weight: 400;\">Fourth Generation: 1971-1980. VLSI microprocessor-based.&nbsp;</span></p>\r\n<p><span style=\"font-weight: 400;\">Fifth Generation: 1980-onwards. ULSI microprocessor-based.</span></p>\n",
+                    solution_hi: "<p>6.(c )</p>\r\n<p><span style=\"font-weight: 400;\">First Generation: &nbsp; 1946-1959. Vacuum tube-based.&nbsp;</span></p>\r\n<p><span style=\"font-weight: 400;\">Second Generation: 1959-1965. <strong>Transistor-based.&nbsp;</strong></span></p>\r\n<p><span style=\"font-weight: 400;\">Third Generation: 1965-1971. Integrated Circuit based.</span></p>\r\n<p><span style=\"font-weight: 400;\">Fourth Generation: 1971-1980. VLSI microprocessor-based.&nbsp;</span></p>\r\n<p><span style=\"font-weight: 400;\">Fifth Generation: 1980-onwards. ULSI microprocessor-based.</span></p>\n",
+                    correct: "c",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "7",
+                    section: "31",
+                    question_en: "<p>7.<span style=\"font-family: Palanquin Dark;\"> Which of the following belongs to the \'Effects\' category with reference to text </span><span style=\"font-family: Palanquin Dark;\">formatting in MS Word?</span></p>",
+                    question_hi: "<p>7.<span style=\"font-family: Palanquin Dark;\"> निम्नलिखित में से कौन MS WORD में टेक्स्ट फॉर्मेटिंग के <span style=\"font-size: 14pt;\">Reference</span> में&nbsp; \'इफेक्ट्स\' श्रेणी <span style=\"font-size: 14pt;\">( effects category )</span> से संबंधित है?</span></p>",
+                    options_en: ["<p>Bold</p>", "<p>Regular</p>", 
+                                "<p>Italic</p>", "<p>Strike through</p>"],
+                    options_hi: ["<p>Bold</p>", "<p>Regular</p>",
+                                "<p>Italic</p>", "<p>Strike through</p>"],
+                    solution_en: "<p>7.(d) <span style=\"font-family: Palanquin Dark;\">Strikethrough belongs to the \'Effects\' category with reference to text formatting in MS Word. Press Alt + K to select Strikethrough .</span></p>",
+                    solution_hi: "<p>7.(d) <strong><span style=\"font-size: 14pt;\">Strike through</span></strong> <span style=\"font-family: Palanquin Dark;\">एक <span style=\"font-size: 14pt;\">Font Effect&nbsp; </span>है जो <span style=\"font-size: 14pt;\">Text</span>&nbsp; को प्रकट <span style=\"font-size: 14pt;\">( appear )</span> करने का कारण बनता है | टेक्स्ट ( <span style=\"font-size: 14pt;\">Text ) </span>के स्ट्राइकथ्रू ( &nbsp;<strong><span style=\"font-size: 14pt;\">Strike through ) </span></strong>का चयन करने के लिए <span style=\"font-size: 14pt;\"><strong>Alt + K </strong>, shortcut key</span> का उपयोग किया जाता हे&nbsp;.</span></p>",
+                    correct: "d",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "8",
+                    section: "31",
+                    question_en: "<p>8. <strong>&nbsp;_</strong><span style=\"font-weight: 400;\">_____ is the process of turning on a computer and powering up the system.</span><span style=\"font-family: Palanquin Dark;\">?</span></p>",
+                    question_hi: "<p>8. <strong>&nbsp;_</strong><span style=\"font-weight: 400;\">_____ कंप्यूटर को चालू करने और सिस्टम को पॉवर-अप करने की प्रक्रिया है </span><span style=\"font-family: Palanquin Dark;\">?</span></p>",
+                    options_en: ["<p><span style=\"font-weight: 400;\">&nbsp;Booting </span></p>", "<p><span style=\"font-weight: 400;\">Loading&nbsp;</span></p>", 
+                                "<p><span style=\"font-weight: 400;\">Saving&nbsp;</span></p>", "<p><span style=\"font-weight: 400;\">Execution </span></p>"],
+                    options_hi: ["<p><span style=\"font-weight: 400;\">Booting </span></p>", "<p><span style=\"font-weight: 400;\">Loading&nbsp;</span></p>",
+                                "<p><span style=\"font-weight: 400;\">Saving </span></p>", "<p><span style=\"font-weight: 400;\">Execution&nbsp;</span></p>"],
+                    solution_en: "<p>8. (a) <span style=\"font-weight: 400;\">Booting is the process of turning on a computer and powering up the system. </span><span style=\"font-weight: 400;\">When we start our computer then there is an operation which is performed automatically by the computer which is also called Booting.</span></p>",
+                    solution_hi: "<p>8. (a)<span style=\"font-size: 14pt;\"> <span style=\"font-weight: 400;\">बूटिंग ( Booting ) कंप्यूटर को चालू करने और सिस्टम को पावर देने की प्रक्रिया है। जब हम अपना कंप्यूटर शुरू करते हैं तो एक ऑपरेशन होता है जो कंप्यूटर द्वारा स्वचालित रूप से किया जाता है जिसे बूटिंग ( Booting ) भी कहा जाता है।</span></span></p>",
+                    correct: "a",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "9",
+                    section: "31",
+                    question_en: "<p>9.<span style=\"font-weight: 400;\">LCD is a basic type of monitor. What is the full form of LCD </span><span style=\"font-family: Palanquin Dark;\"><span style=\"font-family: \'times new roman\', times, serif; font-size: 14pt;\">?</span></span></p>",
+                    question_hi: "<p>9.<span style=\"font-family: Palanquin Dark;\">&nbsp;</span><span style=\"font-weight: 400;\">LCD एक basic type &nbsp;का मॉनिटर ( monitor )&nbsp; है। LCD का पूर्ण रूप क्या है?&nbsp;</span></p>",
+                    options_en: ["<p><span style=\"font-weight: 400;\">&nbsp;Laser Crystal Display </span></p>", "<p><span style=\"font-weight: 400;\">Liquid Crystal Diode </span></p>", 
+                                "<p><span style=\"font-weight: 400;\">Light Component Device </span></p>", "<p><span style=\"font-weight: 400;\">Liquid Crystal Display </span></p>"],
+                    options_hi: ["<p><span style=\"font-weight: 400;\">Laser Crystal Display </span></p>", "<p><span style=\"font-weight: 400;\">Liquid Crystal Diode </span></p>",
+                                "<p><span style=\"font-weight: 400;\">Light Component Device </span></p>", "<p><span style=\"font-weight: 400;\">&nbsp;Liquid Crystal Display </span></p>"],
+                    solution_en: "<p><span style=\"font-family: \'times new roman\', times, serif;\">9.(d) </span></p>\r\n<p><span style=\"font-weight: 400;\">&nbsp;LCD is a basic type of monitor and the full form of LCD&nbsp; is Liquid Crystal Display. It is a type of flat panel display which uses liquid crystals in its primary form of operation.</span></p>",
+                    solution_hi: "<p>9.(d)&nbsp;</p>\r\n<p><span style=\"font-weight: 400;\">LCD एक basic type का मॉनिटर है और LCD का पूर्ण रूप Liquid Crystal Display है। यह एक प्रकार का Flat panel display है जो अपने Primary form&nbsp; में Liquid crystal का उपयोग करता है।</span></p>",
+                    correct: "d",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "10",
+                    section: "31",
+                    question_en: "<p>10.&nbsp;<span style=\"font-weight: 400;\">What is the full form of DHCP in a networking system ?</span></p>\n",
+                    question_hi: "<p>10. <span style=\"font-weight: 400;\">&#2344;&#2375;&#2335;&#2357;&#2352;&#2381;&#2325;&#2367;&#2306;&#2327; &#2360;&#2367;&#2360;&#2381;&#2335;&#2350; &#2350;&#2375;&#2306; DHCP &#2325;&#2366; &#2346;&#2370;&#2352;&#2381;&#2339; &#2352;&#2370;&#2346; &#2325;&#2381;&#2351;&#2366; &#2361;&#2376;?</span></p>\n",
+                    options_en: ["<p><span style=\"font-weight: 400;\">Dynamic Host Configuration </span><span style=\"font-weight: 400;\">Protocol</span></p>\n", "<p><span style=\"font-weight: 400;\">Data Host Control Panel&nbsp;</span></p>\n", 
+                                "<p><span style=\"font-weight: 400;\">Dynamic Host Control Point</span></p>\n", "<p><span style=\"font-weight: 400;\">Display House Control Protocol</span></p>\n"],
+                    options_hi: ["<p><span style=\"font-weight: 400;\">Dynamic Host Configuration Protocol</span></p>\n", "<p><span style=\"font-weight: 400;\">Data Host Control Panel</span></p>\n",
+                                "<p><span style=\"font-weight: 400;\">&nbsp;Dynamic Host Control Point</span></p>\n", "<p><span style=\"font-weight: 400;\">Display House Control Protocol</span></p>\n"],
+                    solution_en: "<p>10.(a) The full form of DHCP in a networking system is <strong>Dynamic Host Configuration Protocol.</strong></p>\r\n<p>It is a network management protocol used on internet protocol networks.</p>\n",
+                    solution_hi: "<p>10.(a)&nbsp;<span style=\"font-size: 14pt;\"><span style=\"font-family: Palanquin Dark;\">&nbsp;</span></span><span style=\"font-weight: 400;\">&#2344;&#2375;&#2335;&#2357;&#2352;&#2381;&#2325;&#2367;&#2306;&#2327; &#2360;&#2367;&#2360;&#2381;&#2335;&#2350; &#2350;&#2375;&#2306; DHCP &#2325;&#2366; &#2346;&#2370;&#2352;&#2381;&#2339; &#2352;&#2370;&#2346; &#2337;&#2366;&#2351;&#2344;&#2366;&#2350;&#2367;&#2325; &#2361;&#2379;&#2360;&#2381;&#2335; &#2325;&#2377;&#2344;&#2381;&#2347;&#2364;&#2367;&#2327;&#2352;&#2375;&#2358;&#2344; <strong>( Dynamic Host COnfiguration Protocol )</strong>&nbsp; &#2346;&#2381;&#2352;&#2379;&#2335;&#2379;&#2325;&#2377;&#2354; &#2361;&#2376;&#2404; </span></p>\r\n<p><span style=\"font-weight: 400;\">&#2351;&#2361; &#2311;&#2306;&#2335;&#2352;&#2344;&#2375;&#2335; &#2346;&#2381;&#2352;&#2379;&#2335;&#2379;&#2325;&#2377;&#2354; &#2344;&#2375;&#2335;&#2357;&#2352;&#2381;&#2325; &#2346;&#2352; &#2313;&#2346;&#2351;&#2379;&#2327; &#2325;&#2367;&#2351;&#2366; &#2332;&#2366;&#2344;&#2375; &#2357;&#2366;&#2354;&#2366; &#2319;&#2325; &#2344;&#2375;&#2335;&#2357;&#2352;&#2381;&#2325; management&nbsp; &#2346;&#2381;&#2352;&#2379;&#2335;&#2379;&#2325;&#2377;&#2354; &#2361;&#2376;&#2404;</span></p>\n",
+                    correct: "a",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "11",
+                    section: "31",
+                    question_en: "<p>11. <span style=\"font-family: Palanquin Dark;\">Match the following domain name extensions with their respective definitions.</span></p>\r\n<table style=\"border-collapse: collapse; width: 76.1858%; height: 185px;\" border=\"1\">\r\n<tbody>\r\n<tr>\r\n<td style=\"width: 50.001%;\"><span style=\"font-family: Palanquin Dark;\">.gov</span></td>\r\n<td style=\"width: 50.001%;\"><span style=\"font-family: Palanquin Dark;\">A) Government agencies</span></td>\r\n</tr>\r\n<tr>\r\n<td style=\"width: 50.001%;\"><span style=\"font-family: Palanquin Dark;\">.org</span></td>\r\n<td style=\"width: 50.001%;\"><span style=\"font-family: Palanquin Dark;\">B) Network organizations</span></td>\r\n</tr>\r\n<tr>\r\n<td style=\"width: 50.001%;\"><span style=\"font-family: Palanquin Dark;\">.edu</span></td>\r\n<td style=\"width: 50.001%;\"><span style=\"font-family: Palanquin Dark;\">C) Non-Profit organizations</span></td>\r\n</tr>\r\n<tr>\r\n<td style=\"width: 50.001%;\"><span style=\"font-family: Palanquin Dark;\">.net</span></td>\r\n<td style=\"width: 50.001%;\"><span style=\"font-family: Palanquin Dark;\">D) Educational organizations</span></td>\r\n</tr>\r\n</tbody>\r\n</table>\r\n<p>&nbsp;</p>",
+                    question_hi: "<p>11. <span style=\"font-family: Palanquin Dark;\">निम्नलिखित<span style=\"font-size: 14pt;\"> Domain Name Extension </span>को उनकी संबंधित परिभाषाओं के साथ सुमेलित करें।</span></p>\r\n<table style=\"border-collapse: collapse; width: 57.3123%; height: 132px;\" border=\"1\">\r\n<tbody>\r\n<tr>\r\n<td style=\"width: 50.0864%;\"><span style=\"font-family: Palanquin Dark;\">.gov</span></td>\r\n<td style=\"width: 49.9136%;\"><span style=\"font-family: Palanquin Dark;\">A) Government agencies</span></td>\r\n</tr>\r\n<tr>\r\n<td style=\"width: 50.0864%;\"><span style=\"font-family: Palanquin Dark;\">.org</span></td>\r\n<td style=\"width: 49.9136%;\"><span style=\"font-family: Palanquin Dark;\">B) Network organizations</span></td>\r\n</tr>\r\n<tr>\r\n<td style=\"width: 50.0864%;\"><span style=\"font-family: Palanquin Dark;\">.edu</span></td>\r\n<td style=\"width: 49.9136%;\"><span style=\"font-family: Palanquin Dark;\">C) Non-Profit organizations</span></td>\r\n</tr>\r\n<tr>\r\n<td style=\"width: 50.0864%;\"><span style=\"font-family: Palanquin Dark;\">.net</span></td>\r\n<td style=\"width: 49.9136%;\"><span style=\"font-family: Palanquin Dark;\">D) Educational organizations</span></td>\r\n</tr>\r\n</tbody>\r\n</table>\r\n<p>&nbsp;</p>",
+                    options_en: ["<p>1-A, 2-D, 3-C, 4-B</p>", "<p>1-A, 2-C, 3-D, 4-B</p>", 
+                                "<p>1-C, 2-A, 3-D, 4-B</p>", "<p>1-D,2-C, 3-A, 4-B</p>"],
+                    options_hi: ["<p>1-A, 2-D, 3-C, 4-B</p>", "<p>1-A, 2-C, 3-D, 4-B</p>",
+                                "<p>1-C, 2-A, 3-D, 4-B</p>", "<p>1-D,2-C, 3-A, 4-B</p>"],
+                    solution_en: "<p>11.(b) <span style=\"font-family: Palanquin Dark;\">.gov (Government agencies), .org (Non-Profit organizations), .edu (Educational organizations) and .net (Network organizations). </span></p>",
+                    solution_hi: "<p>11.(b) <span style=\"font-size: 14pt;\">.</span><span style=\"font-family: Palanquin Dark;\"><span style=\"font-size: 14pt;\">gov</span> (सरकारी एजेंसियां), <span style=\"font-size: 14pt;\">.org </span>(गैर-लाभकारी संगठन), <span style=\"font-size: 14pt;\">.edu </span>(शैक्षिक संगठन) और <span style=\"font-size: 14pt;\">.net </span>(नेटवर्क संगठन)।</span></p>",
+                    correct: "b",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "12",
+                    section: "31",
+                    question_en: " <p>12.</span><span style=\"font-family:Palanquin Dark\"> What is the maximum height of a row in MS Excel 2010 ?</span></p>",
+                    question_hi: "<p>12. <span style=\"font-family: Palanquin Dark;\">MS Excel 2010 में एक पंक्ति ( Row ) की अधिकतम ऊंचाई कितनी है?</span></p>",
+                    options_en: [" <p> 128 points</span></p>", " <p> 409 points</span></p>", 
+                                " <p> 255 points</span></p>", " <p> 100 points</span></p>"],
+                    options_hi: ["<p>128 अंक</p>", "<p>409 अंक</p>",
+                                "<p>255 अंक</p>", "<p>100 अंक</p>"],
+                    solution_en: " <p>12.(b)</span><span style=\"font-family:Palanquin Dark\"> In Excel, Total number of rows and columns on a worksheet (1,048,576 rows by 16,384 columns), Column width (255 characters) and Row height (409 points). </span></p>",
+                    solution_hi: "<p>1<span style=\"font-family: Palanquin Dark;\">2.(b) Excel, वर्कशीट में पंक्तियों ( row )और स्तंभों ( column ) की कुल संख्या (1,048,576 ( row )16,384 ( column )&nbsp; ) , होती हे |&nbsp;</span></p>\r\n<p><span style=\"font-family: Palanquin Dark;\">कॉलम की चौड़ाई (255 अंक) और पंक्ति ( row ) की ऊँचाई (409 अंक)होती हे&nbsp;&nbsp;</span></p>",
+                    correct: "b",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "13",
+                    section: "31",
+                    question_en: "<p>13.<span style=\"font-family: Palanquin Dark;\"> In MS Excel 2010, a cell may display &lsquo;_________&rsquo; if that cell contains a number or a date and the width of its column cannot display all the characters that its format requires.</span></p>",
+                    question_hi: "<p>13. <span style=\"font-family: Palanquin Dark;\">MS Excel 2010 में, एक सेल \'_________\' प्रदर्शित कर सकता है यदि उस सेल में एक संख्या ( Number ) या एक तिथि ( date ) है और इसके कॉलम की चौड़ाई ( Width ) इसके फॉर्मेट की आवश्यकता वाले सभी वर्णों ( characters ) को प्रदर्शित ( Display )&nbsp; नहीं कर सकती है।</span></p>",
+                    options_en: ["<p><span style=\"font-family: Palanquin Dark;\">**###</span></p>", "<p>#####</p>", 
+                                "<p>$$$$$</p>", "<p>*****</p>"],
+                    options_hi: ["<p><span style=\"font-weight: 400;\">** ###</span></p>", "<p>#####</p>",
+                                "<p>$$$$$</p>", "<p>*****</p>"],
+                    solution_en: "<p>13.(b) <span style=\"font-family: Palanquin Dark;\">Microsoft Excel might show ##### in cells when a column isn\'t wide enough to show all of the cell contents.</span></p>",
+                    solution_hi: "<p>13.(b)<span style=\"font-family: Palanquin Dark;\">MS Excel 2010 में, एक सेल </span><span style=\"font-family: Palanquin Dark;\">&nbsp; ##### दिखा सकता है ,&nbsp; जब स्तंभ ( column ) सभी सेल कंटेंट को दिखाने के लिए पर्याप्त चौड़ा नहीं होता है।</span></p>",
+                    correct: "b",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "14",
+                    section: "31",
+                    question_en: " <p>14.</span><span style=\"font-family:Palanquin Dark\"> In MS Word, Ctrl+R is used to align the text to the _______ of the screen.</span></p>",
+                    question_hi: "<p>14. <span style=\"font-family: Palanquin Dark;\">MS Word में, Ctrl + R का उपयोग टेक्स्ट को स्क्रीन के _______ अलाइन करने के लिए किया जाता है।</span></p>",
+                    options_en: [" <p> Right</span></p>", " <p> Bottom</span></p>", 
+                                " <p> Top</span></p>", " <p> Left</span></p>"],
+                    options_hi: ["<p><span style=\"font-weight: 400;\">दाएं (Right )</span></p>", "<p><span style=\"font-weight: 400;\">नीचे ( Bottom )</span></p>",
+                                "<p><span style=\"font-weight: 400;\">शीर्ष (Top)</span></p>", "<p><span style=\"font-weight: 400;\">बाएं (Left)</span></p>"],
+                    solution_en: " <p>14.(a)</span><span style=\"font-family:Palanquin Dark\"> Align the text to the right (Ctrl+R),</span></p> <p><span style=\"font-family:Palanquin Dark\"> Align the text to the left (Ctrl+L), </span></p>",
+                    solution_hi: "<p>14.(a) <span style=\"font-family: Palanquin Dark;\">MS Word में, Ctrl + R का उपयोग टेक्स्ट को स्क्रीन के <span style=\"font-weight: 400;\">दाएं (Right )</span></span><span style=\"font-family: Palanquin Dark;\"> ओर अलाइन करने के लिए &nbsp;किया जाता हे&nbsp; |&nbsp;</span></p>\r\n<p><span style=\"font-family: Palanquin Dark;\"> टेक्स्ट को बाईं ओरअलाइन करने के लिए&nbsp; (Ctrl+L) का उपयोग किया जाता हे&nbsp; | |&nbsp;</span></p>",
+                    correct: "a",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "15",
+                    section: "31",
+                    question_en: " <p>15.</span><span style=\"font-family:Palanquin Dark\"> To add a watermark in MS Word 2010 document, one has to click on the ‘_______’ tab and then select the ‘Watermark’ option provided in the  ‘________’ group.</span></p>",
+                    question_hi: "<p>15.<span style=\"font-family: Palanquin Dark;\"> MS Word 2010 document में Watermark&nbsp; जोड़ने के लिए, \'_______\' टैब पर क्लिक करना होगा और फिर \'________\' समूह में दिए गए \'वॉटरमार्क\' विकल्प का चयन करना होगा ?&nbsp;</span></p>",
+                    options_en: [" <p> Page Layout, Page Background</span></p>", " <p> Layout, Page Background</span></p>", 
+                                " <p> Insert, Page Background</span></p>", " <p> View, Page Background</span></p>"],
+                    options_hi: ["<p>Page Layout, Page Background</p>", "<p>Layout, Page Background</p>",
+                                "<p>Insert, Page Background</p>", "<p>View, Page Background</p>"],
+                    solution_en: " <p>15.(a)</span><span style=\"font-family:Palanquin Dark\"> A </span><span style=\"font-family:Palanquin Dark\">watermark</span><span style=\"font-family:Arial Unicode MS\"> is an image or text that appears behind the main text of the document. Step 1 − Open a word document, </span></p> <p><span style=\"font-family:Arial Unicode MS\">Step 2 − Click the Page Layout tab and then click the Watermark button to display a list of standard watermark options. </span></p> <p><span style=\"font-family:Arial Unicode MS\">Step 3 − Select any of the available standard watermarks by simply clicking over it.</span></p>",
+                    solution_hi: "<p>1<span style=\"font-family: Arial Unicode MS;\">5.(a) </span><span style=\"font-family: Palanquin Dark;\">Watermark </span><span style=\"font-family: Palanquin Dark;\">एक image या Text &nbsp;हे जो Document के Main Text के पीछे दिखाई देता है। </span></p>\r\n<p><span style=\"font-family: Palanquin Dark;\">चरण 1 - word document खोलें, </span></p>\r\n<p><span style=\"font-family: Palanquin Dark;\">चरण 2 - Page Layout Tab पर क्लिक करें और फिर मानक वॉटरमार्क विकल्पों ( standard watermark options.) की सूची प्रदर्शित करने के लिए Watermark button पर क्लिक करें।</span></p>\r\n<p><span style=\"font-family: Palanquin Dark;\"> चरण 3 - किसी भी उपलब्ध मानक वॉटरमार्क ( standard watermark options. ) </span><span style=\"font-family: \'Palanquin Dark\';\">पर केवल क्लिक करके उसका चयन करें।</span></p>",
+                    correct: "a",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "16",
+                    section: "31",
+                    question_en: " <p>16. </span><span style=\"font-family:Palanquin Dark\">What is the value of the following MS Excel formula?</span></p> <p><span style=\"font-family:Palanquin Dark\">=SUMSQ(1, 2, 3, 4)</span></p>",
+                    question_hi: " <p>16.</span><span style=\"font-family:Palanquin Dark\"> निम्नलिखित MS Excel फार्मूला का मान क्या है?</span></p> <p><span style=\"font-family:Palanquin Dark\">=SUMSQ(1, 2, 3, 4)</span></p>",
+                    options_en: [" <p> 30</span></p>", " <p> 10</span></p>", 
+                                " <p> 34</span></p>", " <p> 24</span></p>"],
+                    options_hi: [" <p> 30</span></p>", " <p> 10</span></p>",
+                                " <p> 34</span></p>", " <p> 24</span></p>"],
+                    solution_en: " <p>16.(a)</span><span style=\"font-family:Palanquin Dark\"> The Excel </span><span style=\"font-family:Palanquin Dark\">SUMSQ</span><span style=\"font-family:Palanquin Dark\"> function returns the sum of squares of a supplied set of values.</span></p> <p><span style=\"font-family:Palanquin Dark\">SUMSQ(1, 2, 3, 4)= 30</span></p>",
+                    solution_hi: " <p>16.(a)</span><span style=\"font-family:Palanquin Dark\"> एक्सेल SUMSQ फ़ंक्शन, दिए गए मानों के सेट के वर्गों का योग प्रदान करता है।</span></p> <p><span style=\"font-family:Palanquin Dark\">SUMSQ(1, 2, 3, 4)= 30</span></p>",
+                    correct: "a",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "17",
+                    section: "31",
+                    question_en: " <p>17. </span><span style=\"font-family:Palanquin Dark\">Which of the following keyboard shortcuts is used to run spelling and Grammar Check in MS Word 2010?</span></p>",
+                    question_hi: "<p>17. <span style=\"font-family: Palanquin Dark;\">MS Word 2010 में <span style=\"font-size: 14pt;\">Spelling&nbsp;</span> और <span style=\"font-size: 14pt;\">Grammer check</span>&nbsp; करने के लिए निम्न में से किस<span style=\"font-size: 14pt;\"> Keyboard shortcut </span>का उपयोग किया जाता है?</span></p>",
+                    options_en: [" <p> F1</span></p>", " <p> F2</span></p>", 
+                                " <p> F7</span></p>", " <p> F9</span></p>"],
+                    options_hi: ["<p>F1</p>", "<p>F2</p>",
+                                "<p>F7</p>", "<p>F9</p>"],
+                    solution_en: " <p>17.(c)</span><span style=\"font-family:Palanquin Dark\"> </span><span style=\"font-family:Palanquin Dark\">F7 </span><span style=\"font-family:Palanquin Dark\">– Used to spell check and grammar check a document in Microsoft Apps (e.g. Word). </span></p> <p><span style=\"font-family:Palanquin Dark\">F1 </span><span style=\"font-family:Palanquin Dark\">– Opens the Help screen for almost every program.</span></p> <p><span style=\"font-family:Palanquin Dark\"> </span><span style=\"font-family:Palanquin Dark\">F2</span><span style=\"font-family:Palanquin Dark\"> – Allows you to rename a selected file or folder. </span></p> <p><span style=\"font-family:Palanquin Dark\">F9 </span><span style=\"font-family:Palanquin Dark\">– Refreshes a document in Microsoft Word and sends and receives emails in Outlook.</span></p>",
+                    solution_hi: "<p>17.(c) F7 <span style=\"font-family: Palanquin Dark;\">- माइक्रोसॉफ्ट ऐप्स (जैसे वर्ड ) में किसी डॉक्यूमेंट की <span style=\"font-size: 14pt;\">spelling check</span> और<span style=\"font-size: 14pt;\"> grammer check </span>करने के लिए उपयोग किया जाता है।</span></p>\r\n<p><span style=\"font-family: Palanquin Dark;\"> </span><span style=\"font-family: Palanquin Dark;\">F1</span><span style=\"font-family: Palanquin Dark;\"> - लगभग हर प्रोग्राम के लिए <span style=\"font-size: 14pt;\">Help Screen </span>को खोलता है। </span></p>\r\n<p><span style=\"font-family: Palanquin Dark;\">F2</span><span style=\"font-family: Palanquin Dark;\"> - आपको किसी चयनित फ़ाइल या फ़ोल्डर का नाम बदलने की अनुमति देता है।</span></p>\r\n<p><span style=\"font-family: Palanquin Dark;\"> </span><span style=\"font-family: Palanquin Dark;\">F9</span><span style=\"font-family: Palanquin Dark;\"> - MS - WORD&nbsp; में एक डॉक्यूमेंट को रिफ्रेश करता है और <span style=\"font-size: 14pt;\">Outlook&nbsp;</span> में <span style=\"font-size: 14pt;\">E-mail </span>भेजता और प्राप्त करता है।</span></p>",
+                    correct: "c",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "18",
+                    section: "31",
+                    question_en: " <p>18. </span><span style=\"font-family:Palanquin Dark\">The option of Spell Check can be selected from the _________ tab in MS Excel 2007.</span></p>",
+                    question_hi: "<p>18. <span style=\"font-family: Palanquin Dark;\">MS Excel 2007 में _________ टैब से spelling check के विकल्प का चयन किया जा सकता है।</span></p>",
+                    options_en: [" <p> Formula</span></p>", " <p> File</span></p>", 
+                                " <p> Review</span></p>", " <p> Help </span></p>"],
+                    options_hi: ["<p>Formula</p>", "<p>File</p>",
+                                "<p>Review</p>", "<p>Help</p>"],
+                    solution_en: " <p>18.(c)</span><span style=\"font-family:Palanquin Dark\"> Under the </span><span style=\"font-family:Palanquin Dark\">Review tab</span><span style=\"font-family:Palanquin Dark\">, Excel offers tools to check your document. Search some words in a dictionary, find synonyms or translate a word to verify the spelling. </span></p> <p><span style=\"font-family:Palanquin Dark\">The </span><span style=\"font-family:Palanquin Dark\">formula tab</span><span style=\"font-family:Palanquin Dark\"> allows you to select from over 300 Excel functions such as financial, logical, text, date & time, math, etc. </span></p> <p><span style=\"font-family:Palanquin Dark\">The file tab</span><span style=\"font-family:Palanquin Dark\"> contains the basic required options such as New, Open, Save, Save as, Print, Share, Export, and Close options. </span></p> <p><span style=\"font-family:Palanquin Dark\">Help</span><span style=\"font-family:Palanquin Dark\"> - Displays the Excel Help standalone window (Search Box).</span></p>",
+                    solution_hi: "<p><span style=\"font-family: \'times new roman\', times, serif; font-size: 12pt;\">18.(c) <strong>Review Tab </strong>&nbsp;के अंतर्गत, एक्सेल हमारे डॉक्यूमेंट की जाँच करने के लिए टूल प्रदान करता है। </span></p>\r\n<p><span style=\"font-family: \'times new roman\', times, serif; font-size: 12pt;\">जैसे शब्दकोश <span style=\"font-size: 14pt;\">( dictionary ) </span>में कुछ शब्द खोजना,<span style=\"font-size: 14pt;\">synonyms </span>खोजना , शब्द का <span style=\"font-size: 14pt;\">Translation </span>करना आदि । </span></p>\r\n<p><span style=\"font-family: \'times new roman\', times, serif; font-size: 12pt;\"><span style=\"font-size: 14pt;\"><strong>Formula Tab </strong></span>आपको वित्तीय <span style=\"font-size: 14pt;\">( financial ) </span>, तार्किक <span style=\"font-size: 14pt;\">( logical ) </span>, पाठ (<span style=\"font-size: 14pt;\"> text ) , </span>दिनांक और समय <span style=\"font-size: 14pt;\">( date and time ) </span>, गणित, आदि जैसे 300 से अधिक एक्सेल कार्यों में&nbsp; चयन करने की अनुमति देता है। </span></p>\r\n<p><span style=\"font-family: \'times new roman\', times, serif; font-size: 12pt;\"><span style=\"font-size: 14pt;\"><strong>File Tab </strong></span>में <span style=\"font-size: 14pt;\">Basic necessary&nbsp; </span>विकल्प होते हैं जैसे कि &nbsp;<span style=\"font-size: 14pt;\">New, Open, Save, Save as, Print, Share, Export, and Close options</span>.। </span></p>\r\n<p><span style=\"font-family: \'times new roman\', times, serif; font-size: 12pt;\"><span style=\"font-size: 14pt;\"><strong>Help</strong>&nbsp; </span>:-&nbsp; &nbsp;<span style=\"font-size: 14pt;\">Excel Help standalone window</span>&nbsp; (खोज बॉक्स) प्रदर्शित करता है।</span></p>",
+                    correct: "c",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "19",
+                    section: "31",
+                    question_en: " <p>19.</span><span style=\"font-family:Palanquin Dark\"> Which of the following keyboard shortcuts is used for closing an MS Word 2010 document?</span></p>",
+                    question_hi: "<p>19. <span style=\"font-family: Palanquin Dark;\">MS Word 2010 &nbsp;में&nbsp; दस्तावेज़ को बंद करने के लिए निम्न में से किस <span style=\"font-size: 14pt;\">Keyboard Shortcut</span>&nbsp; का उपयोग किया जाता है?</span></p>",
+                    options_en: [" <p> Ctrl + N</span></p>", " <p> Ctrl + W</span></p>", 
+                                " <p> Ctrl + E</span></p>", " <p> Ctrl + O</span></p>"],
+                    options_hi: ["<p>Ctrl + N</p>", "<p>Ctrl + W</p>",
+                                "<p>Ctrl + E</p>", "<p>Ctrl + O</p>"],
+                    solution_en: " <p>19.(b)</span><span style=\"font-family:Palanquin Dark\"> Close the document (Ctrl+W),</span></p> <p><span style=\"font-family:Palanquin Dark\"> Create a new document (Ctrl+N), </span></p> <p><span style=\"font-family:Palanquin Dark\">Open a document (Ctrl+O) and </span></p> <p><span style=\"font-family:Palanquin Dark\">Center the text (Ctrl+E). </span></p>",
+                    solution_hi: "<p>19.(b)<span style=\"font-family: Palanquin Dark;\"> </span></p>\r\n<p><span style=\"font-family: Palanquin Dark;\">MS Word 2010 &nbsp;में&nbsp; दस्तावेज़ को बंद करने के लिए&nbsp; <strong>(Ctrl+W),</strong><span style=\"font-size: 14pt;\">Keyboard Shortcut</span>&nbsp; का उपयोग किया जाता है |&nbsp;</span></p>\r\n<p><span style=\"font-family: Palanquin Dark;\"><span style=\"font-size: 14pt;\">some shortcuts</span> :-&nbsp;</span></p>\r\n<p><span style=\"font-family: Palanquin Dark;\">(Ctrl+N) :- Create a new document&nbsp;</span></p>\r\n<p><span style=\"font-family: Palanquin Dark;\">(Ctrl+O) :- Open a document&nbsp; और </span></p>\r\n<p><span style=\"font-family: Palanquin Dark;\">&nbsp;(Ctrl+E):- Center the text&nbsp;&nbsp;</span></p>",
+                    correct: "b",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+                questions.push({
+                    id: "20",
+                    section: "misc",
+                    question_en: " <p>20. </span><span style=\"font-family:Palanquin Dark\">Pick the odd one out.</span></p>",
+                    question_hi: "<p>20.<span style=\"font-family: Palanquin Dark;\"> विषम को चुनें।</span></p>",
+                    options_en: [" <p> Mozilla</span></p>", " <p> Safari</span></p>", 
+                                " <p> Internet Explorer</span></p>", " <p> File Explorer</span></p>"],
+                    options_hi: ["<p>Mozilla</p>", "<p>Safari</p>",
+                                "<p>Internet Explorer</p>", "<p>File Explorer</p>"],
+                    solution_en: " <p>20.(d) File Explorer </span><span style=\"font-family:Palanquin Dark\">is a file browser found in every version of Microsoft Windows since Windows 95.</span></p> <p><span style=\"font-family:Palanquin Dark\"> A </span><span style=\"font-family:Palanquin Dark\">web browser</span><span style=\"font-family:Palanquin Dark\"> is an application used to access and view websites. Common web browsers include Microsoft Edge, Internet Explorer, Google Chrome, Mozilla Firefox, and Apple Safari.</span></p>",
+                    solution_hi: "<p>20.(d)<span style=\"font-size: 14pt;\"> File Explorer </span><span style=\"font-family: Palanquin Dark;\">विंडोज 95 के बाद से<span style=\"font-size: 14pt;\"> microsoft windows</span> के हर <span style=\"font-size: 14pt;\">version</span> में पाया जाने वाला एक <span style=\"font-size: 14pt;\">file browser</span>&nbsp; है।</span></p>\r\n<p><span style=\"font-family: Palanquin Dark;\"> </span><span style=\"font-family: Palanquin Dark;\">वेब ब्राउजर </span><span style=\"font-family: Palanquin Dark;\">वेबसाइटों तक पहुंचने और देखने के लिए उपयोग किया जाने वाला एक एप्लीकेशन है। सामान्य वेब ब्राउज़र में माइक्रोसॉफ्ट एज<span style=\"font-size: 14pt;\"> ( Microsoft Edge ) </span>, इंटरनेट एक्स्प्लोरर <span style=\"font-size: 14pt;\">( Internet Explorer ) </span>, गूगल क्रोम, मोज़िला फ़ायरफ़ॉक्स<span style=\"font-size: 14pt;\"> ( Mozilla firefox )</span>&nbsp; और एप्पल सफारी&nbsp; <span style=\"font-size: 14pt;\">( safari )</span> शामिल हैं।</span></p>",
+                    correct: "d",
+                    pos_marks: 3.0,
+                    neg_marks: 1.0
+                });
+            
+            // Generate question boxes
+            const boxesContainer = document.getElementById('question-boxes');
+            questions.forEach((q, index) => {
+                const box = document.createElement('div');
+                box.className = 'q-box';
+                box.textContent = index + 1;
+                box.onclick = () => showQuestion(index);
+                box.id = `box-${index}`;
+                boxesContainer.appendChild(box);
+            });
+            
+            // Show first question
+            showQuestion(0);
+            updateProgress();
+        }
+        
+        // Show a specific question
+        
+        function formatContent(text) {
+            if (!text) return '';
+            return text.replace(/<img/g, '<img style="max-width:100%;height:auto;"');
+        }
+        
+        function showQuestion(index) {
+            if (index < 0 || index >= questions.length) return;
+            
+            currentQuestion = index;
+            const question = questions[index];
+            
+            // Update question counter
+            document.getElementById('question-counter').textContent = `Question ${index + 1} of ${questions.length}`;
+            
+            // Update question boxes
+            document.querySelectorAll('.q-box').forEach(box => box.classList.remove('current'));
+            document.getElementById(`box-${index}`).classList.add('current');
+            
+            // Generate question HTML
+            let html = `
+                <div class="question-card">
+                    <div class="question-text">
+                        <div class="en">${formatContent(question.question_en)}</div>
+                        <div class="hi" style="display:none">${formatContent(question.question_hi)} </div>
+                    </div>
+                    <div class="options" id="options-container">`;
+            
+            // Add options
+            ['a', 'b', 'c', 'd'].forEach((opt, i) => {
+                let optionClass = '';
+                let isCorrectAnswer = opt === question.correct;
+                let isUserAnswer = answers[question.id] === opt;
+                
+                // When reviewing, add appropriate classes
+                if (submitted) {
+                    if (isCorrectAnswer) {
+                        optionClass += ' correct-answer';
+                    } else if (isUserAnswer && !isCorrectAnswer) {
+                        optionClass += ' incorrect';
+                    }
+                }
+                
+                html += `
+                    <div class="option-item">
+                        <input class="option-input" type="radio" name="q${index}" 
+                            id="opt-${index}-${opt}" value="${opt}" 
+                            ${isUserAnswer ? 'checked' : ''}
+                            onclick="selectAnswer('${question.id}', '${opt}')">
+                       <label class="option-label${optionClass}" for="opt-${index}-${opt}">
+                            <div class="en">${question.options_en[i]}</div>
+                            <div class="hi" style="display:none">${question.options_hi[i]}</div>
+                        </label>
+                    </div>`;
+            });
+            
+            // Add solution if submitted
+            if (submitted) {
+                const isCorrect = answers[question.id] === question.correct;
+                const resultText = answers[question.id] ? (isCorrect ? 'Correct!' : 'Incorrect!') : 'Not attempted';
+                
+                html += `
+                    <div class="solution-container">
+                        <div class="solution-title">${resultText}</div>
+                        <div class="solution-text">
+                            <div class="en">${question.solution_en}</div>
+                            <div class="hi" style="display:none">${question.solution_hi}</div>
+                        </div>
+                    </div>`;
+            }
+            
+            html += `</div></div>`;
+            
+            document.getElementById('questions-container').innerHTML = html;
+            
+            // Apply language settings
+            applyLanguage();
+            
+            // If in mobile view, close the menu
+            if (window.innerWidth < 992) {
+                toggleNav(false);
+            }
+            
+            // Add review mode class if submitted
+            if (submitted) {
+                document.getElementById('options-container').classList.add('review-mode');
+            }
+        }
+        
+        // Apply current language
+        function applyLanguage() {
+            document.querySelectorAll(`.${currentLang}`).forEach(el => el.style.display = 'block');
+            document.querySelectorAll(`.${currentLang === 'en' ? 'hi' : 'en'}`).forEach(el => el.style.display = 'none');
+            
+            // Update language button text
+            document.getElementById('lang-text').textContent = currentLang === 'en' ? 'Hi' : 'En';
+        }
+        
+        // Select an answer
+        function selectAnswer(qId, option) {
+            if (submitted) return;
+            
+            answers[qId] = option;
+            updateProgress();
+            
+            // Mark question as attempted in the navigation
+            const index = questions.findIndex(q => q.id === qId);
+            if (index >= 0) {
+                const box = document.getElementById(`box-${index}`);
+                box.classList.add('attempted');
+                box.classList.remove('unattempted');
+            }
+        }
+        
+        // Navigate to previous/next question
+        function prevQuestion() { 
+            if (currentQuestion > 0) showQuestion(currentQuestion - 1); 
+        }
+        
+        function nextQuestion() { 
+            if (currentQuestion < questions.length - 1) showQuestion(currentQuestion + 1); 
+        }
+        
+        // Switch section
+        function switchSection(sectionId) {
+            if (sectionId === 'all') {
+                showQuestion(0);
+                return;
+            }
+            
+            const section = sections[sectionId];
+            if (section) showQuestion(section.start);
+        }
+        
+        // Toggle language
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'hi' : 'en';
+            applyLanguage();
+        }
+        
+        // Toggle navigation sidebar
+        function toggleNav(show) {
+            const nav = document.getElementById('question-nav');
+            const overlay = document.getElementById('nav-overlay');
+            
+            if (show === undefined) {
+                show = !nav.classList.contains('show');
+            }
+            
+            if (show) {
+                nav.classList.add('show');
+                overlay.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            } else {
+                nav.classList.remove('show');
+                overlay.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+        }
+        
+        // Update progress
+        function updateProgress() {
+            const attempted = Object.keys(answers).length;
+            document.getElementById('attempted-count').textContent = attempted;
+        }
+        
+        // Start timer
+        function startTimer() {
+            const timerDisplay = document.getElementById('timer-display');
+            let timeLeft = totalTime;
+            
+            const timerInterval = setInterval(() => {
+                if (timeLeft <= 0 || submitted) {
+                    clearInterval(timerInterval);
+                    if (!submitted) submitTest();
+                    return;
+                }
+                
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                timeLeft--;
+            }, 1000);
+        }
+        
+        // Confirm before submitting
+        function confirmSubmit() {
+            if (submitted) return;
+            
+            const attempted = Object.keys(answers).length;
+            const remaining = questions.length - attempted;
+            
+            // Create a more modern confirmation dialog
+            const confirmHtml = `
+                <div style="text-align: center; padding: 20px;">
+                    <h4 style="margin-bottom: 16px; color: var(--dark);">Confirm Submission</h4>
+                    <p style="margin-bottom: 24px; color: var(--gray);">
+                        You have attempted ${attempted} of ${questions.length} questions.<br>
+                        ${remaining} questions are unattempted.
+                    </p>
+                    <div style="display: flex; justify-content: center; gap: 12px;">
+                        <button onclick="this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; border: 1px solid var(--light-gray); background: white; border-radius: 8px; cursor: pointer;">
+                            Cancel
+                        </button>
+                        <button onclick="submitTest(); this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer;">
+                            Submit Test
+                        </button>
+                    </div>
+                </div>`;
+            
+            // Create modal element
+            const modal = document.createElement('div');
+            modal.className = 'results-modal show';
+            modal.innerHTML = `
+                <div class="results-card" style="max-width: 400px;">
+                    <button class="cancel-btn" style="position: absolute; top: 12px; right: 12px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--gray);" onclick="this.closest('.results-modal').remove()">
+                        ×
+                    </button>
+                    ${confirmHtml}
+                </div>`;
+            
+            document.body.appendChild(modal);
+        }
+        
+        // Submit test
+        function submitTest() {
+            if (submitted) return;
+            
+            submitted = true;
+            
+            let score = 0;
+            let correctCount = 0;
+            let incorrectCount = 0;
+            let unattemptedCount = 0;
+            
+            questions.forEach((q, index) => {
+                const userAns = answers[q.id];
+                const box = document.getElementById(`box-${index}`);
+                
+                box.classList.remove('attempted');
+                
+                if (!userAns) {
+                    unattemptedCount++;
+                    box.classList.add('unattempted');
+                } else if (userAns === q.correct) {
+                    correctCount++;
+                    score += q.pos_marks;
+                    box.classList.add('correct');
+                } else {
+                    incorrectCount++;
+                    score -= q.neg_marks;
+                    box.classList.add('incorrect');
+                }
+            });
+            
+            // Update result values
+            document.getElementById('score-value').textContent = score.toFixed(2);
+            document.getElementById('correct-value').textContent = correctCount;
+            document.getElementById('incorrect-value').textContent = incorrectCount;
+            document.getElementById('unattempted-value').textContent = unattemptedCount;
+            
+            // Show the results modal
+            document.getElementById('results-modal').classList.add('show');
+            
+            // Disable submit button
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-check"></i>';
+            submitBtn.style.backgroundColor = 'var(--success)';
+            
+            // Refresh current question view to show solution
+            showQuestion(currentQuestion);
+        }
+        
+        // Review test
+        function reviewTest() {
+            document.getElementById('results-modal').classList.remove('show');
+            showQuestion(0);
+        }
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target === document.getElementById('results-modal')) {
+                document.getElementById('results-modal').classList.remove('show');
+            }
+        });
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') prevQuestion();
+            if (e.key === 'ArrowRight') nextQuestion();
+        });
+    </script>
+</body>
+</html>
