@@ -1,0 +1,1449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mocks Wallah</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --primary-light: #a29bfe;
+            --primary-dark: #5649c0;
+            --secondary: #00cec9;
+            --accent: #fd79a8;
+            --success: #00b894;
+            --warning: #fdcb6e;
+            --danger: #d63031;
+            --light: #f8f9fa;
+            --dark: #2d3436;
+            --gray: #636e72;
+            --light-gray: #dfe6e9;
+            --card-bg: #ffffff;
+            --body-bg: #f5f6fa;
+            --header-bg: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            --footer-bg: #ffffff;
+            --box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            --box-shadow-sm: 0 2px 10px rgba(0,0,0,0.05);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background-color: var(--body-bg);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            color: var(--dark);
+            line-height: 1.6;
+            padding-bottom: 80px; /* Space for fixed navigation */
+            overflow-x: hidden;
+        }
+        
+        /* Header Styles */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: var(--header-bg);
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            z-index: 1000;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .header-brand {
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .header-brand i {
+            margin-right: 8px;
+            font-size: 1.2rem;
+        }
+        
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .control-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .control-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .control-btn.active {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .timer-display {
+            background: rgba(0,0,0,0.2);
+            border-radius: 18px;
+            padding: 4px 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+        
+        .timer-display i {
+            margin-right: 6px;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-top: 60px;
+            padding: 16px;
+            min-height: calc(100vh - 140px);
+        }
+        
+        .question-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--box-shadow-sm);
+            border: none;
+            transition: var(--transition);
+        }
+        
+        .question-counter {
+            font-size: 0.9rem;
+            color: var(--gray);
+            text-align: center;
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+        
+        .question-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+        
+        .option-item {
+            margin-bottom: 12px;
+            position: relative;
+        }
+        
+        .option-input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+            .question-text {
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        hyphens: auto;
+        max-width: 100%;
+    }
+
+    .question-text img,
+    .option-label img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 8px 0;
+        border-radius: 8px;
+    }
+
+    .option-label {
+        overflow: hidden;
+    }
+
+    .question-card {
+        overflow: hidden;
+    }
+        
+        .option-label {
+            display: block;
+            padding: 14px 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--light-gray);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .option-label:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .option-input:checked + .option-label {
+            border-color: var(--primary);
+            background: rgba(108, 92, 231, 0.05);
+            box-shadow: 0 0 0 1px var(--primary);
+        }
+        
+        .option-input:checked + .option-label::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--primary);
+        }
+        
+        /* When reviewing answers */
+        .review-mode .option-input:checked + .option-label.correct {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.correct::after {
+            background: var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.incorrect {
+            border-color: var(--danger);
+            background: rgba(214, 48, 49, 0.05);
+            box-shadow: 0 0 0 1px var(--danger);
+        }
+        
+        .MathJax, .mjx-chtml {
+            overflow-x: auto;
+            max-width: 100%;
+            display: inline-block;
+        }
+
+        
+        .review-mode .option-input:checked + .option-label.incorrect::after {
+            background: var(--danger);
+        }
+        
+        .review-mode .option-label.correct-answer {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-label.correct-answer::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--success);
+        }
+        
+        .solution-container {
+            margin-top: 20px;
+            padding: 16px;
+            background: rgba(108, 92, 231, 0.05);
+            border-radius: 12px;
+            border-left: 3px solid var(--primary);
+        }
+        
+        .solution-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+        
+        /* Question Navigation */
+        .question-nav {
+            position: fixed;
+            top: 60px;
+            right: 0;
+            bottom: 80px;
+            width: 100%;
+            max-width: 320px;
+            background: var(--card-bg);
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            transform: translateX(100%);
+            transition: var(--transition);
+            z-index: 900;
+            overflow-y: auto;
+            padding: 16px;
+        }
+        
+        .question-nav.show {
+            transform: translateX(0);
+        }
+        
+        .nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .nav-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+        
+        .question-stats {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .stat-badge {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        
+        .section-selector {
+            width: 100%;
+            margin-bottom: 16px;
+            border-radius: 12px;
+            padding: 10px 16px;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            font-size: 0.9rem;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 16px;
+        }
+        
+        .question-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+            gap: 8px;
+        }
+        
+        .q-box {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .q-box:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .q-box.attempted {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .q-box.correct {
+            background-color: var(--success);
+            color: white;
+            border-color: var(--success);
+        }
+        
+        .q-box.incorrect {
+            background-color: var(--danger);
+            color: white;
+            border-color: var(--danger);
+        }
+        
+        .q-box.current {
+            border: 2px solid var(--accent) !important;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .q-box.unattempted {
+            background-color: var(--gray);
+            color: white;
+            border-color: var(--gray);
+        }
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: var(--footer-bg);
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            z-index: 800;
+        }
+        
+        .nav-btn {
+            height: 48px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 20px;
+            transition: var(--transition);
+            gap: 8px;
+        }
+        
+        .nav-btn i {
+            font-size: 1rem;
+        }
+        
+        .nav-btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .nav-btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+        
+        .nav-btn-outline:hover {
+            background: rgba(108, 92, 231, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        /* Overlay when nav is open */
+        .nav-overlay {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            bottom: 80px;
+            background: rgba(0,0,0,0.5);
+            z-index: 800;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+        }
+        
+        .nav-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        /* Results Modal */
+        .results-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1100;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+            padding: 16px;
+        }
+        
+        .results-modal.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .results-card {
+            background: white;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+            transform: translateY(20px);
+            transition: var(--transition);
+        }
+        
+        .results-modal.show .results-card {
+            transform: translateY(0);
+        }
+        
+        .results-header {
+            background: var(--header-bg);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .results-title {
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .results-body {
+            padding: 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            color: white;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+        
+        .results-footer {
+            padding: 16px 20px;
+            display: flex;
+            justify-content: center;
+            border-top: 1px solid var(--light-gray);
+        }
+        
+        /* Responsive Adjustments */
+        @media (min-width: 992px) {
+            .question-nav {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-right: 320px;
+            }
+            
+            .nav-overlay {
+                display: none;
+            }
+            
+            .bottom-nav {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .question-grid {
+                grid-template-columns: repeat(auto-fill, minmax(36px, 1fr));
+                gap: 6px;
+            }
+            
+            .q-box {
+                width: 36px;
+                height: 36px;
+                font-size: 0.9rem;
+            }
+            
+            .option-label {
+                padding: 12px 14px;
+            }
+            
+            .question-text {
+                font-size: 1rem;
+            }
+            
+            .header-brand {
+                font-size: 1rem;
+            }
+            
+            .control-btn {
+                width: 32px;
+                height: 32px;
+            }
+            
+            .timer-display {
+                font-size: 0.8rem;
+                padding: 4px 10px;
+            }
+            
+            .nav-btn {
+                height: 44px;
+                padding: 0 16px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="#" class="header-brand">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Mocks Wallah</span>
+            </a>
+            
+            <div class="header-controls">
+                <!-- Timer -->
+                <div class="timer-display">
+                    <i class="far fa-clock"></i>
+                    <span id="timer-display">12:00</span>
+                </div>
+                
+                <!-- Language toggle -->
+                <button class="control-btn" id="lang-btn" onclick="toggleLanguage()">
+                    <span id="lang-text">En</span>
+                </button>
+                
+                <!-- Submit button -->
+                <button class="control-btn" id="submit-btn" onclick="confirmSubmit()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+                
+                <!-- Questions toggle for mobile -->
+                <button class="control-btn nav-toggle-btn" id="nav-toggle" onclick="toggleNav()">
+                    <i class="fas fa-th"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main content -->
+    <main class="main-content" id="main-content">
+        <div class="question-counter" id="question-counter">Question 1 of 23</div>
+        
+        <!-- Questions will be displayed here -->
+        <div id="questions-container"></div>
+    </main>
+    
+    <!-- Overlay for mobile nav -->
+    <div class="nav-overlay" id="nav-overlay" onclick="toggleNav(false)"></div>
+    
+    <!-- Question navigation sidebar -->
+    <aside class="question-nav" id="question-nav">
+        <div class="nav-header">
+            <h3 class="nav-title">Questions</h3>
+            <div class="question-stats">
+                <span class="stat-badge bg-primary" id="attempted-count">0</span>
+                <span class="stat-badge bg-gray" id="total-count">23</span>
+                <button class="control-btn d-lg-none" onclick="toggleNav(false)">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Section selector -->
+        <select class="section-selector" id="section-selector" onchange="switchSection(this.value)">
+            <option value="all">All Sections</option>
+        </select>
+        
+        <!-- Question grid -->
+        <div class="question-grid" id="question-boxes"></div>
+    </aside>
+    
+    <!-- Bottom navigation for mobile -->
+    <nav class="bottom-nav d-lg-none">
+        <button class="nav-btn nav-btn-outline" onclick="prevQuestion()">
+            <i class="fas fa-chevron-left"></i>
+            <span>Previous</span>
+        </button>
+        <button class="nav-btn nav-btn-outline" onclick="nextQuestion()">
+            <span>Next</span>
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </nav>
+    
+    <!-- Results modal -->
+    <div class="results-modal" id="results-modal">
+        <div class="results-card">
+            <div class="results-header">
+                <h3 class="results-title">Test Results</h3>
+            </div>
+            <div class="results-body">
+                <div class="stats-grid">
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark))">
+                        <div class="stat-value" id="score-value">0</div>
+                        <div class="stat-label">Score</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--success), #1b9aaa)">
+                        <div class="stat-value" id="correct-value">0</div>
+                        <div class="stat-label">Correct</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--danger), var(--accent))">
+                        <div class="stat-value" id="incorrect-value">0</div>
+                        <div class="stat-label">Incorrect</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--gray), var(--dark))">
+                        <div class="stat-value" id="unattempted-value">0</div>
+                        <div class="stat-label">Unattempted</div>
+                    </div>
+                </div>
+            </div>
+            <div class="results-footer">
+                <button class="nav-btn nav-btn-primary" onclick="reviewTest()">
+                    <i class="fas fa-search me-1"></i>
+                    <span>Review Test</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Questions data
+        const questions = [];
+        const sections = {};
+        let currentLang = "en";
+        let currentQuestion = 0;
+        let answers = {};
+        let submitted = false;
+        let totalTime = 12 * 60;
+        
+        // Initialize the test
+        window.onload = function() {
+            initializeTest();
+            startTimer();
+            
+            // If on desktop, show the question navigation by default
+            if (window.innerWidth >= 992) {
+                document.getElementById('question-nav').classList.add('show');
+                document.getElementById('main-content').classList.add('with-nav');
+            }
+        };
+        
+        // Initialize test data
+        function initializeTest() {
+            // Add sections and questions
+            
+            sections["7"] = {
+                name: "English",
+                start: 0,
+                end: 21
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="7">English</option>`;
+            
+            sections["misc"] = {
+                name: "Miscellaneous",
+                start: 22,
+                end: 22
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="misc">Miscellaneous</option>`;
+            
+            
+                questions.push({
+                    id: "1",
+                    section: "7",
+                    question_en: "<p>1. Select the most appropriate synonym of the given word.<br>Squawk</p>",
+                    question_hi: "<p>1. Select the most appropriate synonym of the given word.<br>Squawk</p>",
+                    options_en: ["<p>Suggest</p>", "<p>Explore</p>", 
+                                "<p>Scream</p>", "<p>Connote</p>"],
+                    options_hi: ["<p>Suggest</p>", "<p>Explore</p>",
+                                "<p>Scream</p>", "<p>Connote</p>"],
+                    solution_en: "<p>1.(c)<br><strong>Scream </strong>- to cry out loudly in a high voice because you are afraid, excited, angry, in pain, etc.<br><strong>Squawk </strong>- to make a loud unpleasant noise<br><strong>Suggest </strong>- to mention a plan or an idea that you have for somebody to discuss or consider<br><strong>Explore </strong>- to travel around a place, etc. in order to learn about it<br><strong>Connote -</strong> imply as a consequence or condition</p>",
+                    solution_hi: "<p>1.(c)<br><strong>Scream</strong> (चीखना/चिल्लाना) - to cry out loudly in a high voice because you are afraid, excited, angry, in pain, etc.<br><strong>Squawk </strong>(कर्कश आवाज़ निकालना) - to make a loud unpleasant noise<br><strong>Suggest</strong> (सुझाव देना) - to mention a plan or an idea that you have for somebody to discuss or consider<br><strong>Explore</strong> (पता लगाना/अन्वेषण करना) - to travel around a place, etc. in order to learn about it<br><strong>Connote</strong> (परिणामस्वरूप अर्थ प्रकट करना) - imply as a consequence or condition</p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "2",
+                    section: "7",
+                    question_en: "<p>2. Select the most appropriate synonym of the given word. <br>Threshold</p>",
+                    question_hi: "<p>2. Select the most appropriate synonym of the given word. <br>Threshold</p>",
+                    options_en: ["<p>stairs</p>", "<p>exit</p>", 
+                                "<p>window</p>", "<p>doorway</p>"],
+                    options_hi: ["<p>stairs</p>", "<p>exit</p>",
+                                "<p>window</p>", "<p>doorway</p>"],
+                    solution_en: "<p>2.(d)<br><strong>Doorway - </strong>an opening filled by a door leading into a building, room, etc.<br><strong>Threshold -</strong> the ground at the entrance to a room or building<br><strong>Stairs </strong>- a series of steps inside a building that lead from one level to another<br><strong>Exit</strong> - a door or way out of a public building or vehicle</p>",
+                    solution_hi: "<p>2.(d)<br><strong>Doorway</strong> (प्रवेश द्वार/दरवाजा) - an opening filled by a door leading into a building, room, etc.<br><strong>Threshold</strong> (दहलीज़) - the ground at the entrance to a room or building<br><strong>Stairs</strong> (सीढ़ियाँ) - a series of steps inside a building that lead from one level to another<br><strong>Exit </strong>(निकास) - a door or way out of a public building or vehicle</p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "3",
+                    section: "7",
+                    question_en: "<p>3. Select the most appropriate synonym of the given word. <br>Perjury</p>",
+                    question_hi: "<p>3. Select the most appropriate synonym of the given word. <br>Perjury</p>",
+                    options_en: ["<p>Melancholy</p>", "<p>Frankness</p>", 
+                                "<p>Penury</p>", "<p>Falsehood</p>"],
+                    options_hi: ["<p>Melancholy</p>", "<p>Frankness</p>",
+                                "<p>Penury</p>", "<p>Falsehood</p>"],
+                    solution_en: "<p>3.(d)<br><strong>Falsehood -</strong> the state of being untrue.<br><strong>Perjury </strong>- the act of telling a lie in a court of law<br><strong>Melancholy - </strong>a feeling of sadness which lasts for a long time<br><strong>Frankness -</strong> the quality of being honest and straightforward <br><strong>Penury -</strong> the state of being very poor</p>",
+                    solution_hi: "<p>3.(d)<br><strong>Falsehood</strong> (असत्य) - the state of being untrue.<br><strong>Perjury</strong> (झूठी गवाही) - the act of telling a lie in a court of law<br><strong>Melancholy</strong> (उदासी) - a feeling of sadness which lasts for a long time<br><strong>Frankness</strong> (निष्कपटता) - the quality of being honest and straightforward <br><strong>Penury </strong>(निर्धनता) - the state of being very poor</p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "4",
+                    section: "7",
+                    question_en: "4. Select the most appropriate synonym of the given word. <br />Amass",
+                    question_hi: "4. Select the most appropriate synonym of the given word. <br />Amass",
+                    options_en: [" Gather ", " Spread ", 
+                                " Divide ", " Scatter "],
+                    options_hi: [" Gather ", " Spread ",
+                                " Divide ", "<p>Scatter</p>"],
+                    solution_en: "<p>4.(a)<br><strong>Gather - </strong>to come or be brought together in a group<br><strong>Amass </strong>- to collect or put together a large quantity of something <br><strong>Spread </strong>- to affect a larger area or a bigger group of people <br><strong>Divide </strong>- to separate into different parts<br><strong>Scatter -</strong> to move away quickly in different directions</p>",
+                    solution_hi: "<p>4.(a)<br><strong>Gather</strong> (इकट्ठा होना) - to come or be brought together in a group<br><strong>Amass </strong>(संचय करना) - to collect or put together a large quantity of something<br><strong>Spread</strong> (फैलाना) - to affect a larger area or a bigger group of people <br><strong>Divide</strong> (विभाजित करना/बाँटना) - to separate into different parts<br><strong>Scatter</strong> (बिखेरना) - to move away quickly in different directions</p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "5",
+                    section: "7",
+                    question_en: "<p>5. Select the most appropriate synonym of the given word.<br>Obstruct</p>",
+                    question_hi: "<p>5. Select the most appropriate synonym of the given word.<br>Obstruct</p>",
+                    options_en: ["<p>Approve</p>", "<p>Block</p>", 
+                                "<p>Match</p>", "<p>Permit</p>"],
+                    options_hi: ["<p>Approve</p>", "<p>Block</p>",
+                                "<p>Match</p>", "<p>Permit</p>"],
+                    solution_en: "<p><strong>5.(b) Block -</strong> a thing that makes movement or progress difficult <br><strong>Obstruct </strong>- to stop something from happening<br><strong>Approve </strong>- to be pleased about something<br><strong>Match -</strong> to find somebody/something that is like or suitable for somebody/something else</p>\n<p><strong>Permit -</strong> to allow somebody to do something or to allow something to happen</p>",
+                    solution_hi: "<p>5.(b)<br><strong>Block</strong> (अवरोध) - a thing that makes movement or progress difficult <br><strong>Obstruct</strong> (बाधित करना) - to stop something from happening<br><strong>Approve</strong> (स्वीकृति देना) - to be pleased about something<br><strong>Match </strong>(मेल खाना) - to find somebody/something that is like or suitable for somebody/something else</p>\n<p><strong>Permit </strong>(अनुमति देना) - to allow somebody to do something or to allow something to happen</p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "6",
+                    section: "7",
+                    question_en: "<p>6. Select the most appropriate synonym of the given word.<br>Commute</p>",
+                    question_hi: "<p>6. Select the most appropriate synonym of the given word.<br>Commute</p>",
+                    options_en: ["<p>Consume</p>", "<p>Convert</p>", 
+                                "<p>Condense</p>", "<p>Conserve</p>"],
+                    options_hi: ["<p>Consume</p>", "<p>Convert</p>",
+                                "<p>Condense</p>", "<p>Conserve</p>"],
+                    solution_en: "<p>6.(b) <br><strong>Convert - </strong>to change from one form, system, or use to another<br><strong>Commute -</strong> to travel a long distance from home to work every day<br><strong>Consume </strong>- to use something such as fuel, energy or time<br><strong>Condense -</strong> to change or make something change from gas to liquid<br><strong>Conserve </strong>- to avoid wasting something</p>",
+                    solution_hi: "<p>6.(b)<br><strong>Convert </strong>(परिवर्तित करना) - to change from one form, system, or use to another<br><strong>Commute</strong> (आवागमन) - to travel a long distance from home to work every day<br><strong>Consume</strong> (उपभोग करना) - to use something such as fuel, energy or time<br><strong>Condense </strong>(संघनित करना) - to change or make something change from gas to liquid<br><strong>Conserve</strong> (संरक्षण करना) - to avoid wasting something</p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "7",
+                    section: "7",
+                    question_en: "<p>7. Select the most appropriate synonym of the given word.<br>Monotonous</p>",
+                    question_hi: "<p>7. Select the most appropriate synonym of the given word.<br>Monotonous</p>",
+                    options_en: ["<p>Boring</p>", "<p>Compulsory</p>", 
+                                "<p>Eventful</p>", "<p>Momentous</p>"],
+                    options_hi: ["<p>Boring</p>", "<p>Compulsory</p>",
+                                "<p>Eventful</p>", "<p>Momentous</p>"],
+                    solution_en: "<p>7.(a)<br><strong>Boring -</strong> not at all interesting<br><strong>Monotonous</strong> - never changing and therefore boring<br><strong>Compulsory - </strong>that must be done, by law, rules, etc. <br><strong>Eventful -</strong> full of important, dangerous, or exciting things happening<br><strong>Momentous </strong>- very important</p>",
+                    solution_hi: "<p>7.(a)<br><strong>Boring </strong>(नीरस) - not at all interesting<br><strong>Monotonous</strong> (उबाऊ) - never changing and therefore boring<br><strong>Compulsory</strong> (अनिवार्य) - that must be done, by law, rules, etc. <br><strong>Eventful</strong> (घटनापूर्ण) - full of important, dangerous, or exciting things happening<br><strong>Momentous</strong> (महत्वपूर्ण) - very important</p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "8",
+                    section: "7",
+                    question_en: "<p>8. Select the most appropriate synonym of the given word. <br>Abandon</p>",
+                    question_hi: "<p>8. Select the most appropriate synonym of the given word. <br>Abandon</p>",
+                    options_en: ["<p>Possess</p>", "<p>Retain</p>", 
+                                "<p>Rescue</p>", "<p>Quit</p>"],
+                    options_hi: ["<p>Possess</p>", "<p>Retain</p>",
+                                "<p>Rescue</p>", "<p>Quit</p>"],
+                    solution_en: "<p>8.(d)<br><strong>Quit -</strong> to leave a job, etc., or to go away from a place<br><strong>Abandon - </strong>to leave somebody/something that you are responsible for<br><strong>Possess - </strong>to have or own something<br><strong>Retain -</strong> to keep or continue to have something<br><strong>Rescue -</strong> to save somebody/something from a situation that is dangerous</p>",
+                    solution_hi: "<p>8.(d)<br><strong>Quit</strong> (छोड़ना) - to leave a job, etc., or to go away from a place<br><strong>Abandon</strong> (त्याग देना) - to leave somebody/something that you are responsible for<br><strong>Possess</strong> (अधिकार रखना) - to have or own something<br><strong>Retain</strong> (बनाए रखना) - to keep or continue to have something<br><strong>Rescue</strong> (बचाना) - to save somebody/something from a situation that is dangerous</p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "9",
+                    section: "7",
+                    question_en: "<p>9. Select the most appropriate synonym of the given word<br>Arid</p>",
+                    question_hi: "<p>9. Select the most appropriate synonym of the given word<br>Arid</p>",
+                    options_en: ["<p>Dry</p>", "<p>Lively</p>", 
+                                "<p>Damp</p>", "<p>Fertile</p>"],
+                    options_hi: ["<p>Dry</p>", "<p>Lively</p>",
+                                "<p>Damp</p>", "<p>Fertile</p>"],
+                    solution_en: "<p>9.(a) <br><strong>Dry -</strong> without liquid in it or on it<br><strong>Arid -</strong> very dry<br><strong>Lively -</strong> full of energy, interest, excitement, etc. <br><strong>Damp - </strong>a little wet<br><strong>Fertile -</strong> that can produce babies, fruit, or new plants</p>",
+                    solution_hi: "<p>9.(a)<br><strong>Dry</strong> (शुष्क ) - without liquid in it or on it<br><strong>Arid</strong> (शुष्क) - very dry<br><strong>Lively </strong>(जीवंत) - full of energy, interest, excitement, etc. <br><strong>Damp </strong>(नम) - a little wet<br><strong>Fertile</strong> (उपजाऊ) - that can produce babies, fruit, or new plants</p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "10",
+                    section: "7",
+                    question_en: "<p>10. Select the most appropriate synonym of the given word<br>Tranquil</p>",
+                    question_hi: "<p>10. Select the most appropriate synonym of the given word<br>Tranquil</p>",
+                    options_en: ["<p>Calm</p>", "<p>Alert</p>", 
+                                "<p>Aware</p>", "<p>Dazed</p>"],
+                    options_hi: ["<p>Calm</p>", "<p>Alert</p>",
+                                "<p>Aware</p>", "<p>Dazed</p>"],
+                    solution_en: "<p>10.(a) <br><strong>Calm </strong>- not excited, worried or angry<br><strong>Tranquil </strong>- quiet and peaceful<br><strong>Alert </strong>- watching, listening, etc. for something with all your attention <br><strong>Aware -</strong> knowing about or realizing something <br><strong>Dazed</strong> - unable to think or react normally</p>",
+                    solution_hi: "<p>10.(a)<br><strong>Calm</strong> (शांत) - not excited, worried or angry<br><strong>Tranquil</strong> (शांत) - quiet and peaceful<br><strong>Alert </strong>(सतर्क) - watching, listening, etc. for something with all your attention <br><strong>Aware</strong> (जागरूक) - knowing about or realizing something <br><strong>Dazed</strong> (स्तब्ध/चकित) - unable to think or react normally</p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "11",
+                    section: "7",
+                    question_en: "<p>11. Select the most appropriate synonym of the given word. <br>Saucy</p>",
+                    question_hi: "<p>11. Select the most appropriate synonym of the given word. <br>Saucy</p>",
+                    options_en: ["<p>Tasty</p>", "<p>Polite</p>", 
+                                "<p>Smooth</p>", "<p>Cheeky</p>"],
+                    options_hi: ["<p>Tasty</p>", "<p>Polite</p>",
+                                "<p>Smooth</p>", "<p>Cheeky</p>"],
+                    solution_en: "<p><strong>11.(d) Cheeky </strong>- not showing respect<br><strong>Saucy -</strong> sexually suggestive in a light-hearted and humorous way.<br><strong>Tasty -</strong> having a good flavour<br><strong>Polite -</strong> having good manners and showing respect for others <br><strong>Smooth</strong> - having a completely flat surface with no lumps or holes or rough areas</p>",
+                    solution_hi: "<p>11.(d)<br><strong>Cheeky</strong> (निर्लज्ज) - not showing respect<br><strong>Saucy</strong> (नटखट) - sexually suggestive in a light-hearted and humorous way.<br><strong>Tasty</strong> (स्वादिष्ट) - having a good flavour<br><strong>Polite </strong>(विनम्र) - having good manners and showing respect for others <br><strong>Smooth</strong> (चिकना) - having a completely flat surface with no lumps or holes or rough areas</p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "12",
+                    section: "7",
+                    question_en: "<p>12. Select the most appropriate synonym of the given word. <br>Robust</p>",
+                    question_hi: "<p>12. Select the most appropriate synonym of the given word. <br>Robust</p>",
+                    options_en: ["<p>sturdy</p>", "<p>small</p>", 
+                                "<p>round</p>", "<p>weak</p>"],
+                    options_hi: ["<p>sturdy</p>", "<p>small</p>",
+                                "<p>round</p>", "<p>weak</p>"],
+                    solution_en: "<p><strong>12.(a) Sturdy -</strong> strong and healthy<br><strong>Robust </strong>- strong and healthy<br><strong>Small - </strong>not large in size, number, amount, etc<br><strong>Round </strong>- having the shape of a circle<br><strong>Weak -</strong> having little strength or energy or not strong</p>",
+                    solution_hi: "<p>12.(a)<br><strong>Sturdy </strong>(मजबूत) - strong and healthy<br><strong>Robust </strong>(हट्टा-कट्टा/पुष्ट) - strong and healthy<br><strong>Small </strong>(छोटा) - not large in size, number, amount, etc<br><strong>Round </strong>(गोलाकार) - having the shape of a circle<br><strong>Weak </strong>(दुर्बल) - having little strength or energy or not strong</p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "13",
+                    section: "7",
+                    question_en: "<p>13. Select the most appropriate synonym of the given word. <br>Triumphant</p>",
+                    question_hi: "<p>13. Select the most appropriate synonym of the given word. <br>Triumphant</p>",
+                    options_en: ["<p>Victorious</p>", "<p>Fortunate</p>", 
+                                "<p>Affluent</p>", "<p>Pompous</p>"],
+                    options_hi: ["<p>Victorious</p>", "<p>Fortunate</p>",
+                                "<p>Affluent</p>", "<p>Pompous</p>"],
+                    solution_en: "<p><strong>13.(a) Victorious -</strong> having won a victory<br><strong>Triumphant </strong>- feeling or showing great happiness because you have won or succeeded at something<br><strong>Fortunate </strong>- lucky<br><strong>Affluent -</strong> having a lot of money<br><strong>Pompous -</strong> showing that you think you are more important than other people</p>",
+                    solution_hi: "<p>13.(a)<br><strong>Victorious </strong>(विजयी) - having won a victory<br><strong>Triumphant </strong>(विजयोल्लसित) - feeling or showing great happiness because you have won or succeeded at something<br><strong>Fortunate</strong> (भाग्यशाली) - lucky<br><strong>Affluent </strong>(समृद्ध/धनी) - having a lot of money<br><strong>Pompous </strong>(आडंबरपूर्ण) - showing that you think you are more important than other people</p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "14",
+                    section: "7",
+                    question_en: "<p>14. Select the most appropriate synonym of the given word.<br>Bare</p>",
+                    question_hi: "<p>14. Select the most appropriate synonym of the given word.<br>Bare</p>",
+                    options_en: ["<p>Earthly</p>", "<p>Hidden</p>", 
+                                "<p>Holy</p>", "<p>Basic</p>"],
+                    options_hi: ["<p>Earthly</p>", "<p>Hidden</p>",
+                                "<p>Holy</p>", "<p>Basic</p>"],
+                    solution_en: "<p>14.(d)<br><strong>Basic -</strong> from which other things develop<br><strong>Bare - </strong>not covered by clothing<br><strong>Earthly </strong>- possible <br><strong>Hidden </strong>- to cover something so that it cannot be seen <br><strong>Holy - </strong>connected with God or with religion</p>",
+                    solution_hi: "<p>14.(d)<br><strong>Basic (मूलभूत) -</strong> from which other things develop<br><strong>Bare</strong> (नग्न/अनावरित) - not covered by clothing<br><strong>Earthly</strong> (सांसारिक) - possible <br><strong>Hidden </strong>(छिपा हुआ) - to cover something so that it cannot be seen <br><strong>Holy (पवित्र) </strong>- connected with God or with religion</p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "15",
+                    section: "7",
+                    question_en: "<p>15. Select the most appropriate synonym of the given word. <br>Ravenous</p>",
+                    question_hi: "<p>15. Select the most appropriate synonym of the given word. <br>Ravenous</p>",
+                    options_en: ["<p>Starved</p>", "<p>Satiated</p>", 
+                                "<p>Full</p>", "<p>Content</p>"],
+                    options_hi: ["<p>Starved</p>", "<p>Satiated</p>",
+                                "<p>Full</p>", "<p>Content</p>"],
+                    solution_en: "<p><strong>15.(a) Starved -</strong> to suffer or die because you do not have enough food to eat<br><strong>Ravenous </strong>- very hungry<br><strong>Satiated </strong>- to completely satisfy a desire or need<br><strong>Full -</strong> holding or containing as much or as many as possible<br><strong>Content - h</strong>appy or satisfied with what you have or do</p>",
+                    solution_hi: "<p><strong>15.(a) Starved</strong> (भूख से पीड़ित होना) - to suffer or die because you do not have enough food to eat<br><strong>Ravenous</strong> (अत्यंत भूखा) - very hungry<br><strong>Satiated (</strong>तृप्त) - to completely satisfy a desire or need<br><strong>Full</strong> (भरा हुआ) - holding or containing as much or as many as possible<br><strong>Content</strong> (संतुष्ट) - happy or satisfied with what you have or do</p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "16",
+                    section: "7",
+                    question_en: "16. Select the most appropriate synonym of the given word. <br />Lull",
+                    question_hi: "16. Select the most appropriate synonym of the given word. <br />Lull",
+                    options_en: [" Disturbance", " Activity", 
+                                " Noise", " Calm"],
+                    options_hi: [" Disturbance", " Activity",
+                                " Noise", " Calm"],
+                    solution_en: "<p>16.(d)<br><strong>Calm - </strong>not excited, worried, or angry<br><strong>Lull </strong>- a short period of quiet between times of activity<br><strong>Disturbance </strong>- something that makes you stop what you are doing<br><strong>Activity </strong>- a situation in which there is a lot of action or movement<br><strong>Noise -</strong> a sound, especially one that is loud or unpleasant</p>",
+                    solution_hi: "<p>16.(d)<br><strong>Calm </strong>(शांत) - not excited, worried, or angry<br><strong>Lull</strong> (ठहराव/विराम) - a short period of quiet between times of activity<br><strong>Disturbance</strong> (अशांति) - something that makes you stop what you are doing<br><strong>Activity</strong> (गतिविधि) - a situation in which there is a lot of action or movement<br><strong>Noise</strong> (शोर) - a sound, especially one that is loud or unpleasant</p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "17",
+                    section: "7",
+                    question_en: "<p>17. Select the most appropriate synonym of the given word. <br>Honest</p>",
+                    question_hi: "<p>17. Select the most appropriate synonym of the given word. <br>Honest</p>",
+                    options_en: ["<p>Secretive</p>", "<p>Sincere</p>", 
+                                "<p>Daring</p>", "<p>Strange</p>"],
+                    options_hi: ["<p>Secretive</p>", "<p>Sincere</p>",
+                                "<p>Daring</p>", "<p>Strange</p>"],
+                    solution_en: "<p>17.(b)<br><strong>Sincere </strong>- really meaning or believing what you say<br><strong>Honest -</strong> showing honest qualities<br><strong>Secretive - l</strong>ike to keep things secret from other people <br><strong>Daring -</strong> involving or taking risks or brave <br><strong>Strange -</strong> unusual or unexpected</p>",
+                    solution_hi: "<p>17.(b)<br><strong>Sincere</strong> (ईमानदार) - really meaning or believing what you say<br><strong>Honest </strong>(ईमानदार) - showing honest qualities<br><strong>Secretive</strong> (गुप्त रखने वाला) - like to keep things secret from other people <br><strong>Daring </strong>(साहसी) - involving or taking risks or brave <br><strong>Strange</strong> (विचित्र) - unusual or unexpected</p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "18",
+                    section: "7",
+                    question_en: "<p>18. Select the most appropriate synonym of the given word.<br>Imbue</p>",
+                    question_hi: "<p>18. Select the most appropriate synonym of the given word.<br>Imbue</p>",
+                    options_en: ["<p>Remove</p>", "<p>Clear</p>", 
+                                "<p>Instil</p>", "<p>Deprive</p>"],
+                    options_hi: ["<p>Remove</p>", "<p>Clear</p>",
+                                "<p>Instil</p>", "<p>Deprive</p>"],
+                    solution_en: "<p>18.(c)<br><strong>Instill -</strong> to make somebody think or feel something<br><strong>Imbue - </strong>to fill somebody/something with deep feelings, strong opinions or ideas, or a particular sense of value or quality<br><strong>Remove -</strong> to take somebody/something off or away <br><strong>Clear -</strong> easy to see, hear or understand <br><strong>Deprive</strong> - to prevent somebody/something from having something</p>",
+                    solution_hi: "<p>18.(c)<br><strong>Instill</strong> (विचार/भावना पैदा करना) - to make somebody think or feel something<br><strong>Imbue</strong> (ओत-प्रोत करना) - to fill somebody/something with deep feelings, strong opinions or ideas, or a particular sense of value or quality<br><strong>Remove (</strong>हटाना) - to take somebody/something off or away <br><strong>Clear</strong> (स्पष्ट) - easy to see, hear or understand <br><strong>Deprive</strong> (वंचित करना) - to prevent somebody/something from having something</p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "19",
+                    section: "7",
+                    question_en: "<p>19. Select the most appropriate synonym of the given word. <br>Livid</p>",
+                    question_hi: "<p>19. Select the most appropriate synonym of the given word. <br>Livid</p>",
+                    options_en: ["<p>Closed</p>", "<p>Clear</p>", 
+                                "<p>Pale</p>", "<p>Furious</p>"],
+                    options_hi: ["<p>Closed</p>", "<p>Clear</p>",
+                                "<p>Pale</p>", "<p>Furious</p>"],
+                    solution_en: "<p>19.(d)<br><strong>Furious -</strong> very angry<br><strong>Livid - </strong>very angry<br><strong>Closed -</strong> not open<br><strong>Clear -</strong> easy to see, hear or understand<br><strong>Pale -</strong> not bright or strong in colour</p>",
+                    solution_hi: "<p>19.(d)<br><strong>Furious </strong>(अत्यंत क्रुद्ध) - very angry<br><strong>Livid</strong> (अत्यंत क्रुद्ध) - very angry<br><strong>Closed</strong> (बंद) - not open<br><strong>Clear</strong> (स्पष्ट) - easy to see, hear or understand<br><strong>Pale (</strong>फीका) - not bright or strong in colour</p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "20",
+                    section: "7",
+                    question_en: "20. Select the most appropriate synonym of the given word. <br />Amusement",
+                    question_hi: "20. Select the most appropriate synonym of the given word. <br />Amusement",
+                    options_en: [" Pleasure", " Gloom", 
+                                " Boredom", " Despair"],
+                    options_hi: [" Pleasure", " Gloom",
+                                " Boredom", " Despair"],
+                    solution_en: "<p>20.(a)<br><strong>Pleasure -</strong> the feeling of being happy or satisfied<br><strong>Amusement -</strong> the feeling caused by something that makes you laugh or smile<br><strong>Gloom - </strong>a feeling of being sad and without hope<br><strong>Boredom </strong>- the state of being bored<br><strong>Despair-</strong> the state of having lost all hope</p>",
+                    solution_hi: "<p>20.(a)<br><strong>Pleasure</strong> (आनंद/खुशी) - the feeling of being happy or satisfied<br><strong>Amusement </strong>(मनोरंजन) - the feeling caused by something that makes you laugh or smile<br><strong>Gloom</strong> (उदासी) - a feeling of being sad and without hope<br><strong>Boredom </strong>(ऊब/नीरस) - the state of being bored<br><strong>Despair </strong>(निराशा) - the state of having lost all hope</p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "21",
+                    section: "7",
+                    question_en: "21. Select the most appropriate synonym of the given word. <br />Retaliate ",
+                    question_hi: "21. Select the most appropriate synonym of the given word. <br />Retaliate ",
+                    options_en: [" Clap ", " Rotate ", 
+                                " Facilitate ", " react "],
+                    options_hi: [" Clap ", " Rotate ",
+                                " Facilitate ", " react "],
+                    solution_en: "<p><strong>21.(d) React - </strong>to do or say something because of something that has happened or been said <br><strong>Retaliate - </strong>to react to something unpleasant that somebody does to you by doing something unpleasant in return<br><strong>Clap </strong>- to hit your hands together many times<br><strong>Rotate - </strong>to turn in circles round a central point<br><strong>Facilitate </strong>- to make something possible or easier</p>",
+                    solution_hi: "<p><strong>21.(d) React </strong>(प्रतिक्रिया देना) - to do or say something because of something that has happened or been said <br><strong>Retaliate </strong>(प्रतिशोध लेना) - to react to something unpleasant that somebody does to you by doing something unpleasant in return<br><strong>Clap</strong> (ताली बजाना) - to hit your hands together many times<br><strong>Rotate </strong>(घूमना) - to turn in circles round a central point<br><strong>Facilitate </strong>(सुगम बनाना) - to make something possible or easier</p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "22",
+                    section: "7",
+                    question_en: "<p>22. Select the most appropriate synonym of the given word. <br>Sagacious</p>",
+                    question_hi: "<p>22. Select the most appropriate synonym of the given word. <br>Sagacious</p>",
+                    options_en: ["<p>Precious</p>", "<p>Delicious</p>", 
+                                "<p>Malicious</p>", "<p>Judicious</p>"],
+                    options_hi: ["<p>Precious</p>", "<p>Delicious</p>",
+                                "<p>Malicious</p>", "<p>Judicious</p>"],
+                    solution_en: "<p><strong>22.(d) Judicious </strong>- showing good judgement<br><strong>Sagacious </strong>- having or showing good judgement and understanding<br><strong>Precious - </strong>of great value<br><strong>Delicious </strong>- having a very pleasant taste or smell<br><strong>Malicious </strong>- having or showing a desire to cause harm to someone</p>",
+                    solution_hi: "<p>22.(d)<br><strong>Judicious</strong> (विवेकपूर्ण) - showing good judgement<br><strong>Sagacious</strong> (बुद्धिमान) - having or showing good judgement and understanding<br><strong>Precious</strong> (बहुमूल्य) - of great value<br><strong>Delicious </strong>(स्वादिष्ट) - having a very pleasant taste or smell<br><strong>Malicious</strong> (द्वेषपूर्ण) - having or showing a desire to cause harm to someone</p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "23",
+                    section: "misc",
+                    question_en: "<p>23. Select the most appropriate synonym of the given word. <br>Audacity</p>",
+                    question_hi: "<p>23. Select the most appropriate synonym of the given word. <br>Audacity</p>",
+                    options_en: ["<p>Daring</p>", "<p>Meekness</p>", 
+                                "<p>Caution</p>", "<p>Kindness</p>"],
+                    options_hi: ["<p>Daring</p>", "<p>Meekness</p>",
+                                "<p>Caution</p>", "<p>Kindness</p>"],
+                    solution_en: "<p><strong>23.(a) Daring -</strong> involving or taking risks or brave<br><strong>Audacity -</strong> behaviour that risks being shocking<br><strong>Meekness</strong> - enduring injury with patience and without resentment <br><strong>Caution -</strong> great care, because of possible danger<br><strong>Kindness </strong>- the quality of being kind</p>",
+                    solution_hi: "<p>23.(a)<br><strong>Daring</strong> (साहसी) - involving or taking risks or brave<br><strong>Audacity (</strong>दुस्साहस) - behaviour that risks being shocking<br><strong>Meekness</strong> (विनम्रता) - enduring injury with patience and without resentment <br><strong>Caution</strong> (सावधानी) - great care, because of possible danger<br><strong>Kindness </strong>(दयालुता) - the quality of being kind</p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+            
+            // Generate question boxes
+            const boxesContainer = document.getElementById('question-boxes');
+            questions.forEach((q, index) => {
+                const box = document.createElement('div');
+                box.className = 'q-box';
+                box.textContent = index + 1;
+                box.onclick = () => showQuestion(index);
+                box.id = `box-${index}`;
+                boxesContainer.appendChild(box);
+            });
+            
+            // Show first question
+            showQuestion(0);
+            updateProgress();
+        }
+        
+        // Show a specific question
+        
+        function formatContent(text) {
+            if (!text) return '';
+            return text.replace(/<img/g, '<img style="max-width:100%;height:auto;"');
+        }
+        
+        function showQuestion(index) {
+            if (index < 0 || index >= questions.length) return;
+            
+            currentQuestion = index;
+            const question = questions[index];
+            
+            // Update question counter
+            document.getElementById('question-counter').textContent = `Question ${index + 1} of ${questions.length}`;
+            
+            // Update question boxes
+            document.querySelectorAll('.q-box').forEach(box => box.classList.remove('current'));
+            document.getElementById(`box-${index}`).classList.add('current');
+            
+            // Generate question HTML
+            let html = `
+                <div class="question-card">
+                    <div class="question-text">
+                        <div class="en">${formatContent(question.question_en)}</div>
+                        <div class="hi" style="display:none">${formatContent(question.question_hi)} </div>
+                    </div>
+                    <div class="options" id="options-container">`;
+            
+            // Add options
+            ['a', 'b', 'c', 'd'].forEach((opt, i) => {
+                let optionClass = '';
+                let isCorrectAnswer = opt === question.correct;
+                let isUserAnswer = answers[question.id] === opt;
+                
+                // When reviewing, add appropriate classes
+                if (submitted) {
+                    if (isCorrectAnswer) {
+                        optionClass += ' correct-answer';
+                    } else if (isUserAnswer && !isCorrectAnswer) {
+                        optionClass += ' incorrect';
+                    }
+                }
+                
+                html += `
+                    <div class="option-item">
+                        <input class="option-input" type="radio" name="q${index}" 
+                            id="opt-${index}-${opt}" value="${opt}" 
+                            ${isUserAnswer ? 'checked' : ''}
+                            onclick="selectAnswer('${question.id}', '${opt}')">
+                       <label class="option-label${optionClass}" for="opt-${index}-${opt}">
+                            <div class="en">${question.options_en[i]}</div>
+                            <div class="hi" style="display:none">${question.options_hi[i]}</div>
+                        </label>
+                    </div>`;
+            });
+            
+            // Add solution if submitted
+            if (submitted) {
+                const isCorrect = answers[question.id] === question.correct;
+                const resultText = answers[question.id] ? (isCorrect ? 'Correct!' : 'Incorrect!') : 'Not attempted';
+                
+                html += `
+                    <div class="solution-container">
+                        <div class="solution-title">${resultText}</div>
+                        <div class="solution-text">
+                            <div class="en">${question.solution_en}</div>
+                            <div class="hi" style="display:none">${question.solution_hi}</div>
+                        </div>
+                    </div>`;
+            }
+            
+            html += `</div></div>`;
+            
+            document.getElementById('questions-container').innerHTML = html;
+            
+            // Apply language settings
+            applyLanguage();
+            
+            // If in mobile view, close the menu
+            if (window.innerWidth < 992) {
+                toggleNav(false);
+            }
+            
+            // Add review mode class if submitted
+            if (submitted) {
+                document.getElementById('options-container').classList.add('review-mode');
+            }
+        }
+        
+        // Apply current language
+        function applyLanguage() {
+            document.querySelectorAll(`.${currentLang}`).forEach(el => el.style.display = 'block');
+            document.querySelectorAll(`.${currentLang === 'en' ? 'hi' : 'en'}`).forEach(el => el.style.display = 'none');
+            
+            // Update language button text
+            document.getElementById('lang-text').textContent = currentLang === 'en' ? 'Hi' : 'En';
+        }
+        
+        // Select an answer
+        function selectAnswer(qId, option) {
+            if (submitted) return;
+            
+            answers[qId] = option;
+            updateProgress();
+            
+            // Mark question as attempted in the navigation
+            const index = questions.findIndex(q => q.id === qId);
+            if (index >= 0) {
+                const box = document.getElementById(`box-${index}`);
+                box.classList.add('attempted');
+                box.classList.remove('unattempted');
+            }
+        }
+        
+        // Navigate to previous/next question
+        function prevQuestion() { 
+            if (currentQuestion > 0) showQuestion(currentQuestion - 1); 
+        }
+        
+        function nextQuestion() { 
+            if (currentQuestion < questions.length - 1) showQuestion(currentQuestion + 1); 
+        }
+        
+        // Switch section
+        function switchSection(sectionId) {
+            if (sectionId === 'all') {
+                showQuestion(0);
+                return;
+            }
+            
+            const section = sections[sectionId];
+            if (section) showQuestion(section.start);
+        }
+        
+        // Toggle language
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'hi' : 'en';
+            applyLanguage();
+        }
+        
+        // Toggle navigation sidebar
+        function toggleNav(show) {
+            const nav = document.getElementById('question-nav');
+            const overlay = document.getElementById('nav-overlay');
+            
+            if (show === undefined) {
+                show = !nav.classList.contains('show');
+            }
+            
+            if (show) {
+                nav.classList.add('show');
+                overlay.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            } else {
+                nav.classList.remove('show');
+                overlay.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+        }
+        
+        // Update progress
+        function updateProgress() {
+            const attempted = Object.keys(answers).length;
+            document.getElementById('attempted-count').textContent = attempted;
+        }
+        
+        // Start timer
+        function startTimer() {
+            const timerDisplay = document.getElementById('timer-display');
+            let timeLeft = totalTime;
+            
+            const timerInterval = setInterval(() => {
+                if (timeLeft <= 0 || submitted) {
+                    clearInterval(timerInterval);
+                    if (!submitted) submitTest();
+                    return;
+                }
+                
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                timeLeft--;
+            }, 1000);
+        }
+        
+        // Confirm before submitting
+        function confirmSubmit() {
+            if (submitted) return;
+            
+            const attempted = Object.keys(answers).length;
+            const remaining = questions.length - attempted;
+            
+            // Create a more modern confirmation dialog
+            const confirmHtml = `
+                <div style="text-align: center; padding: 20px;">
+                    <h4 style="margin-bottom: 16px; color: var(--dark);">Confirm Submission</h4>
+                    <p style="margin-bottom: 24px; color: var(--gray);">
+                        You have attempted ${attempted} of ${questions.length} questions.<br>
+                        ${remaining} questions are unattempted.
+                    </p>
+                    <div style="display: flex; justify-content: center; gap: 12px;">
+                        <button onclick="this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; border: 1px solid var(--light-gray); background: white; border-radius: 8px; cursor: pointer;">
+                            Cancel
+                        </button>
+                        <button onclick="submitTest(); this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer;">
+                            Submit Test
+                        </button>
+                    </div>
+                </div>`;
+            
+            // Create modal element
+            const modal = document.createElement('div');
+            modal.className = 'results-modal show';
+            modal.innerHTML = `
+                <div class="results-card" style="max-width: 400px;">
+                    <button class="cancel-btn" style="position: absolute; top: 12px; right: 12px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--gray);" onclick="this.closest('.results-modal').remove()">
+                        ×
+                    </button>
+                    ${confirmHtml}
+                </div>`;
+            
+            document.body.appendChild(modal);
+        }
+        
+        // Submit test
+        function submitTest() {
+            if (submitted) return;
+            
+            submitted = true;
+            
+            let score = 0;
+            let correctCount = 0;
+            let incorrectCount = 0;
+            let unattemptedCount = 0;
+            
+            questions.forEach((q, index) => {
+                const userAns = answers[q.id];
+                const box = document.getElementById(`box-${index}`);
+                
+                box.classList.remove('attempted');
+                
+                if (!userAns) {
+                    unattemptedCount++;
+                    box.classList.add('unattempted');
+                } else if (userAns === q.correct) {
+                    correctCount++;
+                    score += q.pos_marks;
+                    box.classList.add('correct');
+                } else {
+                    incorrectCount++;
+                    score -= q.neg_marks;
+                    box.classList.add('incorrect');
+                }
+            });
+            
+            // Update result values
+            document.getElementById('score-value').textContent = score.toFixed(2);
+            document.getElementById('correct-value').textContent = correctCount;
+            document.getElementById('incorrect-value').textContent = incorrectCount;
+            document.getElementById('unattempted-value').textContent = unattemptedCount;
+            
+            // Show the results modal
+            document.getElementById('results-modal').classList.add('show');
+            
+            // Disable submit button
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-check"></i>';
+            submitBtn.style.backgroundColor = 'var(--success)';
+            
+            // Refresh current question view to show solution
+            showQuestion(currentQuestion);
+        }
+        
+        // Review test
+        function reviewTest() {
+            document.getElementById('results-modal').classList.remove('show');
+            showQuestion(0);
+        }
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target === document.getElementById('results-modal')) {
+                document.getElementById('results-modal').classList.remove('show');
+            }
+        });
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') prevQuestion();
+            if (e.key === 'ArrowRight') nextQuestion();
+        });
+    </script>
+</body>
+</html>
