@@ -1,0 +1,2375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Action to Situation</title>
+<style>
+:root {
+  --primary-color: #007bff;
+  --primary-hover: #0069d9;
+  --success-color: #28a745;
+  --success-hover: #218838;
+  --danger-color: #dc3545;
+  --warning-color: #ffc107;
+  --secondary-color: #6c757d;
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --bg-tertiary: #e9ecef;
+  --text-primary: #212529;
+  --text-secondary: #6c757d;
+  --border-color: #dee2e6;
+  --shadow: 0 4px 6px rgba(0,0,0,0.1);
+  --shadow-lg: 0 10px 30px rgba(0,0,0,0.15);
+  --overlay: rgba(0,0,0,0.5);
+  --nav-height: 80px;
+}
+
+[data-theme="dark"] {
+  --primary-color: #4dabf7;
+  --primary-hover: #339af0;
+  --success-color: #51cf66;
+  --success-hover: #40c057;
+  --danger-color: #ff6b6b;
+  --warning-color: #ffd43b;
+  --secondary-color: #868e96;
+  --bg-primary: #1a1a1a;
+  --bg-secondary: #2d2d2d;
+  --bg-tertiary: #404040;
+  --text-primary: #f8f9fa;
+  --text-secondary: #adb5bd;
+  --border-color: #495057;
+  --shadow: 0 4px 6px rgba(0,0,0,0.3);
+  --shadow-lg: 0 10px 30px rgba(0,0,0,0.4);
+  --overlay: rgba(0,0,0,0.7);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  transition: background 0.3s, color 0.3s;
+  overflow-x: hidden;
+  position: relative;
+  padding-bottom: var(--nav-height);
+}
+
+body.palette-open {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg-primary);
+  padding: 20px 30px;
+  border-radius: 15px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow);
+}
+
+.header h1 {
+  font-size: 28px;
+  color: var(--primary-color);
+  font-weight: 700;
+  user-select: none;
+}
+
+.header-controls {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.theme-toggle, .fullscreen-btn {
+  background: var(--bg-tertiary);
+  border: none;
+  padding: 10px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 20px;
+  transition: all 0.3s;
+  min-width: 44px;
+  min-height: 44px;
+  user-select: none;
+}
+
+.theme-toggle:active, .fullscreen-btn:active {
+  transform: scale(0.95);
+}
+
+.theme-toggle:hover, .fullscreen-btn:hover {
+  background: var(--primary-color);
+  color: white;
+}
+
+.timer {
+  background: var(--warning-color);
+  color: #000;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 18px;
+  min-width: 100px;
+  text-align: center;
+  user-select: none;
+}
+
+.timer.warning {
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.palette-fab {
+  position: fixed;
+  bottom: calc(var(--nav-height) + 20px);
+  right: 20px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 24px;
+  box-shadow: 0 6px 20px rgba(0,123,255,0.4);
+  transition: all 0.3s ease;
+  z-index: 998;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.palette-fab:active {
+  transform: scale(0.9);
+}
+
+.palette-fab:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 25px rgba(0,123,255,0.6);
+}
+
+.palette-fab.active {
+  background: var(--danger-color);
+}
+
+.palette-fab .badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: var(--success-color);
+  color: white;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--bg-secondary);
+  pointer-events: none;
+}
+
+.palette-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--overlay);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  z-index: 999;
+  touch-action: none;
+}
+
+.palette-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.question-palette {
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: 100%;
+  max-width: 450px;
+  height: 100vh;
+  height: 100dvh;
+  background: var(--bg-primary);
+  box-shadow: -5px 0 20px rgba(0,0,0,0.2);
+  transition: right 0.3s ease;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.question-palette.active {
+  right: 0;
+}
+
+.palette-header {
+  padding: 20px;
+  background: var(--primary-color);
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.palette-header h3 {
+  font-size: 20px;
+  margin: 0;
+}
+
+.palette-close {
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 32px;
+  cursor: pointer;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: background 0.2s;
+  line-height: 1;
+  touch-action: manipulation;
+}
+
+.palette-close:active {
+  transform: scale(0.9);
+}
+
+.palette-close:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+.palette-stats {
+  padding: 15px 20px;
+  background: var(--bg-tertiary);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  font-size: 13px;
+  text-align: center;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border-color);
+  user-select: none;
+}
+
+.palette-stat {
+  display: flex;
+  flex-direction: column;
+}
+
+.palette-stat .number {
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 5px;
+}
+
+.palette-stat.answered .number { color: var(--success-color); }
+.palette-stat.unanswered .number { color: var(--secondary-color); }
+.palette-stat.bookmarked .number { color: var(--warning-color); }
+
+.palette-search {
+  padding: 15px 20px;
+  background: var(--bg-secondary);
+  flex-shrink: 0;
+}
+
+.palette-search input {
+  width: 100%;
+  padding: 10px 15px;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 14px;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.palette-search input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+.palette-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 20px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.palette-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 10px;
+}
+
+.palette-btn {
+  aspect-ratio: 1;
+  border: 2px solid var(--border-color);
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s;
+  min-width: 40px;
+  min-height: 40px;
+  color: var(--text-primary);
+  position: relative;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.palette-btn:active {
+  transform: scale(0.9);
+}
+
+.palette-btn:hover {
+  transform: scale(1.1);
+  z-index: 10;
+  box-shadow: var(--shadow);
+}
+
+.palette-btn.current {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+  animation: currentPulse 2s infinite;
+}
+
+@keyframes currentPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(0,123,255,0.7); }
+  50% { box-shadow: 0 0 0 8px rgba(0,123,255,0); }
+}
+
+.palette-btn.answered {
+  background: var(--success-color);
+  color: white;
+  border-color: var(--success-color);
+}
+
+.palette-btn.bookmarked::after {
+  content: '🔖';
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  font-size: 16px;
+  pointer-events: none;
+}
+
+.palette-btn.bookmarked.answered {
+  background: var(--success-color);
+}
+
+.palette-legend {
+  padding: 20px;
+  border-top: 1px solid var(--border-color);
+  font-size: 13px;
+  background: var(--bg-secondary);
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.legend-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+.question-image, .option-image {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 10px 0;
+  display: block;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.legend-color {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.quiz-container {
+  background: var(--bg-primary);
+  border-radius: 15px;
+  box-shadow: var(--shadow-lg);
+  padding: 30px;
+  max-width: 900px;
+  margin: 0 auto;
+  scroll-margin-top: 20px;
+}
+
+.quiz-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.marking-info {
+  display: inline-block;
+  background: var(--bg-tertiary);
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  user-select: none;
+}
+
+.progress-section {
+  margin-bottom: 25px;
+}
+
+.progress-stats {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  user-select: none;
+}
+
+.progress-bar-container {
+  background: var(--bg-tertiary);
+  border-radius: 12px;
+  overflow: hidden;
+  height: 10px;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary-color), var(--success-color));
+  transition: width 0.4s ease;
+  border-radius: 12px;
+}
+
+.question-section {
+  min-height: 300px;
+  scroll-margin-top: 80px;
+  margin-bottom: 20px;
+}
+
+.question-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.question-number {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--primary-color);
+  user-select: none;
+}
+
+.bookmark-btn {
+  background: transparent;
+  border: 2px solid var(--border-color);
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 44px;
+  min-height: 44px;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.bookmark-btn:active {
+  transform: scale(0.95);
+}
+
+.bookmark-btn.active {
+  background: var(--warning-color);
+  border-color: var(--warning-color);
+  color: #000;
+}
+
+.question {
+  font-size: 18px;
+  line-height: 1.7;
+  margin-bottom: 25px;
+  color: var(--text-primary);
+  user-select: text;
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.option-label {
+  display: flex;
+  align-items: center;
+  border: 2px solid var(--border-color);
+  padding: 16px 20px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--bg-secondary);
+  min-height: 60px;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.option-label:active {
+  transform: scale(0.98);
+}
+
+.option-label:hover {
+  background: var(--bg-tertiary);
+  border-color: var(--primary-color);
+}
+
+.option-label.selected {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+  color: white;
+}
+
+.option-label input[type="radio"] {
+  margin-right: 15px;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: var(--primary-color);
+  flex-shrink: 0;
+}
+
+.option-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.option-image {
+  max-width: 100%;
+  max-height: 200px;
+  border-radius: 8px;
+  object-fit: contain;
+  background: var(--bg-primary);
+  padding: 10px;
+}
+
+.option-label.selected .option-image {
+  background: rgba(255,255,255,0.1);
+}
+
+.navigation {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--bg-primary);
+  border-top: 2px solid var(--border-color);
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+  z-index: 997;
+  padding: 15px 20px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 10px;
+  max-width: 100%;
+}
+
+.nav-btn {
+  padding: 14px 20px;
+  border-radius: 10px;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s;
+  min-height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  user-select: none;
+  touch-action: manipulation;
+  white-space: nowrap;
+}
+
+.nav-btn:active {
+  transform: scale(0.97);
+}
+
+.nav-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.nav-btn.prev {
+  background: var(--secondary-color);
+  color: white;
+}
+
+.nav-btn.prev:hover:not(:disabled) {
+  background: #5a6268;
+}
+
+.nav-btn.next {
+  background: var(--primary-color);
+  color: white;
+}
+
+.nav-btn.next:hover:not(:disabled) {
+  background: var(--primary-hover);
+}
+
+.nav-btn.clear {
+  background: var(--danger-color);
+  color: white;
+}
+
+.nav-btn.clear:hover {
+  background: #c82333;
+}
+
+.nav-btn.submit {
+  background: var(--success-color);
+  color: white;
+  grid-column: 1 / -1;
+}
+
+.nav-btn.submit:hover {
+  background: var(--success-hover);
+}
+
+.result-section {
+  animation: fadeIn 0.5s;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.score-card {
+  background: linear-gradient(135deg, var(--primary-color), var(--success-color));
+  color: white;
+  padding: 30px;
+  border-radius: 15px;
+  text-align: center;
+  margin-bottom: 30px;
+  user-select: none;
+}
+
+.score-card h2 {
+  font-size: 48px;
+  margin-bottom: 10px;
+}
+
+.score-card p {
+  font-size: 18px;
+  opacity: 0.9;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.stat-card {
+  background: var(--bg-secondary);
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+  border: 2px solid var(--border-color);
+  user-select: none;
+}
+
+.stat-card h3 {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.stat-card.correct h3 { color: var(--success-color); }
+.stat-card.wrong h3 { color: var(--danger-color); }
+.stat-card.unattempted h3 { color: var(--secondary-color); }
+
+.question-review {
+  border: 2px solid var(--border-color);
+  border-radius: 15px;
+  padding: 25px;
+  margin-bottom: 20px;
+  background: var(--bg-secondary);
+}
+
+.question-review h4 {
+  margin-bottom: 15px;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.review-option {
+  padding: 12px 16px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  border: 2px solid var(--border-color);
+  background: var(--bg-primary);
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.review-option .option-image {
+  max-width: 150px;
+  max-height: 100px;
+}
+
+.review-option.correct {
+  background: #d4edda;
+  border-color: var(--success-color);
+  color: #155724;
+}
+
+.review-option.wrong {
+  background: #f8d7da;
+  border-color: var(--danger-color);
+  color: #721c24;
+}
+
+.review-option.user-selected {
+  border-width: 3px;
+  font-weight: 600;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.action-btn {
+  padding: 14px 30px;
+  border-radius: 10px;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s;
+  min-width: 150px;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.action-btn:active {
+  transform: scale(0.95);
+}
+
+.action-btn.restart {
+  background: var(--danger-color);
+  color: white;
+}
+
+.action-btn.restart:hover {
+  background: #c82333;
+}
+
+.action-btn.download {
+  background: var(--primary-color);
+  color: white;
+}
+
+.action-btn.download:hover {
+  background: var(--primary-hover);
+}
+
+.action-btn.print {
+  background: var(--secondary-color);
+  color: white;
+}
+
+.action-btn.print:hover {
+  background: #5a6268;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.palette-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.palette-content::-webkit-scrollbar-track {
+  background: var(--bg-tertiary);
+}
+
+.palette-content::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: 4px;
+}
+
+.palette-content::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-hover);
+}
+
+@media (max-width: 768px) {
+  :root {
+    --nav-height: 140px;
+  }
+
+  .container {
+    padding: 10px;
+  }
+
+  .header {
+    flex-direction: column;
+    gap: 15px;
+    padding: 15px;
+  }
+
+  .header h1 {
+    font-size: 22px;
+  }
+
+  .quiz-container {
+    padding: 20px 15px;
+  }
+
+  .question-palette {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .palette-grid {
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+  }
+
+  .palette-btn {
+    font-size: 13px;
+    min-width: 36px;
+    min-height: 36px;
+  }
+
+  .palette-fab {
+    bottom: calc(var(--nav-height) + 10px);
+    right: 15px;
+    width: 56px;
+    height: 56px;
+    font-size: 22px;
+  }
+
+  .navigation {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 12px 15px;
+  }
+
+  .nav-btn {
+    min-height: 44px;
+    font-size: 15px;
+  }
+
+  .nav-btn.clear {
+    order: 3;
+  }
+
+  .nav-btn.submit {
+    grid-column: auto;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .legend-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .question {
+    font-size: 16px;
+  }
+
+  .option-label {
+    padding: 14px 16px;
+    font-size: 15px;
+  }
+
+  .option-image {
+    max-height: 150px;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+  }
+
+  .action-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .palette-grid {
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+  }
+
+  .palette-btn {
+    font-size: 12px;
+    min-width: 32px;
+    min-height: 32px;
+  }
+
+  .header h1 {
+    font-size: 20px;
+  }
+
+  .timer {
+    font-size: 16px;
+    padding: 8px 16px;
+  }
+
+  .option-image {
+    max-height: 120px;
+  }
+}
+
+@media (max-width: 360px) {
+  .palette-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media print {
+  .header-controls, .navigation, .palette-fab, .palette-overlay, .question-palette, .action-buttons, .bookmark-btn {
+    display: none !important;
+  }
+
+  body {
+    background: white;
+    padding-bottom: 0;
+  }
+
+  .container {
+    padding-bottom: 20px;
+  }
+}
+
+@media (max-height: 500px) and (orientation: landscape) {
+  .palette-fab {
+    bottom: calc(var(--nav-height) + 5px);
+    right: 10px;
+    width: 48px;
+    height: 48px;
+    font-size: 20px;
+  }
+
+  .palette-fab .badge {
+    width: 20px;
+    height: 20px;
+    font-size: 11px;
+  }
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>🎯 Action to Situation</h1>
+    <div class="header-controls">
+      <div class="timer" id="timer">00:00</div>
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle Theme">🌙</button>
+      <button class="fullscreen-btn" id="fullscreenBtn" aria-label="Toggle fullscreen" title="Fullscreen">⛶</button>
+    </div>
+  </div>
+
+  <div class="quiz-container" id="quizContainer">
+    <div class="quiz-header">
+      <div class="marking-info" id="markingInfo">Marking: +1, -0</div>
+    </div>
+
+    <div class="progress-section">
+      <div class="progress-stats">
+        <span>Progress: <strong id="progressText">1/2</strong></span>
+        <span>Attempted: <strong id="attemptedText">0</strong></span>
+      </div>
+      <div class="progress-bar-container">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+    </div>
+
+    <div class="question-section" id="questionSection">
+      <div class="question-header">
+        <div class="question-number" id="questionNumber">Question 1 of 2</div>
+        <button class="bookmark-btn" id="bookmarkBtn" aria-label="Bookmark question">
+          <span>🔖</span> <span>Bookmark</span>
+        </button>
+      </div>
+      
+      <div class="question" id="questionText"></div>
+      
+      <div class="options" id="optionsContainer"></div>
+    </div>
+
+    <div class="result-section hidden" id="resultSection"></div>
+  </div>
+</div>
+
+<button class="palette-fab" id="paletteFab" aria-label="Toggle question palette" title="Question Palette">
+  📋
+  <span class="badge" id="answeredBadge">0</span>
+</button>
+
+<div class="palette-overlay" id="paletteOverlay"></div>
+
+<div class="question-palette" id="questionPalette">
+  <div class="palette-header">
+    <h3>Question Palette</h3>
+    <button class="palette-close" id="paletteClose" aria-label="Close palette">×</button>
+  </div>
+
+  <div class="palette-stats">
+    <div class="palette-stat answered">
+      <div class="number" id="paletteAnswered">0</div>
+      <div>Answered</div>
+    </div>
+    <div class="palette-stat unanswered">
+      <div class="number" id="paletteUnanswered">2</div>
+      <div>Not Answered</div>
+    </div>
+    <div class="palette-stat bookmarked">
+      <div class="number" id="paletteBookmarked">0</div>
+      <div>Bookmarked</div>
+    </div>
+  </div>
+
+  <div class="palette-search">
+    <input type="number" id="paletteSearch" placeholder="Jump to question number..." aria-label="Search questions" inputmode="numeric" pattern="[0-9]*">
+  </div>
+
+  <div class="palette-content">
+    <div class="palette-grid" id="paletteGrid"></div>
+  </div>
+
+  <div class="palette-legend">
+    <div class="legend-grid">
+      <div class="legend-item">
+        <div class="legend-color" style="background: var(--success-color)"></div>
+        <span>Answered</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background: var(--bg-secondary); border: 2px solid var(--border-color)"></div>
+        <span>Not Answered</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background: var(--primary-color)"></div>
+        <span>Current Question</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background: var(--warning-color)"></div>
+        <span>🔖 Bookmarked</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="navigation" id="navigation">
+  <button class="nav-btn prev" id="prevBtn" aria-label="Previous question">
+    <span>←</span> Previous
+  </button>
+  <button class="nav-btn clear" id="clearBtn" aria-label="Clear answer">Clear</button>
+  <button class="nav-btn next" id="nextBtn" aria-label="Next question">
+    Next <span>→</span>
+  </button>
+  <button class="nav-btn submit hidden" id="submitBtn" aria-label="Submit quiz">Submit Quiz</button>
+</div>
+
+<script>
+// MODIFIED: Quiz data structure with time_minutes
+const quizData = {
+  "time_minutes": 20,
+  "questions": [
+    {
+      "sr_no": 1,
+      "question": "<p>Nishant has 68% B.Sc., pending M.Sc. result, 3 years teaching experience, 27 years old, willing for probation. What to do? </p>",
+      "option1": "<p>Refer to Principal </p>",
+      "option2": "<p>Reject due to incomplete PG </p>",
+      "option3": "<p>Wait for result then decide </p>",
+      "option4": "<p>Data inadequate </p>",
+      "answer": "4",
+      "negative_marking": "0.25",
+      "positive_marking": "1.00",
+      "solution": "<p>M.Sc. result is pending — that’s a major qualification gap </p><p>No clarity on subject specialization, teaching level, or institutional criteria </p><p>No mention of accreditation, eligibility norms, or cutoffs </p><p>So , the data is inadequate to make a firm decision. That’s the most precise and responsible choice from the given options. </p><p>Final answer: Data inadequate </p>"
+    },
+    {
+      "sr_no": 2,
+      "question": "<p>Sahil completed B.Sc. with 66% and M.Sc. with 60%. He has 1 year teaching experience and is 24 years old. What should be the action? </p>",
+      "option1": "<p>Select directly </p>",
+      "option2": "<p>Reject due to low experience </p>",
+      "option3": "<p>Keep pending for verification </p>",
+      "option4": "<p>Data in adequate </p>",
+      "answer": "4",
+      "negative_marking": "0.25",
+      "positive_marking": "1.00",
+      "solution": "<p>The question asks what action should be taken regarding Sahil, but it does not specify: </p><p>Minimum required percentage for selection </p><p>Required teaching experience </p><p>Age criteria </p><p>Whether the role is academic, research-based, or administrative </p><p>So , while Sahil’s data is provided, the criteria for selection or rejection are missing . That makes it impossible to decide the action confidently. </p><p>Correct answer: Data inadequate </p>"
+    },
+    {
+      "sr_no": 3,
+      "question": "<p>Rohit is planning a special dinner to celebrate his wife’s 40th birthday. She enjoys cozy, informal gatherings and loves Indian street food more than fancy, high-end dining. Which of the following restaurants would be the best fit for her? </p>",
+      "option1": "<p>Chaat Chowk serves a variety of popular Indian street foods like pani puri, pav bhaji, and aloo tikki in a casual, vibrant, and bustling atmosphere reminiscent of Mumbai’s famous street stalls. </p>",
+      "option2": "<p>Tandoori Trails is a fine-dining restaurant specializing in North Indian kebabs and rich curries with sophisticated decor. </p>",
+      "option3": "<p>Spice Symphony features contemporary Indian fusion cuisine with an upscale modern ambiance and a focus on creative plating. </p>",
+      "option4": "<p>Royal Rasoi offers an elegant dining experience with traditional Rajasthani royal cuisine served in a palace-like setting. </p>",
+      "answer": "1",
+      "negative_marking": "0.25",
+      "positive_marking": "1.00",
+      "solution": "<p>Rohit’s wife prefers: </p><p>Cozy, informal gatherings ✅ </p><p>Indian street food over fine dining ✅ </p><p>Chaat Chowk perfectly matches both: </p><p>Serves pani puri, pav bhaji, aloo tikki </p><p>Casual, vibrant, street-style atmosphere </p><p>Other options lean toward upscale or royal dining, which she doesn’t enjoy as much. </p><p>Correct answer: Chaat Chowk serves a variety of popular Indian street foods like pani puri, pav bhaji, and aloo tikki in a casual, vibrant, and bustling atmosphere reminiscent of Mumbai’s famous street stalls. </p>"
+    },
+    {
+      "sr_no": 4,
+      "question": "<p>Scenario : <br/>Karthik has the following profile: <br/>Education: B.Sc. with 64% and M.Sc. in Chemistry (passed) <br/>Experience: No teaching experience yet <br/>Age: 23 years <br/>Preference: Open to probationary roles <br/>Eligibility Criteria for the Position: <br/>Minimum Age: 24 years <br/>Maximum Age: 30 years <br/>Educational Qualification: At least M.Sc. in Chemistry <br/>Experience: Minimum 2 years in the relevant field <br/>Probationary Roles: Open to candidates with less than 5 years of experience <br/>Minimum Marks in B.Sc.: 65% <br/>Decision: <br/>Based on the provided information, what is the most appropriate decision regarding Karthik's eligibility for the position? </p>",
+      "option1": "<p>Case is to be referred to Principal </p>",
+      "option2": "<p>Information is inadequate </p>",
+      "option3": "<p>Candidate is not to be selected </p>",
+      "option4": "<p>Candidate is to be selected </p>",
+      "answer": "3",
+      "negative_marking": "0.25",
+      "positive_marking": "1.00",
+      "solution": "<p>Analysis of Karthik’s Profile vs Eligibility Criteria: </p><p>Criteria </p><p>Required </p><p>Karthik’s Status </p><p>Eligible? </p><p>Age </p><p>Minimum 24 years </p><p>23 years </p><p>❌ No</p><p>B.Sc. Marks </p><p>Minimum 65% </p><p>64% </p><p>❌ No</p><p>M.Sc. in Chemistry </p><p>Required </p><p>Completed </p><p>✅ Yes</p><p>Experience </p><p>Minimum 2 years </p><p>None </p><p>❌ No</p><p>Probationary Role Preference </p><p>Open to &amp;lt;5 years experience </p><p>Open </p><p>✅ Yes</p><p>Conclusion: Karthik fails on three key criteria : age, B.Sc. marks, and experience. Even though he is open to probationary roles, he does not meet the basic eligibility . </p><p>✅ Correct answer: Candidate is not to be selected </p>"
+    },
+    {
+      "sr_no": 5,
+      "question": "<p>Meera has 70% in B.Sc., M.Sc. completed, 3 years Maths teaching experience, 25 years old, ready for probation. What should be done? </p>",
+      "option1": "<p>Reject Meera </p>",
+      "option2": "<p>Data inadequate </p>",
+      "option3": "<p>Select Meera directly </p>",
+      "option4": "<p>Refer Meera to Principal </p>",
+      "answer": "2",
+      "negative_marking": "0.25",
+      "positive_marking": "1.00",
+      "solution": "<p>B.Sc. with 70% – decent academic record </p><p>M.Sc. completed – meets qualification </p><p>3 years teaching experience in Maths – relevant and valuable </p><p>25 years old – within typical age range </p><p>Willing for probation – shows flexibility </p><p>So far, it looks promising. But here's the catch: We don’t know the institution’s specific selection criteria — whether they require a B.Ed., a demo class, interview performance, or other formalities. Without knowing those, we can’t definitively say whether Meera should be selected, rejected, or referred. </p><p>So , yes — data is inadequate if the question is about final selection. </p><p>✅ Correct answer: Data inadequate </p>"
+    },
+    {
+      "sr_no": 6,
+      "question": "<p>Post: Project Manager – Urban Infrastructure Eligibility Criteria (as on 01-01-2025): <br/>B.E./ B.Tech in Civil or Urban Engineering with minimum 75% marks. <br/>Must have completed MBA in Infrastructure/Project Management with 65% or above. <br/>Total experience must be minimum 10 years, out of which at least 3 years as team lead. <br/>Age limit: Maximum 42 years. <br/>Candidate must have handled at least two full-cycle government projects. <br/>Special Clause : <br/>If no MBA, but 12+ years of experience including at least 2 years abroad, and led 3+ projects — refer to Advisory Board. <br/>If project count is only one, but other conditions are fully met, refer to Infrastructure Commission. <br/>Case : <br/>Sneha has 78% in B.Tech Civil, no MBA, 13 years of experience including 3 years abroad, and has led 4 projects (all for state government). <br/>Question: What should be done in Sneha’s c ase? </p>",
+      "option1": "<p>Select the candidate </p>",
+      "option2": "<p>Ref er to Infrastructure Commission </p>",
+      "option3": "<p>Refer to Advisory Board </p>",
+      "option4": "<p>Reject the candidate </p>",
+      "answer": "3",
+      "negative_marking": "0.25",
+      "positive_marking": "1.00",
+      "solution": "<p>Sneha does not have an MBA , but she: </p><p>Has 78% in B.Tech Civil ✅ </p><p>Has 13 years of experience , including 3 years abroad ✅ </p><p>Has led 4 government projects ✅ </p><p>Meets the special clause : No MBA + 12+ years experience + 2+ years abroad + led 3+ projects </p><p>🔍 According to the special clause , such cases must be referred to the Advisory Board . </p><p>✅ Correct Answer: Refer to Advisory Board </p>"
+    },
+    {
+      "sr_no": 7,
+      "question": "<p>You are Browse online forums and accidentally stumble upon a link to a publicly accessible cloud storage folder. Upon clicking it, you realize it contains hundreds of documents that appear to be sensitive personal data (like scanned passports, utility bills, and tax documents) belonging to various individuals, indicating a major privacy oversight. <br/>Given this situation, which of the following is the most ethical and responsible action? </p>",
+      "option1": "<p>Ignore the folder completely, as it's not your data and you don't want to get involved. </p>",
+      "option2": "<p>Copy the link and share it on social media to alert the publi c and expose the vulnerability. </p>",
+      "option3": "<p>Immediately report the vulnerability to the platform's administrator or the relevant cybersecurity authority and avo id accessing the files further. </p>",
+      "option4": "<p>Download the files to save them, then try to contact a few of the individuals directly to war n them about their leaked data. </p>",
+      "answer": "3",
+      "negative_marking": "0.25",
+      "positive_marking": "1.00",
+      "solution": "<p>The most ethical and responsible action in this situation is: </p><p>✅ Immediately report the vulnerability to the platform's administrator or the relevant cybersecurity authority and avoid accessing the files further. </p><p>Why this is correct: </p><p>It protects the privacy of affected individuals. </p><p>It avoids spreading or mishandling sensitive data. </p><p>It helps the responsible party fix the issue quickly. </p><p>It keeps you on the right side of legal and ethical boundaries. </p>"
+    },
+    {
+      "sr_no": 8,
+      "question": "<p>Criteria to be selected as Assistant Manager (as on 01-04-2023) : <br/>MBA degree with at least 65% marks. <br/>Age between 26 to 32 years. <br/>Must have minimum 2 years of management experience. <br/>Must be fluent in English and Hindi. <br/>Special Clause : <br/>If candidate meets all but the language requirement, refer to Language Proficiency Panel. <br/>Case : <br/>Tarun is 30 years old, has MBA with 70% marks, and 3 years experience . He is fluent in English but not confident in Hindi. <br/>What s hould be done in Tarun's case? <br/> </p>",
+      "option1": "<p>Refe r to Language Proficiency Panel </p>",
+      "option2": "<p>Select the candidate </p>",
+      "option3": "<p>Reject the candidate </p>",
+      "option4": "<p>Refer to Managing Director </p>",
+      "answer": "1",
+      "negative_marking": "0.25",
+      "positive_marking": "1.00",
+      "solution": "<p>Criteria: </p><p>MBA ≥ 65% ✅ ( Tarun has 70%) </p><p>Age 26–32 ✅ ( Tarun is 30) </p><p>Experience ≥ 2 years ✅ ( Tarun has 3 years) </p><p>Fluent in English &amp; Hindi ❌ ( Tarun is not confident in Hindi) </p><p>Special Clause: <br/>If candidate meets all except language → Ref er to Language Proficiency Pan </p><p>Correct Answer: Refer to Language Proficiency Panel </p>"
+    },
+    {
+      "sr_no": 9,
+      "question": "<p>You find a wallet in your school library. What is the most appropriate action? </p>",
+      "option1": "<p>Ignore it </p>",
+      "option2": "<p>Hand it over to the librarian or authority </p>",
+      "option3": "<p>Take the money and leave the wallet </p>",
+      "option4": "<p>Keep it for yoursel f and wait for someone to claim </p>",
+      "answer": "2",
+      "negative_marking": "0.25",
+      "positive_marking": "1.00",
+      "solution": "<p>If you find a wallet in your school library, it means someone has accidentally lost it. The right thing is to not keep it or take money from it , because that would be dishonest. Ignoring it also doesn’t solve the problem — the owner may never find it. </p><p>The most responsible action is to hand it over to the librarian or school authority . They can safely return it to the rightful owner. This shows honesty, responsibility, and respect for others’ belongings. </p>"
+    },
+    {
+      "sr_no": 10,
+      "question": "<p>Criteria to be selected as Junior Analyst <br/>Eligibility Criteria (as on 15-07-2023) : <br/>Must have a B.Sc. in Statistics/Mathematics with minimum 65% marks. <br/>Age between 23 and 30 years. <br/>Must have completed a Data Analytics Certificate course. <br/>Should have 2 years of analytical work experience. <br/>Special Case : <br/>If candidate has only 1 year experience, but has Master’s degree in Data Science, refer to Project Manager. <br/>Case : <br/>Meera is 26 years old, B.Sc. in Statistics with 70% marks, has done a certificate course and holds a Master’s in Data Science. She has only 1 year experience. <br/>What should be done in Meera’s case? </p>",
+      "option1": "<p>Refer to HR </p>",
+      "option2": "<p>Refer to Project Manager </p>",
+      "option3": "<p>Select the candidate </p>",
+      "option4": "<p>Reject the candidate </p>",
+      "answer": "2",
+      "negative_marking": "0.25",
+      "positive_marking": "1.00",
+      "solution": "<p>Eligibility Criteria: </p><p>✅ Age: 26 → between 23 and 30 </p><p>✅ B.Sc. in Statistics with 70% → above 65% </p><p>✅ Data Analytics Certificate course → completed </p><p>❌ Experience: only 1 year (required: 2 years) </p><p>Special Case: <br/>If candidate has only 1 year experience but has Master’s in Data Science → Refer to Project Manager . </p><p>Meera fits this special case exactly. </p><p>✅ Correct Answer: Refer to Project Manager </p>"
+    },
+    {
+      "sr_no": 11,
+      "question": "<p>Scenario: <br/>Priyanka has the following qualifications: <br/>Education: B.Sc. with 82% and M.Sc. in Chemistry <br/>Experience: 3 years in the relevant field <br/>Age: 26 years </p><p>Eligibility Criteria for the Position: <br/>Minimum Age: 25 years <br/>Maximum Age: 30 years <br/>Educational Qualification: At least M.Sc. in Chemistry <br/>Experience: Minimum 2 years in the relevant field <br/>Probationary Roles: Open to candidates with less than 5 years of experience </p><p>Decision: <br/>Based on the provided information, what is the most appropriate decision regarding Priyanka’s eligibility for the position? </p>",
+      "option1": "<p>Priyanka is not eligible due to insufficient experience. </p>",
+      "option2": "<p>Priyanka is not eligible due to her age exceeding the maximum limit. </p>",
+      "option3": "<p>Priyanka is eligible for the position as she meets all the criteria. </p>",
+      "option4": "<p>Priyanka is eligible only if she agrees to a probationary role. </p>",
+      "answer": "3",
+      "negative_marking": "0.25",
+      "positive_marking": "1.00",
+      "solution": "<p>Explanation: </p><p>Age : 26 years → ✅ Between 25 and 30 </p><p>Education : M.Sc. in Chemistry → ✅ Meets the minimum qualification </p><p>Experience : 3 years → ✅ More than the required 2 years, and less than 5 years → eligible for probationary roles </p><p>Probationary Role : Open to candidates with less than 5 years → ✅ She qualifies </p><p>Priyanka meets all the criteria without any conditions or exceptions. </p><p>✅ Correct answer: Priyanka is eligible for the position as she meets all the criteria. </p>"
+    },
+    {
+      "sr_no": 12,
+      "question": "<p>Sameer has 67% in B.Sc. and a completed M.Sc. He is 31 years old and has 5 years of experience. Ready for probation. </p>",
+      "option1": "<p>Refer to Principal </p>",
+      "option2": "<p>Insufficient Data </p>",
+      "option3": "<p>Refer to Vice Principal </p>",
+      "option4": "<p>Selected </p>",
+      "answer": "2",
+      "negative_marking": "0.25",
+      "positive_marking": "1.00",
+      "solution": "<p>Explanation : </p><p>Age : Sameer is 31, which may exceed a typical cutoff—but if age relaxation or probation exceptions exist, we can't rule him out. </p><p>Experience : 5 years is substantial, but we don’t know if it’s in a relevant domain. </p><p>Probation : He's ready, but we don’t know if probation is allowed beyond age limits. </p><p>Missing Criteria : No clarity on role-specific requirements, reservation policies, or institutional discretion. </p><p>✅ Insufficient Data ( अपर्याप्त डेटा) is the most accurate choice when rules aren’t fully disclosed. </p>"
+    },
+    {
+      "sr_no": 13,
+      "question": "<p>You have three tasks due: </p><p>A project worth 50% of your grade (due in 3 days) </p><p>A team meeting (in 1 hour) </p><p>An optional quiz (due tonight) </p><p>What should you do first? </p>",
+      "option1": "<p>Review all deadlines again </p>",
+      "option2": "<p>Take the optional quiz </p>",
+      "option3": "<p>Start the project </p>",
+      "option4": "<p>Attend the team meeting </p>",
+      "answer": "4",
+      "negative_marking": "0.25",
+      "positive_marking": "1.00",
+      "solution": "<p>The best immediate action is to attend the team meeting. The project has a longer deadline (3 days) and the quiz is optional, so they can be planned later. The meeting, however, is scheduled within the next hour and missing it could affect coordination with the team. Therefore, the correct first priority is to attend the team meeting. </p>"
+    },
+    {
+      "sr_no": 14,
+      "question": "<p>Eligibility Criteria : </p><p>The candidate must be a B.Sc. graduate with at least 60% marks . </p><p>The candidate must have completed M.Sc. . </p><p>The candidate must be below 28 years of age as on 01-01-2017 . </p><p>Candidates with prior work experience will be given preference. </p><p>If the candidate is otherwise eligible but has no work experience , the case should be referred to the Principal . </p><p>If the candidate satisfies all the above criteria, he/she should be selected . </p><p>If the information is inadequate , mark the decision as “Information inadequate”. </p><p>Neeraj is a B.Sc. graduate with 65% marks. He has completed M.Sc. but has no work experience. He is willing to undergo a probation period of one year. Age: 26 years as of 2017. What decision should be taken? </p>",
+      "option1": "<p>Refer to Principal </p>",
+      "option2": "<p>Refer to Vice Principal </p>",
+      "option3": "<p>Select the candidate </p>",
+      "option4": "<p>Information inadequate </p>",
+      "answer": "1",
+      "negative_marking": "0.25",
+      "positive_marking": "1.00",
+      "solution": "<p>Solution </p><p>Neeraj has 65% in B.Sc. , which is more than the required 60%. </p><p>He has completed M.Sc. , so he meets the educational qualification. </p><p>His age is 26 years as of 2017 , which is less than 28 years, hence eligible. </p><p>But he has no work experience . As per rules, if otherwise eligible but lacking work experience, the case should be referred to the Principal . </p><p>Therefore, the correct answer is Refer to Principal . </p>"
+    },
+    {
+      "sr_no": 15,
+      "question": "<p>Post: Security Guard </p><p>Eligibility Criteria (as on 01-06-2025): </p><p>Must be between 25 and 35 years of age. </p><p>Must have passed 10th standard. </p><p>Must be physically fit and have no criminal record. </p><p>Case: </p><p>Suresh is 29 years old, has passed Class 10, is physically fit, and has no police record. What should be done in Suresh’s case? </p>",
+      "option1": "<p>Refer to Police Verification </p>",
+      "option2": "<p>Data incomplete </p>",
+      "option3": "<p>Reject the candidate </p>",
+      "option4": "<p>Select the candidate </p>",
+      "answer": "4",
+      "negative_marking": "0.25",
+      "positive_marking": "1.00",
+      "solution": "<p>The eligibility criteria require that the candidate must be 25–35 years old, passed Class 10, be physically fit, and have no criminal record . Suresh is 29 years old , has completed Class 10 , is physically fit , and has no police record . This means he fulfils all the given requirements without any missing condition . Hence, there is no reason for rejection or delay, and the correct decision is to select the candidate . </p>"
+    },
+    {
+      "sr_no": 16,
+      "question": "<p>Criteria to be selected as Librarian (as on 01-08-2023): </p><p>• Must have a Bachelor’s degree in Library Science ( B.Lib.Sc ) with at least 55% marks. </p><p>• Age must be between 24 and 32 years. </p><p>• Must have basic computer skills. </p><p>• Must possess at least 1 year of experience in a library. </p><p>Special Clause: </p><p>If the candidate has no experience but has a Master’s in Library Science with 60% marks, refer to Library Director. </p><p>Case: </p><p>Neelam is 27 years old, has completed B.Lib.Sc with 58%, holds a Master’s in Library Science (62%) but has no experience and is not computer literate. </p><p>Question: What should be done in Neelam’s case? </p>",
+      "option1": "<p>Select the candidate </p>",
+      "option2": "<p>Reject the candidate </p>",
+      "option3": "<p>Refer to Library Director </p>",
+      "option4": "<p>Refer to HR </p>",
+      "answer": "3",
+      "negative_marking": "0.25",
+      "positive_marking": "1.00",
+      "solution": "<p>• Neelam has B.Lib.Sc with 58% → satisfies minimum marks. <br/>• Age = 27 → satisfies age condition. <br/>• No library experience → fails normal condition. <br/>• Has Master’s in Library Science with 62% → satisfies Special Clause . <br/>• According to rules, candidates with Master’s degree (60%+) but no experience must be referred to Library Director . </p>"
+    },
+    {
+      "sr_no": 17,
+      "question": "<p>Read each scenario carefully, evaluate all options, identify the action that best navigates the various competing factors and values. </p><p>You’re enjoying a casual evening gathering at a close friend’s home. During the evening, your friend decides to put on a movie that you immediately recognize as a pirated copy they downloaded illegally. Your friend excitedly asks you to help connect their laptop to the TV, and everyone else at the gathering seems oblivious or unconcerned. You personally disapprove of piracy but don’t want to create an awkward situation or offend your friend. </p><p>Question: What should you do in this situation? </p>",
+      "option1": "<p>Discreetly excuse yourself from participating in the setup or watching the movie, perhaps by saying you need to ma ke a call outside for a moment. </p>",
+      "option2": "<p>Watch the movie, but later, report your fr iend to copyright authorities. </p>",
+      "option3": "<p>Go along with it and help connect the laptop, avoiding any discomfort or confrontation. </p>",
+      "option4": "<p>Publicly refuse to help and explain loudly to your friend and the group why piracy is wrong. </p>",
+      "answer": "1",
+      "negative_marking": "0.25",
+      "positive_marking": "1.00",
+      "solution": "<p>Step by Step: <br/>• Watching and supporting piracy is legally and ethically wrong. <br/>• Reporting your friend later creates mistrust and damages the friendship. <br/>• Helping your friend directly goes against your values. <br/>• Publicly refusing may embarrass your friend and spoil the gathering. <br/>• The most balanced action is to discreetly excuse yourself without creating conflict. <br/>Correct Answer = Option 1 </p>"
+    },
+    {
+      "sr_no": 18,
+      "question": "<p>Post: Content Head – EdTech Division Eligibility Criteria (as on 15-02-2025): </p><p>• Master’s in English/Linguistics/Education with minimum 68% marks. </p><p>• Minimum 6 years of experience, with 3 years in academic content creation. </p><p>• Managed a team of 5+ members for at least 1 year. </p><p>• Published at least 2 educational research articles in journals. </p><p>Special Clause: </p><p>- If candidate has only 1 research article but 8+ years of experience + M.Ed./B.Ed., refer to Board of Academic Excellence. </p><p>- If academic marks are below 68% but has 3+ research papers and certifications, refer to Chief Editor. </p><p>Case: </p><p>Aditya has 66% in MA English, 9 years of experience (4 in content creation), led a team for 2 years, has 3 published papers, and a B.Ed. degree. Question: </p><p>What should be done in Aditya’s case? </p>",
+      "option1": "<p>Select the candidate </p>",
+      "option2": "<p>Refer to Chief Editor </p>",
+      "option3": "<p>Refer to Board of Academic Excellence </p>",
+      "option4": "<p>Reject the candidate </p>",
+      "answer": "2",
+      "negative_marking": "0.25",
+      "positive_marking": "1.00",
+      "solution": "<p>Aditya has less than 68% marks , but he has 3+ research papers and certifications , hence as per special clause, he should be referred to Chief Editor . </p>"
+    },
+    {
+      "sr_no": 19,
+      "question": "<p>Criteria to be selected as Assistant Teacher Eligibility Criteria (as on 31-03-2024): </p><p>• Must have a B.Ed. degree with minimum 50% marks. </p><p>• Age must be between 25 and 35 years. </p><p>• Must have 2 years teaching experience. </p><p>• Must be willing to work in rural schools. </p><p>Special Rule: </p><p>If candidate has 1 year teaching experience but a Master’s in Education, refer to Vice Principal. </p><p>Case: </p><p>Sonal is 28 years old with a B.Ed. (55%), a Master’s in Education, and 1 year experience. She agrees to work in rural schools. Question: What should be done in Sonal’s case? </p>",
+      "option1": "<p>Case cannot be considered </p>",
+      "option2": "<p>Refer to Vice Principal </p>",
+      "option3": "<p>Select the candidate </p>",
+      "option4": "<p>Reject the candidate </p>",
+      "answer": "2",
+      "negative_marking": "0.25",
+      "positive_marking": "1.00",
+      "solution": "<p>• Eligibility requires 2 years of teaching experience. <br/>• Sonal has only 1 year of experience. <br/>• But as per Special Rule , if the candidate has a Master’s in Education and 1 year experience, the case should be referred to the Vice Principal. <br/><br/>Correct Answer = Refer to Vice Principal </p>"
+    },
+    {
+      "sr_no": 20,
+      "question": "<p>A man sees smoke coming from a building and hears people shouting. What should he do first? </p>",
+      "option1": "<p>Try to enter the building </p>",
+      "option2": "<p>Run away immediately </p>",
+      "option3": "<p>Call emergency services </p>",
+      "option4": "<p>Ignore and move on </p>",
+      "answer": "3",
+      "negative_marking": "0.25",
+      "positive_marking": "1.00",
+      "solution": "<p>– The safest and most responsible action is to call emergency services immediately. <br/>– Entering the building without training may put the person in danger instead of helping. <br/>– Running away or ignoring the situation leaves the people inside without help. <br/>– Therefore, the correct step is to inform authorities and emergency services as the first response. </p>"
+    },
+    {
+      "sr_no": 21,
+      "question": "<p>You’re leading a group project and one member is not contributing. What is the best decision to resolve the issue? </p>",
+      "option1": "<p>Complain directly to the teacher without discussion </p>",
+      "option2": "<p>Remove the person from the group </p>",
+      "option3": "<p>Do the work yourself </p>",
+      "option4": "<p>Talk to the member and understand their reasons </p>",
+      "answer": "4",
+      "negative_marking": "0.25",
+      "positive_marking": "1.00",
+      "solution": "<p>– The best way to resolve conflicts in teamwork is through communication and understanding . <br/>– Directly complaining or removing the member without discussion may create negativity and worsen the situation. <br/>– Doing all the work yourself is unfair and impractical in a group project. <br/>– Hence, the most effective step is to talk to the member, understand their issues, and motivate them to contribute → Option 4 . </p>"
+    },
+    {
+      "sr_no": 22,
+      "question": "<p>Given the situation below, which of the following is the most responsible course of action for you? </p><p>While driving, you witness a minor fender bender in a parking lot. One car, which appears to be at fault, quickly drives away without stopping. The other car’s driver is still in their vehicle, looking shaken and surveying the damage. </p><p>Question: Given this situation, which of the following is the most ethical and responsible action? </p>",
+      "option1": "<p>Immediately call emergency services, even if there are no apparent injuries. </p>",
+      "option2": "<p>Assume it’s a minor incident and continue driving, as it doesn’t involve you directly. </p>",
+      "option3": "<p>Pull over safely, check on the driver of the damaged car, and offer to provide your contact information and what you witnessed. </p>",
+      "option4": "<p>Chase after the car that drove away to get their license plate number and confront the driver. </p>",
+      "answer": "3",
+      "negative_marking": "0.25",
+      "positive_marking": "1.00",
+      "solution": "<p>– Safety first: Stop in a safe place and check whether anyone needs help; do not chase vehicles (unsafe/illegal). <br/>– Be a good witness: Offer your name, contact , and a brief statement of what you saw to the affected driver; call police/non-emergency line if appropriate. <br/>– Why others are wrong: Calling emergency services immediately is excessive with no injuries; driving away ignores duty of care; chasing the hit-and-run driver escalates risk. The responsible action is Option 3 . </p>"
+    },
+    {
+      "sr_no": 23,
+      "question": "<p>A student is struggling with time management for an upcoming entrance exam. What would be the most effective decision to address this issue? </p>",
+      "option1": "<p>Leave preparation to the last week </p>",
+      "option2": "<p>Make a realistic study timetable and follow it </p>",
+      "option3": "<p>Focus only on favourite subjects </p>",
+      "option4": "<p>Study all night and skip sleep </p>",
+      "answer": "2",
+      "negative_marking": "0.25",
+      "positive_marking": "1.00",
+      "solution": "<p>Creating and following a realistic timetable directly targets time-management: it sets priorities, allocates slots to all subjects, builds daily/weekly goals, and includes breaks, sleep, and revision. The other choices worsen performance—procrastination (1), narrow focus that leaves gaps (3), and sleep deprivation that harms memory and concentration (4). </p>"
+    },
+    {
+      "sr_no": 24,
+      "question": "<p>Someone is speaking with you, and you strongly disagree with that person. What is the best socially intelligent reaction? </p>",
+      "option1": "<p>Wait and then respond politely with reasons </p>",
+      "option2": "<p>Interrupt them and argue with force today </p>",
+      "option3": "<p>Stay silent and gossip later about them </p>",
+      "option4": "<p>Walk away to avoid the argument now </p>",
+      "answer": "1",
+      "negative_marking": "0.25",
+      "positive_marking": "1.00",
+      "solution": "<p>The socially intelligent response is to listen first, regulate emotions, and reply respectfully with reasons . This preserves rapport and opens space for constructive dialogue. Interrupting is disrespectful, gossiping is unethical and erodes trust, and walking away avoids the issue without resolution. </p>"
+    },
+    {
+      "sr_no": 25,
+      "question": "<p>Read scenario carefully, evaluate all options, identify the action that best navigates the various competing factors and values. </p><p>You are part of a volunteer committee overseeing a local community garden project that is struggling financially. A large, successful local business offers a substantial donation that would secure the garden’s operations for the next year. However, their offer comes with the condition that they can paint their corporate logo, in bright, contrasting colors, prominently on the garden’s main entrance arch, which clashes significantly with the garden’s established natural and rustic aesthetic. </p><p>Question: Given this situation, which of the following is the most ethical and responsible action? </p>",
+      "option1": "<p>Immediately accept the donation and the logo placement, prioritizing the garden’s financial survival above all else. </p>",
+      "option2": "<p>Express gratitude for the offer and attempt to negotiate alternative forms of recognition, such as a smaller, less prominent plaque or a mention on the garden’s website, explaining the importance of maintaining the garden’s aesthetic integrity. </p>",
+      "option3": "<p>Accept the donation and the logo placement, with the intention of secretly removing or altering the logo after a few months once funds are secured. </p>",
+      "option4": "<p>Decline the donation entirely, citing the conflict with the garden’s aesthetic and core values, even if it means potential closure. </p>",
+      "answer": "2",
+      "negative_marking": "0.25",
+      "positive_marking": "1.00",
+      "solution": "<p>The most ethical and responsible action is to acknowledge the donation offer with gratitude but negotiate for an alternative, less intrusive form of recognition (like a plaque or website mention). This ensures the garden’s financial stability while protecting its natural aesthetic integrity . </p>"
+    },
+    {
+      "sr_no": 26,
+      "question": "<p>Address 1: Ms. Rina Dey, Flat No. 302, Block A, Sunrise Apartments, Mumbai – 400089 </p><p>Address 2: Ms. Rina Dey, A-302, Sunrise Apt., Mumbai – 400089 Which of the following is TRUE? </p>",
+      "option1": "<p>The block and flat number do not match </p>",
+      "option2": "<p>The apartment names differ </p>",
+      "option3": "<p>The addresses refer to the same location </p>",
+      "option4": "<p>The city pin codes are different </p>",
+      "answer": "3",
+      "negative_marking": "0.25",
+      "positive_marking": "1.00",
+      "solution": "<p>Both addresses contain the same flat (302 / A-302) , same apartment (Sunrise Apartments) , and same pin code (400089) . The difference in writing style (Block A, Flat No. 302 vs. A-302) does not change the meaning. Therefore, both addresses refer to the same location . </p>"
+    },
+    {
+      "sr_no": 27,
+      "question": "<p>Criteria to be selected as Field Officer (as on 01-01-2024): </p><p>• Graduate in Agriculture or Environmental Science with at least 65% marks. </p><p>• Age between 23 and 35 years. </p><p>• Must have a valid driving license. </p><p>• Should have field experience of at least 2 years. </p><p>Special Clause: </p><p>If candidate has no driving license but more than 4 years of field experience, refer to Regional Head. </p><p>Case: Shalini is 29 years old, has 68% in Environmental Science, 5 years of field work, but does not hold a driving license. Question: What should be done in Shalini’s case? </p>",
+      "option1": "<p>Call for interview </p>",
+      "option2": "<p>Select the candidate </p>",
+      "option3": "<p>Reject the candidate </p>",
+      "option4": "<p>Refer to Regional Head </p>",
+      "answer": "4",
+      "negative_marking": "0.25",
+      "positive_marking": "1.00",
+      "solution": "<p>Shalini fulfills the criteria of age, qualification, and field experience but does not have a driving license . According to the special clause , if a candidate has more than 4 years of field experience but lacks a driving license, the case should be referred to the Regional Head . Hence, the correct decision is Option 4 (Refer to Regional Head) . </p>"
+    },
+    {
+      "sr_no": 28,
+      "question": "<p>Criteria to be selected as Lab Assistant (as on 01-03-2024): </p><p>• Must have a Diploma in Lab Technology with at least 60% marks. </p><p>• Age must be 21 to 28 years. </p><p>• Should have minimum 1 year practical lab experience. </p><p>• Must be willing to work in night shifts. </p><p>Special Clause: </p><p>If the candidate has 70% in Diploma but only 6 months of experience, refer to Chief Lab Supervisor. </p><p>Case: </p><p>Irfan is 22 years old, has 72% in Lab Diploma, 6 months of experience, and agrees to night shifts. Question: What should be done in Irfan’s case? </p>",
+      "option1": "<p>Refer to Chief Lab Supervisor </p>",
+      "option2": "<p>Select the candidate </p>",
+      "option3": "<p>Reject the candidate </p>",
+      "option4": "<p>Information insufficient </p>",
+      "answer": "1",
+      "negative_marking": "0.25",
+      "positive_marking": "1.00",
+      "solution": "<p>Irfan fulfills all requirements of age, marks (72%) , and is willing to work in night shifts. However, he has only 6 months of experience instead of 1 year. According to the special clause , if a candidate has 70% or more in Diploma but less than 1 year of experience (only 6 months), the case should be referred to the Chief Lab Supervisor . Hence, the correct answer is Option 1 . </p>"
+    },
+    {
+      "sr_no": 29,
+      "question": "<p>Criteria to be selected as Senior Analyst – Risk and Compliance (as on 01-04-2024): </p><p>• Must have a Postgraduate degree in Finance, Economics, or Risk Management with minimum 70% marks. </p><p>• Should have work experience of 5–8 years, out of which minimum 3 years must be in risk/compliance domain. </p><p>• Age must be between 30 and 40 years. </p><p>• Must have cleared at least one international certification such as CFA, FRM, or CAMS. </p><p>Special Clause: </p><p>– If the candidate has only 60–69% marks in PG, but holds 2 certifications (CFA, FRM, CAMS), and more than 7 years of experience, refer to Director of Risk Oversight. – If the candidate is underage by less than 6 months, refer to CEO’s desk. </p><p>Case: Rajat holds a PG in Economics with 67%, has 7.5 years of experience (including 3.5 years in compliance), and holds CFA and FRM certifications. He is 29 years and 7 months old as of 01-04-2024. </p><p>Question: What should be done in Rajat’s case? </p>",
+      "option1": "<p>Refer to Director of Risk Oversight </p>",
+      "option2": "<p>Reject the candidate </p>",
+      "option3": "<p>Refer to CEO’s desk </p>",
+      "option4": "<p>Select the candidate </p>",
+      "answer": "3",
+      "negative_marking": "0.25",
+      "positive_marking": "1.00",
+      "solution": "<p>Rajat has 67% in PG (less than 70%), which normally disqualifies him. But since he has two certifications (CFA, FRM) and 7.5 years of experience , he fits the special clause. However, he is underage by 5 months (minimum age 30 required, he is 29 years 7 months). According to the rules, if a candidate is underage by less than 6 months , the case should be referred to the CEO’s desk . Hence, the correct answer is Option 3 . </p>"
+    },
+    {
+      "sr_no": 30,
+      "question": "<p>Post: Junior Librarian Eligibility Criteria (as on 01-04-2025): </p><p>Must have a Bachelor’s degree in Library Science (B.Lib.Sc.) </p><p>Age must be less than 32 years. </p><p>Must have minimum 1 year experience in any library. </p><p>Case: </p><p>Rina is 31, has B.Lib.Sc., and has 18 months experience in a college library. What should be done in Rina’s case? </p>",
+      "option1": "<p>Select the candidate </p>",
+      "option2": "<p>Reject the candidate </p>",
+      "option3": "<p>Refer to Senior Librarian </p>",
+      "option4": "<p>Information insufficient </p>",
+      "answer": "1",
+      "negative_marking": "0.25",
+      "positive_marking": "1.00",
+      "solution": "<p>Rina fulfils all the eligibility conditions. She has a Bachelor’s degree in Library Science , her age is 31 (less than 32 years) , and she has 18 months experience (&gt;1 year) . Therefore, she is eligible and should be selected . </p>"
+    }
+  ]
+};
+
+// Extract questions and time from new structure
+const questions = quizData.questions;
+const totalTimeMinutes = quizData.time_minutes;
+
+let currentQuestion = 0;
+let answers = {};
+let bookmarks = new Set();
+let timerSeconds = totalTimeMinutes * 60;
+let timerInterval = null;
+let isPaletteOpen = false;
+
+function isImageURL(str) {
+  return str && (str.startsWith('http') || str.startsWith('https'));
+}
+
+function createOptionContent(optionText) {
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'option-content';
+    
+    if (isImageURL(optionText)) {
+        const img = document.createElement('img');
+        img.src = optionText;
+        img.className = 'option-image';
+        img.alt = 'Option image';
+        img.loading = 'lazy';
+        img.onerror = function() {
+            this.style.display = 'none';
+            const errorText = document.createTextNode('Image failed to load');
+            contentDiv.appendChild(errorText);
+        };
+        contentDiv.appendChild(img);
+    } else {
+        contentDiv.innerHTML = optionText;  // FIXED: Use innerHTML
+    }
+    
+    return contentDiv;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  initTheme();
+  initQuiz();
+  initEventListeners();
+  loadFromLocalStorage();
+  startTimer();
+  createPalette();
+  preventDoubleTapZoom();
+});
+
+function preventDoubleTapZoom() {
+  let lastTouchEnd = 0;
+  document.addEventListener('touchend', (event) => {
+    const now = Date.now();
+    if (now - lastTouchEnd <= 300) {
+      event.preventDefault();
+    }
+    lastTouchEnd = now;
+  }, { passive: false });
+}
+
+function initTheme() {
+  const savedTheme = localStorage.getItem('quizTheme') || 'light';
+  document.documentElement.setAttribute('data-theme', savedTheme);
+  updateThemeIcon();
+}
+
+function updateThemeIcon() {
+  const theme = document.documentElement.getAttribute('data-theme');
+  const themeBtn = document.getElementById('themeToggle');
+  if (themeBtn) {
+    themeBtn.textContent = theme === 'dark' ? '☀️' : '🌙';
+  }
+}
+
+function toggleTheme() {
+  const currentTheme = document.documentElement.getAttribute('data-theme');
+  const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', newTheme);
+  localStorage.setItem('quizTheme', newTheme);
+  updateThemeIcon();
+}
+
+function initQuiz() {
+  loadQuestion(currentQuestion);
+  updateMarkingInfo();
+}
+
+function initEventListeners() {
+  const themeBtn = document.getElementById('themeToggle');
+  const fullscreenBtn = document.getElementById('fullscreenBtn');
+  
+  if (themeBtn) {
+    themeBtn.addEventListener('click', toggleTheme);
+    themeBtn.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      toggleTheme();
+    });
+  }
+  
+  if (fullscreenBtn) {
+    fullscreenBtn.addEventListener('click', toggleFullscreen);
+    fullscreenBtn.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      toggleFullscreen();
+    });
+  }
+  
+  addButtonListener('prevBtn', prevQuestion);
+  addButtonListener('nextBtn', nextQuestion);
+  addButtonListener('clearBtn', clearAnswer);
+  addButtonListener('submitBtn', confirmSubmit);
+  addButtonListener('bookmarkBtn', toggleBookmark);
+  
+  addButtonListener('paletteFab', togglePalette);
+  addButtonListener('paletteClose', closePalette);
+  
+  const overlay = document.getElementById('paletteOverlay');
+  if (overlay) {
+    overlay.addEventListener('click', closePalette);
+    overlay.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      closePalette();
+    });
+  }
+  
+  const searchInput = document.getElementById('paletteSearch');
+  if (searchInput) {
+    searchInput.addEventListener('input', handleSearch);
+    searchInput.addEventListener('change', jumpToQuestion);
+  }
+  
+  document.addEventListener('keydown', handleKeyPress);
+  
+  setInterval(saveToLocalStorage, 5000);
+  
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
+      updatePalette();
+    }
+  });
+}
+
+function addButtonListener(id, handler) {
+  const btn = document.getElementById(id);
+  if (btn) {
+    btn.addEventListener('click', handler);
+    btn.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      handler();
+    });
+  }
+}
+
+function jumpToQuestion(e) {
+  const questionNum = parseInt(e.target.value);
+  if (questionNum >= 1 && questionNum <= questions.length) {
+    goToQuestion(questionNum - 1);
+    closePalette();
+    e.target.value = '';
+  }
+}
+
+function togglePalette() {
+  isPaletteOpen = !isPaletteOpen;
+  const palette = document.getElementById('questionPalette');
+  const overlay = document.getElementById('paletteOverlay');
+  const fab = document.getElementById('paletteFab');
+  
+  if (isPaletteOpen) {
+    palette.classList.add('active');
+    overlay.classList.add('active');
+    fab.classList.add('active');
+    fab.innerHTML = `📋 <span class="badge" id="answeredBadge">${Object.keys(answers).length}</span>`;
+    document.body.classList.add('palette-open');
+  } else {
+    closePalette();
+  }
+}
+
+function closePalette() {
+  isPaletteOpen = false;
+  const palette = document.getElementById('questionPalette');
+  const overlay = document.getElementById('paletteOverlay');
+  const fab = document.getElementById('paletteFab');
+  
+  if (palette) palette.classList.remove('active');
+  if (overlay) overlay.classList.remove('active');
+  if (fab) {
+    fab.classList.remove('active');
+    fab.innerHTML = `📋 <span class="badge" id="answeredBadge">${Object.keys(answers).length}</span>`;
+  }
+  document.body.classList.remove('palette-open');
+}
+
+function handleSearch(e) {
+  const searchTerm = e.target.value.toLowerCase();
+  if (!searchTerm) {
+    document.querySelectorAll('.palette-btn').forEach(btn => {
+      btn.style.display = '';
+    });
+    return;
+  }
+  
+  const buttons = document.querySelectorAll('.palette-btn');
+  buttons.forEach((btn, index) => {
+    const questionNum = (index + 1).toString();
+    if (questionNum.includes(searchTerm)) {
+      btn.style.display = '';
+    } else {
+      btn.style.display = 'none';
+    }
+  });
+}
+
+function handleKeyPress(e) {
+  if (document.getElementById('resultSection').classList.contains('hidden')) {
+    if (e.key === 'Escape') {
+      if (isPaletteOpen) {
+        closePalette();
+      }
+    } else if (!isPaletteOpen && e.target.tagName !== 'INPUT') {
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        prevQuestion();
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        nextQuestion();
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        nextQuestion();
+      } else if (e.key === 'b' || e.key === 'B') {
+        e.preventDefault();
+        toggleBookmark();
+      } else if (e.key === 'c' || e.key === 'C') {
+        e.preventDefault();
+        clearAnswer();
+      } else if (e.key === 'p' || e.key === 'P') {
+        e.preventDefault();
+        togglePalette();
+      } else if (e.key >= '1' && e.key <= '4') {
+        e.preventDefault();
+        selectOption(parseInt(e.key));
+      }
+    }
+  }
+}
+
+function selectOption(optionNum) {
+  const q = questions[currentQuestion];
+  const radio = document.querySelector(`input[name="q${q.sr_no}"][value="${optionNum}"]`);
+  if (radio) {
+    radio.checked = true;
+    const label = radio.closest('.option-label');
+    if (label) {
+      document.querySelectorAll('.option-label').forEach(l => l.classList.remove('selected'));
+      label.classList.add('selected');
+      saveAnswer();
+    }
+  }
+}
+
+function toggleFullscreen() {
+  try {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(err => {
+        console.log('Fullscreen error:', err);
+      });
+    } else {
+      document.exitFullscreen();
+    }
+  } catch (err) {
+    console.log('Fullscreen not supported');
+  }
+}
+
+function startTimer() {
+  if (timerInterval) {
+    clearInterval(timerInterval);
+  }
+  timerInterval = setInterval(() => {
+    timerSeconds--;
+    updateTimer();
+    
+    // Auto-submit when time runs out
+    if (timerSeconds <= 0) {
+      clearInterval(timerInterval);
+      alert('Time is up! Submitting quiz automatically.');
+      submitQuiz();
+      return;
+    }
+    
+    if (timerSeconds <= 120) {
+      const timer = document.getElementById('timer');
+      if (timer) timer.classList.add('warning');
+    }
+  }, 1000);
+}
+
+function updateTimer() {
+  const minutes = Math.floor(timerSeconds / 60);
+  const seconds = timerSeconds % 60;
+  const timer = document.getElementById('timer');
+  if (timer) {
+    timer.textContent = 
+      `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  }
+}
+
+function createPalette() {
+  const grid = document.getElementById('paletteGrid');
+  if (!grid) return;
+  
+  grid.innerHTML = '';
+  questions.forEach((q, index) => {
+    const btn = document.createElement('button');
+    btn.textContent = index + 1;
+    btn.className = 'palette-btn';
+    btn.setAttribute('aria-label', `Go to question ${index + 1}`);
+    btn.setAttribute('type', 'button');
+    
+    btn.addEventListener('click', () => {
+      goToQuestion(index);
+      closePalette();
+    });
+    
+    btn.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      goToQuestion(index);
+      closePalette();
+    });
+    
+    grid.appendChild(btn);
+  });
+  updatePalette();
+}
+
+function updatePalette() {
+  const buttons = document.querySelectorAll('.palette-btn');
+  buttons.forEach((btn, index) => {
+    btn.className = 'palette-btn';
+    if (index === currentQuestion) btn.classList.add('current');
+    if (answers[questions[index].sr_no]) btn.classList.add('answered');
+    if (bookmarks.has(questions[index].sr_no)) btn.classList.add('bookmarked');
+  });
+  
+  updatePaletteStats();
+}
+
+function updatePaletteStats() {
+  const answered = Object.keys(answers).length;
+  const unanswered = questions.length - answered;
+  const bookmarkedCount = bookmarks.size;
+  
+  const answeredEl = document.getElementById('paletteAnswered');
+  const unansweredEl = document.getElementById('paletteUnanswered');
+  const bookmarkedEl = document.getElementById('paletteBookmarked');
+  
+  if (answeredEl) answeredEl.textContent = answered;
+  if (unansweredEl) unansweredEl.textContent = unanswered;
+  if (bookmarkedEl) bookmarkedEl.textContent = bookmarkedCount;
+  
+  const badge = document.querySelector('.palette-fab .badge');
+  if (badge) badge.textContent = answered;
+}
+
+function goToQuestion(index) {
+  if (index < 0 || index >= questions.length) return;
+  saveAnswer();
+  currentQuestion = index;
+  loadQuestion(currentQuestion);
+  
+  const questionSection = document.getElementById('questionSection');
+  if (questionSection) {
+    setTimeout(() => {
+      questionSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  }
+}
+
+function loadQuestion(index) {
+  const q = questions[index];
+  
+  const questionNumber = document.getElementById('questionNumber');
+  const questionText = document.getElementById('questionText');
+  
+  if (questionNumber) {
+    questionNumber.textContent = `Question ${index + 1} of ${questions.length}`;
+  }
+  
+  if (questionText) {
+    questionText.innerHTML = '';
+    const questionContent = createOptionContent(q.question);
+    questionText.appendChild(questionContent);
+  }
+  
+  const container = document.getElementById('optionsContainer');
+  if (!container) return;
+  
+  container.innerHTML = '';
+  
+  for (let i = 1; i <= 4; i++) {
+    const label = document.createElement('label');
+    label.className = 'option-label';
+    if (answers[q.sr_no] == i) label.classList.add('selected');
+    
+    const radio = document.createElement('input');
+    radio.type = 'radio';
+    radio.name = `q${q.sr_no}`;
+    radio.value = i;
+    radio.checked = answers[q.sr_no] == i;
+    
+    const changeHandler = () => {
+      document.querySelectorAll('.option-label').forEach(l => l.classList.remove('selected'));
+      label.classList.add('selected');
+      saveAnswer();
+    };
+    
+    radio.addEventListener('change', changeHandler);
+    label.addEventListener('click', (e) => {
+      if (e.target !== radio) {
+        radio.checked = true;
+        changeHandler();
+      }
+    });
+    
+    label.appendChild(radio);
+    
+    const optionContent = createOptionContent(q[`option${i}`]);
+    label.appendChild(optionContent);
+    
+    container.appendChild(label);
+  }
+  
+  const bookmarkBtn = document.getElementById('bookmarkBtn');
+  if (bookmarkBtn) {
+    if (bookmarks.has(q.sr_no)) {
+      bookmarkBtn.classList.add('active');
+    } else {
+      bookmarkBtn.classList.remove('active');
+    }
+  }
+  
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const submitBtn = document.getElementById('submitBtn');
+  
+  if (prevBtn) prevBtn.disabled = index === 0;
+  
+  if (index === questions.length - 1) {
+    if (nextBtn) nextBtn.classList.add('hidden');
+    if (submitBtn) submitBtn.classList.remove('hidden');
+  } else {
+    if (nextBtn) nextBtn.classList.remove('hidden');
+    if (submitBtn) submitBtn.classList.add('hidden');
+  }
+  
+  updateProgress();
+  updatePalette();
+}
+
+function updateMarkingInfo() {
+  const q = questions[0];
+  const markingInfo = document.getElementById('markingInfo');
+  if (markingInfo) {
+    markingInfo.textContent = `Marking: +${q.positive_marking}, -${q.negative_marking}`;
+  }
+}
+
+function updateProgress() {
+  const attempted = Object.keys(answers).length;
+  const currentProgress = ((currentQuestion + 1) / questions.length) * 100;
+  
+  const progressBar = document.getElementById('progressBar');
+  const progressText = document.getElementById('progressText');
+  const attemptedText = document.getElementById('attemptedText');
+  
+  if (progressBar) progressBar.style.width = `${currentProgress}%`;
+  if (progressText) progressText.textContent = `${currentQuestion + 1}/${questions.length}`;
+  if (attemptedText) attemptedText.textContent = attempted;
+}
+
+function saveAnswer() {
+  const q = questions[currentQuestion];
+  const selected = document.querySelector(`input[name="q${q.sr_no}"]:checked`);
+  
+  if (selected) {
+    answers[q.sr_no] = selected.value;
+  }
+  
+  updateProgress();
+  updatePalette();
+  saveToLocalStorage();
+}
+
+function clearAnswer() {
+  const q = questions[currentQuestion];
+  delete answers[q.sr_no];
+  
+  const selected = document.querySelector(`input[name="q${q.sr_no}"]:checked`);
+  if (selected) selected.checked = false;
+  
+  document.querySelectorAll('.option-label').forEach(l => l.classList.remove('selected'));
+  
+  updateProgress();
+  updatePalette();
+  saveToLocalStorage();
+}
+
+function toggleBookmark() {
+  const q = questions[currentQuestion];
+  const btn = document.getElementById('bookmarkBtn');
+  
+  if (bookmarks.has(q.sr_no)) {
+    bookmarks.delete(q.sr_no);
+    if (btn) btn.classList.remove('active');
+  } else {
+    bookmarks.add(q.sr_no);
+    if (btn) btn.classList.add('active');
+  }
+  
+  updatePalette();
+  saveToLocalStorage();
+}
+
+function nextQuestion() {
+  saveAnswer();
+  if (currentQuestion < questions.length - 1) {
+    currentQuestion++;
+    loadQuestion(currentQuestion);
+  }
+}
+
+function prevQuestion() {
+  saveAnswer();
+  if (currentQuestion > 0) {
+    currentQuestion--;
+    loadQuestion(currentQuestion);
+  }
+}
+
+function confirmSubmit() {
+  const unattempted = questions.length - Object.keys(answers).length;
+  let message = 'Are you sure you want to submit the quiz?';
+  
+  if (unattempted > 0) {
+    message = `You have ${unattempted} unanswered questions. ${message}`;
+  }
+  
+  if (confirm(message)) {
+    submitQuiz();
+  }
+}
+
+function submitQuiz() {
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+  saveAnswer();
+  closePalette();
+  
+  let correct = 0, wrong = 0, unattempted = 0, score = 0;
+  
+  questions.forEach(q => {
+    const userAns = answers[q.sr_no];
+    const posMark = parseFloat(q.positive_marking) || 0;
+    const negMark = parseFloat(q.negative_marking) || 0;
+    
+    if (!userAns) {
+      unattempted++;
+    } else if (userAns == q.answer) {
+      correct++;
+      score += posMark;
+    } else {
+      wrong++;
+      score -= negMark;
+    }
+  });
+  
+  displayResults(correct, wrong, unattempted, score);
+  
+  const fab = document.getElementById('paletteFab');
+  const nav = document.getElementById('navigation');
+  if (fab) fab.style.display = 'none';
+  if (nav) nav.style.display = 'none';
+  
+  document.body.style.paddingBottom = '20px';
+  
+  clearLocalStorage();
+}
+
+function displayResults(correct, wrong, unattempted, score) {
+  const totalQuestions = questions.length;
+  const percentage = ((correct / totalQuestions) * 100).toFixed(1);
+  const timerEl = document.getElementById('timer');
+  const timeText = timerEl ? timerEl.textContent : '00:00';
+  const timeTaken = (totalTimeMinutes * 60) - timerSeconds;
+  const minutesTaken = Math.floor(timeTaken / 60);
+  const secondsTaken = timeTaken % 60;
+  const timeTakenText = `${minutesTaken}m ${secondsTaken}s`;
+  
+  let html = `
+    <div class="score-card">
+      <h2>${score}/${totalQuestions}</h2>
+      <p>Your Score: ${percentage}%</p>
+      <p>Time Taken: ${timeTakenText}</p>
+    </div>
+    
+    <div class="stats-grid">
+      <div class="stat-card correct">
+        <h3>${correct}</h3>
+        <p>Correct</p>
+      </div>
+      <div class="stat-card wrong">
+        <h3>${wrong}</h3>
+        <p>Wrong</p>
+      </div>
+      <div class="stat-card unattempted">
+        <h3>${unattempted}</h3>
+        <p>Unattempted</p>
+      </div>
+      <div class="stat-card">
+        <h3>${totalQuestions}</h3>
+        <p>Total</p>
+      </div>
+    </div>
+  `;
+  
+  questions.forEach(q => {
+    const userAns = answers[q.sr_no];
+    let questionDisplay = '';
+    if (isImageURL(q.question)) {
+      questionDisplay = `<img src="${q.question}" class="question-image" alt="Question ${q.sr_no}">`;
+    } else {
+      questionDisplay = q.question;
+    }
+    html += `<div class="question-review">
+      <h4>Q${q.sr_no}: ${questionDisplay}</h4>`;
+    
+    for (let i = 1; i <= 4; i++) {
+      const isCorrect = i.toString() === q.answer;
+      const isUserAnswer = userAns == i.toString();
+      
+      let className = 'review-option';
+      if (isCorrect) className += ' correct';
+      if (isUserAnswer && !isCorrect) className += ' wrong';
+      if (isUserAnswer) className += ' user-selected';
+      
+      const optionValue = q[`option${i}`];
+      
+      if (isImageURL(optionValue)) {
+        html += `<div class="${className}">
+          ${isCorrect ? '✓ ' : ''}${isUserAnswer ? '➤ ' : ''} 
+          <img src="${optionValue}" class="option-image" alt="Option ${i}">
+        </div>`;
+      } else {
+        html += `<div class="${className}">
+          ${isCorrect ? '✓ ' : ''}${isUserAnswer ? '➤ ' : ''}${optionValue}
+        </div>`;
+      }
+    }
+    
+    if (q.solution && q.solution.trim() !== '') {
+      let solutionDisplay = '';
+      if (isImageURL(q.solution)) {
+        solutionDisplay = `<img src="${q.solution}" class="solution-image" alt="Solution" style="max-width: 100%; height: auto; border-radius: 8px; margin-top: 10px;">`;
+      } else {
+        solutionDisplay = q.solution;
+      }
+      
+      html += `<div class="solution-section" style="margin-top: 15px; padding: 15px; background: #f0f8ff; border-left: 4px solid #007bff; border-radius: 8px;">
+        <strong style="color: #007bff;">💡 Solution:</strong>
+        <div style="margin-top: 8px; color: #333;">${solutionDisplay}</div>
+      </div>`;
+    }
+    
+    html += `</div>`;
+  });
+  
+  html += `
+    <div class="action-buttons">
+      <button class="action-btn restart" onclick="restartQuiz()">Restart Quiz</button>
+      <button class="action-btn download" onclick="downloadResults()">Download Results</button>
+      <button class="action-btn print" onclick="window.print()">Print Results</button>
+    </div>
+  `;
+  
+  const resultSection = document.getElementById('resultSection');
+  const questionSection = document.getElementById('questionSection');
+  const progressSection = document.querySelector('.progress-section');
+  
+  if (resultSection) {
+    resultSection.innerHTML = html;
+    resultSection.classList.remove('hidden');
+  }
+  if (questionSection) questionSection.classList.add('hidden');
+  if (progressSection) progressSection.classList.add('hidden');
+  
+  const quizContainer = document.getElementById('quizContainer');
+  if (quizContainer) {
+    setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 100);
+  }
+}
+function isImageURL(str) {
+  return str && (str.startsWith('http') || str.startsWith('https')) &&
+    (str.match(/\.(jpeg|jpg|gif|png|svg|webp)$/i));
+}
+function restartQuiz() {
+  if (confirm('Are you sure you want to restart? All progress will be lost.')) {
+    currentQuestion = 0;
+    answers = {};
+    bookmarks.clear();
+    timerSeconds = totalTimeMinutes * 60;
+    
+    const resultSection = document.getElementById('resultSection');
+    const questionSection = document.getElementById('questionSection');
+    const progressSection = document.querySelector('.progress-section');
+    const fab = document.getElementById('paletteFab');
+    const nav = document.getElementById('navigation');
+    
+    if (resultSection) {
+      resultSection.classList.add('hidden');
+      resultSection.innerHTML = '';
+    }
+    if (questionSection) questionSection.classList.remove('hidden');
+    if (progressSection) progressSection.classList.remove('hidden');
+    if (fab) fab.style.display = 'flex';
+    if (nav) nav.style.display = 'grid';
+    
+    document.body.style.paddingBottom = 'var(--nav-height)';
+    
+    if (timerInterval) {
+      clearInterval(timerInterval);
+    }
+    updateTimer();
+    startTimer();
+    
+    loadQuestion(currentQuestion);
+    createPalette();
+  }
+}
+
+function downloadResults() {
+  const resultSection = document.getElementById('resultSection');
+  if (!resultSection) return;
+  
+  const resultHTML = resultSection.innerHTML;
+  const fullHTML = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Action to Situation</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; max-width: 900px; margin: 0 auto; }
+    .score-card { background: linear-gradient(135deg, #007bff, #28a745); color: white; padding: 30px; border-radius: 15px; text-align: center; margin-bottom: 20px; }
+    .score-card h2 { font-size: 48px; margin-bottom: 10px; }
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 30px; }
+    .stat-card { background: white; padding: 20px; border-radius: 10px; text-align: center; border: 2px solid #ddd; }
+    .stat-card h3 { font-size: 32px; margin-bottom: 8px; }
+    .stat-card.correct h3 { color: #28a745; }
+    .stat-card.wrong h3 { color: #dc3545; }
+    .stat-card.unattempted h3 { color: #6c757d; }
+    .question-review { background: white; border: 2px solid #ddd; border-radius: 10px; padding: 20px; margin-bottom: 15px; }
+    .question-review h4 { margin-bottom: 15px; font-size: 16px; line-height: 1.6; }
+    .review-option { padding: 10px 15px; margin: 8px 0; border-radius: 8px; border: 2px solid #ddd; display: flex; align-items: center; gap: 10px; }
+    .option-image { max-width: 150px; max-height: 100px; border-radius: 8px; }
+    .review-option.correct { background: #d4edda; border-color: #28a745; color: #155724; }
+    .review-option.wrong { background: #f8d7da; border-color: #dc3545; color: #721c24; }
+    .review-option.user-selected { border-width: 3px; font-weight: bold; }
+    @media print { body { background: white; } }
+    @media (max-width: 600px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+  </style>
+</head>
+<body>
+  <h1 style="text-align: center; color: #007bff;">MOTION 3.0 - Quiz Results</h1>
+  <p style="text-align: center; color: #666; margin-bottom: 30px;">Generated on: ${new Date().toLocaleString()}</p>
+  ${resultHTML.replace(/<div class="action-buttons">[\s\S]*?<\/div>/, '')}
+</body>
+</html>
+  `;
+  
+  try {
+    const blob = new Blob([fullHTML], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Quiz_Results_${new Date().getTime()}.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } catch (err) {
+    alert('Download failed. Please try using the Print option instead.');
+    console.error('Download error:', err);
+  }
+}
+
+function saveToLocalStorage() {
+  try {
+    const state = {
+      currentQuestion,
+      answers,
+      bookmarks: Array.from(bookmarks),
+      timerSeconds,
+      timestamp: Date.now()
+    };
+    localStorage.setItem('quizState', JSON.stringify(state));
+  } catch (err) {
+    console.error('Save error:', err);
+  }
+}
+
+function loadFromLocalStorage() {
+  try {
+    const saved = localStorage.getItem('quizState');
+    if (saved) {
+      const state = JSON.parse(saved);
+      if (Date.now() - state.timestamp < 24 * 60 * 60 * 1000) {
+        if (confirm('Resume previous quiz session?')) {
+          currentQuestion = state.currentQuestion || 0;
+          answers = state.answers || {};
+          bookmarks = new Set(state.bookmarks || []);
+          timerSeconds = state.timerSeconds || (totalTimeMinutes * 60); // MODIFIED
+          updateTimer();
+          loadQuestion(currentQuestion);
+        }
+      } else {
+        clearLocalStorage();
+      }
+    }
+  } catch (err) {
+    console.error('Load error:', err);
+    clearLocalStorage();
+  }
+}
+
+function clearLocalStorage() {
+  try {
+    localStorage.removeItem('quizState');
+  } catch (err) {
+    console.error('Clear storage error:', err);
+  }
+}
+
+window.addEventListener('beforeunload', (e) => {
+  const resultSection = document.getElementById('resultSection');
+  if (resultSection && !resultSection.classList.contains('hidden')) {
+    return;
+  }
+  e.preventDefault();
+  e.returnValue = '';
+});
+
+window.addEventListener('unload', () => {
+  if (timerInterval) {
+    clearInterval(timerInterval);
+  }
+});
+</script>
+</body>
+</html>
