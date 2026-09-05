@@ -1,0 +1,2495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Input</title>
+<style>
+:root {
+  --primary-color: #007bff;
+  --primary-hover: #0069d9;
+  --success-color: #28a745;
+  --success-hover: #218838;
+  --danger-color: #dc3545;
+  --warning-color: #ffc107;
+  --secondary-color: #6c757d;
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --bg-tertiary: #e9ecef;
+  --text-primary: #212529;
+  --text-secondary: #6c757d;
+  --border-color: #dee2e6;
+  --shadow: 0 4px 6px rgba(0,0,0,0.1);
+  --shadow-lg: 0 10px 30px rgba(0,0,0,0.15);
+  --overlay: rgba(0,0,0,0.5);
+  --nav-height: 80px;
+}
+
+[data-theme="dark"] {
+  --primary-color: #4dabf7;
+  --primary-hover: #339af0;
+  --success-color: #51cf66;
+  --success-hover: #40c057;
+  --danger-color: #ff6b6b;
+  --warning-color: #ffd43b;
+  --secondary-color: #868e96;
+  --bg-primary: #1a1a1a;
+  --bg-secondary: #2d2d2d;
+  --bg-tertiary: #404040;
+  --text-primary: #f8f9fa;
+  --text-secondary: #adb5bd;
+  --border-color: #495057;
+  --shadow: 0 4px 6px rgba(0,0,0,0.3);
+  --shadow-lg: 0 10px 30px rgba(0,0,0,0.4);
+  --overlay: rgba(0,0,0,0.7);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  transition: background 0.3s, color 0.3s;
+  overflow-x: hidden;
+  position: relative;
+  padding-bottom: var(--nav-height);
+}
+
+body.palette-open {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg-primary);
+  padding: 20px 30px;
+  border-radius: 15px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow);
+}
+
+.header h1 {
+  font-size: 28px;
+  color: var(--primary-color);
+  font-weight: 700;
+  user-select: none;
+}
+
+.header-controls {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.theme-toggle, .fullscreen-btn {
+  background: var(--bg-tertiary);
+  border: none;
+  padding: 10px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 20px;
+  transition: all 0.3s;
+  min-width: 44px;
+  min-height: 44px;
+  user-select: none;
+}
+
+.theme-toggle:active, .fullscreen-btn:active {
+  transform: scale(0.95);
+}
+
+.theme-toggle:hover, .fullscreen-btn:hover {
+  background: var(--primary-color);
+  color: white;
+}
+
+.timer {
+  background: var(--warning-color);
+  color: #000;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 18px;
+  min-width: 100px;
+  text-align: center;
+  user-select: none;
+}
+
+.timer.warning {
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.palette-fab {
+  position: fixed;
+  bottom: calc(var(--nav-height) + 20px);
+  right: 20px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 24px;
+  box-shadow: 0 6px 20px rgba(0,123,255,0.4);
+  transition: all 0.3s ease;
+  z-index: 998;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.palette-fab:active {
+  transform: scale(0.9);
+}
+
+.palette-fab:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 25px rgba(0,123,255,0.6);
+}
+
+.palette-fab.active {
+  background: var(--danger-color);
+}
+
+.palette-fab .badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: var(--success-color);
+  color: white;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--bg-secondary);
+  pointer-events: none;
+}
+
+.palette-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--overlay);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  z-index: 999;
+  touch-action: none;
+}
+
+.palette-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.question-palette {
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: 100%;
+  max-width: 450px;
+  height: 100vh;
+  height: 100dvh;
+  background: var(--bg-primary);
+  box-shadow: -5px 0 20px rgba(0,0,0,0.2);
+  transition: right 0.3s ease;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.question-palette.active {
+  right: 0;
+}
+
+.palette-header {
+  padding: 20px;
+  background: var(--primary-color);
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.palette-header h3 {
+  font-size: 20px;
+  margin: 0;
+}
+
+.palette-close {
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 32px;
+  cursor: pointer;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: background 0.2s;
+  line-height: 1;
+  touch-action: manipulation;
+}
+
+.palette-close:active {
+  transform: scale(0.9);
+}
+
+.palette-close:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+.palette-stats {
+  padding: 15px 20px;
+  background: var(--bg-tertiary);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  font-size: 13px;
+  text-align: center;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border-color);
+  user-select: none;
+}
+
+.palette-stat {
+  display: flex;
+  flex-direction: column;
+}
+
+.palette-stat .number {
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 5px;
+}
+
+.palette-stat.answered .number { color: var(--success-color); }
+.palette-stat.unanswered .number { color: var(--secondary-color); }
+.palette-stat.bookmarked .number { color: var(--warning-color); }
+
+.palette-search {
+  padding: 15px 20px;
+  background: var(--bg-secondary);
+  flex-shrink: 0;
+}
+
+.palette-search input {
+  width: 100%;
+  padding: 10px 15px;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 14px;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.palette-search input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+.palette-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 20px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.palette-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 10px;
+}
+
+.palette-btn {
+  aspect-ratio: 1;
+  border: 2px solid var(--border-color);
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s;
+  min-width: 40px;
+  min-height: 40px;
+  color: var(--text-primary);
+  position: relative;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.palette-btn:active {
+  transform: scale(0.9);
+}
+
+.palette-btn:hover {
+  transform: scale(1.1);
+  z-index: 10;
+  box-shadow: var(--shadow);
+}
+
+.palette-btn.current {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+  animation: currentPulse 2s infinite;
+}
+
+@keyframes currentPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(0,123,255,0.7); }
+  50% { box-shadow: 0 0 0 8px rgba(0,123,255,0); }
+}
+
+.palette-btn.answered {
+  background: var(--success-color);
+  color: white;
+  border-color: var(--success-color);
+}
+
+.palette-btn.bookmarked::after {
+  content: '🔖';
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  font-size: 16px;
+  pointer-events: none;
+}
+
+.palette-btn.bookmarked.answered {
+  background: var(--success-color);
+}
+
+.palette-legend {
+  padding: 20px;
+  border-top: 1px solid var(--border-color);
+  font-size: 13px;
+  background: var(--bg-secondary);
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.legend-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+.question-image, .option-image {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 10px 0;
+  display: block;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.legend-color {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.quiz-container {
+  background: var(--bg-primary);
+  border-radius: 15px;
+  box-shadow: var(--shadow-lg);
+  padding: 30px;
+  max-width: 900px;
+  margin: 0 auto;
+  scroll-margin-top: 20px;
+}
+
+.quiz-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.marking-info {
+  display: inline-block;
+  background: var(--bg-tertiary);
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  user-select: none;
+}
+
+.progress-section {
+  margin-bottom: 25px;
+}
+
+.progress-stats {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  user-select: none;
+}
+
+.progress-bar-container {
+  background: var(--bg-tertiary);
+  border-radius: 12px;
+  overflow: hidden;
+  height: 10px;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary-color), var(--success-color));
+  transition: width 0.4s ease;
+  border-radius: 12px;
+}
+
+.question-section {
+  min-height: 300px;
+  scroll-margin-top: 80px;
+  margin-bottom: 20px;
+}
+
+.question-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.question-number {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--primary-color);
+  user-select: none;
+}
+
+.bookmark-btn {
+  background: transparent;
+  border: 2px solid var(--border-color);
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 44px;
+  min-height: 44px;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.bookmark-btn:active {
+  transform: scale(0.95);
+}
+
+.bookmark-btn.active {
+  background: var(--warning-color);
+  border-color: var(--warning-color);
+  color: #000;
+}
+
+.question {
+  font-size: 18px;
+  line-height: 1.7;
+  margin-bottom: 25px;
+  color: var(--text-primary);
+  user-select: text;
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.option-label {
+  display: flex;
+  align-items: center;
+  border: 2px solid var(--border-color);
+  padding: 16px 20px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--bg-secondary);
+  min-height: 60px;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.option-label:active {
+  transform: scale(0.98);
+}
+
+.option-label:hover {
+  background: var(--bg-tertiary);
+  border-color: var(--primary-color);
+}
+
+.option-label.selected {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+  color: white;
+}
+
+.option-label input[type="radio"] {
+  margin-right: 15px;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: var(--primary-color);
+  flex-shrink: 0;
+}
+
+.option-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.option-image {
+  max-width: 100%;
+  max-height: 200px;
+  border-radius: 8px;
+  object-fit: contain;
+  background: var(--bg-primary);
+  padding: 10px;
+}
+
+.option-label.selected .option-image {
+  background: rgba(255,255,255,0.1);
+}
+
+.navigation {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--bg-primary);
+  border-top: 2px solid var(--border-color);
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+  z-index: 997;
+  padding: 15px 20px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 10px;
+  max-width: 100%;
+}
+
+.nav-btn {
+  padding: 14px 20px;
+  border-radius: 10px;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s;
+  min-height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  user-select: none;
+  touch-action: manipulation;
+  white-space: nowrap;
+}
+
+.nav-btn:active {
+  transform: scale(0.97);
+}
+
+.nav-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.nav-btn.prev {
+  background: var(--secondary-color);
+  color: white;
+}
+
+.nav-btn.prev:hover:not(:disabled) {
+  background: #5a6268;
+}
+
+.nav-btn.next {
+  background: var(--primary-color);
+  color: white;
+}
+
+.nav-btn.next:hover:not(:disabled) {
+  background: var(--primary-hover);
+}
+
+.nav-btn.clear {
+  background: var(--danger-color);
+  color: white;
+}
+
+.nav-btn.clear:hover {
+  background: #c82333;
+}
+
+.nav-btn.submit {
+  background: var(--success-color);
+  color: white;
+  grid-column: 1 / -1;
+}
+
+.nav-btn.submit:hover {
+  background: var(--success-hover);
+}
+
+.result-section {
+  animation: fadeIn 0.5s;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.score-card {
+  background: linear-gradient(135deg, var(--primary-color), var(--success-color));
+  color: white;
+  padding: 30px;
+  border-radius: 15px;
+  text-align: center;
+  margin-bottom: 30px;
+  user-select: none;
+}
+
+.score-card h2 {
+  font-size: 48px;
+  margin-bottom: 10px;
+}
+
+.score-card p {
+  font-size: 18px;
+  opacity: 0.9;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.stat-card {
+  background: var(--bg-secondary);
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+  border: 2px solid var(--border-color);
+  user-select: none;
+}
+
+.stat-card h3 {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.stat-card.correct h3 { color: var(--success-color); }
+.stat-card.wrong h3 { color: var(--danger-color); }
+.stat-card.unattempted h3 { color: var(--secondary-color); }
+
+.question-review {
+  border: 2px solid var(--border-color);
+  border-radius: 15px;
+  padding: 25px;
+  margin-bottom: 20px;
+  background: var(--bg-secondary);
+}
+
+.question-review h4 {
+  margin-bottom: 15px;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.review-option {
+  padding: 12px 16px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  border: 2px solid var(--border-color);
+  background: var(--bg-primary);
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.review-option .option-image {
+  max-width: 150px;
+  max-height: 100px;
+}
+
+.review-option.correct {
+  background: #d4edda;
+  border-color: var(--success-color);
+  color: #155724;
+}
+
+.review-option.wrong {
+  background: #f8d7da;
+  border-color: var(--danger-color);
+  color: #721c24;
+}
+
+.review-option.user-selected {
+  border-width: 3px;
+  font-weight: 600;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.action-btn {
+  padding: 14px 30px;
+  border-radius: 10px;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s;
+  min-width: 150px;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.action-btn:active {
+  transform: scale(0.95);
+}
+
+.action-btn.restart {
+  background: var(--danger-color);
+  color: white;
+}
+
+.action-btn.restart:hover {
+  background: #c82333;
+}
+
+.action-btn.download {
+  background: var(--primary-color);
+  color: white;
+}
+
+.action-btn.download:hover {
+  background: var(--primary-hover);
+}
+
+.action-btn.print {
+  background: var(--secondary-color);
+  color: white;
+}
+
+.action-btn.print:hover {
+  background: #5a6268;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.palette-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.palette-content::-webkit-scrollbar-track {
+  background: var(--bg-tertiary);
+}
+
+.palette-content::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: 4px;
+}
+
+.palette-content::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-hover);
+}
+
+@media (max-width: 768px) {
+  :root {
+    --nav-height: 140px;
+  }
+
+  .container {
+    padding: 10px;
+  }
+
+  .header {
+    flex-direction: column;
+    gap: 15px;
+    padding: 15px;
+  }
+
+  .header h1 {
+    font-size: 22px;
+  }
+
+  .quiz-container {
+    padding: 20px 15px;
+  }
+
+  .question-palette {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .palette-grid {
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+  }
+
+  .palette-btn {
+    font-size: 13px;
+    min-width: 36px;
+    min-height: 36px;
+  }
+
+  .palette-fab {
+    bottom: calc(var(--nav-height) + 10px);
+    right: 15px;
+    width: 56px;
+    height: 56px;
+    font-size: 22px;
+  }
+
+  .navigation {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 12px 15px;
+  }
+
+  .nav-btn {
+    min-height: 44px;
+    font-size: 15px;
+  }
+
+  .nav-btn.clear {
+    order: 3;
+  }
+
+  .nav-btn.submit {
+    grid-column: auto;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .legend-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .question {
+    font-size: 16px;
+  }
+
+  .option-label {
+    padding: 14px 16px;
+    font-size: 15px;
+  }
+
+  .option-image {
+    max-height: 150px;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+  }
+
+  .action-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .palette-grid {
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+  }
+
+  .palette-btn {
+    font-size: 12px;
+    min-width: 32px;
+    min-height: 32px;
+  }
+
+  .header h1 {
+    font-size: 20px;
+  }
+
+  .timer {
+    font-size: 16px;
+    padding: 8px 16px;
+  }
+
+  .option-image {
+    max-height: 120px;
+  }
+}
+
+@media (max-width: 360px) {
+  .palette-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media print {
+  .header-controls, .navigation, .palette-fab, .palette-overlay, .question-palette, .action-buttons, .bookmark-btn {
+    display: none !important;
+  }
+
+  body {
+    background: white;
+    padding-bottom: 0;
+  }
+
+  .container {
+    padding-bottom: 20px;
+  }
+}
+
+@media (max-height: 500px) and (orientation: landscape) {
+  .palette-fab {
+    bottom: calc(var(--nav-height) + 5px);
+    right: 10px;
+    width: 48px;
+    height: 48px;
+    font-size: 20px;
+  }
+
+  .palette-fab .badge {
+    width: 20px;
+    height: 20px;
+    font-size: 11px;
+  }
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>🎯 Input</h1>
+    <div class="header-controls">
+      <div class="timer" id="timer">00:00</div>
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle Theme">🌙</button>
+      <button class="fullscreen-btn" id="fullscreenBtn" aria-label="Toggle fullscreen" title="Fullscreen">⛶</button>
+    </div>
+  </div>
+
+  <div class="quiz-container" id="quizContainer">
+    <div class="quiz-header">
+      <div class="marking-info" id="markingInfo">Marking: +1, -0</div>
+    </div>
+
+    <div class="progress-section">
+      <div class="progress-stats">
+        <span>Progress: <strong id="progressText">1/2</strong></span>
+        <span>Attempted: <strong id="attemptedText">0</strong></span>
+      </div>
+      <div class="progress-bar-container">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+    </div>
+
+    <div class="question-section" id="questionSection">
+      <div class="question-header">
+        <div class="question-number" id="questionNumber">Question 1 of 2</div>
+        <button class="bookmark-btn" id="bookmarkBtn" aria-label="Bookmark question">
+          <span>🔖</span> <span>Bookmark</span>
+        </button>
+      </div>
+      
+      <div class="question" id="questionText"></div>
+      
+      <div class="options" id="optionsContainer"></div>
+    </div>
+
+    <div class="result-section hidden" id="resultSection"></div>
+  </div>
+</div>
+
+<button class="palette-fab" id="paletteFab" aria-label="Toggle question palette" title="Question Palette">
+  📋
+  <span class="badge" id="answeredBadge">0</span>
+</button>
+
+<div class="palette-overlay" id="paletteOverlay"></div>
+
+<div class="question-palette" id="questionPalette">
+  <div class="palette-header">
+    <h3>Question Palette</h3>
+    <button class="palette-close" id="paletteClose" aria-label="Close palette">×</button>
+  </div>
+
+  <div class="palette-stats">
+    <div class="palette-stat answered">
+      <div class="number" id="paletteAnswered">0</div>
+      <div>Answered</div>
+    </div>
+    <div class="palette-stat unanswered">
+      <div class="number" id="paletteUnanswered">2</div>
+      <div>Not Answered</div>
+    </div>
+    <div class="palette-stat bookmarked">
+      <div class="number" id="paletteBookmarked">0</div>
+      <div>Bookmarked</div>
+    </div>
+  </div>
+
+  <div class="palette-search">
+    <input type="number" id="paletteSearch" placeholder="Jump to question number..." aria-label="Search questions" inputmode="numeric" pattern="[0-9]*">
+  </div>
+
+  <div class="palette-content">
+    <div class="palette-grid" id="paletteGrid"></div>
+  </div>
+
+  <div class="palette-legend">
+    <div class="legend-grid">
+      <div class="legend-item">
+        <div class="legend-color" style="background: var(--success-color)"></div>
+        <span>Answered</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background: var(--bg-secondary); border: 2px solid var(--border-color)"></div>
+        <span>Not Answered</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background: var(--primary-color)"></div>
+        <span>Current Question</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background: var(--warning-color)"></div>
+        <span>🔖 Bookmarked</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="navigation" id="navigation">
+  <button class="nav-btn prev" id="prevBtn" aria-label="Previous question">
+    <span>←</span> Previous
+  </button>
+  <button class="nav-btn clear" id="clearBtn" aria-label="Clear answer">Clear</button>
+  <button class="nav-btn next" id="nextBtn" aria-label="Next question">
+    Next <span>→</span>
+  </button>
+  <button class="nav-btn submit hidden" id="submitBtn" aria-label="Submit quiz">Submit Quiz</button>
+</div>
+
+<script>
+// MODIFIED: Quiz data structure with time_minutes
+const quizData = {
+  "time_minutes": 50,
+  "questions": [
+    {
+      "sr_no": 1,
+      "question": "<p>An electronic device rearranges numbers step-by-step in a particular order according to a set of rules. The device stops when the final result is obtained. In this case the device stops at Step V. </p><p>Input: 85 16 36 04 19 97 63 09</p><p>Step I: 97 85 16 36 04 19 63 09​<br/>Step II: 97 85 63 16 36 04 19 09​<br/>Step III: 97 85 63 36 16 04 19 09​<br/>Step IV: 97 85 63 36 19 16 04 09​<br/>Step V: 97 85 63 36 19 16 09 04</p><p>Study the above arrangement carefully and then answer the following questions:​</p><p>Which of the following will be Step III for the input below?</p><p>Input: 09 25 16 30 32 18 17 06</p>",
+      "option1": "<p>32 30 25 09 16 18 17 06</p>",
+      "option2": "<p>32 30 09 25 16 18 17 06</p>",
+      "option3": "<p>32 09 25 16 30 18 17 06</p>",
+      "option4": "<p>32 30 09 25 16 19 17 06</p>",
+      "answer": "1",
+      "negative_marking": "0.50",
+      "positive_marking": "2.00",
+      "solution": "<p>Answer: 32 30 25 09 16 18 17 06.</p><p>Reason: each step picks the next largest number and inserts it just after the already placed numbers (shifting the others).<br/>Step I → place 32: 32 09 25 16 30 18 17 06<br/>Step II → place 30: 32 30 09 25 16 18 17 06<br/>Step III → place 25: 32 30 25 09 16 18 17 06.</p>"
+    },
+    {
+      "sr_no": 2,
+      "question": "<p>An electronic device rearranges numbers step-by-step in a particular order according to a set of rules. The device stops when the final result is obtained. In this case the device stops at Step V. </p><p>Input: 85 16 36 04 19 97 63 09</p><p>Step I: 97 85 16 36 04 19 63 09​<br/>Step II: 97 85 63 16 36 04 19 09​<br/>Step III: 97 85 63 36 16 04 19 09​<br/>Step IV: 97 85 63 36 19 16 04 09​<br/>Step V: 97 85 63 36 19 16 09 04</p><p>Study the above arrangement carefully and then answer the following questions:​</p><p>Which is the last step for the input below?​<br/>Input: 16 09 25 27 06 05</p>",
+      "option1": "<p>Step II</p>",
+      "option2": "<p> Step III</p>",
+      "option3": "<p>Step IV</p>",
+      "option4": "<p>None of these</p>",
+      "answer": "1",
+      "negative_marking": "0.50",
+      "positive_marking": "2.00",
+      "solution": "<p>Input: 16 09 25 27 06 05<br/>Step I (place 27): 27 16 09 25 06 05<br/>Step II (place 25): 27 25 16 09 06 05 — this is already fully in descending order (27&gt;25&gt;16&gt;09&gt;06&gt;05), so the device stops at Step II.</p>"
+    },
+    {
+      "sr_no": 3,
+      "question": "<p>An electronic device rearranges numbers step-by-step in a particular order according to a set of rules. The device stops when the final result is obtained. In this case the device stops at Step V. </p><p>Input: 85 16 36 04 19 97 63 09</p><p>Step I: 97 85 16 36 04 19 63 09​<br/>Step II: 97 85 63 16 36 04 19 09​<br/>Step III: 97 85 63 36 16 04 19 09​<br/>Step IV: 97 85 63 36 19 16 04 09​<br/>Step V: 97 85 63 36 19 16 09 04</p><p>Study the above arrangement carefully and then answer the following questions:​</p><p>What is the output of Step V for the input below?</p><p>Input: 25 08 35 11 88 67 23</p>",
+      "option1": "<p>08 11 23 25 35 67 88</p>",
+      "option2": "<p>88 67 35 25 23 11 08</p>",
+      "option3": "<p>88 67 35 25 23 08 11</p>",
+      "option4": "<p>None of these</p>",
+      "answer": "2",
+      "negative_marking": "0.50",
+      "positive_marking": "2.00",
+      "solution": "<p>Input: 25 08 35 11 88 67 23</p><p>Step I: 88 25 08 35 11 67 23</p><p>Step II: 88 67 25 08 35 11 23</p><p>Step III:88 67 35 25 08 11 23</p><p>Step IV: 88 67 35 25 23 08 11</p><p>Step V: 88 67 35 25 23 11 08 ← fully descending (final)</p>"
+    },
+    {
+      "sr_no": 4,
+      "question": "<p>An electronic device rearranges numbers step-by-step in a particular order according to a set of rules. The device stops when the final result is obtained. In this case the device stops at Step V. </p><p>Input: 85 16 36 04 19 97 63 09</p><p>Step I: 97 85 16 36 04 19 63 09​<br/>Step II: 97 85 63 16 36 04 19 09​<br/>Step III: 97 85 63 36 16 04 19 09​<br/>Step IV: 97 85 63 36 19 16 04 09​<br/>Step V: 97 85 63 36 19 16 09 04</p><p>Study the above arrangement carefully and then answer the following questions:​</p><p>Which one of the following would be the last step for the input below?​<br/>Input: 03 31 43 22 11 09</p>",
+      "option1": "<p>Step II</p>",
+      "option2": "<p>Step III</p>",
+      "option3": "<p>Step IV</p>",
+      "option4": "<p>None of these</p>",
+      "answer": "4",
+      "negative_marking": "0.50",
+      "positive_marking": "2.00",
+      "solution": "<p>Input: 03 31 43 22 11 09</p><p>Step I (place 43): 43 03 31 22 11 09<br/>Step II (place 31): 43 31 03 22 11 09<br/>Step III (place 22):43 31 22 03 11 09<br/>Step IV (place 11): 43 31 22 11 03 09<br/>Step V (place 09): 43 31 22 11 09 03 ← now fully descending</p><p>Since the final (fully descending) array appears at Step V, and Step V is not one of the given options, the correct choice is None of these.</p>"
+    },
+    {
+      "sr_no": 5,
+      "question": "<p>An electronic device rearranges numbers step-by-step in a particular order according to a set of rules. The device stops when the final result is obtained. In this case the device stops at Step V. </p><p>Input: 85 16 36 04 19 97 63 09</p><p>Step I: 97 85 16 36 04 19 63 09​<br/>Step II: 97 85 63 16 36 04 19 09​<br/>Step III: 97 85 63 36 16 04 19 09​<br/>Step IV: 97 85 63 36 19 16 04 09​<br/>Step V: 97 85 63 36 19 16 09 04</p><p>Study the above arrangement carefully and then answer the following questions:​</p><p>If the output of Step IV is as given below, what was the input?​<br/>Step IV: 92 86 71 69 15 19 06 63 58</p>",
+      "option1": "<p>15 19 06 63 58 86 92 69 71</p>",
+      "option2": "<p>15 86 19 92 06 69 63 58 71</p>",
+      "option3": "<p>86 92 69 71 15 19 06 63 58</p>",
+      "option4": "<p>Cannot be determined</p>",
+      "answer": "4",
+      "negative_marking": "0.50",
+      "positive_marking": "2.00",
+      "solution": "<p>Both option A (15 19 06 63 58 86 92 69 71) and option B (15 86 19 92 06 69 63 58 71) produce that exact array at Step IV when simulated under the puzzle rule, so the original input cannot be uniquely determined from the given Step IV alone. Hence “Cannot be determined.”</p>"
+    },
+    {
+      "sr_no": 6,
+      "question": "<p>A word arrangement machine, when given an input line of words, rearranges it in every step following a certain rule. Following is an illustration of an input line of words and various steps of rearrangement.</p><p>Input: gone are take enough brought station</p><p>Step I: take gone are enough brought station​<br/>Step II: take are gone enough brought station​<br/>Step III: take are station gone enough brought​<br/>Step IV: take are station brought gone enough​<br/>And, Step IV is the last step for this input. Now, find out an appropriate step in each of the following questions following the above rule.</p><p>Input: car on star quick demand fat<br/>What will be the third step for this input?</p>",
+      "option1": "<p>star quick car demand on fat</p>",
+      "option2": "<p>star car quick demand on fat</p>",
+      "option3": "<p>star car demand quick on fat</p>",
+      "option4": "<p>star car quick on demand fat</p>",
+      "answer": "2",
+      "negative_marking": "0.50",
+      "positive_marking": "2.00",
+      "solution": "<p>Step Pattern Observation</p><p>are(1) brought(2) enough(3) gone(4) station(5) take(6)</p><p>The final (last) step order — as given — is:<br/>6, 1, 5, 2, 4, 3<br/>⇒ take are station brought gone enough</p><p>Hence, the machine rearranges words step-by-step toward this pattern.</p><p>Now apply it to the question</p><p>Input:<br/>car on star quick demand fat</p><p>Step 1 – Alphabetical order:</p><p>car(1), demand(2), fat(3), on(4), quick(5), star(6)</p><p>Final pattern (like before):</p><p>6, 1, 5, 2, 4, 3<br/>⇒ star car quick demand on fat</p><p>That’s the final arrangement.<br/>Now we’ll reach it step-by-step.</p><p>Step-by-step process </p><p>Input: car on star quick demand fat</p><p>Step I: Move star (word 6) to the front.<br/>→ star car on quick demand fat</p><p>Step II: Next, move quick (word 5) into its correct position after car.<br/>→ star car quick on demand fat</p><p>Step III: Next, move demand (word 2) after quick.<br/>→ star car quick demand on fat</p><p>So, after Step III, we get:</p><p>✅ Step III output: star car quick demand on fat</p>"
+    },
+    {
+      "sr_no": 7,
+      "question": "<p>A word arrangement machine, when given an input line of words, rearranges it in every step following a certain rule. Following is an illustration of an input line of words and various steps of rearrangement.</p><p>Input: gone are take enough brought station</p><p>Step I: take gone are enough brought station​<br/>Step II: take are gone enough brought station​<br/>Step III: take are station gone enough brought​<br/>Step IV: take are station brought gone enough​<br/>And, Step IV is the last step for this input. Now, find out an appropriate step in each of the following questions following the above rule.</p><p>Input: ink hurry yet for the victory<br/>Which of the following will be the last step of the above input?</p>",
+      "option1": "<p>III</p>",
+      "option2": "<p>IV</p>",
+      "option3": "<p>V</p>",
+      "option4": "<p>VI</p>",
+      "answer": "3",
+      "negative_marking": "0.50",
+      "positive_marking": "2.00",
+      "solution": "<p>Answer: V (Step V).</p><p>Now place words one by one in the final-pattern order, skipping any selection that causes no visible change:</p><p>We reached the fully rearranged (final) sequence at Step V. Hence the last step is V.</p>"
+    },
+    {
+      "sr_no": 8,
+      "question": "<p>A word arrangement machine, when given an input line of words, rearranges it in every step following a certain rule. Following is an illustration of an input line of words and various steps of rearrangement.</p><p>Input: gone are take enough brought station</p><p>Step I: take gone are enough brought station​<br/>Step II: take are gone enough brought station​<br/>Step III: take are station gone enough brought​<br/>Step IV: take are station brought gone enough​<br/>And, Step IV is the last step for this input. Now, find out an appropriate step in each of the following questions following the above rule.</p><p>If Step III of an input is ‘warden examination town ink garden restore’, what step would be ‘warden ink town garden restore examination’?</p>",
+      "option1": "<p>I</p>",
+      "option2": "<p>II</p>",
+      "option3": "<p>IV</p>",
+      "option4": "<p> V</p>",
+      "answer": "1",
+      "negative_marking": "0.50",
+      "positive_marking": "2.00",
+      "solution": "<p>Answer: I (Step I).</p><p>We’re told<br/>Step III = warden examination town ink garden restore.</p><p>Work backwards to get earlier steps:</p><p>So, the arrangement warden ink town garden restore examination is the Step I sequence.</p>"
+    },
+    {
+      "sr_no": 9,
+      "question": "<p>A word arrangement machine, when given an input line of words, rearranges it in every step following a certain rule. Following is an illustration of an input line of words and various steps of rearrangement.</p><p>Input: gone are take enough brought station</p><p>Step I: take gone are enough brought station​<br/>Step II: take are gone enough brought station​<br/>Step III: take are station gone enough brought​<br/>Step IV: take are station brought gone enough​<br/>And, Step IV is the last step for this input. Now, find out an appropriate step in each of the following questions following the above rule.</p><p>If Step IV of an input is ‘violet for sour height journey medium’, which of the following could be Step II of that input?</p>",
+      "option1": "<p>violet for sour height journey medium</p>",
+      "option2": "<p>violet for journey height sour medium</p>",
+      "option3": "<p>violet journey height for sour medium</p>",
+      "option4": "<p>violet for sour journey height medium</p>",
+      "answer": "2",
+      "negative_marking": "0.50",
+      "positive_marking": "2.00",
+      "solution": "<p>Step IV has four rearranged words—‘violet’, ‘for’, ‘sour’ and ‘height’. This means that none of these words automatically came to its place during rearrangement, but each of them was replaced at one step. Thus, Step II should contain only ‘violet’ and ‘for’ in the first and second places, and each one of ‘sour’ and ‘height’ must lie at any place after ‘jumping’, so that each of them needs to be rearranged. Hence, the answer is (b).</p>"
+    },
+    {
+      "sr_no": 10,
+      "question": "<p>A word and number arrangement machine when given an input line of words and numbers, rearranges them following a particular rule in each step. The following is an illustration of input and rearrangement.</p><p>Input: sight by now 25 72 sight 37 15 home​<br/>Step I: sight by now 25 72 37 15 home​<br/>Step II: sight 15 by now 25 72 37 home​<br/>Step III: sight 15 by now 25 72 37 home​<br/>Step IV: sight 15 now 25 by 72 37 home<br/>Step V: sight 15 now 25 home by 72 37​<br/>Step VI: sight 15 now 25 home 37 by 72​<br/>And Step VI is the last step of the rearrangement.​</p><p><br/>As per the rules followed in the above steps, find out in each of the following questions the appropriate step for the given inputs. </p><p>Input: ask for me 49 32 64 and 24<br/>Which of the following will be Step III for the above input?</p>",
+      "option1": "<p>me 24 ask for 49 32 64 and </p>",
+      "option2": "<p>me 24 for ask 49 32 64 and</p>",
+      "option3": "<p>me 24 for 32 ask 49 64 and</p>",
+      "option4": "<p>me 24 for 32 ask 49 and 64</p>",
+      "answer": "2",
+      "negative_marking": "0.50",
+      "positive_marking": "2.00",
+      "solution": "<p>So, Step III is option B.</p>"
+    },
+    {
+      "sr_no": 11,
+      "question": "<p>A word and number arrangement machine when given an input line of words and numbers, rearranges them following a particular rule in each step. The following is an illustration of input and rearrangement.</p><p>Input: sight by now 25 72 sight 37 15 home​<br/>Step I: sight by now 25 72 37 15 home​<br/>Step II: sight 15 by now 25 72 37 home​<br/>Step III: sight 15 by now 25 72 37 home​<br/>Step IV: sight 15 now 25 by 72 37 home<br/>Step V: sight 15 now 25 home by 72 37​<br/>Step VI: sight 15 now 25 home 37 by 72​<br/>And Step VI is the last step of the rearrangement.​</p><p>As per the rules followed in the above steps, find out in each of the following questions the appropriate step for the given inputs. </p><p>Input: go now and come 72 34 57 25<br/>How many steps will be required to complete the rearrangement?</p>",
+      "option1": "<p>Four</p>",
+      "option2": "<p>Five</p>",
+      "option3": "<p>Six</p>",
+      "option4": "<p>Seven</p>",
+      "answer": "2",
+      "negative_marking": "0.50",
+      "positive_marking": "2.00",
+      "solution": "<p>Input: go now and come 72 34 57 25<br/>Target pattern (words in reverse alphabetical at odd positions, numbers in ascending at even positions):<br/>now 25 go 34 come 57 and 72</p><p>Counted steps:</p><p>So, the rearrangement completes in Five steps.</p>"
+    },
+    {
+      "sr_no": 12,
+      "question": "<p>A word and number arrangement machine when given an input line of words and numbers, rearranges them following a particular rule in each step. The following is an illustration of input and rearrangement.</p><p>Input: sight by now 25 72 sight 37 15 home​<br/>Step I: sight by now 25 72 37 15 home​<br/>Step II: sight 15 by now 25 72 37 home​<br/>Step III: sight 15 by now 25 72 37 home​<br/>Step IV: sight 15 now 25 by 72 37 home<br/>Step V: sight 15 now 25 home by 72 37​<br/>Step VI: sight 15 now 25 home 37 by 72​<br/>And Step VI is the last step of the rearrangement.​</p><p>As per the rules followed in the above steps, find out in each of the following questions the appropriate step for the given inputs. </p><p>Step III of an input is: yellow 12 tire 92 84 36 goal life<br/>How many more steps will be required to complete the rearrangement?</p>",
+      "option1": "<p>Three</p>",
+      "option2": "<p>Four</p>",
+      "option3": "<p>Five</p>",
+      "option4": "<p>Six</p>",
+      "answer": "2",
+      "negative_marking": "0.50",
+      "positive_marking": "2.00",
+      "solution": "<p>Given Step III: yellow 12 tire 92 84 36 goal life<br/>Final target (words in reverse-alphabetical at odd places; numbers ascending at even places) is:<br/>yellow 12 tire 36 life 84 goal 92</p><p>From Step III we must perform these visible moves:</p><p>So, 4 more steps (IV, V, VI, VII) are needed.</p>"
+    },
+    {
+      "sr_no": 13,
+      "question": "<p>A word and number arrangement machine when given an input line of words and numbers, rearranges them following a particular rule in each step. The following is an illustration of input and rearrangement.</p><p>Input: sight by now 25 72 sight 37 15 home​<br/>Step I: sight by now 25 72 37 15 home​<br/>Step II: sight 15 by now 25 72 37 home​<br/>Step III: sight 15 by now 25 72 37 home​<br/>Step IV: sight 15 now 25 by 72 37 home<br/>Step V: sight 15 now 25 home by 72 37​<br/>Step VI: sight 15 now 25 home 37 by 72​<br/>And Step VI is the last step of the rearrangement.​</p><p>As per the rules followed in the above steps, find out in each of the following questions the appropriate step for the given inputs. </p><p>Step IV of an input is: now 17 mother 23 can know 47 31<br/>How many more steps will be required to complete the rearrangement?</p>",
+      "option1": "<p>Two</p>",
+      "option2": "<p>Three</p>",
+      "option3": "<p>Four</p>",
+      "option4": "<p>Five</p>",
+      "answer": "1",
+      "negative_marking": "0.50",
+      "positive_marking": "2.00",
+      "solution": "<p>Given Step IV: now 17 mother 23 can know 47 31<br/>Target (words in reverse alphabetical at odd positions; numbers ascending at even positions):<br/>now 17 mother 23 know 31 can 47</p><p>Visible moves remaining:</p><p>So, 2 more steps are required.</p>"
+    },
+    {
+      "sr_no": 14,
+      "question": "<p>A word and number arrangement machine when given an input line of words and numbers, rearranges them following a particular rule in each step. The following is an illustration of input and rearrangement.</p><p>Input: sight by now 25 72 sight 37 15 home​<br/>Step I: sight by now 25 72 37 15 home​<br/>Step II: sight 15 by now 25 72 37 home​<br/>Step III: sight 15 by now 25 72 37 home​<br/>Step IV: sight 15 now 25 by 72 37 home<br/>Step V: sight 15 now 25 home by 72 37​<br/>Step VI: sight 15 now 25 home 37 by 72​<br/>And Step VI is the last step of the rearrangement.​</p><p>As per the rules followed in the above steps, find out in each of the following questions the appropriate step for the given inputs. </p><p>Step II of an input is: victory 19 22 34 age bear high 24<br/>Which of the following will be Step VII?</p>",
+      "option1": "<p>victory 19 high 22 34 age bear 24</p>",
+      "option2": "<p>There will be no Step VII</p>",
+      "option3": "<p>victory 19 high 22 bear 34 age 24</p>",
+      "option4": "<p>victory 19 high 22 bear 24 34 age</p>",
+      "answer": "2",
+      "negative_marking": "0.50",
+      "positive_marking": "2.00",
+      "solution": "<p>Answer: There will be no Step VII.</p><p>Perform visible moves after Step II:</p><p>At this point the list is fully arranged; the remaining “placement” of 34 would produce no visible change, so it is not counted as a step. Therefore there is no Step VII.</p>"
+    },
+    {
+      "sr_no": 15,
+      "question": "<p>A number sorting machine, when given an input of numbers, rearranges them in a particular manner step-by-step as indicated below till all the numbers are arranged. Given below is an illustration of this arrangement.</p><p>Input: 39 121 48 18 76 112 14 45 63 96​<br/>Step I: 14 39 121 48 18 76 112 45 63 96​<br/>Step II: 14 39 48 18 76 112 45 63 96 121​<br/>Step III: 14 18 39 48 76 112 45 63 96 121​<br/>Step IV: 14 18 39 48 76 45 63 96 112 121​<br/>Step V: 14 18 39 45 48 76 63 96 112 121​<br/>Step VI: 14 18 39 45 48 63 76 96 112 121​<br/>And Step VI is the last step for this input.</p><p>What will be Step III for the following input?</p><p>Input: 68 182 39 93 129 46 21 58</p>",
+      "option1": "<p>21 39 68 129 93 46 58 182</p>",
+      "option2": "<p>21 39 68 93 129 46 58 182</p>",
+      "option3": "<p>21 68 39 129 93 46 58 182</p>",
+      "option4": "<p>Cannot be determined</p>",
+      "answer": "2",
+      "negative_marking": "0.50",
+      "positive_marking": "2.00",
+      "solution": "<p>Alternate placing the smallest remaining number at the next left position and the largest remaining number at the next right position.</p><p>Starting with 68 182 39 93 129 46 21 58:</p><p>So, Step III is 21 39 68 93 129 46 58 182 (option B).</p>"
+    },
+    {
+      "sr_no": 16,
+      "question": "<p>A number sorting machine, when given an input of numbers, rearranges them in a particular manner step-by-step as indicated below till all the numbers are arranged. Given below is an illustration of this arrangement.</p><p>Input: 39 121 48 18 76 112 14 45 63 96​<br/>Step I: 14 39 121 48 18 76 112 45 63 96​<br/>Step II: 14 39 48 18 76 112 45 63 96 121​<br/>Step III: 14 18 39 48 76 112 45 63 96 121​<br/>Step IV: 14 18 39 48 76 45 63 96 112 121​<br/>Step V: 14 18 39 45 48 76 63 96 112 121​<br/>Step VI: 14 18 39 45 48 63 76 96 112 121​<br/>And Step VI is the last step for this input.</p><p>Given below is the fifth step of an input. What will be the third step?</p><p>Step V: 17 32 43 82 69 93 49 56 99 106</p>",
+      "option1": "<p>17 32 82 69 43 93 49 56 99 106</p>",
+      "option2": "<p>17 32 82 69 93 43 49 56 99 106</p>",
+      "option3": "<p>17 32 82 69 43 93 56 49 99 106</p>",
+      "option4": "<p>Cannot be determined</p>",
+      "answer": "4",
+      "negative_marking": "0.50",
+      "positive_marking": "2.00",
+      "solution": "<p>Answer: Cannot be determined.</p><p>Why (brief):<br/>Working backward/forward under the rule (place smallest to next left slot, then largest to next right slot, alternately):</p><p>Because more than one of the provided Step-III sequences (options 1 and 2) lead to the same Step V, the original Step III cannot be determined uniquely from the information given. Hence: Cannot be determined.</p>"
+    },
+    {
+      "sr_no": 17,
+      "question": "<p>A number sorting machine, when given an input of numbers, rearranges them in a particular manner step-by-step as indicated below till all the numbers are arranged. Given below is an illustration of this arrangement.</p><p>Input: 39 121 48 18 76 112 14 45 63 96​<br/>Step I: 14 39 121 48 18 76 112 45 63 96​<br/>Step II: 14 39 48 18 76 112 45 63 96 121​<br/>Step III: 14 18 39 48 76 112 45 63 96 121​<br/>Step IV: 14 18 39 48 76 45 63 96 112 121​<br/>Step V: 14 18 39 45 48 76 63 96 112 121​<br/>Step VI: 14 18 39 45 48 63 76 96 112 121​<br/>And Step VI is the last step for this input.</p><p>What will be the last step for the following input?<br/>Input: 138 63 49 93 89 122 32 71</p>",
+      "option1": "<p>32 49 63 71 89 93 122 138</p>",
+      "option2": "<p>32 49 71 63 89 93 122 138</p>",
+      "option3": "<p>32 49 63 71 89 93 122 138</p>",
+      "option4": "<p>Cannot be determined</p>",
+      "answer": "1",
+      "negative_marking": "0.50",
+      "positive_marking": "2.00",
+      "solution": "<p>The machine sorts the list into ascending order, but it does that one element at a time by alternating two operations:</p><p>Repeat (smallest → largest → smallest → largest …) until all numbers are in ascending order.</p><p>Input:<br/>138 63 49 93 89 122 32 71</p><p>Step I (smallest → left): place 32 at front<br/>→ 32 138 63 49 93 89 122 71</p><p>Step II (largest → right): place 138 at end<br/>→ 32 63 49 93 89 122 71 138</p><p>Step III (smallest → next left): place 49 into position 2<br/>→ 32 49 63 93 89 122 71 138</p><p>Step IV (largest → next right): place 122 into next-right slot<br/>→ 32 49 63 93 89 71 122 138</p><p>Next largest/smallest moves:</p><p>The machine’s final (last) step is the ascending order:<br/>32 49 63 71 89 93 122 138</p>"
+    },
+    {
+      "sr_no": 18,
+      "question": "<p>A number sorting machine, when given an input of numbers, rearranges them in a particular manner step-by-step as indicated below till all the numbers are arranged. Given below is an illustration of this arrangement.</p><p>Input: 39 121 48 18 76 112 14 45 63 96​<br/>Step I: 14 39 121 48 18 76 112 45 63 96​<br/>Step II: 14 39 48 18 76 112 45 63 96 121​<br/>Step III: 14 18 39 48 76 112 45 63 96 121​<br/>Step IV: 14 18 39 48 76 45 63 96 112 121​<br/>Step V: 14 18 39 45 48 76 63 96 112 121​<br/>Step VI: 14 18 39 45 48 63 76 96 112 121​<br/>And Step VI is the last step for this input.</p><p>How many steps will be required for getting the final output for the following input?<br/>Input: 101 85 66 49 73 39 142 25 115 74</p>",
+      "option1": "<p>Five</p>",
+      "option2": "<p>Six</p>",
+      "option3": "<p>Seven</p>",
+      "option4": "<p>Eight</p>",
+      "answer": "4",
+      "negative_marking": "0.50",
+      "positive_marking": "2.00",
+      "solution": "<p>The machine alternately places the smallest remaining number at the next free slot from the left, then the largest remaining number at the next free slot from the right, and repeats until the list is fully ascending.</p><p>Input: 101 85 66 49 73 39 142 25 115 74<br/>Sorted target: 25 39 49 66 73 74 85 101 115 142</p><p>Applying the small-left / large-right moves (counting only moves that actually change the array):</p><p>No further visible moves remain, so the sorted array is reached after 8 visible steps.</p>"
+    },
+    {
+      "sr_no": 19,
+      "question": "<p>A number arrangement machine, when given an input of numbers, rearranges them following a particular rule in each step. The following is an illustration of input and steps of rearrangement.</p><p>Input: 48 245 182 26 99 542 378 297​<br/>Step I: 542 48 245 182 26 99 378 297​<br/>Step II: 542 26 48 245 182 99 378 297​<br/>Step III: 542 26 378 48 245 182 99 297​<br/>Step IV: 542 26 378 48 297 245 182 99​<br/>Step V: 542 26 378 48 297 99 245 182​<br/>This is the final arrangement and Step V is the last step for this input.</p><p>What will be the fourth step for an input whose second step is given below?<br/>Step II: 765 42 183 289 542 65 110 350</p>",
+      "option1": "<p>765 42 542 65 183 289 110 350</p>",
+      "option2": "<p>765 42 542 350 183 289 65 110</p>",
+      "option3": "<p>765 42 542 350 183 289 65 110</p>",
+      "option4": "<p>Cannot be determined</p>",
+      "answer": "1",
+      "negative_marking": "0.50",
+      "positive_marking": "2.00",
+      "solution": "<p>Answer: 765 42 542 65 183 289 110 350.</p><p>Reason: final pattern is highest, lowest, 2nd highest, 2nd lowest, ...<br/>From Step II we already have 765 (highest) and 42 (lowest) in front, with the remaining numbers in their original relative order:<br/>183 289 542 65 110 350.<br/>Step III will place the 2nd-highest (542) into position 3 →<br/>765 42 542 183 289 65 110 350.<br/>Step IV then places the 2nd-lowest (65) into position 4 →<br/>765 42 542 65 183 289 110 350.</p><p>That matches option 1.</p>"
+    },
+    {
+      "sr_no": 20,
+      "question": "<p>A number arrangement machine, when given an input of numbers, rearranges them following a particular rule in each step. The following is an illustration of input and steps of rearrangement.</p><p>Input: 48 245 182 26 99 542 378 297​<br/>Step I: 542 48 245 182 26 99 378 297​<br/>Step II: 542 26 48 245 182 99 378 297​<br/>Step III: 542 26 378 48 245 182 99 297​<br/>Step IV: 542 26 378 48 297 245 182 99​<br/>Step V: 542 26 378 48 297 99 245 182​<br/>This is the final arrangement and Step V is the last step for this input.</p><p>How many steps will be required to get the final output from the following input?<br/>Input: 39 88 162 450 386 72 29</p>",
+      "option1": "<p>Two</p>",
+      "option2": "<p>Three</p>",
+      "option3": "<p>Four</p>",
+      "option4": "<p>None of these</p>",
+      "answer": "4",
+      "negative_marking": "0.50",
+      "positive_marking": "2.00",
+      "solution": "<p>Answer: None of these.</p><p>Using the machine rule (place highest, then lowest, then 2nd highest, 2nd lowest, …) ,the sequence of visible moves is:</p><p>Input: 39 88 162 450 386 72 29<br/>Target final: 450 29 386 39 162 72 88</p><p>Visible steps (only steps that change the array):</p><p>So, 5 visible steps are required — since the options list only Two/Three/Four, the correct choice is None of these.</p>"
+    },
+    {
+      "sr_no": 21,
+      "question": "<p>A number arrangement machine, when given an input of numbers, rearranges them following a particular rule in each step. The following is an illustration of input and steps of rearrangement.</p><p>Input: 48 245 182 26 99 542 378 297​<br/>Step I: 542 48 245 182 26 99 378 297​<br/>Step II: 542 26 48 245 182 99 378 297​<br/>Step III: 542 26 378 48 245 182 99 297​<br/>Step IV: 542 26 378 48 297 245 182 99​<br/>Step V: 542 26 378 48 297 99 245 182​<br/>This is the final arrangement and Step V is the last step for this input.</p><p>If the first step of an input is ‘785 198 32 426 373 96 49’, then which of the following steps will be ‘785 32 426 49 198 373 96’?</p>",
+      "option1": "<p>Second</p>",
+      "option2": "<p>Third</p>",
+      "option3": "<p>Fourth</p>",
+      "option4": "<p> Fifth</p>",
+      "answer": "3",
+      "negative_marking": "0.50",
+      "positive_marking": "2.00",
+      "solution": "<p>Answer: Fourth.</p><p>Reason: Starting from </p>"
+    },
+    {
+      "sr_no": 22,
+      "question": "<p>A word arrangement machine, when given an input line of words, rearranges them following a particular rule in each step. The following is an illustration of input and the steps of rearrangement.</p><p>Input: Go for to Though By easy To Access at​<br/>Step I: Access Go for to Though By easy To at​<br/>Step II: Access at Go for to Though By easy To​<br/>Step III: Access at By Go for to Though easy To​<br/>Step IV: Access at By easy Go for to Though To​<br/>Step V: Access at By easy for Go to Though To​<br/>Step VI: Access at By easy for Go Though to To​<br/>Step VII: Access at By easy for Go Though To to​<br/>And Step VII is the last step for this input. As per the rules followed in the above steps, find out in the given questions the appropriate step for the given input.​</p><p>Input: story For around on was He at<br/>Which of the following will be Step IV for the given input?</p>",
+      "option1": "<p>around at For He on was story</p>",
+      "option2": "<p>around at For He on story was</p>",
+      "option3": "<p>around at For He story on was</p>",
+      "option4": "<p>around at He For story on was</p>",
+      "answer": "3",
+      "negative_marking": "0.50",
+      "positive_marking": "2.00",
+      "solution": "<p>Logic:</p><p>The machine arranges words alphabetically (A–Z), shifting only one word to its correct position in each step.</p><p>Input:</p><p>story For around on was He at<br/>Alphabetical order → around, at, For, He, on, story, was</p><p>Steps:</p><p>Step I → around story For on was He at<br/>Step II → around at story For on was He<br/>Step III → around at For story on was He<br/>Step IV → around at For He story on was</p><p>✅ Answer: Step IV = around at For He story on was</p>"
+    },
+    {
+      "sr_no": 23,
+      "question": "<p>A word arrangement machine, when given an input line of words, rearranges them following a particular rule in each step. The following is an illustration of input and the steps of rearrangement.</p><p>Input: Go for to Though By easy To Access at​<br/>Step I: Access Go for to Though By easy To at​<br/>Step II: Access at Go for to Though By easy To​<br/>Step III: Access at By Go for to Though easy To​<br/>Step IV: Access at By easy Go for to Though To​<br/>Step V: Access at By easy for Go to Though To​<br/>Step VI: Access at By easy for Go Though to To​<br/>Step VII: Access at By easy for Go Though To to​<br/>And Step VII is the last step for this input. As per the rules followed in the above steps, find out in the given questions the appropriate step for the given input.​</p><p>Input: every and peer to an for<br/>Which of the following steps would be ‘an and every for peer to’?</p>",
+      "option1": "<p>II</p>",
+      "option2": "<p>III</p>",
+      "option3": "<p>IV</p>",
+      "option4": "<p>V</p>",
+      "answer": "2",
+      "negative_marking": "0.50",
+      "positive_marking": "2.00",
+      "solution": "<p>Input: every and peer to an for<br/>Alphabetical order: an, and, every, for, peer, to — final target is ‘an and every for peer to’.</p><p>Steps:</p><p>So, the sequence appears at Step III.</p>"
+    },
+    {
+      "sr_no": 24,
+      "question": "<p>A word arrangement machine, when given an input line of words, rearranges them following a particular rule in each step. The following is an illustration of input and the steps of rearrangement.</p><p>Input: Go for to Though By easy To Access at​<br/>Step I: Access Go for to Though By easy To at​<br/>Step II: Access at Go for to Though By easy To​<br/>Step III: Access at By Go for to Though easy To​<br/>Step IV: Access at By easy Go for to Though To​<br/>Step V: Access at By easy for Go to Though To​<br/>Step VI: Access at By easy for Go Though to To​<br/>Step VII: Access at By easy for Go Though To to​<br/>And Step VII is the last step for this input. As per the rules followed in the above steps, find out in the given questions the appropriate step for the given input.​</p><p>Input: Together over series on feast the so<br/>Which of the following steps will be the last but one?</p>",
+      "option1": "<p>II</p>",
+      "option2": "<p>III</p>",
+      "option3": "<p>IV</p>",
+      "option4": "<p>V</p>",
+      "answer": "4",
+      "negative_marking": "0.50",
+      "positive_marking": "2.00",
+      "solution": "<p>Answer: V (Step V).</p><p>Input: Together over series on feast the so<br/>Alphabetical order → feast, on, over, series, so, the, Together</p><p>So, the last but one (second-last) is Step V.</p>"
+    },
+    {
+      "sr_no": 25,
+      "question": "<p>A word arrangement machine, when given an input line of words, rearranges them following a particular rule in each step. The following is an illustration of input and the steps of rearrangement.</p><p>Input: Go for to Though By easy To Access at​<br/>Step I: Access Go for to Though By easy To at​<br/>Step II: Access at Go for to Though By easy To​<br/>Step III: Access at By Go for to Though easy To​<br/>Step IV: Access at By easy Go for to Though To​<br/>Step V: Access at By easy for Go to Though To​<br/>Step VI: Access at By easy for Go Though to To​<br/>Step VII: Access at By easy for Go Though To to​<br/>And Step VII is the last step for this input. As per the rules followed in the above steps, find out in the given questions the appropriate step for the given input.​</p><p>Input: Over Go For through at one<br/>Which step will be the last step of the above input?</p>",
+      "option1": "<p>III</p>",
+      "option2": "<p>V</p>",
+      "option3": "<p>VI</p>",
+      "option4": "<p>None of these</p>",
+      "answer": "4",
+      "negative_marking": "0.50",
+      "positive_marking": "2.00",
+      "solution": "<p>Input: Over Go For through at one<br/>Alphabetical order → at, for, go, one, over, through</p><p>Steps:</p><p>The arrangement is complete at Step IV, which is not among the choices, so None of these is correct.</p>"
+    },
+    {
+      "sr_no": 26,
+      "question": "<p>A word and number arrangement machine, when given an input line of words and numbers, rearranges them following a particular rule in each step. The following is an illustration of input and rearrangement.​</p><p>Input: goal 63 57 home five task 82 17​<br/>Step I: 82 goal 63 57 home five task 17​<br/>Step II: 82 five goal 63 57 home task 17​<br/>Step III: 82 five 63 goal 57 home task 17​<br/>Step IV: 82 five 63 goal 57 home 17 task​<br/>And Step IV is the last output. As per the rules followed in the above steps, find out in each of the following questions the appropriate step for the given input.</p><p>Input: host 15 32 page 43 over mother 92<br/>Which of the following steps will be the last but one?</p>",
+      "option1": "<p>IV</p>",
+      "option2": "<p>V</p>",
+      "option3": "<p>VI</p>",
+      "option4": "<p>VII</p>",
+      "answer": "1",
+      "negative_marking": "0.50",
+      "positive_marking": "2.00",
+      "solution": "<p>Answer: IV</p><p>Logic:</p><p>Simulate visible moves (skip any step that makes no visible change):</p><p>So, the final appears at Step V, hence the last-but-one is Step IV.</p>"
+    },
+    {
+      "sr_no": 27,
+      "question": "<p>A word and number arrangement machine, when given an input line of words and numbers, rearranges them following a particular rule in each step. The following is an illustration of input and rearrangement.​</p><p>Input: goal 63 57 home five task 82 17​<br/>Step I: 82 goal 63 57 home five task 17​<br/>Step II: 82 five goal 63 57 home task 17​<br/>Step III: 82 five 63 goal 57 home task 17​<br/>Step IV: 82 five 63 goal 57 home 17 task​<br/>And Step IV is the last output. As per the rules followed in the above steps, find out in each of the following questions the appropriate step for the given input.</p><p>Step II of an input is:<br/>67 cat 12 25 dog fight man 42<br/>Which of the following will be Step V?</p>",
+      "option1": "<p>67 cat 42 dog 25 fight 12 man</p>",
+      "option2": "<p>67 cat 42 dog 25 12 fight man</p>",
+      "option3": "<p>67 cat 42 dog 25 12 fight man</p>",
+      "option4": "<p>67 cat 42 12 25 dog fight man</p>",
+      "answer": "2",
+      "negative_marking": "0.50",
+      "positive_marking": "2.00",
+      "solution": "<p>Answer: 67 cat 42 dog 25 12 fight man (Option 2).</p><p>Brief logic:</p>"
+    },
+    {
+      "sr_no": 28,
+      "question": "<p>A word and number arrangement machine, when given an input line of words and numbers, rearranges them following a particular rule in each step. The following is an illustration of input and rearrangement.​</p><p>Input: goal 63 57 home five task 82 17​<br/>Step I: 82 goal 63 57 home five task 17​<br/>Step II: 82 five goal 63 57 home task 17​<br/>Step III: 82 five 63 goal 57 home task 17​<br/>Step IV: 82 five 63 goal 57 home 17 task​<br/>And Step IV is the last output. As per the rules followed in the above steps, find out in each of the following questions the appropriate step for the given input.</p><p>Input: world 23 new 47 major 13 62 desk<br/>Which of the following will be Step V for the above input?</p>",
+      "option1": "<p>62 desk 47 major world 23 new 13</p>",
+      "option2": "<p>62 desk 47 world 23 new major 13</p>",
+      "option3": "<p>62 desk 47 major 23 world new 13</p>",
+      "option4": "<p>62 desk 47 major 23 new world 13</p>",
+      "answer": "3",
+      "negative_marking": "0.50",
+      "positive_marking": "2.00",
+      "solution": "<p>Answer: (3) 62 desk 47 major 23 world new 13.</p><p>Logic: numbers go into odd positions in descending order (62, 47, 23, 13) and words go into even positions in alphabetical order (desk, major, new, world).<br/>Apply moves one term per step from left to right:</p><p>Start: world 23 new 47 major 13 62 desk<br/>Step I (62→pos1): 62 world 23 new 47 major 13 desk<br/>Step II (desk→pos2): 62 desk world 23 new 47 major 13<br/>Step III (47→pos3): 62 desk 47 world 23 new major 13<br/>Step IV (major→pos4): 62 desk 47 major world 23 new 13<br/>Step V (23→pos5): 62 desk 47 major 23 world new 13 — option 3.</p>"
+    },
+    {
+      "sr_no": 29,
+      "question": "<p>A word and number arrangement machine, when given an input line of words and numbers, rearranges them following a particular rule in each step. The following is an illustration of input and rearrangement.​</p><p>Input: goal 63 57 home five task 82 17​<br/>Step I: 82 goal 63 57 home five task 17​<br/>Step II: 82 five goal 63 57 home task 17​<br/>Step III: 82 five 63 goal 57 home task 17​<br/>Step IV: 82 five 63 goal 57 home 17 task​<br/>And Step IV is the last output. As per the rules followed in the above steps, find out in each of the following questions the appropriate step for the given input.</p><p>Step III of an input is:<br/>81 boat 73 wheel spike dancer 32 59<br/>How many more steps are required to complete the rearrangement?</p>",
+      "option1": "<p>Two</p>",
+      "option2": "<p>Three</p>",
+      "option3": "<p>Four</p>",
+      "option4": "<p>Five</p>",
+      "answer": "3",
+      "negative_marking": "0.50",
+      "positive_marking": "2.00",
+      "solution": "<p>From Step III: 81 boat 73 wheel spike dancer 32 59</p><p>Target pattern (alternate): numbers in descending at odd positions, words in alphabetical at even positions.<br/>Final should be: 81 boat 73 dancer 59 spike 32 wheel.</p><p>Which placements remain (one per visible step):</p><p>Each placement changes the visible array, so 4 more steps are needed.</p>"
+    },
+    {
+      "sr_no": 30,
+      "question": "<p>A word and number arrangement machine, when given an input line of words and numbers, rearranges them following a particular rule in each step. The following is an illustration of input and rearrangement.</p><p>Input: quick fire 15 28 39 war 19 yellow​<br/>Step I: yellow quick fire 15 28 39 war 19​<br/>Step II: yellow 15 quick fire 28 39 war 19​<br/>Step III: yellow 15 war quick fire 28 39 19​<br/>Step IV: yellow 15 war 19 quick fire 28 39​<br/>Step V: yellow 15 war 19 quick 28 fire 39​<br/>And Step V is the last step of the above input. As per the rules followed in the above steps, find out in each of the following questions the appropriate step for the given input.</p><p>Step II of an input is:<br/>zebra 12 bank carriage 46 31 29 dusk<br/>Which of the following steps will be the penultimate step?</p>",
+      "option1": "<p>V</p>",
+      "option2": "<p>VI</p>",
+      "option3": "<p>VII</p>",
+      "option4": "<p>VIII</p>",
+      "answer": "1",
+      "negative_marking": "0.50",
+      "positive_marking": "2.00",
+      "solution": "<p>Answer: V (Step V).</p><p>Words (reverse alphabetical): zebra, dusk, carriage, bank<br/>Numbers (ascending): 12, 29, 31, 46<br/>Final target: zebra 12 dusk 29 carriage 31 bank 46.</p><p>Given Step II:<br/>zebra 12 bank carriage 46 31 29 dusk</p><p>Do the visible placements from Step III onward:</p><p>So, the final arrangement is reached at Step VI, hence the penultimate (last-but-one) step is Step V.</p>"
+    },
+    {
+      "sr_no": 31,
+      "question": "<p>A word and number arrangement machine, when given an input line of words and numbers, rearranges them following a particular rule in each step. The following is an illustration of input and rearrangement.</p><p>Input: quick fire 15 28 39 war 19 yellow​<br/>Step I: yellow quick fire 15 28 39 war 19​<br/>Step II: yellow 15 quick fire 28 39 war 19​<br/>Step III: yellow 15 war quick fire 28 39 19​<br/>Step IV: yellow 15 war 19 quick fire 28 39​<br/>Step V: yellow 15 war 19 quick 28 fire 39​<br/>And Step V is the last step of the above input. As per the rules followed in the above steps, find out in each of the following questions the appropriate step for the given input.</p><p>Input: age die 72 53 35 hold goal 26<br/>How many steps will be required to complete the rearrangement?</p>",
+      "option1": "<p>Four</p>",
+      "option2": "<p>Five</p>",
+      "option3": "<p>Six</p>",
+      "option4": "<p>Seven </p>",
+      "answer": "3",
+      "negative_marking": "0.50",
+      "positive_marking": "2.00",
+      "solution": "<p>Answer: Six.</p><p>Explanation: words (reverse alphabetical) → hold, goal, die, age; numbers (ascending) → 26, 35, 53, 72. Final target:<br/>hold 26 goal 35 die 53 age 72.</p><p>Visible moves (one term per counted step):</p><p>Steps that would cause no visible change are skipped, so the rearrangement completes in 6 visible steps.</p>"
+    },
+    {
+      "sr_no": 32,
+      "question": "<p>A word and number arrangement machine, when given an input line of words and numbers, rearranges them following a particular rule in each step. The following is an illustration of input and rearrangement.</p><p>Input: quick fire 15 28 39 war 19 yellow​<br/>Step I: yellow quick fire 15 28 39 war 19​<br/>Step II: yellow 15 quick fire 28 39 war 19​<br/>Step III: yellow 15 war quick fire 28 39 19​<br/>Step IV: yellow 15 war 19 quick fire 28 39​<br/>Step V: yellow 15 war 19 quick 28 fire 39​<br/>And Step V is the last step of the above input. As per the rules followed in the above steps, find out in each of the following questions the appropriate step for the given input.</p><p>Step II of an input is:<br/>win 12 92 for 81 always 36 home<br/>Which of the following will be Step VII?</p>",
+      "option1": "<p>win 12 home 36 92 for 81 always</p>",
+      "option2": "<p>win 12 home 36 92 for 81 always</p>",
+      "option3": "<p>There will be no Step VII</p>",
+      "option4": "<p>None of these</p>",
+      "answer": "4",
+      "negative_marking": "0.50",
+      "positive_marking": "2.00",
+      "solution": "<p>Answer: None of these.</p><p>Given Step II: win 12 92 for 81 always 36 home</p><p>Continue placing terms alternately (words in reverse-alpha: win, home, for, always; numbers ascending: 12, 36, 81, 92):</p><p>This does not match any of the given options, so None of these is correct.</p>"
+    },
+    {
+      "sr_no": 33,
+      "question": "<p>A word and number arrangement machine, when given an input line of words and numbers, rearranges them following a particular rule in each step. The following is an illustration of input and rearrangement.</p><p>Input: quick fire 15 28 39 war 19 yellow​<br/>Step I: yellow quick fire 15 28 39 war 19​<br/>Step II: yellow 15 quick fire 28 39 war 19​<br/>Step III: yellow 15 war quick fire 28 39 19​<br/>Step IV: yellow 15 war 19 quick fire 28 39​<br/>Step V: yellow 15 war 19 quick 28 fire 39​<br/>And Step V is the last step of the above input. As per the rules followed in the above steps, find out in each of the following questions the appropriate step for the given input.</p><p>Step III of an input is:<br/>train 23 star 61 32 fall hard 53<br/>Which of the following is definitely the input?</p>",
+      "option1": "<p>23 star 61 train 32 fall hard 53</p>",
+      "option2": "<p>star rain 61 23 32 fall hard 53</p>",
+      "option3": "<p>61 star 23 train 32 fall hard 53</p>",
+      "option4": "<p>Cannot be determined</p>",
+      "answer": "4",
+      "negative_marking": "0.50",
+      "positive_marking": "2.00",
+      "solution": "<p>Answer: Cannot be determined.</p><p>Reasoning:</p>"
+    },
+    {
+      "sr_no": 34,
+      "question": "<p>Given an input, a machine generates pass codes for the six batches each day as follows:​<br/>Input: these icons were taken out from the sea</p><p>Pass codes:​<br/>Batch I: from sea the out taken were icons these​<br/>Batch II: from icons these were taken out the sea​<br/>Batch III: from icons out sea the taken were these​<br/>Batch IV: from icons out sea these were taken the​<br/>and so on.</p><p>First batch starts at 10.00 a.m., and each batch is for one hour. There is a rest period of one hour after the end of the fourth batch.</p><p>What will be the pass code for the batch at 3.00 p.m., if input is ‘four of the following five form a group’?</p>",
+      "option1": "<p>a five following form four group the of</p>",
+      "option2": "<p>a five following form four group the of</p>",
+      "option3": "<p>a five following form four of the group</p>",
+      "option4": "<p>a five following form four group of the</p>",
+      "answer": "1",
+      "negative_marking": "0.50",
+      "positive_marking": "2.00",
+      "solution": "<p>Step 1:<br/>Batch timings → 10 a.m. (I), 11 a.m. (II), 12 p.m. (III), 1 p.m. (IV), 2 p.m. rest, 3 p.m. (V)<br/>→ We need Batch V.</p><p>Step 2 (Rule):<br/>Each step places the next alphabetically smallest word second and reverses the rest.<br/>So by Batch V → first six words in dictionary order + remaining reversed.</p><p>Step 3 (Alphabetical order):<br/>a, five, following, form, four, group, of, the</p><p>Step 4 (Batch V):<br/>First 6 → a five following form four group<br/>Rest reversed → the, of</p><p>✅ Final pass code:<br/>a five following form four group the of</p><p>Answer: (a)</p>"
+    },
+    {
+      "sr_no": 35,
+      "question": "<p>A word arrangement machine, when given an input line of words, rearranges them following a particular rule in each step. The following is an illustration of the input and of the steps of rearrangement.</p><p>Input: but going for crept to light sir​<br/>Step I: crept but going for to light sir​<br/>Step II: crept but going light but for te sir​<br/>Step III: crept going light but for sir te<br/>Step III is the last step for this input. </p><p>As per the rules followed in the above steps, find out in the given questions the appropriate step for the given input.</p><p>If the input is ‘true se veto be nuke my like’, which of the following will be Step IV?</p>",
+      "option1": "<p>like nuke true veto be se my</p>",
+      "option2": "<p>be my like se true veto nuke</p>",
+      "option3": "<p>be my se like true veto nuke</p>",
+      "option4": "<p>veto true nuke like so be my</p>",
+      "answer": "1",
+      "negative_marking": "0.50",
+      "positive_marking": "2.00",
+      "solution": "<p>Final order groups words by length (longest → shortest), each group alphabetically:</p><p>So Step IV = like nuke true veto be se my (option A).</p>"
+    },
+    {
+      "sr_no": 36,
+      "question": "<p>A word arrangement machine, when given an input line of words, rearranges them following a particular rule in each step. The following is an illustration of the input and of the steps of rearrangement.</p><p>Input: but going for crept to light sir​<br/>Step I: crept but going for to light sir​<br/>Step II: crept but going light but for te sir​<br/>Step III: crept going light but for sir te<br/>Step III is the last step for this input. </p><p>As per the rules followed in the above steps, find out in the given questions the appropriate step for the given input.</p><p>Input: more fight cats cough sough acts idea<br/>Which of the following steps would be the last step for this input?</p>",
+      "option1": "<p>III</p>",
+      "option2": "<p>IV</p>",
+      "option3": "<p>V</p>",
+      "option4": "<p>VI</p>",
+      "answer": "4",
+      "negative_marking": "0.50",
+      "positive_marking": "2.00",
+      "solution": "<p>Answer: VI</p><p>Reason </p><p>Hence the last step is Step VI.</p>"
+    },
+    {
+      "sr_no": 37,
+      "question": "<p>A word arrangement machine, when given an input line of words, rearranges them following a particular rule in each step. The following is an illustration of the input and of the steps of rearrangement.</p><p>Input: but going for crept to light sir​<br/>Step I: crept but going for to light sir​<br/>Step II: crept but going light but for te sir​<br/>Step III: crept going light but for sir te<br/>Step III is the last step for this input. </p><p>As per the rules followed in the above steps, find out in the given questions the appropriate step for the given input.</p><p>If the second step of an input is ‘clever remand window sales batch tiger never’, which of the following will be its sixth step?</p>",
+      "option1": "<p>window remand clever sales batch tiger never</p>",
+      "option2": "<p>clever remand window batch sales tiger never</p>",
+      "option3": "<p>batch never sales tiger clever remand window</p>",
+      "option4": "<p>It cannot have sixth step.</p>",
+      "answer": "4",
+      "negative_marking": "0.50",
+      "positive_marking": "2.00",
+      "solution": "<p>Answer: It cannot have sixth step.</p>"
+    },
+    {
+      "sr_no": 38,
+      "question": "<p>Study the following information carefully and answer the given question: A word and number arrangement machine when given an input line of words and numbers rearranges them following a particular rule in each step. The following is an illustration of input and rearrangement:</p><p>Input: sky forward 17 over 95 23 come 40​<br/>Step I: come sky forward 17 over 95 23 40​<br/>Step II: come 95 sky forward 17 over 23 40​<br/>Step III: come 95 forward sky 17 over 23 40​<br/>Step IV: come 95 forward 40 sky 17 over 23​<br/>Step V: come 95 forward 40 over sky 17 23​<br/>Step VI: come 95 forward 40 over 23 sky 17​<br/>Step VI is the last step of the rearrangement of the above input.​</p><p>As per the rules followed in the above steps, find out in the following question the appropriate step for the given input.​</p><p>Input: machine hire for 19 against 85 21 46​<br/>Which of the following will be step II?</p>",
+      "option1": "<p>against 85 machine 19 hire for 21 46</p>",
+      "option2": "<p> against 85 machine hire for 19 21 46</p>",
+      "option3": "<p>against 85 hire machine for 19 21 46</p>",
+      "option4": "<p>Cannot be determined.</p>",
+      "answer": "2",
+      "negative_marking": "0.50",
+      "positive_marking": "2.00",
+      "solution": "<p>Answer: ✅ Option 2 — against 85 machine hire for 19 21 46</p><p>Easy Logic Explanation:</p><p>So, Step II = against 85 machine hire for 19 21 46.</p>"
+    },
+    {
+      "sr_no": 39,
+      "question": "<p>Read the following information carefully and answer the question that follow: A word-number arrangement machine, when given input as set of words and numbers, rearranges them following a particular rule and generates a stepwise output until the rearrangement is complete following that rule.</p><p>Following is an illustration of the input and steps of rearrangement until the last step.​</p><p>Input: Tokyo 7 Rio @ 5 Salva We​<br/>Step 1: Tokyo 7 Rio @ We 5 Salva​<br/>Step 2: Tokyo 7 Rio We @ 5 Salva​<br/>Step 3: 7 Rio We @ 5 Salva Tokyo​<br/>Step 4: Rio 7 We @ 5 Salva Tokyo​<br/>In addition, step 4 is the last step.​</p><p>For the input, \"Let 1 mail &amp; check me and\", What is Step 4?</p>",
+      "option1": "<p>mail 1 me Let &amp; and check</p>",
+      "option2": "<p>1 &amp; and check me Let mail</p>",
+      "option3": "<p>mail 1 and &amp; check me Let</p>",
+      "option4": "<p>and check me Let mail 1%</p>",
+      "answer": "3",
+      "negative_marking": "0.50",
+      "positive_marking": "2.00",
+      "solution": "<p>Answer: (C) mail 1 and &amp; check me Let</p><p>Why (brief and simple):</p><p>Treat the input items as positions p1…p7:</p><p>The machine in the example applies these four visible position changes:</p><p>Apply these to our labels:</p><p>So, option (C) is correct.</p>"
+    },
+    {
+      "sr_no": 40,
+      "question": "<p>A definite Input-Output process is given below. Study the arrangement rules carefully for the given input and follow them to answer the questions based on the new input. </p><p>Input: 40 10 60 20 30</p><p>Step I: 10 40 60 20 30​<br/>Step II: 10 20 40 60 30​<br/>Step III: 10 20 30 40 60​<br/>Last Step: 10 20 30 40 60​</p><p>Based on the process shown above, answer the following question for the given input:​</p><p>New Input: 75 25 85 35 15​<br/>Question: What is the element at the 3rd position from the left in Step II of the new input?</p>",
+      "option1": "<p>75</p>",
+      "option2": "<p>35</p>",
+      "option3": "<p>85</p>",
+      "option4": "<p>25</p>",
+      "answer": "1",
+      "negative_marking": "0.50",
+      "positive_marking": "2.00",
+      "solution": "<p>The machine arranges numbers in ascending order, moving one number to its correct position in each step.</p><p>Given example:<br/>Input: 40 10 60 20 30<br/>Step I → smallest (10) comes first → 10 40 60 20 30<br/>Step II → next smallest (20) goes second → 10 20 40 60 30<br/>Step III → next (30) goes third → 10 20 30 40 60</p><p>Apply same rule to new input:<br/>Input: 75 25 85 35 15</p><p>Now, in Step II, the 3rd element = 75</p>"
+    }
+  ]
+};
+
+// Extract questions and time from new structure
+const questions = quizData.questions;
+const totalTimeMinutes = quizData.time_minutes;
+
+let currentQuestion = 0;
+let answers = {};
+let bookmarks = new Set();
+let timerSeconds = totalTimeMinutes * 60;
+let timerInterval = null;
+let isPaletteOpen = false;
+
+function isImageURL(str) {
+  return str && (str.startsWith('http') || str.startsWith('https'));
+}
+
+function createOptionContent(optionText) {
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'option-content';
+    
+    if (isImageURL(optionText)) {
+        const img = document.createElement('img');
+        img.src = optionText;
+        img.className = 'option-image';
+        img.alt = 'Option image';
+        img.loading = 'lazy';
+        img.onerror = function() {
+            this.style.display = 'none';
+            const errorText = document.createTextNode('Image failed to load');
+            contentDiv.appendChild(errorText);
+        };
+        contentDiv.appendChild(img);
+    } else {
+        contentDiv.innerHTML = optionText;  // FIXED: Use innerHTML
+    }
+    
+    return contentDiv;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  initTheme();
+  initQuiz();
+  initEventListeners();
+  loadFromLocalStorage();
+  startTimer();
+  createPalette();
+  preventDoubleTapZoom();
+});
+
+function preventDoubleTapZoom() {
+  let lastTouchEnd = 0;
+  document.addEventListener('touchend', (event) => {
+    const now = Date.now();
+    if (now - lastTouchEnd <= 300) {
+      event.preventDefault();
+    }
+    lastTouchEnd = now;
+  }, { passive: false });
+}
+
+function initTheme() {
+  const savedTheme = localStorage.getItem('quizTheme') || 'light';
+  document.documentElement.setAttribute('data-theme', savedTheme);
+  updateThemeIcon();
+}
+
+function updateThemeIcon() {
+  const theme = document.documentElement.getAttribute('data-theme');
+  const themeBtn = document.getElementById('themeToggle');
+  if (themeBtn) {
+    themeBtn.textContent = theme === 'dark' ? '☀️' : '🌙';
+  }
+}
+
+function toggleTheme() {
+  const currentTheme = document.documentElement.getAttribute('data-theme');
+  const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', newTheme);
+  localStorage.setItem('quizTheme', newTheme);
+  updateThemeIcon();
+}
+
+function initQuiz() {
+  loadQuestion(currentQuestion);
+  updateMarkingInfo();
+}
+
+function initEventListeners() {
+  const themeBtn = document.getElementById('themeToggle');
+  const fullscreenBtn = document.getElementById('fullscreenBtn');
+  
+  if (themeBtn) {
+    themeBtn.addEventListener('click', toggleTheme);
+    themeBtn.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      toggleTheme();
+    });
+  }
+  
+  if (fullscreenBtn) {
+    fullscreenBtn.addEventListener('click', toggleFullscreen);
+    fullscreenBtn.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      toggleFullscreen();
+    });
+  }
+  
+  addButtonListener('prevBtn', prevQuestion);
+  addButtonListener('nextBtn', nextQuestion);
+  addButtonListener('clearBtn', clearAnswer);
+  addButtonListener('submitBtn', confirmSubmit);
+  addButtonListener('bookmarkBtn', toggleBookmark);
+  
+  addButtonListener('paletteFab', togglePalette);
+  addButtonListener('paletteClose', closePalette);
+  
+  const overlay = document.getElementById('paletteOverlay');
+  if (overlay) {
+    overlay.addEventListener('click', closePalette);
+    overlay.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      closePalette();
+    });
+  }
+  
+  const searchInput = document.getElementById('paletteSearch');
+  if (searchInput) {
+    searchInput.addEventListener('input', handleSearch);
+    searchInput.addEventListener('change', jumpToQuestion);
+  }
+  
+  document.addEventListener('keydown', handleKeyPress);
+  
+  setInterval(saveToLocalStorage, 5000);
+  
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
+      updatePalette();
+    }
+  });
+}
+
+function addButtonListener(id, handler) {
+  const btn = document.getElementById(id);
+  if (btn) {
+    btn.addEventListener('click', handler);
+    btn.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      handler();
+    });
+  }
+}
+
+function jumpToQuestion(e) {
+  const questionNum = parseInt(e.target.value);
+  if (questionNum >= 1 && questionNum <= questions.length) {
+    goToQuestion(questionNum - 1);
+    closePalette();
+    e.target.value = '';
+  }
+}
+
+function togglePalette() {
+  isPaletteOpen = !isPaletteOpen;
+  const palette = document.getElementById('questionPalette');
+  const overlay = document.getElementById('paletteOverlay');
+  const fab = document.getElementById('paletteFab');
+  
+  if (isPaletteOpen) {
+    palette.classList.add('active');
+    overlay.classList.add('active');
+    fab.classList.add('active');
+    fab.innerHTML = `📋 <span class="badge" id="answeredBadge">${Object.keys(answers).length}</span>`;
+    document.body.classList.add('palette-open');
+  } else {
+    closePalette();
+  }
+}
+
+function closePalette() {
+  isPaletteOpen = false;
+  const palette = document.getElementById('questionPalette');
+  const overlay = document.getElementById('paletteOverlay');
+  const fab = document.getElementById('paletteFab');
+  
+  if (palette) palette.classList.remove('active');
+  if (overlay) overlay.classList.remove('active');
+  if (fab) {
+    fab.classList.remove('active');
+    fab.innerHTML = `📋 <span class="badge" id="answeredBadge">${Object.keys(answers).length}</span>`;
+  }
+  document.body.classList.remove('palette-open');
+}
+
+function handleSearch(e) {
+  const searchTerm = e.target.value.toLowerCase();
+  if (!searchTerm) {
+    document.querySelectorAll('.palette-btn').forEach(btn => {
+      btn.style.display = '';
+    });
+    return;
+  }
+  
+  const buttons = document.querySelectorAll('.palette-btn');
+  buttons.forEach((btn, index) => {
+    const questionNum = (index + 1).toString();
+    if (questionNum.includes(searchTerm)) {
+      btn.style.display = '';
+    } else {
+      btn.style.display = 'none';
+    }
+  });
+}
+
+function handleKeyPress(e) {
+  if (document.getElementById('resultSection').classList.contains('hidden')) {
+    if (e.key === 'Escape') {
+      if (isPaletteOpen) {
+        closePalette();
+      }
+    } else if (!isPaletteOpen && e.target.tagName !== 'INPUT') {
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        prevQuestion();
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        nextQuestion();
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        nextQuestion();
+      } else if (e.key === 'b' || e.key === 'B') {
+        e.preventDefault();
+        toggleBookmark();
+      } else if (e.key === 'c' || e.key === 'C') {
+        e.preventDefault();
+        clearAnswer();
+      } else if (e.key === 'p' || e.key === 'P') {
+        e.preventDefault();
+        togglePalette();
+      } else if (e.key >= '1' && e.key <= '4') {
+        e.preventDefault();
+        selectOption(parseInt(e.key));
+      }
+    }
+  }
+}
+
+function selectOption(optionNum) {
+  const q = questions[currentQuestion];
+  const radio = document.querySelector(`input[name="q${q.sr_no}"][value="${optionNum}"]`);
+  if (radio) {
+    radio.checked = true;
+    const label = radio.closest('.option-label');
+    if (label) {
+      document.querySelectorAll('.option-label').forEach(l => l.classList.remove('selected'));
+      label.classList.add('selected');
+      saveAnswer();
+    }
+  }
+}
+
+function toggleFullscreen() {
+  try {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(err => {
+        console.log('Fullscreen error:', err);
+      });
+    } else {
+      document.exitFullscreen();
+    }
+  } catch (err) {
+    console.log('Fullscreen not supported');
+  }
+}
+
+function startTimer() {
+  if (timerInterval) {
+    clearInterval(timerInterval);
+  }
+  timerInterval = setInterval(() => {
+    timerSeconds--;
+    updateTimer();
+    
+    // Auto-submit when time runs out
+    if (timerSeconds <= 0) {
+      clearInterval(timerInterval);
+      alert('Time is up! Submitting quiz automatically.');
+      submitQuiz();
+      return;
+    }
+    
+    if (timerSeconds <= 120) {
+      const timer = document.getElementById('timer');
+      if (timer) timer.classList.add('warning');
+    }
+  }, 1000);
+}
+
+function updateTimer() {
+  const minutes = Math.floor(timerSeconds / 60);
+  const seconds = timerSeconds % 60;
+  const timer = document.getElementById('timer');
+  if (timer) {
+    timer.textContent = 
+      `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  }
+}
+
+function createPalette() {
+  const grid = document.getElementById('paletteGrid');
+  if (!grid) return;
+  
+  grid.innerHTML = '';
+  questions.forEach((q, index) => {
+    const btn = document.createElement('button');
+    btn.textContent = index + 1;
+    btn.className = 'palette-btn';
+    btn.setAttribute('aria-label', `Go to question ${index + 1}`);
+    btn.setAttribute('type', 'button');
+    
+    btn.addEventListener('click', () => {
+      goToQuestion(index);
+      closePalette();
+    });
+    
+    btn.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      goToQuestion(index);
+      closePalette();
+    });
+    
+    grid.appendChild(btn);
+  });
+  updatePalette();
+}
+
+function updatePalette() {
+  const buttons = document.querySelectorAll('.palette-btn');
+  buttons.forEach((btn, index) => {
+    btn.className = 'palette-btn';
+    if (index === currentQuestion) btn.classList.add('current');
+    if (answers[questions[index].sr_no]) btn.classList.add('answered');
+    if (bookmarks.has(questions[index].sr_no)) btn.classList.add('bookmarked');
+  });
+  
+  updatePaletteStats();
+}
+
+function updatePaletteStats() {
+  const answered = Object.keys(answers).length;
+  const unanswered = questions.length - answered;
+  const bookmarkedCount = bookmarks.size;
+  
+  const answeredEl = document.getElementById('paletteAnswered');
+  const unansweredEl = document.getElementById('paletteUnanswered');
+  const bookmarkedEl = document.getElementById('paletteBookmarked');
+  
+  if (answeredEl) answeredEl.textContent = answered;
+  if (unansweredEl) unansweredEl.textContent = unanswered;
+  if (bookmarkedEl) bookmarkedEl.textContent = bookmarkedCount;
+  
+  const badge = document.querySelector('.palette-fab .badge');
+  if (badge) badge.textContent = answered;
+}
+
+function goToQuestion(index) {
+  if (index < 0 || index >= questions.length) return;
+  saveAnswer();
+  currentQuestion = index;
+  loadQuestion(currentQuestion);
+  
+  const questionSection = document.getElementById('questionSection');
+  if (questionSection) {
+    setTimeout(() => {
+      questionSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  }
+}
+
+function loadQuestion(index) {
+  const q = questions[index];
+  
+  const questionNumber = document.getElementById('questionNumber');
+  const questionText = document.getElementById('questionText');
+  
+  if (questionNumber) {
+    questionNumber.textContent = `Question ${index + 1} of ${questions.length}`;
+  }
+  
+  if (questionText) {
+    questionText.innerHTML = '';
+    const questionContent = createOptionContent(q.question);
+    questionText.appendChild(questionContent);
+  }
+  
+  const container = document.getElementById('optionsContainer');
+  if (!container) return;
+  
+  container.innerHTML = '';
+  
+  for (let i = 1; i <= 4; i++) {
+    const label = document.createElement('label');
+    label.className = 'option-label';
+    if (answers[q.sr_no] == i) label.classList.add('selected');
+    
+    const radio = document.createElement('input');
+    radio.type = 'radio';
+    radio.name = `q${q.sr_no}`;
+    radio.value = i;
+    radio.checked = answers[q.sr_no] == i;
+    
+    const changeHandler = () => {
+      document.querySelectorAll('.option-label').forEach(l => l.classList.remove('selected'));
+      label.classList.add('selected');
+      saveAnswer();
+    };
+    
+    radio.addEventListener('change', changeHandler);
+    label.addEventListener('click', (e) => {
+      if (e.target !== radio) {
+        radio.checked = true;
+        changeHandler();
+      }
+    });
+    
+    label.appendChild(radio);
+    
+    const optionContent = createOptionContent(q[`option${i}`]);
+    label.appendChild(optionContent);
+    
+    container.appendChild(label);
+  }
+  
+  const bookmarkBtn = document.getElementById('bookmarkBtn');
+  if (bookmarkBtn) {
+    if (bookmarks.has(q.sr_no)) {
+      bookmarkBtn.classList.add('active');
+    } else {
+      bookmarkBtn.classList.remove('active');
+    }
+  }
+  
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const submitBtn = document.getElementById('submitBtn');
+  
+  if (prevBtn) prevBtn.disabled = index === 0;
+  
+  if (index === questions.length - 1) {
+    if (nextBtn) nextBtn.classList.add('hidden');
+    if (submitBtn) submitBtn.classList.remove('hidden');
+  } else {
+    if (nextBtn) nextBtn.classList.remove('hidden');
+    if (submitBtn) submitBtn.classList.add('hidden');
+  }
+  
+  updateProgress();
+  updatePalette();
+}
+
+function updateMarkingInfo() {
+  const q = questions[0];
+  const markingInfo = document.getElementById('markingInfo');
+  if (markingInfo) {
+    markingInfo.textContent = `Marking: +${q.positive_marking}, -${q.negative_marking}`;
+  }
+}
+
+function updateProgress() {
+  const attempted = Object.keys(answers).length;
+  const currentProgress = ((currentQuestion + 1) / questions.length) * 100;
+  
+  const progressBar = document.getElementById('progressBar');
+  const progressText = document.getElementById('progressText');
+  const attemptedText = document.getElementById('attemptedText');
+  
+  if (progressBar) progressBar.style.width = `${currentProgress}%`;
+  if (progressText) progressText.textContent = `${currentQuestion + 1}/${questions.length}`;
+  if (attemptedText) attemptedText.textContent = attempted;
+}
+
+function saveAnswer() {
+  const q = questions[currentQuestion];
+  const selected = document.querySelector(`input[name="q${q.sr_no}"]:checked`);
+  
+  if (selected) {
+    answers[q.sr_no] = selected.value;
+  }
+  
+  updateProgress();
+  updatePalette();
+  saveToLocalStorage();
+}
+
+function clearAnswer() {
+  const q = questions[currentQuestion];
+  delete answers[q.sr_no];
+  
+  const selected = document.querySelector(`input[name="q${q.sr_no}"]:checked`);
+  if (selected) selected.checked = false;
+  
+  document.querySelectorAll('.option-label').forEach(l => l.classList.remove('selected'));
+  
+  updateProgress();
+  updatePalette();
+  saveToLocalStorage();
+}
+
+function toggleBookmark() {
+  const q = questions[currentQuestion];
+  const btn = document.getElementById('bookmarkBtn');
+  
+  if (bookmarks.has(q.sr_no)) {
+    bookmarks.delete(q.sr_no);
+    if (btn) btn.classList.remove('active');
+  } else {
+    bookmarks.add(q.sr_no);
+    if (btn) btn.classList.add('active');
+  }
+  
+  updatePalette();
+  saveToLocalStorage();
+}
+
+function nextQuestion() {
+  saveAnswer();
+  if (currentQuestion < questions.length - 1) {
+    currentQuestion++;
+    loadQuestion(currentQuestion);
+  }
+}
+
+function prevQuestion() {
+  saveAnswer();
+  if (currentQuestion > 0) {
+    currentQuestion--;
+    loadQuestion(currentQuestion);
+  }
+}
+
+function confirmSubmit() {
+  const unattempted = questions.length - Object.keys(answers).length;
+  let message = 'Are you sure you want to submit the quiz?';
+  
+  if (unattempted > 0) {
+    message = `You have ${unattempted} unanswered questions. ${message}`;
+  }
+  
+  if (confirm(message)) {
+    submitQuiz();
+  }
+}
+
+function submitQuiz() {
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+  saveAnswer();
+  closePalette();
+  
+  let correct = 0, wrong = 0, unattempted = 0, score = 0;
+  
+  questions.forEach(q => {
+    const userAns = answers[q.sr_no];
+    const posMark = parseFloat(q.positive_marking) || 0;
+    const negMark = parseFloat(q.negative_marking) || 0;
+    
+    if (!userAns) {
+      unattempted++;
+    } else if (userAns == q.answer) {
+      correct++;
+      score += posMark;
+    } else {
+      wrong++;
+      score -= negMark;
+    }
+  });
+  
+  displayResults(correct, wrong, unattempted, score);
+  
+  const fab = document.getElementById('paletteFab');
+  const nav = document.getElementById('navigation');
+  if (fab) fab.style.display = 'none';
+  if (nav) nav.style.display = 'none';
+  
+  document.body.style.paddingBottom = '20px';
+  
+  clearLocalStorage();
+}
+
+function displayResults(correct, wrong, unattempted, score) {
+  const totalQuestions = questions.length;
+  const percentage = ((correct / totalQuestions) * 100).toFixed(1);
+  const timerEl = document.getElementById('timer');
+  const timeText = timerEl ? timerEl.textContent : '00:00';
+  const timeTaken = (totalTimeMinutes * 60) - timerSeconds;
+  const minutesTaken = Math.floor(timeTaken / 60);
+  const secondsTaken = timeTaken % 60;
+  const timeTakenText = `${minutesTaken}m ${secondsTaken}s`;
+  
+  let html = `
+    <div class="score-card">
+      <h2>${score}/${totalQuestions}</h2>
+      <p>Your Score: ${percentage}%</p>
+      <p>Time Taken: ${timeTakenText}</p>
+    </div>
+    
+    <div class="stats-grid">
+      <div class="stat-card correct">
+        <h3>${correct}</h3>
+        <p>Correct</p>
+      </div>
+      <div class="stat-card wrong">
+        <h3>${wrong}</h3>
+        <p>Wrong</p>
+      </div>
+      <div class="stat-card unattempted">
+        <h3>${unattempted}</h3>
+        <p>Unattempted</p>
+      </div>
+      <div class="stat-card">
+        <h3>${totalQuestions}</h3>
+        <p>Total</p>
+      </div>
+    </div>
+  `;
+  
+  questions.forEach(q => {
+    const userAns = answers[q.sr_no];
+    let questionDisplay = '';
+    if (isImageURL(q.question)) {
+      questionDisplay = `<img src="${q.question}" class="question-image" alt="Question ${q.sr_no}">`;
+    } else {
+      questionDisplay = q.question;
+    }
+    html += `<div class="question-review">
+      <h4>Q${q.sr_no}: ${questionDisplay}</h4>`;
+    
+    for (let i = 1; i <= 4; i++) {
+      const isCorrect = i.toString() === q.answer;
+      const isUserAnswer = userAns == i.toString();
+      
+      let className = 'review-option';
+      if (isCorrect) className += ' correct';
+      if (isUserAnswer && !isCorrect) className += ' wrong';
+      if (isUserAnswer) className += ' user-selected';
+      
+      const optionValue = q[`option${i}`];
+      
+      if (isImageURL(optionValue)) {
+        html += `<div class="${className}">
+          ${isCorrect ? '✓ ' : ''}${isUserAnswer ? '➤ ' : ''} 
+          <img src="${optionValue}" class="option-image" alt="Option ${i}">
+        </div>`;
+      } else {
+        html += `<div class="${className}">
+          ${isCorrect ? '✓ ' : ''}${isUserAnswer ? '➤ ' : ''}${optionValue}
+        </div>`;
+      }
+    }
+    
+    if (q.solution && q.solution.trim() !== '') {
+      let solutionDisplay = '';
+      if (isImageURL(q.solution)) {
+        solutionDisplay = `<img src="${q.solution}" class="solution-image" alt="Solution" style="max-width: 100%; height: auto; border-radius: 8px; margin-top: 10px;">`;
+      } else {
+        solutionDisplay = q.solution;
+      }
+      
+      html += `<div class="solution-section" style="margin-top: 15px; padding: 15px; background: #f0f8ff; border-left: 4px solid #007bff; border-radius: 8px;">
+        <strong style="color: #007bff;">💡 Solution:</strong>
+        <div style="margin-top: 8px; color: #333;">${solutionDisplay}</div>
+      </div>`;
+    }
+    
+    html += `</div>`;
+  });
+  
+  html += `
+    <div class="action-buttons">
+      <button class="action-btn restart" onclick="restartQuiz()">Restart Quiz</button>
+      <button class="action-btn download" onclick="downloadResults()">Download Results</button>
+      <button class="action-btn print" onclick="window.print()">Print Results</button>
+    </div>
+  `;
+  
+  const resultSection = document.getElementById('resultSection');
+  const questionSection = document.getElementById('questionSection');
+  const progressSection = document.querySelector('.progress-section');
+  
+  if (resultSection) {
+    resultSection.innerHTML = html;
+    resultSection.classList.remove('hidden');
+  }
+  if (questionSection) questionSection.classList.add('hidden');
+  if (progressSection) progressSection.classList.add('hidden');
+  
+  const quizContainer = document.getElementById('quizContainer');
+  if (quizContainer) {
+    setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 100);
+  }
+}
+function isImageURL(str) {
+  return str && (str.startsWith('http') || str.startsWith('https')) &&
+    (str.match(/\.(jpeg|jpg|gif|png|svg|webp)$/i));
+}
+function restartQuiz() {
+  if (confirm('Are you sure you want to restart? All progress will be lost.')) {
+    currentQuestion = 0;
+    answers = {};
+    bookmarks.clear();
+    timerSeconds = totalTimeMinutes * 60;
+    
+    const resultSection = document.getElementById('resultSection');
+    const questionSection = document.getElementById('questionSection');
+    const progressSection = document.querySelector('.progress-section');
+    const fab = document.getElementById('paletteFab');
+    const nav = document.getElementById('navigation');
+    
+    if (resultSection) {
+      resultSection.classList.add('hidden');
+      resultSection.innerHTML = '';
+    }
+    if (questionSection) questionSection.classList.remove('hidden');
+    if (progressSection) progressSection.classList.remove('hidden');
+    if (fab) fab.style.display = 'flex';
+    if (nav) nav.style.display = 'grid';
+    
+    document.body.style.paddingBottom = 'var(--nav-height)';
+    
+    if (timerInterval) {
+      clearInterval(timerInterval);
+    }
+    updateTimer();
+    startTimer();
+    
+    loadQuestion(currentQuestion);
+    createPalette();
+  }
+}
+
+function downloadResults() {
+  const resultSection = document.getElementById('resultSection');
+  if (!resultSection) return;
+  
+  const resultHTML = resultSection.innerHTML;
+  const fullHTML = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Input</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; max-width: 900px; margin: 0 auto; }
+    .score-card { background: linear-gradient(135deg, #007bff, #28a745); color: white; padding: 30px; border-radius: 15px; text-align: center; margin-bottom: 20px; }
+    .score-card h2 { font-size: 48px; margin-bottom: 10px; }
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 30px; }
+    .stat-card { background: white; padding: 20px; border-radius: 10px; text-align: center; border: 2px solid #ddd; }
+    .stat-card h3 { font-size: 32px; margin-bottom: 8px; }
+    .stat-card.correct h3 { color: #28a745; }
+    .stat-card.wrong h3 { color: #dc3545; }
+    .stat-card.unattempted h3 { color: #6c757d; }
+    .question-review { background: white; border: 2px solid #ddd; border-radius: 10px; padding: 20px; margin-bottom: 15px; }
+    .question-review h4 { margin-bottom: 15px; font-size: 16px; line-height: 1.6; }
+    .review-option { padding: 10px 15px; margin: 8px 0; border-radius: 8px; border: 2px solid #ddd; display: flex; align-items: center; gap: 10px; }
+    .option-image { max-width: 150px; max-height: 100px; border-radius: 8px; }
+    .review-option.correct { background: #d4edda; border-color: #28a745; color: #155724; }
+    .review-option.wrong { background: #f8d7da; border-color: #dc3545; color: #721c24; }
+    .review-option.user-selected { border-width: 3px; font-weight: bold; }
+    @media print { body { background: white; } }
+    @media (max-width: 600px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+  </style>
+</head>
+<body>
+  <h1 style="text-align: center; color: #007bff;">MOTION 3.0 - Quiz Results</h1>
+  <p style="text-align: center; color: #666; margin-bottom: 30px;">Generated on: ${new Date().toLocaleString()}</p>
+  ${resultHTML.replace(/<div class="action-buttons">[\s\S]*?<\/div>/, '')}
+</body>
+</html>
+  `;
+  
+  try {
+    const blob = new Blob([fullHTML], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Quiz_Results_${new Date().getTime()}.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } catch (err) {
+    alert('Download failed. Please try using the Print option instead.');
+    console.error('Download error:', err);
+  }
+}
+
+function saveToLocalStorage() {
+  try {
+    const state = {
+      currentQuestion,
+      answers,
+      bookmarks: Array.from(bookmarks),
+      timerSeconds,
+      timestamp: Date.now()
+    };
+    localStorage.setItem('quizState', JSON.stringify(state));
+  } catch (err) {
+    console.error('Save error:', err);
+  }
+}
+
+function loadFromLocalStorage() {
+  try {
+    const saved = localStorage.getItem('quizState');
+    if (saved) {
+      const state = JSON.parse(saved);
+      if (Date.now() - state.timestamp < 24 * 60 * 60 * 1000) {
+        if (confirm('Resume previous quiz session?')) {
+          currentQuestion = state.currentQuestion || 0;
+          answers = state.answers || {};
+          bookmarks = new Set(state.bookmarks || []);
+          timerSeconds = state.timerSeconds || (totalTimeMinutes * 60); // MODIFIED
+          updateTimer();
+          loadQuestion(currentQuestion);
+        }
+      } else {
+        clearLocalStorage();
+      }
+    }
+  } catch (err) {
+    console.error('Load error:', err);
+    clearLocalStorage();
+  }
+}
+
+function clearLocalStorage() {
+  try {
+    localStorage.removeItem('quizState');
+  } catch (err) {
+    console.error('Clear storage error:', err);
+  }
+}
+
+window.addEventListener('beforeunload', (e) => {
+  const resultSection = document.getElementById('resultSection');
+  if (resultSection && !resultSection.classList.contains('hidden')) {
+    return;
+  }
+  e.preventDefault();
+  e.returnValue = '';
+});
+
+window.addEventListener('unload', () => {
+  if (timerInterval) {
+    clearInterval(timerInterval);
+  }
+});
+</script>
+</body>
+</html>
