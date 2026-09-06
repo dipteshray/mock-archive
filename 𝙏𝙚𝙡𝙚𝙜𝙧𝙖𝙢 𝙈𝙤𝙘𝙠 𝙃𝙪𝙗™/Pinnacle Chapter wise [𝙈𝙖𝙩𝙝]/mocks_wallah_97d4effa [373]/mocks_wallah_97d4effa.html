@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mocks Wallah</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --primary-light: #a29bfe;
+            --primary-dark: #5649c0;
+            --secondary: #00cec9;
+            --accent: #fd79a8;
+            --success: #00b894;
+            --warning: #fdcb6e;
+            --danger: #d63031;
+            --light: #f8f9fa;
+            --dark: #2d3436;
+            --gray: #636e72;
+            --light-gray: #dfe6e9;
+            --card-bg: #ffffff;
+            --body-bg: #f5f6fa;
+            --header-bg: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            --footer-bg: #ffffff;
+            --box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            --box-shadow-sm: 0 2px 10px rgba(0,0,0,0.05);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background-color: var(--body-bg);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            color: var(--dark);
+            line-height: 1.6;
+            padding-bottom: 80px; /* Space for fixed navigation */
+            overflow-x: hidden;
+        }
+        
+        /* Header Styles */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: var(--header-bg);
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            z-index: 1000;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .header-brand {
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .header-brand i {
+            margin-right: 8px;
+            font-size: 1.2rem;
+        }
+        
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .control-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .control-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .control-btn.active {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .timer-display {
+            background: rgba(0,0,0,0.2);
+            border-radius: 18px;
+            padding: 4px 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+        
+        .timer-display i {
+            margin-right: 6px;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-top: 60px;
+            padding: 16px;
+            min-height: calc(100vh - 140px);
+        }
+        
+        .question-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--box-shadow-sm);
+            border: none;
+            transition: var(--transition);
+        }
+        
+        .question-counter {
+            font-size: 0.9rem;
+            color: var(--gray);
+            text-align: center;
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+        
+        .question-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+        
+        .option-item {
+            margin-bottom: 12px;
+            position: relative;
+        }
+        
+        .option-input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+            .question-text {
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        hyphens: auto;
+        max-width: 100%;
+    }
+
+    .question-text img,
+    .option-label img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 8px 0;
+        border-radius: 8px;
+    }
+
+    .option-label {
+        overflow: hidden;
+    }
+
+    .question-card {
+        overflow: hidden;
+    }
+        
+        .option-label {
+            display: block;
+            padding: 14px 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--light-gray);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .option-label:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .option-input:checked + .option-label {
+            border-color: var(--primary);
+            background: rgba(108, 92, 231, 0.05);
+            box-shadow: 0 0 0 1px var(--primary);
+        }
+        
+        .option-input:checked + .option-label::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--primary);
+        }
+        
+        /* When reviewing answers */
+        .review-mode .option-input:checked + .option-label.correct {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.correct::after {
+            background: var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.incorrect {
+            border-color: var(--danger);
+            background: rgba(214, 48, 49, 0.05);
+            box-shadow: 0 0 0 1px var(--danger);
+        }
+        
+        .MathJax, .mjx-chtml {
+            overflow-x: auto;
+            max-width: 100%;
+            display: inline-block;
+        }
+
+        
+        .review-mode .option-input:checked + .option-label.incorrect::after {
+            background: var(--danger);
+        }
+        
+        .review-mode .option-label.correct-answer {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-label.correct-answer::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--success);
+        }
+        
+        .solution-container {
+            margin-top: 20px;
+            padding: 16px;
+            background: rgba(108, 92, 231, 0.05);
+            border-radius: 12px;
+            border-left: 3px solid var(--primary);
+        }
+        
+        .solution-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+        
+        /* Question Navigation */
+        .question-nav {
+            position: fixed;
+            top: 60px;
+            right: 0;
+            bottom: 80px;
+            width: 100%;
+            max-width: 320px;
+            background: var(--card-bg);
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            transform: translateX(100%);
+            transition: var(--transition);
+            z-index: 900;
+            overflow-y: auto;
+            padding: 16px;
+        }
+        
+        .question-nav.show {
+            transform: translateX(0);
+        }
+        
+        .nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .nav-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+        
+        .question-stats {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .stat-badge {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        
+        .section-selector {
+            width: 100%;
+            margin-bottom: 16px;
+            border-radius: 12px;
+            padding: 10px 16px;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            font-size: 0.9rem;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 16px;
+        }
+        
+        .question-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+            gap: 8px;
+        }
+        
+        .q-box {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .q-box:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .q-box.attempted {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .q-box.correct {
+            background-color: var(--success);
+            color: white;
+            border-color: var(--success);
+        }
+        
+        .q-box.incorrect {
+            background-color: var(--danger);
+            color: white;
+            border-color: var(--danger);
+        }
+        
+        .q-box.current {
+            border: 2px solid var(--accent) !important;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .q-box.unattempted {
+            background-color: var(--gray);
+            color: white;
+            border-color: var(--gray);
+        }
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: var(--footer-bg);
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            z-index: 800;
+        }
+        
+        .nav-btn {
+            height: 48px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 20px;
+            transition: var(--transition);
+            gap: 8px;
+        }
+        
+        .nav-btn i {
+            font-size: 1rem;
+        }
+        
+        .nav-btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .nav-btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+        
+        .nav-btn-outline:hover {
+            background: rgba(108, 92, 231, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        /* Overlay when nav is open */
+        .nav-overlay {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            bottom: 80px;
+            background: rgba(0,0,0,0.5);
+            z-index: 800;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+        }
+        
+        .nav-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        /* Results Modal */
+        .results-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1100;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+            padding: 16px;
+        }
+        
+        .results-modal.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .results-card {
+            background: white;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+            transform: translateY(20px);
+            transition: var(--transition);
+        }
+        
+        .results-modal.show .results-card {
+            transform: translateY(0);
+        }
+        
+        .results-header {
+            background: var(--header-bg);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .results-title {
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .results-body {
+            padding: 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            color: white;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+        
+        .results-footer {
+            padding: 16px 20px;
+            display: flex;
+            justify-content: center;
+            border-top: 1px solid var(--light-gray);
+        }
+        
+        /* Responsive Adjustments */
+        @media (min-width: 992px) {
+            .question-nav {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-right: 320px;
+            }
+            
+            .nav-overlay {
+                display: none;
+            }
+            
+            .bottom-nav {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .question-grid {
+                grid-template-columns: repeat(auto-fill, minmax(36px, 1fr));
+                gap: 6px;
+            }
+            
+            .q-box {
+                width: 36px;
+                height: 36px;
+                font-size: 0.9rem;
+            }
+            
+            .option-label {
+                padding: 12px 14px;
+            }
+            
+            .question-text {
+                font-size: 1rem;
+            }
+            
+            .header-brand {
+                font-size: 1rem;
+            }
+            
+            .control-btn {
+                width: 32px;
+                height: 32px;
+            }
+            
+            .timer-display {
+                font-size: 0.8rem;
+                padding: 4px 10px;
+            }
+            
+            .nav-btn {
+                height: 44px;
+                padding: 0 16px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="#" class="header-brand">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Mocks Wallah</span>
+            </a>
+            
+            <div class="header-controls">
+                <!-- Timer -->
+                <div class="timer-display">
+                    <i class="far fa-clock"></i>
+                    <span id="timer-display">25:00</span>
+                </div>
+                
+                <!-- Language toggle -->
+                <button class="control-btn" id="lang-btn" onclick="toggleLanguage()">
+                    <span id="lang-text">En</span>
+                </button>
+                
+                <!-- Submit button -->
+                <button class="control-btn" id="submit-btn" onclick="confirmSubmit()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+                
+                <!-- Questions toggle for mobile -->
+                <button class="control-btn nav-toggle-btn" id="nav-toggle" onclick="toggleNav()">
+                    <i class="fas fa-th"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main content -->
+    <main class="main-content" id="main-content">
+        <div class="question-counter" id="question-counter">Question 1 of 20</div>
+        
+        <!-- Questions will be displayed here -->
+        <div id="questions-container"></div>
+    </main>
+    
+    <!-- Overlay for mobile nav -->
+    <div class="nav-overlay" id="nav-overlay" onclick="toggleNav(false)"></div>
+    
+    <!-- Question navigation sidebar -->
+    <aside class="question-nav" id="question-nav">
+        <div class="nav-header">
+            <h3 class="nav-title">Questions</h3>
+            <div class="question-stats">
+                <span class="stat-badge bg-primary" id="attempted-count">0</span>
+                <span class="stat-badge bg-gray" id="total-count">20</span>
+                <button class="control-btn d-lg-none" onclick="toggleNav(false)">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Section selector -->
+        <select class="section-selector" id="section-selector" onchange="switchSection(this.value)">
+            <option value="all">All Sections</option>
+        </select>
+        
+        <!-- Question grid -->
+        <div class="question-grid" id="question-boxes"></div>
+    </aside>
+    
+    <!-- Bottom navigation for mobile -->
+    <nav class="bottom-nav d-lg-none">
+        <button class="nav-btn nav-btn-outline" onclick="prevQuestion()">
+            <i class="fas fa-chevron-left"></i>
+            <span>Previous</span>
+        </button>
+        <button class="nav-btn nav-btn-outline" onclick="nextQuestion()">
+            <span>Next</span>
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </nav>
+    
+    <!-- Results modal -->
+    <div class="results-modal" id="results-modal">
+        <div class="results-card">
+            <div class="results-header">
+                <h3 class="results-title">Test Results</h3>
+            </div>
+            <div class="results-body">
+                <div class="stats-grid">
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark))">
+                        <div class="stat-value" id="score-value">0</div>
+                        <div class="stat-label">Score</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--success), #1b9aaa)">
+                        <div class="stat-value" id="correct-value">0</div>
+                        <div class="stat-label">Correct</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--danger), var(--accent))">
+                        <div class="stat-value" id="incorrect-value">0</div>
+                        <div class="stat-label">Incorrect</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--gray), var(--dark))">
+                        <div class="stat-value" id="unattempted-value">0</div>
+                        <div class="stat-label">Unattempted</div>
+                    </div>
+                </div>
+            </div>
+            <div class="results-footer">
+                <button class="nav-btn nav-btn-primary" onclick="reviewTest()">
+                    <i class="fas fa-search me-1"></i>
+                    <span>Review Test</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Questions data
+        const questions = [];
+        const sections = {};
+        let currentLang = "en";
+        let currentQuestion = 0;
+        let answers = {};
+        let submitted = false;
+        let totalTime = 25 * 60;
+        
+        // Initialize the test
+        window.onload = function() {
+            initializeTest();
+            startTimer();
+            
+            // If on desktop, show the question navigation by default
+            if (window.innerWidth >= 992) {
+                document.getElementById('question-nav').classList.add('show');
+                document.getElementById('main-content').classList.add('with-nav');
+            }
+        };
+        
+        // Initialize test data
+        function initializeTest() {
+            // Add sections and questions
+            
+            sections["17"] = {
+                name: "Quantitative Aptitude",
+                start: 0,
+                end: 18
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="17">Quantitative Aptitude</option>`;
+            
+            sections["misc"] = {
+                name: "Miscellaneous",
+                start: 19,
+                end: 19
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="misc">Miscellaneous</option>`;
+            
+            
+                questions.push({
+                    id: "1",
+                    section: "17",
+                    question_en: "<p>1. <span style=\"font-family: Times New Roman;\">The following histogram shows the marks scored by 40 students in a test of 30 marks. A student has to score a minimum of 10 marks to pass the test.<br></span><span style=\"font-family: Times New Roman;\">What is the percentage of students who scored 20 or more marks ?(correct to one decimal).<br><strong id=\"docs-internal-guid-33ce4d9b-7fff-1d17-28f7-48f525e4bb8f\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdoUADyi4PdG9GZbvKcIfUzZ21yo7yRqj9mwh2HJ9UT1y4W070yA2FhnQpCuURblmx0Tcl7oQBYx4OGXYbHXJSDtaJ8Q0GiqHxcfUsIqzjBZdAUrRdAjs4n_MPXbjKjn0AF7FU5qw?key=NAL5o9FIt-yjJDdEV21SuTmc\" width=\"312\" height=\"255\"></strong></span></p>",
+                    question_hi: "<p>1. <span style=\"font-family: Baloo;\"> निम्नलिखित हिस्टोग्राम 30 अंकों की एक परीक्षा में 40 छात्रों द्वारा प्राप्त अंकों को दर्शाता है। एक छात्र को परीक्षा पास करने के लिए कम से कम 10 अंक प्राप्त करने होंगे।<br></span><span style=\"font-family: Baloo;\">20 या अधिक अंक प्राप्त करने वाले छात्रों का प्रतिशत क्या है?<br>(एक दशमलव तक सही)।<br></span><span style=\"font-family: Times New Roman;\"><strong id=\"docs-internal-guid-882c71c8-7fff-7d16-952b-18269ee5c375\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcmqjSly-aCD08zTW-5b8bY1tZWAqKGrDETTms8x3ogj-iplN5fA7K8tbWpCOpuSEx-eHR-TNMS6c3b76NauVNvzDx0DWdpa_8Xywl0yL7FP3j0cOVZeXeowcKfKj_uG2OVZKwN?key=NAL5o9FIt-yjJDdEV21SuTmc\" width=\"308\" height=\"252\"></strong></span></p>",
+                    options_en: ["<p>15%</p>", "<p>57.5%</p>", 
+                                "<p>55%</p>", "<p>37.5%</p>"],
+                    options_hi: ["<p>15%</p>", "<p>57.5%</p>",
+                                "<p>55%</p>", "<p>37.5%</p>"],
+                    solution_en: "<p>1.(d) <span style=\"font-family: Times New Roman;\">Number of students who have scored 20 or more marks = 10 + 5 = 15<br></span><span style=\"font-family: Times New Roman;\">Required percentage = </span><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>15</mn><mn>40</mn></mfrac><mo>&#215;</mo><mn>100</mn><mo>=</mo><mn>37</mn><mo>.</mo><mn>5</mn><mo>%</mo></math></p>",
+                    solution_hi: "<p>1.(d) <span style=\"font-family: Baloo;\">20 या अधिक अंक प्राप्त करने वाले छात्रों की संख्या&nbsp;</span><span style=\"font-family: Baloo;\">= 10 + 5 = 15<br></span><span style=\"font-family: Baloo;\">आवश्यक प्रतिशत <span style=\"font-family: Times New Roman;\">= </span><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>15</mn><mn>40</mn></mfrac><mo>&#215;</mo><mn>100</mn><mo>=</mo><mn>37</mn><mo>.</mo><mn>5</mn><mo>%</mo></math></span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "2",
+                    section: "17",
+                    question_en: "<p>2.<span style=\"font-family: Times New Roman;\"> The given pie chart shows the percentage of students in the five schools and the table shows the ratio of boys and girls i</span><span style=\"font-family: Times New Roman;\">n each</span><span style=\"font-family: Times New Roman;\"> school.&nbsp;<br></span><span style=\"font-family: Times New Roman;\">Study the pie chart and table and answer the question that follows.<br><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXce4LLX92LxeAhHg2y-Cb9PQyyWA-VJUA0aT0CuoUfSe5fDNIuL7urV1VZxFYAFirjnUyr9hSQFkF6v4GbaPPfZEDF4X_BRGM0UKSLyZ7wcp7NV2Zvbbe815zhFhvDuKdDY0Gi6InE4bpMFxAmfMqj25ys?key=rLhyzYdOe3_N70s3RCdieiLI\" width=\"158\" height=\"157\"><br></span></p>\n<p><span style=\"font-family: Times New Roman;\">The below table shows the ratio of girls and boys in the given five schools.<br><img src=\"data:image/png;base64,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\" width=\"146\" height=\"177\"><br></span><span style=\"font-family: Times New Roman;\">If the total number of girls from all five schools is represented as a pie chart, then what will be the measure of the sector angle (to the nearest) corresponding to school B?</span></p>",
+                    question_hi: "<p>2. <span style=\"font-family: Baloo;\">दिया गया पाई चार्ट पांच स्कूलों में छात्रों का प्रतिशत दर्शाता है और तालिका प्रत्येक स्कूल में लड़कों और लड़कियों के अनुपात को दर्शाती है। पाई चार्ट और तालिका का अध्ययन करें और नीचे दिए गए प्रश्न का उत्तर दें।<br><span style=\"font-family: Times New Roman;\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXce4LLX92LxeAhHg2y-Cb9PQyyWA-VJUA0aT0CuoUfSe5fDNIuL7urV1VZxFYAFirjnUyr9hSQFkF6v4GbaPPfZEDF4X_BRGM0UKSLyZ7wcp7NV2Zvbbe815zhFhvDuKdDY0Gi6InE4bpMFxAmfMqj25ys?key=rLhyzYdOe3_N70s3RCdieiLI\" width=\"158\" height=\"157\"></span><br></span></p>\n<p>नीचे दी गई तालिका दिए गए पांच स्कूलों में लड़कियों और लड़कों के अनुपात को दर्शाती है।<br><img src=\"data:image/png;base64,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\" width=\"146\" height=\"155\"><br><span style=\"font-family: Baloo;\">यदि सभी पाँच स्कूलों की लड़कियों की कुल संख्या को पाई चार्ट के रूप में दर्शाया जाता है, तो स्कूल B के संगत त्रिज्यखंड कोण (निकटतम तक) का माप क्या होगा?</span></p>",
+                    options_en: ["<p>48&deg;</p>", "<p>32&deg;</p>", 
+                                "<p>58&deg;</p>", "<p>42&deg;</p>"],
+                    options_hi: ["<p>48&deg;</p>", "<p>32&deg;</p>",
+                                "<p>58&deg;</p>", "<p>42&deg;</p>"],
+                    solution_en: "<p>2.(d)<span style=\"font-family: Times New Roman;\">Let total number of students in all five schools = 100<br></span><span style=\"font-family: Times New Roman;\">According to the question,<br><img src=\"data:image/png;base64,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\" width=\"317\" height=\"148\"><br></span><span style=\"font-family: Times New Roman;\">Here, 51 corresponds to 360&deg;, so desired central angle = </span><span style=\"font-family: Times New Roman;\"> </span><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>6</mn><mo>&#215;</mo><mn>360</mn></mrow><mn>51</mn></mfrac><mo>=</mo><mn>42</mn><mo>.</mo><mn>35</mn><mo>&#8776;</mo><mn>42</mn><mo>&#176;</mo></math></p>",
+                    solution_hi: "<p>2.(d) <span style=\"font-family: Baloo;\">माना सभी पाँच विद्यालयों में विद्यार्थियों की कुल संख्या = 100<br></span><span style=\"font-family: Baloo;\">प्रश्न के अनुसार,<br><img src=\"data:image/png;base64,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\" width=\"327\" height=\"150\"><br></span><span style=\"font-family: Baloo;\">यहाँ, 51, 360&deg; से मेल खाती है, इसलिए वांछित केंद्रीय कोण= <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>6</mn><mo>&#215;</mo><mn>360</mn></mrow><mn>51</mn></mfrac><mo>=</mo><mn>42</mn><mo>.</mo><mn>35</mn><mo>&#8776;</mo><mn>42</mn><mo>&#176;</mo></math></span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "3",
+                    section: "17",
+                    question_en: "<p>3.<span style=\"font-family: Times New Roman;\"> The following bar graph shows receipts and expenditure of a business firm over 5 years.&nbsp;<br></span><span style=\"font-family: Times New Roman;\">Gain = Receipts - Expenditure<br></span><span style=\"font-family: Times New Roman;\">What is the increase percentage in receipts from 2017 to 2018?<br></span><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdO2hTov7ov5kQiwyvnHqB-BjSGT0TQ5D7Y8wSOFtBYvYvu1OeNoS3JQ69W-bqyEJWm_yWUNcU1atowrCAWOIJruivv0vKrJb1T8UdPKYBlzEyA5jYZ4oKWxbsIR4QG6zvBAnsXSxeW8ee2SuUM7J1jZ8s?key=rLhyzYdOe3_N70s3RCdieiLI\" width=\"299\" height=\"238\"></p>",
+                    question_hi: "<p>3.<span style=\"font-family: Baloo;\"> निम्नलिखित बार ग्राफ 5 वर्षों में एक व्यावसायिक फर्म की प्राप्तियों और व्यय को दर्शाता है। लाभ = प्राप्ति-व्यय<br></span><span style=\"font-family: Baloo;\">2017 से 2018 तक प्राप्तियों में वृद्धि प्रतिशत क्या है?<br></span><strong id=\"docs-internal-guid-06d28aad-7fff-2741-d799-6deb35670f1a\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXe0VhAOUER2aeUkspu4a8raoZ1Vq6w-LTl_8_dzXajWWAxiAzn0_t5LB1il4zjcrnMTzhM7OgjBE_-OG5Mcm9IEPbi8wogEXWKtep9WmvX-4Qrawtz9vREfwb5BnvSYarM85Iakjg?key=NAL5o9FIt-yjJDdEV21SuTmc\" width=\"351\" height=\"244\"></strong></p>\n<p>&nbsp;</p>",
+                    options_en: ["<p>6.6</p>", "<p>25</p>", 
+                                "<p>2.5</p>", "<p>20</p>"],
+                    options_hi: ["<p>6.6</p>", "<p>25</p>",
+                                "<p>2.5</p>", "<p>20</p>"],
+                    solution_en: "<p>3.(b) <span style=\"font-family: Times New Roman;\">Percentage increase in receipts from 2017 to 2018&nbsp;<br></span>= <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>80</mn><mo>-</mo><mn>64</mn></mrow><mn>64</mn></mfrac><mo>&#215;</mo><mn>100</mn></math> = 25%</p>",
+                    solution_hi: "<p>3.(b) <span style=\"font-family: Baloo;\">2017 से 2018 तक प्राप्तियों में प्रतिशत वृद्धि<br></span>= <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>80</mn><mo>-</mo><mn>64</mn></mrow><mn>64</mn></mfrac><mo>&#215;</mo><mn>100</mn></math> = 25%</p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "4",
+                    section: "17",
+                    question_en: "<p>4.<span style=\"font-family: Times New Roman;\"> The following bar graph shows the number of youth (in lakhs) and the number of employed youth(in lakhs) in five states A,B,C,D and E.<br></span><span style=\"font-family: Times New Roman;\">Which state has employed youth less than 80% of the total youth population?<br></span><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXco7xnVtzbPCN86JqpmmnfsvqKxL3wjkCnekp1sP4fyEsk_dcl0JnoBPfCVZe72AGl_7RVSXQYpNdXsH-aSBO6ElgM1Atj6aTgorh3X_kM-TyL-ZaYk4vyRV0pJdjYWoKU9IbjjmsYFdbPN_j2FiktVroo?key=rLhyzYdOe3_N70s3RCdieiLI\" width=\"322\" height=\"233\"></p>",
+                    question_hi: "<p>4. <span style=\"font-family: Baloo;\">निम्नलिखित बार ग्राफ पांच राज्यों A, B, C, Dऔर E में युवाओं की संख्या (लाखों में) और नियोजित युवाओं की संख्या (लाखों में) को दर्शाता है।<br></span><span style=\"font-family: Baloo;\">किस राज्य में कुल युवा आबादी के 80% से कम युवाओं को रोजगार मिला है?<br></span><strong id=\"docs-internal-guid-375dfeee-7fff-6f9f-7b53-e0f4a920586d\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdUL-wpSBc1HwnD7UZ7VhbUcPvD9jXxT2KdNRK59cdFxW33nMD1xMmEDY-Sj2m-uTuonTnbYGA4zepJO4JgLEivnoZ7b-XL-g8u8zDLLbTT9UTKX2SQVKukzK6GTtznf9Dm53WG?key=NAL5o9FIt-yjJDdEV21SuTmc\" width=\"373\" height=\"260\"></strong></p>",
+                    options_en: ["<p>D</p>", "<p>B and D</p>", 
+                                "<p>C and D</p>", "<p>A</p>"],
+                    options_hi: ["<p>D</p>", "<p>B और D</p>",
+                                "<p>C और D</p>", "<p>A</p>"],
+                    solution_en: "<p>4.(a) <span style=\"font-family: Times New Roman;\">Percentage of employed youth in state A = </span><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>10</mn><mo>.</mo><mn>5</mn></mrow><mn>12</mn></mfrac><mo>&#215;</mo><mn>100</mn><mo>=</mo><mn>87</mn><mo>.</mo><mn>5</mn><mo>%</mo></math><br><span style=\"font-family: Times New Roman;\">Percentage of employed youth in state B =&nbsp;</span><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mo>&#160;</mo><mn>7</mn><mo>&#160;</mo></mrow><mn>8</mn></mfrac><mo>&#215;</mo><mn>100</mn><mo>=</mo><mn>87</mn><mo>.</mo><mn>5</mn><mo>%</mo></math><br><span style=\"font-family: Times New Roman;\">Percentage of employed youth in state C = </span><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>10</mn><mo>&#160;</mo></mrow><mrow><mn>11</mn><mo>.</mo><mn>5</mn></mrow></mfrac><mo>&#215;</mo><mn>100</mn><mo>=</mo><mn>86</mn><mo>.</mo><mn>96</mn><mo>%</mo></math><br><span style=\"font-family: Times New Roman;\">Percentage of employed youth in state D = </span><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>7</mn><mo>.</mo><mn>5</mn></mrow><mn>10</mn></mfrac><mo>&#215;</mo><mn>100</mn><mo>=</mo><mn>75</mn><mo>%</mo></math><br><span style=\"font-family: Times New Roman;\">Clearly, we can see that only state D has employed youth less than 80% of its total youth population.</span></p>",
+                    solution_hi: "<p>4.(a) <span style=\"font-family: Baloo;\">राज्य A में कार्यरत युवाओं का प्रतिशत = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>10</mn><mo>.</mo><mn>5</mn></mrow><mn>12</mn></mfrac><mo>&#215;</mo><mn>100</mn><mo>=</mo><mn>87</mn><mo>.</mo><mn>5</mn><mo>%</mo></math></span><br><span style=\"font-family: Baloo;\">राज्य B में कार्यरत युवाओं का प्रतिशत = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mo>&#160;</mo><mn>7</mn><mo>&#160;</mo></mrow><mn>8</mn></mfrac><mo>&#215;</mo><mn>100</mn><mo>=</mo><mn>87</mn><mo>.</mo><mn>5</mn><mo>%</mo></math></span><br><span style=\"font-family: Baloo;\">राज्य C में कार्यरत युवाओं का प्रतिशत = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>10</mn><mo>&#160;</mo></mrow><mrow><mn>11</mn><mo>.</mo><mn>5</mn></mrow></mfrac><mo>&#215;</mo><mn>100</mn><mo>=</mo><mn>86</mn><mo>.</mo><mn>96</mn><mo>%</mo></math></span><br><span style=\"font-family: Baloo;\">राज्य D में कार्यरत युवाओं का प्रतिशत = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>7</mn><mo>.</mo><mn>5</mn></mrow><mn>10</mn></mfrac><mo>&#215;</mo><mn>100</mn><mo>=</mo><mn>75</mn><mo>%</mo></math></span><span style=\"font-family: Times New Roman;\"><br></span><span style=\"font-family: Baloo;\">स्पष्ट रूप से, हम देख सकते हैं कि केवल राज्य D ने अपनी कुल युवा आबादी के 80% से कम युवाओं को रोजगार दिया है।</span></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "5",
+                    section: "17",
+                    question_en: "<p>5.<span style=\"font-family: Times New Roman;\"> The given pie chart shows the monthly household expenditure of family A and Family B under various heads. The monthly expenditure for family A and Family B are ₹50,000 and ₹75,000, respectively.<br></span><span style=\"font-family: Times New Roman;\">Study the charts carefully and answer the questions that follows:<br></span><span style=\"font-family: Times New Roman;\">Monthly Household expenditure of ₹ 50000 under various heads of family A.<br></span><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdfk7rMHPHpLZGvWWaAmf1iBaYb9RyBFFDCV7yB7B73_DNZJ4PNAdg0-uZlE4R6LhUDZ-LeVJ35V9kOXtZm3BvB57OZH1dtZctHlMXIotO4_JDzqGFzzTjxfWjOua-ETZZNNotm80dkhmOXn8KC5Q_fnzE?key=rLhyzYdOe3_N70s3RCdieiLI\" width=\"280\" height=\"274\"><br><span style=\"font-family: Times New Roman;\">Monthly Household expenditure of ₹75000 under various heads of family B.<br></span><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeKnGA-H_vhr17BJPw63_BeX6zFUPUhuULFkr8Kt5DRxQyL1G90dC-T5sfFK5ZNjQ5n4H8aW2T7Jf886tNHR-ecyicbyLddFoX5dMgw5pUUZzzqfa-79du8Ru6C6bsPxHUwqxJYg1H1f67u_RcYwVM-G2s?key=rLhyzYdOe3_N70s3RCdieiLI\" width=\"281\" height=\"274\"><br><span style=\"font-family: Times New Roman;\">If the monthly expenditure of both families are combined together then the expenditure on Entertainment of both families together will be what percentage of the total monthly expenditure of both families? Express your answer to the nearest integer.</span></p>",
+                    question_hi: "<p>5. <span style=\"font-family: Baloo;\">दिया गया पाई चार्ट विभिन्न शीर्षों के तहत परिवार A और परिवार B के मासिक घरेलू व्यय को दर्शाता है। परिवार A और परिवार B के लिए मासिक व्यय क्रमशः ₹50,000 और ₹75,000 है।<br></span><span style=\"font-family: Baloo;\">चार्ट का ध्यानपूर्वक अध्ययन करें और निम्नानुसार प्रश्नों के उत्तर दें:<br></span><span style=\"font-family: Baloo;\">परिवार A के विभिन्न शीर्षों के तहत ₹50000 का मासिक घरेलू व्यय।<br><strong id=\"docs-internal-guid-6ff3c6fd-7fff-43eb-c14d-f0c1c3a8cccb\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXem32D-iPoeBD_KsAzQVL0X9Zasvl9piGOZwOEEqyPIMdNIXZNT_UXURIlSsrEpoc6c5LxnzdjMvGgnqwwqwwYC-SJARDT7nKWuTcYJXEH8Otaa9CU7VvUlbVt6WuSRa7p-E_ibuA?key=rLhyzYdOe3_N70s3RCdieiLI\" width=\"235\" height=\"228\"><br></strong></span><span style=\"font-family: Baloo;\">परिवार B के विभिन्न प्रमुखों के तहत ₹ 75000 का मासिक घरेलू व्यय।<br><strong id=\"docs-internal-guid-d6f326a0-7fff-bb40-14de-1d053c2f5822\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfn_RlWzuKjA75UXoVDsrypryfpVKIQ-LH8kA0fc6nts2u8HBGLXsVo2anauZ2Ua-yjXLjteEDRg8eRPs96euhk3_n12WAJQQwNTOtEmlaGYy6-TpaV_8wnFYCdr9jzPiNaAOg82g?key=rLhyzYdOe3_N70s3RCdieiLI\" width=\"238\" height=\"230\"><br></strong></span><span style=\"font-family: Baloo;\">यदि दोनों परिवारों के मासिक व्यय को एक साथ जोड़ दिया जाता है, तो दोनों परिवारों के मनोरंजन पर होने वाला व्यय दोनों परिवारों के कुल मासिक व्यय का कितना प्रतिशत होगा? निकटतम पूर्णांक के लिए अपना उत्तर व्यक्त कीजिये ।</span></p>",
+                    options_en: ["<p>23%</p>", "<p>10%</p>", 
+                                "<p>22%</p>", "<p>11%</p>"],
+                    options_hi: ["<p>23%</p>", "<p>10%</p>",
+                                "<p>22%</p>", "<p>11%</p>"],
+                    solution_en: "<p>5.(d) <span style=\"font-family: Times New Roman;\">Entertainment expenditure of family A = </span><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>50000</mn><mo>&#215;</mo><mfrac><mn>10</mn><mn>100</mn></mfrac><mo>=</mo><mo>&#8377;</mo><mn>5</mn><mo>,</mo><mn>000</mn></math><br><span style=\"font-family: Times New Roman;\">Entertainment expenditure of family B =</span><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>75000</mn><mo>&#215;</mo><mfrac><mn>12</mn><mn>100</mn></mfrac><mo>=</mo><mo>&#8377;</mo><mn>9</mn><mo>,</mo><mn>000</mn></math><br><span style=\"font-family: Times New Roman;\">Total entertainment expenditure of both families = 5000 + 9000 = </span><span style=\"font-family: Times New Roman;\">₹</span><span style=\"font-family: Times New Roman;\">14,000<br></span><span style=\"font-family: Times New Roman;\">Total monthly expenditures of both families = 50000 + 75000 = </span><span style=\"font-family: Times New Roman;\">₹</span><span style=\"font-family: Times New Roman;\">1,25,000&nbsp;<br></span><span style=\"font-family: Times New Roman;\">Required percentage =</span><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>14000</mn><mn>125000</mn></mfrac><mo>&#215;</mo><mn>100</mn><mo>=</mo><mn>11</mn><mo>.</mo><mn>2</mn><mo>&#8776;</mo><mn>11</mn><mo>%</mo></math></p>",
+                    solution_hi: "<p>5.(d) <span style=\"font-family: Baloo;\">परिवार A का मनोरंजन व्यय = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>50000</mn><mo>&#215;</mo><mfrac><mn>10</mn><mn>100</mn></mfrac><mo>=</mo><mo>&#8377;</mo><mn>5</mn><mo>,</mo><mn>000</mn></math></span><br><span style=\"font-family: Baloo;\">परिवार B का मनोरंजन व्यय = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>75000</mn><mo>&#215;</mo><mfrac><mn>12</mn><mn>100</mn></mfrac><mo>=</mo><mo>&#8377;</mo><mn>9</mn><mo>,</mo><mn>000</mn></math></span><br><span style=\"font-family: Baloo;\">दोनों परिवारों का कुल मनोरंजन व्यय = 5000 + 9000 = </span><span style=\"font-family: Times New Roman;\">₹</span><span style=\"font-family: Times New Roman;\">14,000<br></span><span style=\"font-family: Baloo;\">दोनों परिवारों का कुल मासिक खर्च = 50000 + 75000 = </span><span style=\"font-family: Times New Roman;\">₹</span><span style=\"font-family: Times New Roman;\">1,25,000&nbsp;<br></span><span style=\"font-family: Baloo;\">आवश्यक प्रतिशत = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>14000</mn><mn>125000</mn></mfrac><mo>&#215;</mo><mn>100</mn><mo>=</mo><mn>11</mn><mo>.</mo><mn>2</mn><mo>&#8776;</mo><mn>11</mn><mo>%</mo></math></span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "6",
+                    section: "17",
+                    question_en: "<p>6.<span style=\"font-family: Times New Roman;\"> The given pie chart represents the percentage wise distribution of the total number of vanilla cake and chocolate cakes sold everyday.<br></span><span style=\"font-family: Times New Roman;\">The total number of cakes sold in a week = 10500. Study the pie chart and answer the question followed.<br><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeHnSGbrs7UhFfm7BvGX2KmwJTOdcnhEQNjHZMmwHVqYjzAtcpk_DXYwxlc2VVLQw5BM0mzc4N2-QYDAflZF16HMj9ZLCeDRMIR8GNzq6aQSDEr2VPOKhRcz0mlvAW0NOoiZsHqJ3RjjmVFcn6htGfMoJQ?key=rLhyzYdOe3_N70s3RCdieiLI\" width=\"227\" height=\"230\"><br></span></p>\n<p><span style=\"font-family: Times New Roman;\">The ratio of vanilla cakes sold to chocolate cakes sold on Friday is 4:3.If the price of one vanilla cake is ₹9 and that of one chocolate cake is ₹10, then the total amount earned (in ₹) by selling all vanilla cakes and chocolate cakes on friday is;</span></p>",
+                    question_hi: "<p>6. <span style=\"font-family: Baloo;\">दिया गया पाई चार्ट प्रतिदिन बेचे जाने वाले वेनिला केक और चॉकलेट केक की कुल संख्या के प्रतिशत के अनुसार वितरण को दर्शाता है।<br></span><span style=\"font-family: Baloo;\">एक सप्ताह में बेचे गए केक की कुल संख्या = 10500 हैं&nbsp;<br></span><span style=\"font-family: Baloo;\">पाई चार्ट का अध्ययन करें और दिए गए प्रश्न का उत्तर दें।<br><span style=\"font-family: Times New Roman;\"><strong id=\"docs-internal-guid-e216cccb-7fff-5987-7b15-90b80067577f\">&nbsp;<img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXf9_6fDd8sUOSBOmiP7InjWwqyJ98cthL5PWNSx0rYTML3dQwEoa3wPgMr0uFREm7oPYqDMt1WEb-_xwdtLkXXSOKFAYm0X-x2hr8j47pA1zK1JyQUlnE80b5-loVYzVoGajk63PQ?key=rLhyzYdOe3_N70s3RCdieiLI\" width=\"202\" height=\"184\"></strong></span><br></span></p>\n<p><span style=\"font-family: Baloo;\">शुक्रवार को बेचे जाने वाले चॉकलेट केक से बेचे गए वेनिला केक का अनुपात 4:3 है। यदि एक वेनिला केक की कीमत ₹9 है और एक चॉकलेट केक की कीमत ₹10 है, तो शुक्रवार को सभी वेनिला केक और चॉकलेट केक बेचकर अर्जित की गई कुल राशि (₹ में) है;</span></p>",
+                    options_en: ["<p>8,900</p>", "<p>10,000</p>", 
+                                "<p>9,900</p>", "<p>11,000</p>"],
+                    options_hi: ["<p>8,900</p>", "<p>10,000</p>",
+                                "<p>9,900</p>", "<p>11,000</p>"],
+                    solution_en: "<p>6.(c) <span style=\"font-family: Times New Roman;\">Total number of cakes sold on friday = </span><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>10500</mn><mo>&#215;</mo><mfrac><mn>10</mn><mn>100</mn></mfrac><mo>=</mo><mn>1050</mn></math><br><span style=\"font-family: Times New Roman;\">Number of vanilla cakes sold on friday = </span><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>1050</mn><mo>&#215;</mo><mfrac><mn>4</mn><mn>7</mn></mfrac><mo>=</mo><mn>600</mn></math><br><span style=\"font-family: Times New Roman;\">Number of chocolate cakes sold on friday = </span><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>1050</mn><mo>&#215;</mo><mfrac><mn>3</mn><mn>7</mn></mfrac><mo>=</mo><mn>450</mn></math><br><span style=\"font-family: Times New Roman;\">Total amount earned by selling both cakes on friday <br></span>= <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>(</mo><mn>600</mn><mo>&#215;</mo><mn>9</mn><mo>)</mo><mo>+</mo><mo>(</mo><mn>450</mn><mo>&#215;</mo><mn>10</mn><mo>)</mo><mo>=</mo><mn>5400</mn><mo>+</mo><mn>4500</mn><mo>=</mo><mo>&#8377;</mo><mn>9</mn><mo>,</mo><mn>900</mn></math></p>",
+                    solution_hi: "<p>6.(c) <span style=\"font-family: Baloo;\">शुक्रवार को बिकने वाले केक की कुल संख्या = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>10500</mn><mo>&#215;</mo><mfrac><mn>10</mn><mn>100</mn></mfrac><mo>=</mo><mn>1050</mn></math></span><br><span style=\"font-family: Baloo;\">शुक्रवार को बिकने वाले वैनिला केक की संख्या = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>1050</mn><mo>&#215;</mo><mfrac><mn>4</mn><mn>7</mn></mfrac><mo>=</mo><mn>600</mn></math></span><br><span style=\"font-family: Baloo;\">शुक्रवार को बिकने वाले चॉकलेट केक की संख्या = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>1050</mn><mo>&#215;</mo><mfrac><mn>3</mn><mn>7</mn></mfrac><mo>=</mo><mn>450</mn></math></span><br><span style=\"font-family: Baloo;\">शुक्रवार को दोनों केक बेचकर अर्जित की गई कुल राशि <br>=&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>(</mo><mn>600</mn><mo>&#215;</mo><mn>9</mn><mo>)</mo><mo>+</mo><mo>(</mo><mn>450</mn><mo>&#215;</mo><mn>10</mn><mo>)</mo><mo>=</mo><mn>5400</mn><mo>+</mo><mn>4500</mn><mo>=</mo><mo>&#8377;</mo><mn>9</mn><mo>,</mo><mn>900</mn></math></span></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "7",
+                    section: "17",
+                    question_en: "<p>7. <span style=\"font-family: Times New Roman;\">&nbsp;The given bar graph shows the income and expenditure of a company over 5 years, from 2014 to 2018 . Study the Bar graph and answer the question that follows:<br><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeyLbuysRpBOi2Bz7rlFSexPJFEyhTVtdNhrSABlN-gOoA_0N7v9UoC2B4YODrq24sfYyh-TdvUNa9vFRS1zY9WP1MNClHvujVes3_HHajxECEqlWYP9zhwlPibjrlo4GcZJi18AWV7aGtEDkvx05kCd1g?key=rLhyzYdOe3_N70s3RCdieiLI\" width=\"279\" height=\"244\"><br></span><span style=\"font-family: Times New Roman;\">In which of the following years ratio of expenditure to income the minimum?</span></p>",
+                    question_hi: "<p>7.<span style=\"font-family: Baloo;\"> दिया गया बार ग्राफ 2014 से 2018 तक 5 वर्षों में एक कंपनी की आय और व्यय को दर्शाता है। बार ग्राफ का अध्ययन करें और इस प्रकार के प्रश्न का उत्तर दें:<br></span><span style=\"font-family: Times New Roman;\"><strong id=\"docs-internal-guid-e483946b-7fff-7f55-f6f1-01bf205de7f9\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcZo_NuDakf0HH9h0eYA8JK5xZ_Ac0RJT1FpKoE1KTAL28xDHXOEHN4nGjbMO00QjN-PyAuUvagmn0TDpM6f3Ed3GCMouxBFCrAuKnLaQo_oE2WFm4nDyVNjL5FwlUXAtXRNwKUiQ?key=VBeJN-gszFqCZnjmyRoKqD5b\" width=\"323\" height=\"274\"><br></strong></span><span style=\"font-family: Baloo;\">निम्नलिखित में से किस वर्ष में व्यय और आय का न्यूनतम अनुपात है?</span></p>\n<p>&nbsp;</p>",
+                    options_en: ["<p>2016</p>", "<p>2017</p>", 
+                                "<p>2018</p>", "<p>2014</p>"],
+                    options_hi: ["<p>2016</p>", "<p>2017</p>",
+                                "<p>2018</p>", "<p>2014</p>"],
+                    solution_en: "<p>7.(d)<span style=\"font-family: Times New Roman;\">Ratio of expenditure to income for 2016 = </span><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>275</mn><mn>325</mn></mfrac><mo>=</mo><mfrac><mn>11</mn><mn>13</mn></mfrac><mo>=</mo><mn>0</mn><mo>.</mo><mn>85</mn></math><span style=\"font-family: Times New Roman;\">&nbsp;<br></span><span style=\"font-family: Times New Roman;\">Ratio of expenditure to income for 2017 = </span><span style=\"font-family: Times New Roman;\"> </span><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>300</mn><mn>350</mn></mfrac><mo>=</mo><mfrac><mn>6</mn><mn>7</mn></mfrac><mo>=</mo><mn>0</mn><mo>.</mo><mn>86</mn></math><br><span style=\"font-family: Times New Roman;\">Ratio of expenditure to income for 2018 = </span><span style=\"font-family: Times New Roman;\"> </span><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>325</mn><mn>350</mn></mfrac><mo>=</mo><mfrac><mn>13</mn><mn>14</mn></mfrac><mo>=</mo><mn>0</mn><mo>.</mo><mn>93</mn></math><br><span style=\"font-family: Times New Roman;\">Ratio of expenditure to income for 2014 = </span><span style=\"font-family: Times New Roman;\"> </span><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>175</mn><mn>225</mn></mfrac><mo>=</mo><mfrac><mn>7</mn><mn>9</mn></mfrac><mo>=</mo><mn>0</mn><mo>.</mo><mn>78</mn></math><br><span style=\"font-family: Times New Roman;\">Clearly, we can see that in 2014 the required ratio is minimum.</span></p>",
+                    solution_hi: "<p>7.(d) <span style=\"font-family: Baloo;\">2016 के लिए आय से व्यय का अनुपात = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>275</mn><mn>325</mn></mfrac><mo>=</mo><mfrac><mn>11</mn><mn>13</mn></mfrac><mo>=</mo><mn>0</mn><mo>.</mo><mn>85</mn></math></span><span style=\"font-family: Times New Roman;\">&nbsp;<br></span><span style=\"font-family: Baloo;\">2017 के लिए आय से व्यय का अनुपात = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>300</mn><mn>350</mn></mfrac><mo>=</mo><mfrac><mn>6</mn><mn>7</mn></mfrac><mo>=</mo><mn>0</mn><mo>.</mo><mn>86</mn></math></span><br><span style=\"font-family: Baloo;\">2018 के लिए आय से व्यय का अनुपात = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>325</mn><mn>350</mn></mfrac><mo>=</mo><mfrac><mn>13</mn><mn>14</mn></mfrac><mo>=</mo><mn>0</mn><mo>.</mo><mn>93</mn></math></span><br><span style=\"font-family: Baloo;\">2014 के लिए आय से व्यय का अनुपात= <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>175</mn><mn>225</mn></mfrac><mo>=</mo><mfrac><mn>7</mn><mn>9</mn></mfrac><mo>=</mo><mn>0</mn><mo>.</mo><mn>78</mn></math></span><br><span style=\"font-family: Baloo;\">स्पष्ट रूप से, हम देख सकते हैं कि 2014 में आवश्यक अनुपात न्यूनतम है।</span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "8",
+                    section: "17",
+                    question_en: "<p>8.<span style=\"font-family: Times New Roman;\"> The following histogram shows the marks scored by 40 students in a test of 30 marks. A student has to score a minimum of 10 marks to pass the test.<br></span><span style=\"font-family: Times New Roman;\">How many students have passed the test and obtained less than 50% marks?<br></span><strong id=\"docs-internal-guid-c34a0ad8-7fff-5e7b-2a98-966b8b07c007\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdJ3PkyodeJN_bqBAQwAz9_SmJaSM8kYnXS3mHYAvQYx7luVu28bqOSUI2ma7GWEixKAg3YJxbeJqDSvTXydCgR_M4z-lFsjtYb-GZm5DiXNGkDNZtabH0xuIbnWFgWvSkFJ1rxPQ?key=VBeJN-gszFqCZnjmyRoKqD5b\" width=\"239\" height=\"231\"></strong></p>",
+                    question_hi: "<p>8.<span style=\"font-family: Baloo;\"> निम्नलिखित हिस्टोग्राम 30 अंकों की एक परीक्षा में 40 छात्रों द्वारा प्राप्त अंकों को दर्शाता है। एक छात्र को परीक्षा पास करने के लिए न्यूनतम 10 अंक प्राप्त करने होंगे।<br></span><span style=\"font-family: Baloo;\">कितने छात्रों ने परीक्षा उत्तीर्ण की है और 50% से कम अंक प्राप्त किए हैं?<br></span><strong id=\"docs-internal-guid-35956458-7fff-955c-d398-15169c61e071\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeMo9VixfP0yMCx0UXOamq0ARqmvRORga3Auv7QpH5pLv7P9Byh82WqatUfOczhVm-H92MUnE5hKcBo0v4-MbETBYlgegdV3dNzBkVXDqIkcyt9xRCNj88EXujw33dJsB_k3jox_Q?key=VBeJN-gszFqCZnjmyRoKqD5b\" width=\"260\" height=\"226\"></strong></p>\n<p>&nbsp;</p>",
+                    options_en: ["<p>17</p>", "<p>7</p>", 
+                                "<p>15</p>", "<p>10</p>"],
+                    options_hi: ["<p>17</p>", "<p>7</p>",
+                                "<p>15</p>", "<p>10</p>"],
+                    solution_en: "<p>8.(b) <span style=\"font-family: Times New Roman;\">50% of marks = </span><span style=\"font-family: Times New Roman;\"> </span><span style=\"font-family: Times New Roman;\"> <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>1</mn><mn>2</mn></mfrac><mo>&#215;</mo><mn>30</mn></math> = 15 marks<br></span><span style=\"font-family: Times New Roman;\">Passing marks = 10 marks<br></span><span style=\"font-family: Times New Roman;\">So, number of students in the range of 10-15 marks = 7</span></p>",
+                    solution_hi: "<p>8.(b)<span style=\"font-family: Baloo;\">अंको का 50% = <span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>1</mn><mn>2</mn></mfrac><mo>&#215;</mo><mn>30</mn></math></span></span><span style=\"font-family: Baloo;\">&nbsp;= 15 अंक<br></span><span style=\"font-family: Baloo;\">उत्तीर्ण अंक = 10 अंक<br></span><span style=\"font-family: Baloo;\">इसलिए, छात्रों की संख्या 10 &ndash;15 अंकों की सीमा में है = 7</span></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "9",
+                    section: "17",
+                    question_en: "<p>9. <span style=\"font-family: Times New Roman;\">Study the given pie chart and answer the question that follows.<br></span><span style=\"font-family: Times New Roman;\">The pie chart represents the percentage-wise distribution of the total number of Vanilla cakes and Chocolate cakes sold everyday in a week. The total number of cakes sold in a week = 10500.<br><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcJd-URMKkHNr25_WEc0kCFkkxWzao8jvtX4opWTUdGmpYOdNIwxLUNH-bYAs51X-PFW8wPsIdGLZ8tR9Cfxpu_JC_dH1-eDLyq3ZD1VAVVwZ37oW8yGt9D8aAzoJ8GGieem8DOBz_CPHdm-D8WzhxDuhw?key=rLhyzYdOe3_N70s3RCdieiLI\" width=\"227\" height=\"230\"><br></span><span style=\"font-family: Times New Roman;\">The ratio of the number of Vanilla cakes sold to the number of Chocolate cakes sold on Saturday is 4 : 3, the selling price of one Vanilla cake is ₹8 and that of one Chocolate cake is ₹15, then the total amount earned (in ₹ ) by selling all Vanilla cakes and Chocolate cakes on Saturday is :</span></p>",
+                    question_hi: "<p>9. <span style=\"font-family: Baloo;\">दिए गए पाई चार्ट का अध्ययन कीजिये और निम्नलिखित प्रश्न का उत्तर दीजिये।<br></span><span style=\"font-family: Baloo;\">पाई चार्ट एक सप्ताह में हर रोज बेचे जाने वाले वेनिला केक और चॉकलेट केक की कुल संख्या के प्रतिशत-वार वितरण का प्रतिनिधित्व करता है। एक सप्ताह में बेचे गए केक की कुल संख्या = 10500।<br><span style=\"font-family: Times New Roman;\"><strong id=\"docs-internal-guid-218f77bc-7fff-0c74-376d-d2b946b084e7\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXd8qNF6qTJ0-jX9Qpf7RWhGmejQdpx9tqEVo0fVrJk7c-BKBQy8EEskggJWSaUiJRTArGBAlebWOcxqJw03eM44sTpCL5CQigdc2LOiWFoj5WsWeR-ZOtWo3mOzJeL7lTHJDqXG?key=mo0geGJ8DttffZ2nsxtkeQ\" width=\"228\" height=\"209\"></strong></span><br></span><span style=\"font-family: Baloo;\">शनिवार को बेचे गए वेनिला केक की संख्या और चॉकलेट केक की संख्या का अनुपात 4 : 3 है, एक वेनिला केक का विक्रय मूल्य ₹ 8 है और एक चॉकलेट केक का विक्रय मूल्य ₹ 15 है, तो शनिवार को सभी वेनिला केक और चॉकलेट केक को बेचकर अर्जित कुल राशि (₹ में) क्या है?</span></p>\n<p>&nbsp;</p>",
+                    options_en: ["<p>14,880</p>", "<p>10,488</p>", 
+                                "<p>20,000</p>", "<p>18,480</p>"],
+                    options_hi: ["<p>14,880</p>", "<p>10,488</p>",
+                                "<p>20,000</p>", "<p>18,480</p>"],
+                    solution_en: "<p>9.(d) <span style=\"font-family: Times New Roman;\">Total cakes sold on Saturday = 16% of 10500 = 1680<br></span><span style=\"font-family: Times New Roman;\">Vanilla cakes = </span><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>1680</mn><mo>&#215;</mo><mfrac><mn>4</mn><mn>7</mn></mfrac><mo>=</mo><mn>960</mn></math><br><span style=\"font-family: Times New Roman;\">Chocolate cakes = 1680 - 960 = 720<br></span><span style=\"font-family: Times New Roman;\">Total amount earned = </span><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>960</mn><mo>&#215;</mo><mn>8</mn><mo>+</mo><mn>720</mn><mo>&#215;</mo><mn>15</mn><mo>=</mo><mn>7680</mn><mo>+</mo><mn>10800</mn><mo>=</mo><mn>18480</mn></math></p>",
+                    solution_hi: "<p>9.(d) <span style=\"font-family: Baloo;\">शनिवार को बेचे गए कुल केक = 16% of 10500 = 1680<br></span><span style=\"font-family: Baloo;\">वेनिला केक = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>1680</mn><mo>&#215;</mo><mfrac><mn>4</mn><mn>7</mn></mfrac><mo>=</mo><mn>960</mn></math></span><br><span style=\"font-family: Baloo;\">चॉकलेट केक = 1680 - 960 = 720<br></span><span style=\"font-family: Baloo;\">अर्जित कुल राशि = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>960</mn><mo>&#215;</mo><mn>8</mn><mo>+</mo><mn>720</mn><mo>&#215;</mo><mn>15</mn><mo>=</mo><mn>7680</mn><mo>+</mo><mn>10800</mn><mo>=</mo><mn>18480</mn></math></span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "10",
+                    section: "17",
+                    question_en: "<p>10. <span style=\"font-family: Times New Roman;\">The following bar graph shows the total number of youth (in lakhs) and the number of employed youth (in lakhs) in 5 states A, B, C, D and E.<br></span><span style=\"font-family: Times New Roman;\">The number of employed youth in state B is what percentage of the number of employed youth in state E?<br></span><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXezDmdXuoEN8r2l1SrPzlwG0B8uf0bWuCsgyvjULl8APxdLIxDnGagTQiQQtgLsCMTVuTtAugEQ6qz2n5H4cA1JTW5iy2ZW2D3TqscfyKvefuwwflI-ZuYU_oRQo1zQ30ct7sJ1BFfDXbGKP2KaYc2XAcQ?key=rLhyzYdOe3_N70s3RCdieiLI\" width=\"321\" height=\"232\"></p>\n<p>&nbsp;</p>",
+                    question_hi: "<p>10. <span style=\"font-family: Baloo;\">निम्नलिखित बार ग्राफ 5 राज्यों A, B, C, D और E में युवाओं की कुल संख्या (लाखों में) और नियोजित (लाखों में) दिखाता है।<br></span><span style=\"font-family: Baloo;\">राज्य B में कार्यरत युवाओं की संख्या राज्य E में कार्यरत युवाओं की संख्या का कितना प्रतिशत है?<br></span><strong id=\"docs-internal-guid-b268ba55-7fff-0ff7-d4ca-2b0acbc18886\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcQtGgXVcPKkUogfjzJlq3FNZh3qxwZLnylXAIhG2sn_8FdURz8CDEMPvOxvyFp1KLG77C_UPUozmYCc34knz5Ca8Or35aFoXnwk-amxoxV6n30C1JPwMOHu5ePDznzdxZunmNRbg?key=mo0geGJ8DttffZ2nsxtkeQ\" width=\"293\" height=\"236\"></strong></p>",
+                    options_en: ["<p>87%</p>", "<p>85%</p>", 
+                                "<p>88.5%</p>", "<p>87.5%</p>"],
+                    options_hi: ["<p>87%</p>", "<p>85%</p>",
+                                "<p>88.5%</p>", "<p>87.5%</p>"],
+                    solution_en: "<p>10.(d) <span style=\"font-family: Times New Roman;\">Employed youth in B = 700000<br></span><span style=\"font-family: Times New Roman;\">Employed youth in E = 800000<br></span><span style=\"font-family: Times New Roman;\">Required percentage = </span><span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>700000</mn><mn>800000</mn></mfrac><mo>&#215;</mo><mn>100</mn><mo>=</mo><mn>87</mn><mo>.</mo><mn>5</mn><mo>%</mo></math></span></p>",
+                    solution_hi: "<p>10.(d) <span style=\"font-family: Baloo;\">B में नियोजित युवा = 700000<br></span><span style=\"font-family: Baloo;\">E में नियोजित युवा= 800000<br></span><span style=\"font-family: Baloo;\">आवश्यक प्रतिशत = <span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>700000</mn><mn>800000</mn></mfrac><mo>&#215;</mo><mn>100</mn><mo>=</mo><mn>87</mn><mo>.</mo><mn>5</mn><mo>%</mo></math></span></span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "11",
+                    section: "17",
+                    question_en: "<p>11. <span style=\"font-family: Times New Roman;\">The following bar graph shows the total number of youth (in lakhs) and the number of employed (in lakhs) in 5 states A, B, C, D and E.<br></span><span style=\"font-family: Times New Roman;\">How many youth (in lakhs) are unemployed in states A and C taken together?<br></span><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXezDmdXuoEN8r2l1SrPzlwG0B8uf0bWuCsgyvjULl8APxdLIxDnGagTQiQQtgLsCMTVuTtAugEQ6qz2n5H4cA1JTW5iy2ZW2D3TqscfyKvefuwwflI-ZuYU_oRQo1zQ30ct7sJ1BFfDXbGKP2KaYc2XAcQ?key=rLhyzYdOe3_N70s3RCdieiLI\" width=\"321\" height=\"232\"></p>\n<p>&nbsp;</p>",
+                    question_hi: "<p>11. <span style=\"font-family: Baloo;\">निम्नलिखित बार ग्राफ 5 राज्यों A, B, C, D और E में युवाओं की कुल संख्या (लाखों में) और नियोजित (लाखों में) दिखाता है।<br></span><span style=\"font-family: Baloo;\">राज्यों A और C में कुल मिलाकर कितने युवा (लाखों में) बेरोजगार हैं?<br></span><strong id=\"docs-internal-guid-0fffd06e-7fff-ab0c-5406-15a6c1fe0bb5\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXc-RPZ3GZfY4CHBwDRZJ6XXH5N7orDSjgvBjDy6-pqygZdlVnyLTxYRPXrFYtboNtgaFxpyiInXYcmOiKYCn55KENyyeHXUK4KZN2GRXiF9vEqaBxL3JNhM-N5NyVT3tQVR3UscBQ?key=mo0geGJ8DttffZ2nsxtkeQ\" width=\"267\" height=\"215\"></strong></p>\n<p>&nbsp;</p>",
+                    options_en: ["<p>2.8</p>", "<p>3</p>", 
+                                "<p>2.25</p>", "<p>2.85</p>"],
+                    options_hi: ["<p>2.8</p>", "<p>3</p>",
+                                "<p>2.25</p>", "<p>2.85</p>"],
+                    solution_en: "<p>11.(b) <span style=\"font-family: Times New Roman;\">Unemployed youth in A = (12 &ndash; 10.5) lakh = 1.5 lakh<br></span><span style=\"font-family: Times New Roman;\">Unemployed youth in C = (11.5 &ndash; 10) lakh = 1.5 lakh&nbsp;<br></span><span style=\"font-family: Times New Roman;\">Unemployed youth in A and C taken together = 1.5 + 1.5 = 3 lac</span></p>",
+                    solution_hi: "<p>11.(b) <span style=\"font-family: Baloo;\">A में बेरोजगार युवा = (12 &ndash; 10.5) लाख = 1.5 लाख<br></span><span style=\"font-family: Baloo;\">C में बेरोजगार युवा = (11.5 &ndash; 10) लाख = 1.5 लाख<br></span><span style=\"font-family: Baloo;\">A और C में बेरोजगार युवाओं को मिलाकर लिया गया = 1.5 + 1.5 = 3 लाख</span></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "12",
+                    section: "17",
+                    question_en: "<p>12. <span style=\"font-family: Times New Roman;\">The given histogram shows the heights of 232 students of an athletic club and their numbers. Study the histogram carefully and answer the questions that follows.<br></span><strong id=\"docs-internal-guid-57788555-7fff-8474-10e7-a5e56c1a258d\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXesndAE9ICoS3iFf3_Rha9f1sG2_IQ1qtUwEfASwh9fXjrE3JvOS89pAc0vlk0OtROaJ_acyGUA5FNgv_3XVTfufPIfjLZrYIIU7vR4mxr8DIPKflGnTYTvwDYumncSzhVdr_Pc7g?key=mo0geGJ8DttffZ2nsxtkeQ\" width=\"292\" height=\"254\"><br></strong><span style=\"font-family: Times New Roman;\">What is the average height (in cm) of 32 tallest students of the athletic club?<br></span><span style=\"font-family: Times New Roman;\">Express your answer correct to one place of decimal.</span></p>",
+                    question_hi: "<p>12. <span style=\"font-family: Baloo;\">दिया गया हिस्टोग्राम एक एथलेटिक क्लब के 232 छात्रों की ऊंचाई और उनकी संख्या को दर्शाता है। हिस्टोग्राम का ध्यानपूर्वक अध्ययन करें और निम्नलिखित प्रश्नों के उत्तर दें।<br></span><strong id=\"docs-internal-guid-396da1a5-7fff-eaa7-20e5-6d80bdedd1b1\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcnpHPyPwkZYCRKND3XH4MXWzTZztQI_RXEt7gUJRxod-GZGjvYUFZYZTf96JouhHxjHj3N8WH2th42RaJZUy8juPNpVKCFnPykvgogFbfwaYeaNOe-_kFnUuquA5DD0LoRFWGZ6g?key=mo0geGJ8DttffZ2nsxtkeQ\" width=\"301\" height=\"261\"><br></strong><span style=\"font-family: Baloo;\">एथलेटिक क्लब के 32 सबसे लम्बे विद्यार्थियों की औसत ऊँचाई (cm में) क्या है?<br></span><span style=\"font-family: Baloo;\">अपने उत्तर को दशमलव के एक स्थान पर सही व्यक्त करें।</span></p>",
+                    options_en: ["<p>165.4</p>", "<p>167.4</p>", 
+                                "<p>166.4</p>", "<p>164.4</p>"],
+                    options_hi: ["<p>165.4</p>", "<p>167.4</p>",
+                                "<p>166.4</p>", "<p>164.4</p>"],
+                    solution_en: "<p>12.(d) <span style=\"font-family: Times New Roman;\">Last 32 students = 12 + 20<br></span><span style=\"font-family: Times New Roman;\">Mid value of class 165 &ndash; 170 = </span><span style=\"font-family: Times New Roman;\"> <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>165</mn><mo>+</mo><mn>170</mn></mrow><mn>2</mn></mfrac><mo>=</mo><mn>167</mn><mo>.</mo><mn>5</mn></math><br></span><span style=\"font-family: Times New Roman;\">Mid value of class 160 &ndash; 165 = </span><span style=\"font-family: Times New Roman;\"> <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>160</mn><mo>+</mo><mn>165</mn></mrow><mn>2</mn></mfrac><mo>=</mo><mn>162</mn><mo>.</mo><mn>5</mn></math><br></span><span style=\"font-family: Times New Roman;\">Sum of total height = </span><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>167</mn><mo>.</mo><mn>5</mn><mo>&#215;</mo><mn>12</mn><mo>+</mo><mn>162</mn><mo>.</mo><mn>5</mn><mo>&#215;</mo><mn>20</mn><mo>=</mo><mn>2010</mn><mo>+</mo><mn>3250</mn><mo>=</mo><mn>5260</mn></math><br><span style=\"font-family: Times New Roman;\">Required average = </span><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>5260</mn><mn>32</mn></mfrac><mo>=</mo><mn>164</mn><mo>.</mo><mn>4</mn></math></p>",
+                    solution_hi: "<p>12.(d) <span style=\"font-family: Baloo;\">पिछले 32 छात्र = 12 + 20<br></span><span style=\"font-family: Baloo;\">कक्षा 165&ndash;170 का मध्य मान = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>165</mn><mo>+</mo><mn>170</mn></mrow><mn>2</mn></mfrac></math></span><span style=\"font-family: Times New Roman;\"> = 167.5<br></span><span style=\"font-family: Baloo;\">कक्षा 160&ndash;165 का मध्य मान = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>160</mn><mo>+</mo><mn>165</mn></mrow><mn>2</mn></mfrac></math></span><span style=\"font-family: Times New Roman;\"> = 162.5<br></span><span style=\"font-family: Baloo;\">कुल ऊंचाई का योग =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>167</mn><mo>.</mo><mn>5</mn><mo>&#215;</mo><mn>12</mn><mo>+</mo><mn>162</mn><mo>.</mo><mn>5</mn><mo>&#215;</mo><mn>20</mn><mo>=</mo><mn>2010</mn><mo>+</mo><mn>3250</mn><mo>=</mo><mn>5260</mn></math></span><br><span style=\"font-family: Baloo;\">आवश्यक औसत= <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>5260</mn><mn>32</mn></mfrac><mo>=</mo><mn>164</mn><mo>.</mo><mn>4</mn></math></span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "13",
+                    section: "17",
+                    question_en: "<p>13. <span style=\"font-family: Times New Roman;\">Study the given bar graph and answer the question that follows.<br></span><span style=\"font-family: Times New Roman;\">The bar graph shows the exports of cars of type A and B (in ₹ millions) from 2014 to 2018.&nbsp;<br></span><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfA82PgRmoWRUg1oLFm-pBb2pZR3oT1BTAxv3GoqOh88p1zwF-WkrT_VVIc-pMSkUNkcCG1vJeh5eYT8Py6E2K1a4_tb-e0ye3Vq8H4nPu3H6YyRsVCbFGb9WGyqZp30OinKaFdytmwt5QzcomsDZ3vTIw?key=rLhyzYdOe3_N70s3RCdieiLI\" width=\"297\" height=\"236\"><br><span style=\"font-family: Times New Roman;\">What is the ratio of the total exports of cars of type A in 2016 and 2018 to the total exports of cars of type B in 2015 and 2017?</span></p>",
+                    question_hi: "<p>13. <span style=\"font-family: Baloo;\">दिए गए दंड आलेख का अध्ययन कीजिए और नीचे दिए गए प्रश्न का उत्तर दीजिए।<br></span><span style=\"font-family: Baloo;\">बार ग्राफ 2014 से 2018 तक टाइप A और B (₹ मिलियन में) की कारों के निर्यात को दर्शाता है।<br></span><strong id=\"docs-internal-guid-f5391dc6-7fff-bc0a-aa7c-895af0282f64\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXenYeC_H_kse9e4LCiiNtdNweNqr7XPCtlg6WUN8L_n6jrjc9_fC3Zl4HPMK5VfLrsOqaq4RWBYIcr4k5mKLVbNdvi1sOU47ClOuQiBqrHCdGXG5p4esNxHh5dmPnVbEmba-vAtCg?key=4c8hwkg0Ve1oDUOUV6Gjqk6J\" width=\"377\" height=\"262\"><br></strong><span style=\"font-family: Baloo;\">2016 और 2018 में A प्रकार की कारों के कुल निर्यात का 2015 और 2017 में B प्रकार की कारों के कुल निर्यात से अनुपात कितना है?</span></p>",
+                    options_en: ["<p>13 : 12</p>", "<p>10 : 9</p>", 
+                                "<p>5 : 4</p>", "<p>23 : 21</p>"],
+                    options_hi: ["<p>13 : 12</p>", "<p>10 : 9</p>",
+                                "<p>5 : 4</p>", "<p>23 : 21</p>"],
+                    solution_en: "<p>13.(d) <span style=\"font-family: Times New Roman;\">Total exports of cars of type A in 2016 and 2018 = 275 + 300 = 575<br></span><span style=\"font-family: Times New Roman;\">Total exports of cars of type B in 2015 and 2017 = 250 + 275 = 525<br></span><span style=\"font-family: Times New Roman;\">Required ratio = 575 : 525 = 23 : 21</span></p>",
+                    solution_hi: "<p>13.(d)<span style=\"font-family: Baloo;\">2016 और 2018 में A प्रकार की कारों का कुल निर्यात = 275 + 300 = 575<br></span><span style=\"font-family: Baloo;\">2015 और 2017 में B प्रकार की कारों का कुल निर्यात = 250 + 275 = 525<br></span><span style=\"font-family: Baloo;\">आवश्यक अनुपात </span><span style=\"font-family: Times New Roman;\">= 575 : 525 = 23 : 21</span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "14",
+                    section: "17",
+                    question_en: "<p>14.<span style=\"font-family: Times New Roman;\"> Study the given histogram that shows the marks obtained by students in an examination and answer the question that follows.&nbsp;<br></span><strong id=\"docs-internal-guid-1a47954c-7fff-65c4-5a59-7d6890abcfc9\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdzqj7BVwt9eX8u6FE_UqmhzOWmNsKDq1RfHM9n9lDEwhl2_qU3kuvb-iQdmMIBv1JaOZ67D_u8xYeRUBH8Tnv62Ou_KHgMDsVQLOg8S13hWcHA5Gozl6zfxDl2BaWf9GmEsVI4yw?key=4c8hwkg0Ve1oDUOUV6Gjqk6J\" width=\"348\" height=\"248\"><br></strong><span style=\"font-family: Times New Roman;\">The number of students who obtained less than 200 marks is what percentage less than the number of students who obtained 400 or more marks ( correct to one decimal place) ?</span></p>",
+                    question_hi: "<p>14.<span style=\"font-family: Baloo;\"> दिए गए हिस्टोग्राम का अध्ययन करें जो एक परीक्षा में छात्रों द्वारा प्राप्त अंकों को दर्शाता है और नीचे दिए गए प्रश्न का उत्तर देता है।।&nbsp;<br></span><strong id=\"docs-internal-guid-fcae913e-7fff-c109-fc25-b21caf7bb11c\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXev-Q_3zDWTcNOYJRCe9arNi4XUryUkgf4f2kgSXn9Cf5wLQ2Dhks947HOUCmgoSSMG2Rxm0YxWmnWiFG9q-uFvdU2kNyTLBGORvRZaeP1GLYEYI2qX4hSNLvd_X2YZEiBTyp2j7w?key=4c8hwkg0Ve1oDUOUV6Gjqk6J\" width=\"341\" height=\"243\"><br></strong><span style=\"font-family: Baloo;\">200 से कम अंक प्राप्त करने वाले छात्रों की संख्या 400 या अधिक अंक प्राप्त करने वाले छात्रों की संख्या से कितना प्रतिशत कम है (एक दशमलव स्थान तक सही)?</span></p>",
+                    options_en: ["<p>11.9%</p>", "<p>17.8%</p>", 
+                                "<p>21.6%</p>", "<p>14.3%</p>"],
+                    options_hi: ["<p>11.9%</p>", "<p>17.8%</p>",
+                                "<p>21.6%</p>", "<p>14.3%</p>"],
+                    solution_en: "<p>14.(d)<span style=\"font-family: Times New Roman;\">Number of students who obtained less than 200 marks = 30<br></span><span style=\"font-family: Times New Roman;\">Number of students who obtained 400 or more marks = 35<br></span><span style=\"font-family: Times New Roman;\">Required percentage = </span><span style=\"font-family: Times New Roman;\"> </span><span style=\"font-family: Times New Roman;\"> </span><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>35</mn><mo>-</mo><mn>30</mn></mrow><mn>35</mn></mfrac><mo>&#215;</mo><mn>100</mn><mo>=</mo><mn>14</mn><mo>.</mo><mn>28</mn><mo>&#8776;</mo><mn>14</mn><mo>.</mo><mn>3</mn><mo>%</mo></math></p>",
+                    solution_hi: "<p>14.(d)<span style=\"font-family: Baloo;\">200 से कम अंक प्राप्त करने वाले छात्रों की संख्या = 30<br></span><span style=\"font-family: Baloo;\">400 या अधिक अंक प्राप्त करने वाले छात्रों की संख्या = 35<br></span><span style=\"font-family: Baloo;\">आवश्यक प्रतिशत </span><span style=\"font-family: Times New Roman;\">= <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>35</mn><mo>-</mo><mn>30</mn></mrow><mn>35</mn></mfrac><mo>&#215;</mo><mn>100</mn><mo>=</mo><mn>14</mn><mo>.</mo><mn>28</mn><mo>&#8776;</mo><mn>14</mn><mo>.</mo><mn>3</mn><mo>%</mo></math></span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "15",
+                    section: "17",
+                    question_en: "<p>15.<span style=\"font-family: Times New Roman;\"> Study the given pie-chart and answer the question that follows.<br></span><span style=\"font-family: Times New Roman;\">The chart represents the percentage - wise distribution of the total number of vanilla cakes and chocolate cakes sold every day in a week. Total number of cake sold in a week = 10500<br><strong id=\"docs-internal-guid-2fafecbd-7fff-2db3-f2ae-ef619a31afd0\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdn-I4z8DyWJhPXyEu6Y6CsVEySkko7m3Xyv9dB2lChuRC5biMkOhgkgVeFnNNY6q0q8C99xm7t63sTPL7ntI79JWOxRbDBQPsSM1N13ylsDNqzlmlkOdFt77FwPvnNHh4JV_xGkw?key=4c8hwkg0Ve1oDUOUV6Gjqk6J\" width=\"234\" height=\"213\"></strong><br></span><span style=\"font-family: Times New Roman;\">The ratio of vanilla cake sold to chocolate cakes sold on Friday is 4:3. If the selling price of one vanilla cake is ₹9 and that of one chocolate cake is ₹10, then the total amount earned (in ₹)&nbsp;</span><span style=\"font-family: Times New Roman;\">by selling all the vanilla cakes and chocolate cakes on friday is :</span></p>",
+                    question_hi: "<p>15.<span style=\"font-family: Baloo;\"> दिए गए पाई-चार्ट का अध्ययन करें और नीचे दिए गए प्रश्न का उत्तर दें।<br></span><span style=\"font-family: Baloo;\">चार्ट एक सप्ताह में हर दिन बेचे जाने वाले वेनिला केक और चॉकलेट केक की कुल संख्या के प्रतिशत-वार वितरण का प्रतिनिधित्व करता है। एक सप्ताह में बिके केक की कुल संख्या = 10500<br></span><span style=\"font-family: Times New Roman;\"><strong id=\"docs-internal-guid-e9dec283-7fff-4049-4913-aaaa808de44b\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdIK8ujMYuNi9dNR7-QkLVDFP4FLQfoimO-fwKhTCIPIYJ3sUa7Is7pE5r7nJqWIme_Q7uKT3panJLMQK0kPfRiuTlm1RiqS2YDnZwE_UrOZG9ytpDYD1Hb7oRPpi9M7O_lA17qVQ?key=4c8hwkg0Ve1oDUOUV6Gjqk6J\" width=\"233\" height=\"217\"></strong></span></p>\n<p><span style=\"font-family: Baloo;\">शुक्रवार को बेचे गए वनीला केक का चॉकलेट केक से अनुपात 4 : 3 है। यदि एक वेनिला केक का विक्रय मूल्य ₹9 है और एक चॉकलेट केक का ₹10 है, तो शुक्रवार को सभी वेनिला केक और चॉकलेट केक को बेचकर अर्जित की गई कुल राशि (₹ में) है;</span></p>",
+                    options_en: ["<p>11,000</p>", "<p>8,900</p>", 
+                                "<p>10,000</p>", "<p>9,900</p>"],
+                    options_hi: ["<p>11,000</p>", "<p>8,900</p>",
+                                "<p>10,000</p>", "<p>9,900</p>"],
+                    solution_en: "<p>15.(d) <span style=\"font-family: Times New Roman;\">Total number of cakes sold on friday = </span><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>10500</mn><mo>&#215;</mo><mfrac><mn>10</mn><mn>100</mn></mfrac><mo>=</mo><mn>1050</mn></math><br><span style=\"font-family: Times New Roman;\">Number of vanilla cakes sold on friday = </span><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>1050</mn><mo>&#215;</mo><mfrac><mn>4</mn><mn>7</mn></mfrac><mo>=</mo><mn>600</mn></math><br><span style=\"font-family: Times New Roman;\">Number of chocolate cakes sold on friday = </span><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>1050</mn><mo>&#215;</mo><mfrac><mn>3</mn><mn>7</mn></mfrac><mo>=</mo><mn>450</mn></math><br><span style=\"font-family: Times New Roman;\">Total amount earned by selling both cakes on friday<br></span>=<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>(</mo><mn>600</mn><mo>&#215;</mo><mn>9</mn><mo>)</mo><mo>+</mo><mo>(</mo><mn>450</mn><mo>&#215;</mo><mn>10</mn><mo>)</mo><mo>=</mo><mn>5400</mn><mo>+</mo><mn>4500</mn><mo>=</mo><mo>&#8377;</mo><mn>9</mn><mo>,</mo><mn>900</mn></math></p>",
+                    solution_hi: "<p>15.(d) <span style=\"font-family: Baloo;\">शुक्रवार को बिकने वाले केक की कुल संख्या = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>10500</mn><mo>&#215;</mo><mfrac><mn>10</mn><mn>100</mn></mfrac><mo>=</mo><mn>1050</mn></math></span><br><span style=\"font-family: Baloo;\">शुक्रवार को बिकने वाले वैनिला केक की संख्या = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>1050</mn><mo>&#215;</mo><mfrac><mn>4</mn><mn>7</mn></mfrac><mo>=</mo><mn>600</mn></math></span><br><span style=\"font-family: Baloo;\">शुक्रवार को बिकने वाले चॉकलेट केक की संख्या= <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>1050</mn><mo>&#215;</mo><mfrac><mn>3</mn><mn>7</mn></mfrac><mo>=</mo><mn>450</mn></math></span><br><span style=\"font-family: Baloo;\">शुक्रवार को दोनों केक बेचकर अर्जित की गई कुल राशि<br>=<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>(</mo><mn>600</mn><mo>&#215;</mo><mn>9</mn><mo>)</mo><mo>+</mo><mo>(</mo><mn>450</mn><mo>&#215;</mo><mn>10</mn><mo>)</mo><mo>=</mo><mn>5400</mn><mo>+</mo><mn>4500</mn><mo>=</mo><mo>&#8377;</mo><mn>9</mn><mo>,</mo><mn>900</mn></math><br></span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "16",
+                    section: "17",
+                    question_en: "<p>16.<span style=\"font-family: Times New Roman;\"> The following bar graph shows the total number of youth ( in lakhs) and the number of employed youth ( in lakhs) in 5 states A,B,C,D and E.<br></span><span style=\"font-family: Times New Roman;\">What is the percentage of employed youth in state A and E taken together?<br></span><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfGixiSm6eSZZuxbhtojlsniw-Hv3hYkp6sO7NLUheDoDbOZQeKDqUkeYO3AjWpUVBuct0X4hYj50eDQw9fFy6TMnPEaZZRc7ifNhZi_usrrXfY7eMlOoyHjPXHsRV2IQAvOOZBBVUvEcnUu3RExUVlRw?key=rLhyzYdOe3_N70s3RCdieiLI\" width=\"321\" height=\"232\"></p>\n<p>&nbsp;</p>",
+                    question_hi: "<p>16.<span style=\"font-family: Baloo;\"> निम्नलिखित बार ग्राफ 5 राज्यों A, B, C, Dऔर E में युवाओं की कुल संख्या (लाख में) और नियोजित युवाओं की संख्या (लाख में) दिखाता है।<br></span><span style=\"font-family: Baloo;\">राज्य A और E में एक साथ नियोजित युवाओं का प्रतिशत कितना है?<br></span><strong id=\"docs-internal-guid-bba5eb1f-7fff-3181-8b1e-7668a9ab52db\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdrxrxVMT7pjZkMFbIQWz6QlHlEslYVQfesPHa4jcgKnW9mMQwHDeTWGpOMkjqJfPR2Am84dUTNPHbvQ-JTPU8Vh1VJb3Ba3yE5rqnus1wrvKr0S35rghdJ4_YcgqwEwGP2tmrevg?key=4c8hwkg0Ve1oDUOUV6Gjqk6J\" width=\"373\" height=\"260\"></strong></p>\n<p>&nbsp;</p>",
+                    options_en: ["<p><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>88</mn><mfrac><mn>2</mn><mn>21</mn></mfrac></math></p>", "<p><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>88</mn><mfrac><mn>8</mn><mn>21</mn></mfrac></math></p>", 
+                                "<p><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>82</mn><mfrac><mn>8</mn><mn>21</mn></mfrac></math></p>", "<p><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>88</mn><mfrac><mn>1</mn><mn>21</mn></mfrac></math></p>"],
+                    options_hi: ["<p><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>88</mn><mfrac><mn>2</mn><mn>21</mn></mfrac></math></p>", "<p><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>88</mn><mfrac><mn>8</mn><mn>21</mn></mfrac></math></p>",
+                                "<p><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>82</mn><mfrac><mn>8</mn><mn>21</mn></mfrac></math></p>", "<p><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>88</mn><mfrac><mn>1</mn><mn>21</mn></mfrac></math></p>"],
+                    solution_en: "<p>16.(a) <span style=\"font-family: Times New Roman;\">Number of employed youth in state A and E = 10.5 + 8 = 18.5<br></span><span style=\"font-family: Times New Roman;\">Total number of youth in state A and E = 12 + 9 = 21<br></span><span style=\"font-family: Times New Roman;\">Required percentage = </span><span style=\"font-family: Times New Roman;\"> </span><span style=\"font-family: Times New Roman;\"> <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>18</mn><mo>.</mo><mn>5</mn></mrow><mn>21</mn></mfrac><mo>&#215;</mo><mn>100</mn><mo>=</mo><mn>88</mn><mfrac><mn>2</mn><mn>21</mn></mfrac></math></span><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>16.(a)<span style=\"font-family: Baloo;\">राज्य A और E में कार्यरत युवाओं की संख्या = 10.5 + 8 = 18.5<br></span><span style=\"font-family: Baloo;\">राज्य A और E में युवाओं की कुल संख्या = 12 + 9 = 21<br></span><span style=\"font-family: Baloo;\">आवश्यक प्रतिशत </span><span style=\"font-family: Times New Roman;\">= <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>18</mn><mo>.</mo><mn>5</mn></mrow><mn>21</mn></mfrac><mo>&#215;</mo><mn>100</mn><mo>=</mo><mn>88</mn><mfrac><mn>2</mn><mn>21</mn></mfrac></math></span></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "17",
+                    section: "17",
+                    question_en: "<p>17. <span style=\"font-family: Times New Roman;\">The given bar chart represents the Television Sets (TV) manufactured (in thousands) and the respective percentage of those TV sets sold by five different companies A, B, C, D and E in 2015.<br></span><span style=\"font-family: Times New Roman;\">Study the chart carefully and answer the questions that </span><span style=\"font-family: Times New Roman;\">follows</span><span style=\"font-family: Times New Roman;\">.<br></span><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdvf5Cd7gEhK21oa9EFmap_1P3EH9t5I63PBn8NUm9N_TkxYpv6em6S060N6Tu1IfhUA65OGqlzTzRjxfjh146aMQOJ8Bp9Yw6qyc0POlADCT857ZA0U0qHhCy0IIefD4upPLD5-r1AsxwzW8kPeKd1Dpk?key=rLhyzYdOe3_N70s3RCdieiLI\" width=\"309\" height=\"245\"><br><span style=\"font-family: Times New Roman;\">What is the ratio of the number of TV sets sold by company A to that of company B in 2015?</span></p>",
+                    question_hi: "<p>17. <span style=\"font-family: Baloo;\"> दिया गया बार चार्ट 2015 में निर्मित टेलीविजन सेट (टीवी) की संख्या (हजारों में) और पांच अलग-अलग कंपनियों A, B, C, D और E द्वारा 2015 में बेचे गए टीवी सेटों के संबंधित प्रतिशत को दर्शाता है।<br></span><span style=\"font-family: Baloo;\">चार्ट का ध्यानपूर्वक अध्ययन करें और निम्नलिखित प्रश्नों के उत्तर दें।<br></span><strong id=\"docs-internal-guid-8419ef70-7fff-f8ff-b178-9291f97fd9dd\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcf_DF91z6-wOpY9GVSnQ0tVPzSDgAi7eCwqKAwQgk5xyMYEaocaHQf7QByk7e0scDhz8QNT8yYTsGj8XWFMa_AzcVQcY-E4qnNICRKmRKlwMCW3zK5IwVftCD___5HD_WcAsVptQ?key=3CG07PQ74LV66ubMJGDHTg\" width=\"380\" height=\"259\"><br></strong><span style=\"font-family: Baloo;\">2015 में कंपनी A द्वारा बेचे गए टीवी सेटों की संख्या से कंपनी B के बेचे गए टीवी सेटों की संख्या का अनुपात कितना है?</span></p>",
+                    options_en: ["<p><span style=\"font-family: Times New Roman;\">6 : 5</span></p>", "<p>4 : 5</p>", 
+                                "<p>5 : 4</p>", "<p>5 : 6</p>"],
+                    options_hi: ["<p>6 : 5</p>", "<p>4 : 5</p>",
+                                "<p>5 : 4</p>", "<p>5 : 6</p>"],
+                    solution_en: "<p>17.(d) <span style=\"font-family: Times New Roman;\">Number of TV sets sold by company A = </span><span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>64</mn><mo>&#215;</mo><mfrac><mn>75</mn><mn>100</mn></mfrac></math></span><span style=\"font-family: Times New Roman;\"> </span><span style=\"font-family: Times New Roman;\"> = 48 thousands<br></span><span style=\"font-family: Times New Roman;\">Number of TV sets sold by company B = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>90</mn><mo>&#215;</mo><mfrac><mn>64</mn><mn>100</mn></mfrac></math> </span><span style=\"font-family: Times New Roman;\"> </span><span style=\"font-family: Times New Roman;\"> = 57.6 thousands<br></span><span style=\"font-family: Times New Roman;\">Required ratio = 48 : 57.6 = 5 : 6 </span></p>",
+                    solution_hi: "<p>17.(d) <span style=\"font-family: Baloo;\">कंपनी A द्वारा बेचे गए टीवी सेटों की संख्या = <span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>64</mn><mo>&#215;</mo><mfrac><mn>75</mn><mn>100</mn></mfrac></math></span></span><span style=\"font-family: Times New Roman;\">&nbsp;</span><span style=\"font-family: Baloo;\">= 48 हजार<br></span><span style=\"font-family: Baloo;\">कंपनी B द्वारा बेचे गए टीवी सेटों की संख्या = <span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>90</mn><mo>&#215;</mo><mfrac><mn>64</mn><mn>100</mn></mfrac></math></span>&nbsp;</span><span style=\"font-family: Baloo;\">= 57.6 हज़ार<br></span><span style=\"font-family: Baloo;\">अभीष्ट अनुपात = 48 : 57.6 = 5 : 6</span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "18",
+                    section: "17",
+                    question_en: "<p>18. <span style=\"font-family: Times New Roman;\">The following bar chart shows the number of students enrolled in two Summer Camps A and B from 2014 to 2019.&nbsp;<br></span><span style=\"font-family: Times New Roman;\">Study the chart carefully and answer the questions that </span><span style=\"font-family: Times New Roman;\">follows</span><span style=\"font-family: Times New Roman;\">.<br></span><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeK7dl8lOzFR_IPoQCqGL8xX5e4K1PFMzE4Nc57TELqidks9QkMWocDjq0TDP6TxUKF0m4BlR1LVjMB6fcoum4Iwt4RXfgoKyWCAzeIPXVpgrfx3mSTiJmzXdmaA2Q8dq46U4QAxVa-WDt5IVpnUFgVZzk?key=rLhyzYdOe3_N70s3RCdieiLI\" width=\"336\" height=\"264\"><br><span style=\"font-family: Times New Roman;\">What is the ratio of the students enrolled in Camp A in 2014, 2016 and 2017 to the students enrolled in Camp B in 2015, 2018 and 2019?</span></p>",
+                    question_hi: "<p>18. <span style=\"font-family: Baloo;\">निम्नलिखित बार चार्ट 2014 से 2019 तक दो समर कैंप A और B में नामांकित छात्रों की संख्या को दर्शाता है। चार्ट का ध्यानपूर्वक अध्ययन करें और नीचे दिए गए प्रश्नों के उत्तर दें।<br></span><strong id=\"docs-internal-guid-46901d3a-7fff-7f65-bc35-712dedd4cb66\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXciasoUtZ4nB0wYdOIfheav6egQ48McLUhjs4ujeBtn2Kg6OPJxUJueRYlPO5pmWjNu8MCbPsSA8l2qfC1HW6P6J7qxwEEuegm7PvmbzMpRK6fDf69AKSuvGzi-9678jxeKHvfa?key=3CG07PQ74LV66ubMJGDHTg\" width=\"372\" height=\"267\"><br></strong><span style=\"font-family: Baloo;\">2014, 2016 और 2017 में कैंप A में नामांकित छात्रों का 2015, 2018 और 2019 में कैंप B में नामांकित छात्रों से अनुपात कितना है?</span></p>",
+                    options_en: ["<p>18 : 13</p>", "<p>22 : 15</p>", 
+                                "<p>13 : 18</p>", "<p>15 : 22</p>"],
+                    options_hi: ["<p>18 : 13</p>", "<p>22 : 15</p>",
+                                "<p>13 : 18</p>", "<p>15 : 22</p>"],
+                    solution_en: "<p>18.(c) <span style=\"font-family: Times New Roman;\">Number of students enrolled in Camp A in 2014, 2016 and 2017 = 160 + 140 + 220 = 520&nbsp;<br></span><span style=\"font-family: Times New Roman;\">Number of students enrolled in Camp B in 2015, 2018 and 2019 = 240 + 200 + 280 = 720<br></span><span style=\"font-family: Times New Roman;\">Required ratio = 520 : 720 = 13 : 18</span></p>",
+                    solution_hi: "<p>18.(c) <span style=\"font-family: Baloo;\">2014, 2016 और 2017 में कैंप A में नामांकित छात्रों की संख्या = 160 + 140 + 220 = 520<br></span><span style=\"font-family: Baloo;\">2015, 2018 और 2019 में कैंप B में नामांकित छात्रों की संख्या = 240 + 200 + 280 = 720<br></span><span style=\"font-family: Baloo;\">अभीष्ट अनुपात = 520 : 720 = 13 : 18</span></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "19",
+                    section: "17",
+                    question_en: "<p>19.<span style=\"font-family: Times New Roman;\"> Study the given histogram and answer the question that follows.<br></span><strong id=\"docs-internal-guid-bf6067ce-7fff-69e6-ec55-b0dff3290297\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcmpkVTFgqc_i6m0Qcj5a6dbNzgTYP6gifOwGwO4EZ8RfA19VzPbbz6rt1cW0HR5hdT20MLwvLPKxcdfUz0PT2noqS_qnmBVkMzXlCncIaMPaR6Qlk8ZXbCjINa7_xvIhGYJIGn?key=3CG07PQ74LV66ubMJGDHTg\" width=\"313\" height=\"211\"><br></strong><span style=\"font-family: Times New Roman;\">What is the difference between the total number of workers whose daily wages are less than Rs. 450 and the total number of workers whose daily wages are Rs. 650 and above?</span></p>",
+                    question_hi: "<p>19. <span style=\"font-family: Baloo;\">दिए गए हिस्टोग्राम का अध्ययन करें और नीचे दिए गए प्रश्न का उत्तर दें।<br></span><strong id=\"docs-internal-guid-04b0fe7a-7fff-ad24-9cc2-a1b6e004c940\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXecCcW1lr6yYYrOG_C82oBVo_7In7qnHJrw9XTN3go4VlJflvftWiIdUjD-nxQ96IhSyYJPMe4GgOk-E2zyzxuFeK5oB3VycdVzgxLxvw2zdNICniN6DE-gNKaq-xODkkooAwUF?key=3CG07PQ74LV66ubMJGDHTg\" width=\"386\" height=\"266\"><br></strong><span style=\"font-family: Baloo;\">450 रूपये से कम दैनिक मजदूरी वाले श्रमिकों की कुल संख्या तथा 650 रूपये और उससे अधिक दैनिक मजदूरी वाले श्रमिकों की कुल संख्या के बीच का अंतर कितना है ?</span></p>",
+                    options_en: ["<p><span style=\"font-family: Times New Roman;\">4</span></p>", "<p>8</p>", 
+                                "<p>10</p>", "<p>5</p>"],
+                    options_hi: ["<p>4</p>", "<p>8</p>",
+                                "<p>10</p>", "<p>5</p>"],
+                    solution_en: "<p>19.(d) <span style=\"font-family: Times New Roman;\">Number of workers whose daily wages are less than Rs. 450 = 30<br></span><span style=\"font-family: Times New Roman;\">Number of workers whose daily wages are Rs. 650 and above = 35<br></span><span style=\"font-family: Times New Roman;\">Required difference = 35 &ndash; 30 = 5</span></p>",
+                    solution_hi: "<p>19.(d) <span style=\"font-family: Baloo;\">उन श्रमिकों की संख्या जिनकी दैनिक मजदूरी 450 रुपये से कम है = 30<br></span><span style=\"font-family: Baloo;\">उन श्रमिकों की संख्या जिनकी दैनिक मजदूरी 650 रुपये और उससे अधिक है = 35<br></span><span style=\"font-family: Baloo;\">अभीष्ट अंतर = 35 &ndash; 30 = 5</span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "20",
+                    section: "misc",
+                    question_en: "<p>20.<span style=\"font-family: Times New Roman;\"> The given pie chart shows the percentage of students in five schools, and the table shows the ratio of boys and girls in each school<br></span><span style=\"font-family: Times New Roman;\">Study the pie chart and answer the following questions.<br></span><strong id=\"docs-internal-guid-0d34b377-7fff-7383-e39a-c01efcb0928b\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfCK8YveqgUZj3pUbky1cCBHUqSVBrRdrHaQlQu7IZLrcAAKrFsQdtcHAkCXcfn8NDhzY76qtiK_IWacM0LYgvAQfTjIS_BEq-5up9NhqUCtTwcRG-buZsmfxiPSalUh4EYlop4cQ?key=3CG07PQ74LV66ubMJGDHTg\" width=\"177\" height=\"170\"><br></strong><span style=\"font-family: Times New Roman;\">The table shows the ratio of girls and boys in the given five schools<br><img src=\"data:image/png;base64,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\" width=\"163\" height=\"202\"><br></span><span style=\"font-family: Times New Roman;\">What is the ratio of the number of boys in school C to the number of girls in school E?</span></p>",
+                    question_hi: "<p>20.<span style=\"font-family: Baloo;\"> दिया गया पाई चार्ट पांच स्कूलों में छात्रों का प्रतिशत और तालिका प्रत्येक स्कूल में लड़कों और लड़कियों का अनुपात को दर्शाती है<br></span><span style=\"font-family: Baloo;\">पाई चार्ट का अध्ययन करें और निम्नलिखित प्रश्नों के उत्तर दें।<br></span><strong id=\"docs-internal-guid-0d34b377-7fff-7383-e39a-c01efcb0928b\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfCK8YveqgUZj3pUbky1cCBHUqSVBrRdrHaQlQu7IZLrcAAKrFsQdtcHAkCXcfn8NDhzY76qtiK_IWacM0LYgvAQfTjIS_BEq-5up9NhqUCtTwcRG-buZsmfxiPSalUh4EYlop4cQ?key=3CG07PQ74LV66ubMJGDHTg\" width=\"177\" height=\"170\"><br></strong><span style=\"font-family: Baloo;\">तालिका दिए गए पांच स्कूलों में लड़कियों और लड़कों के अनुपात को दर्शाती है<br><img src=\"data:image/png;base64,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\" width=\"175\" height=\"173\"><br></span><span style=\"font-family: Baloo;\">स्कूल C में लड़कों की संख्या का स्कूल E में लड़कियों की संख्या से अनुपात कितना है?</span></p>",
+                    options_en: ["<p>4 : 3</p>", "<p>1 : 2</p>", 
+                                "<p>3 : 4</p>", "<p>2 : 1</p>"],
+                    options_hi: ["<p>4 : 3</p>", "<p>1 : 2</p>",
+                                "<p>3 : 4</p>", "<p>2 : 1</p>"],
+                    solution_en: "<p>20.(c) <span style=\"font-family: Times New Roman;\">Let total number of students in all schools = n<br></span><span style=\"font-family: Times New Roman;\">Required ratio = </span><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mi mathvariant=\"normal\">n</mi><mo>&#215;</mo><mfrac><mn>24</mn><mn>100</mn></mfrac><mo>&#215;</mo><mfrac><mn>3</mn><mn>8</mn></mfrac><mo>:</mo><mi mathvariant=\"normal\">n</mi><mo>&#215;</mo><mfrac><mn>15</mn><mn>100</mn></mfrac><mo>&#215;</mo><mfrac><mn>4</mn><mn>5</mn></mfrac><mo>=</mo><mn>3</mn><mo>:</mo><mn>4</mn></math></p>",
+                    solution_hi: "<p>20.(c) <span style=\"font-family: Baloo;\">माना सभी विद्यालयों में विद्यार्थियों की कुल संख्या = n<br></span><span style=\"font-family: Baloo;\">आवश्यक अनुपात =<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mi mathvariant=\"normal\">n</mi><mo>&#215;</mo><mfrac><mn>24</mn><mn>100</mn></mfrac><mo>&#215;</mo><mfrac><mn>3</mn><mn>8</mn></mfrac><mo>:</mo><mi mathvariant=\"normal\">n</mi><mo>&#215;</mo><mfrac><mn>15</mn><mn>100</mn></mfrac><mo>&#215;</mo><mfrac><mn>4</mn><mn>5</mn></mfrac><mo>=</mo><mn>3</mn><mo>:</mo><mn>4</mn></math></span></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+            
+            // Generate question boxes
+            const boxesContainer = document.getElementById('question-boxes');
+            questions.forEach((q, index) => {
+                const box = document.createElement('div');
+                box.className = 'q-box';
+                box.textContent = index + 1;
+                box.onclick = () => showQuestion(index);
+                box.id = `box-${index}`;
+                boxesContainer.appendChild(box);
+            });
+            
+            // Show first question
+            showQuestion(0);
+            updateProgress();
+        }
+        
+        // Show a specific question
+        
+        function formatContent(text) {
+            if (!text) return '';
+            return text.replace(/<img/g, '<img style="max-width:100%;height:auto;"');
+        }
+        
+        function showQuestion(index) {
+            if (index < 0 || index >= questions.length) return;
+            
+            currentQuestion = index;
+            const question = questions[index];
+            
+            // Update question counter
+            document.getElementById('question-counter').textContent = `Question ${index + 1} of ${questions.length}`;
+            
+            // Update question boxes
+            document.querySelectorAll('.q-box').forEach(box => box.classList.remove('current'));
+            document.getElementById(`box-${index}`).classList.add('current');
+            
+            // Generate question HTML
+            let html = `
+                <div class="question-card">
+                    <div class="question-text">
+                        <div class="en">${formatContent(question.question_en)}</div>
+                        <div class="hi" style="display:none">${formatContent(question.question_hi)} </div>
+                    </div>
+                    <div class="options" id="options-container">`;
+            
+            // Add options
+            ['a', 'b', 'c', 'd'].forEach((opt, i) => {
+                let optionClass = '';
+                let isCorrectAnswer = opt === question.correct;
+                let isUserAnswer = answers[question.id] === opt;
+                
+                // When reviewing, add appropriate classes
+                if (submitted) {
+                    if (isCorrectAnswer) {
+                        optionClass += ' correct-answer';
+                    } else if (isUserAnswer && !isCorrectAnswer) {
+                        optionClass += ' incorrect';
+                    }
+                }
+                
+                html += `
+                    <div class="option-item">
+                        <input class="option-input" type="radio" name="q${index}" 
+                            id="opt-${index}-${opt}" value="${opt}" 
+                            ${isUserAnswer ? 'checked' : ''}
+                            onclick="selectAnswer('${question.id}', '${opt}')">
+                       <label class="option-label${optionClass}" for="opt-${index}-${opt}">
+                            <div class="en">${question.options_en[i]}</div>
+                            <div class="hi" style="display:none">${question.options_hi[i]}</div>
+                        </label>
+                    </div>`;
+            });
+            
+            // Add solution if submitted
+            if (submitted) {
+                const isCorrect = answers[question.id] === question.correct;
+                const resultText = answers[question.id] ? (isCorrect ? 'Correct!' : 'Incorrect!') : 'Not attempted';
+                
+                html += `
+                    <div class="solution-container">
+                        <div class="solution-title">${resultText}</div>
+                        <div class="solution-text">
+                            <div class="en">${question.solution_en}</div>
+                            <div class="hi" style="display:none">${question.solution_hi}</div>
+                        </div>
+                    </div>`;
+            }
+            
+            html += `</div></div>`;
+            
+            document.getElementById('questions-container').innerHTML = html;
+            
+            // Apply language settings
+            applyLanguage();
+            
+            // If in mobile view, close the menu
+            if (window.innerWidth < 992) {
+                toggleNav(false);
+            }
+            
+            // Add review mode class if submitted
+            if (submitted) {
+                document.getElementById('options-container').classList.add('review-mode');
+            }
+        }
+        
+        // Apply current language
+        function applyLanguage() {
+            document.querySelectorAll(`.${currentLang}`).forEach(el => el.style.display = 'block');
+            document.querySelectorAll(`.${currentLang === 'en' ? 'hi' : 'en'}`).forEach(el => el.style.display = 'none');
+            
+            // Update language button text
+            document.getElementById('lang-text').textContent = currentLang === 'en' ? 'Hi' : 'En';
+        }
+        
+        // Select an answer
+        function selectAnswer(qId, option) {
+            if (submitted) return;
+            
+            answers[qId] = option;
+            updateProgress();
+            
+            // Mark question as attempted in the navigation
+            const index = questions.findIndex(q => q.id === qId);
+            if (index >= 0) {
+                const box = document.getElementById(`box-${index}`);
+                box.classList.add('attempted');
+                box.classList.remove('unattempted');
+            }
+        }
+        
+        // Navigate to previous/next question
+        function prevQuestion() { 
+            if (currentQuestion > 0) showQuestion(currentQuestion - 1); 
+        }
+        
+        function nextQuestion() { 
+            if (currentQuestion < questions.length - 1) showQuestion(currentQuestion + 1); 
+        }
+        
+        // Switch section
+        function switchSection(sectionId) {
+            if (sectionId === 'all') {
+                showQuestion(0);
+                return;
+            }
+            
+            const section = sections[sectionId];
+            if (section) showQuestion(section.start);
+        }
+        
+        // Toggle language
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'hi' : 'en';
+            applyLanguage();
+        }
+        
+        // Toggle navigation sidebar
+        function toggleNav(show) {
+            const nav = document.getElementById('question-nav');
+            const overlay = document.getElementById('nav-overlay');
+            
+            if (show === undefined) {
+                show = !nav.classList.contains('show');
+            }
+            
+            if (show) {
+                nav.classList.add('show');
+                overlay.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            } else {
+                nav.classList.remove('show');
+                overlay.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+        }
+        
+        // Update progress
+        function updateProgress() {
+            const attempted = Object.keys(answers).length;
+            document.getElementById('attempted-count').textContent = attempted;
+        }
+        
+        // Start timer
+        function startTimer() {
+            const timerDisplay = document.getElementById('timer-display');
+            let timeLeft = totalTime;
+            
+            const timerInterval = setInterval(() => {
+                if (timeLeft <= 0 || submitted) {
+                    clearInterval(timerInterval);
+                    if (!submitted) submitTest();
+                    return;
+                }
+                
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                timeLeft--;
+            }, 1000);
+        }
+        
+        // Confirm before submitting
+        function confirmSubmit() {
+            if (submitted) return;
+            
+            const attempted = Object.keys(answers).length;
+            const remaining = questions.length - attempted;
+            
+            // Create a more modern confirmation dialog
+            const confirmHtml = `
+                <div style="text-align: center; padding: 20px;">
+                    <h4 style="margin-bottom: 16px; color: var(--dark);">Confirm Submission</h4>
+                    <p style="margin-bottom: 24px; color: var(--gray);">
+                        You have attempted ${attempted} of ${questions.length} questions.<br>
+                        ${remaining} questions are unattempted.
+                    </p>
+                    <div style="display: flex; justify-content: center; gap: 12px;">
+                        <button onclick="this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; border: 1px solid var(--light-gray); background: white; border-radius: 8px; cursor: pointer;">
+                            Cancel
+                        </button>
+                        <button onclick="submitTest(); this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer;">
+                            Submit Test
+                        </button>
+                    </div>
+                </div>`;
+            
+            // Create modal element
+            const modal = document.createElement('div');
+            modal.className = 'results-modal show';
+            modal.innerHTML = `
+                <div class="results-card" style="max-width: 400px;">
+                    <button class="cancel-btn" style="position: absolute; top: 12px; right: 12px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--gray);" onclick="this.closest('.results-modal').remove()">
+                        ×
+                    </button>
+                    ${confirmHtml}
+                </div>`;
+            
+            document.body.appendChild(modal);
+        }
+        
+        // Submit test
+        function submitTest() {
+            if (submitted) return;
+            
+            submitted = true;
+            
+            let score = 0;
+            let correctCount = 0;
+            let incorrectCount = 0;
+            let unattemptedCount = 0;
+            
+            questions.forEach((q, index) => {
+                const userAns = answers[q.id];
+                const box = document.getElementById(`box-${index}`);
+                
+                box.classList.remove('attempted');
+                
+                if (!userAns) {
+                    unattemptedCount++;
+                    box.classList.add('unattempted');
+                } else if (userAns === q.correct) {
+                    correctCount++;
+                    score += q.pos_marks;
+                    box.classList.add('correct');
+                } else {
+                    incorrectCount++;
+                    score -= q.neg_marks;
+                    box.classList.add('incorrect');
+                }
+            });
+            
+            // Update result values
+            document.getElementById('score-value').textContent = score.toFixed(2);
+            document.getElementById('correct-value').textContent = correctCount;
+            document.getElementById('incorrect-value').textContent = incorrectCount;
+            document.getElementById('unattempted-value').textContent = unattemptedCount;
+            
+            // Show the results modal
+            document.getElementById('results-modal').classList.add('show');
+            
+            // Disable submit button
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-check"></i>';
+            submitBtn.style.backgroundColor = 'var(--success)';
+            
+            // Refresh current question view to show solution
+            showQuestion(currentQuestion);
+        }
+        
+        // Review test
+        function reviewTest() {
+            document.getElementById('results-modal').classList.remove('show');
+            showQuestion(0);
+        }
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target === document.getElementById('results-modal')) {
+                document.getElementById('results-modal').classList.remove('show');
+            }
+        });
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') prevQuestion();
+            if (e.key === 'ArrowRight') nextQuestion();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mocks Wallah</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --primary-light: #a29bfe;
+            --primary-dark: #5649c0;
+            --secondary: #00cec9;
+            --accent: #fd79a8;
+            --success: #00b894;
+            --warning: #fdcb6e;
+            --danger: #d63031;
+            --light: #f8f9fa;
+            --dark: #2d3436;
+            --gray: #636e72;
+            --light-gray: #dfe6e9;
+            --card-bg: #ffffff;
+            --body-bg: #f5f6fa;
+            --header-bg: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            --footer-bg: #ffffff;
+            --box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            --box-shadow-sm: 0 2px 10px rgba(0,0,0,0.05);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background-color: var(--body-bg);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            color: var(--dark);
+            line-height: 1.6;
+            padding-bottom: 80px; /* Space for fixed navigation */
+            overflow-x: hidden;
+        }
+        
+        /* Header Styles */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: var(--header-bg);
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            z-index: 1000;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .header-brand {
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .header-brand i {
+            margin-right: 8px;
+            font-size: 1.2rem;
+        }
+        
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .control-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .control-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .control-btn.active {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .timer-display {
+            background: rgba(0,0,0,0.2);
+            border-radius: 18px;
+            padding: 4px 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+        
+        .timer-display i {
+            margin-right: 6px;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-top: 60px;
+            padding: 16px;
+            min-height: calc(100vh - 140px);
+        }
+        
+        .question-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--box-shadow-sm);
+            border: none;
+            transition: var(--transition);
+        }
+        
+        .question-counter {
+            font-size: 0.9rem;
+            color: var(--gray);
+            text-align: center;
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+        
+        .question-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+        
+        .option-item {
+            margin-bottom: 12px;
+            position: relative;
+        }
+        
+        .option-input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+            .question-text {
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        hyphens: auto;
+        max-width: 100%;
+    }
+
+    .question-text img,
+    .option-label img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 8px 0;
+        border-radius: 8px;
+    }
+
+    .option-label {
+        overflow: hidden;
+    }
+
+    .question-card {
+        overflow: hidden;
+    }
+        
+        .option-label {
+            display: block;
+            padding: 14px 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--light-gray);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .option-label:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .option-input:checked + .option-label {
+            border-color: var(--primary);
+            background: rgba(108, 92, 231, 0.05);
+            box-shadow: 0 0 0 1px var(--primary);
+        }
+        
+        .option-input:checked + .option-label::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--primary);
+        }
+        
+        /* When reviewing answers */
+        .review-mode .option-input:checked + .option-label.correct {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.correct::after {
+            background: var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.incorrect {
+            border-color: var(--danger);
+            background: rgba(214, 48, 49, 0.05);
+            box-shadow: 0 0 0 1px var(--danger);
+        }
+        
+        .MathJax, .mjx-chtml {
+            overflow-x: auto;
+            max-width: 100%;
+            display: inline-block;
+        }
+
+        
+        .review-mode .option-input:checked + .option-label.incorrect::after {
+            background: var(--danger);
+        }
+        
+        .review-mode .option-label.correct-answer {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-label.correct-answer::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--success);
+        }
+        
+        .solution-container {
+            margin-top: 20px;
+            padding: 16px;
+            background: rgba(108, 92, 231, 0.05);
+            border-radius: 12px;
+            border-left: 3px solid var(--primary);
+        }
+        
+        .solution-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+        
+        /* Question Navigation */
+        .question-nav {
+            position: fixed;
+            top: 60px;
+            right: 0;
+            bottom: 80px;
+            width: 100%;
+            max-width: 320px;
+            background: var(--card-bg);
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            transform: translateX(100%);
+            transition: var(--transition);
+            z-index: 900;
+            overflow-y: auto;
+            padding: 16px;
+        }
+        
+        .question-nav.show {
+            transform: translateX(0);
+        }
+        
+        .nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .nav-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+        
+        .question-stats {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .stat-badge {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        
+        .section-selector {
+            width: 100%;
+            margin-bottom: 16px;
+            border-radius: 12px;
+            padding: 10px 16px;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            font-size: 0.9rem;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 16px;
+        }
+        
+        .question-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+            gap: 8px;
+        }
+        
+        .q-box {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .q-box:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .q-box.attempted {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .q-box.correct {
+            background-color: var(--success);
+            color: white;
+            border-color: var(--success);
+        }
+        
+        .q-box.incorrect {
+            background-color: var(--danger);
+            color: white;
+            border-color: var(--danger);
+        }
+        
+        .q-box.current {
+            border: 2px solid var(--accent) !important;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .q-box.unattempted {
+            background-color: var(--gray);
+            color: white;
+            border-color: var(--gray);
+        }
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: var(--footer-bg);
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            z-index: 800;
+        }
+        
+        .nav-btn {
+            height: 48px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 20px;
+            transition: var(--transition);
+            gap: 8px;
+        }
+        
+        .nav-btn i {
+            font-size: 1rem;
+        }
+        
+        .nav-btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .nav-btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+        
+        .nav-btn-outline:hover {
+            background: rgba(108, 92, 231, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        /* Overlay when nav is open */
+        .nav-overlay {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            bottom: 80px;
+            background: rgba(0,0,0,0.5);
+            z-index: 800;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+        }
+        
+        .nav-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        /* Results Modal */
+        .results-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1100;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+            padding: 16px;
+        }
+        
+        .results-modal.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .results-card {
+            background: white;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+            transform: translateY(20px);
+            transition: var(--transition);
+        }
+        
+        .results-modal.show .results-card {
+            transform: translateY(0);
+        }
+        
+        .results-header {
+            background: var(--header-bg);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .results-title {
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .results-body {
+            padding: 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            color: white;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+        
+        .results-footer {
+            padding: 16px 20px;
+            display: flex;
+            justify-content: center;
+            border-top: 1px solid var(--light-gray);
+        }
+        
+        /* Responsive Adjustments */
+        @media (min-width: 992px) {
+            .question-nav {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-right: 320px;
+            }
+            
+            .nav-overlay {
+                display: none;
+            }
+            
+            .bottom-nav {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .question-grid {
+                grid-template-columns: repeat(auto-fill, minmax(36px, 1fr));
+                gap: 6px;
+            }
+            
+            .q-box {
+                width: 36px;
+                height: 36px;
+                font-size: 0.9rem;
+            }
+            
+            .option-label {
+                padding: 12px 14px;
+            }
+            
+            .question-text {
+                font-size: 1rem;
+            }
+            
+            .header-brand {
+                font-size: 1rem;
+            }
+            
+            .control-btn {
+                width: 32px;
+                height: 32px;
+            }
+            
+            .timer-display {
+                font-size: 0.8rem;
+                padding: 4px 10px;
+            }
+            
+            .nav-btn {
+                height: 44px;
+                padding: 0 16px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="#" class="header-brand">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Mocks Wallah</span>
+            </a>
+            
+            <div class="header-controls">
+                <!-- Timer -->
+                <div class="timer-display">
+                    <i class="far fa-clock"></i>
+                    <span id="timer-display">30:00</span>
+                </div>
+                
+                <!-- Language toggle -->
+                <button class="control-btn" id="lang-btn" onclick="toggleLanguage()">
+                    <span id="lang-text">En</span>
+                </button>
+                
+                <!-- Submit button -->
+                <button class="control-btn" id="submit-btn" onclick="confirmSubmit()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+                
+                <!-- Questions toggle for mobile -->
+                <button class="control-btn nav-toggle-btn" id="nav-toggle" onclick="toggleNav()">
+                    <i class="fas fa-th"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main content -->
+    <main class="main-content" id="main-content">
+        <div class="question-counter" id="question-counter">Question 1 of 24</div>
+        
+        <!-- Questions will be displayed here -->
+        <div id="questions-container"></div>
+    </main>
+    
+    <!-- Overlay for mobile nav -->
+    <div class="nav-overlay" id="nav-overlay" onclick="toggleNav(false)"></div>
+    
+    <!-- Question navigation sidebar -->
+    <aside class="question-nav" id="question-nav">
+        <div class="nav-header">
+            <h3 class="nav-title">Questions</h3>
+            <div class="question-stats">
+                <span class="stat-badge bg-primary" id="attempted-count">0</span>
+                <span class="stat-badge bg-gray" id="total-count">24</span>
+                <button class="control-btn d-lg-none" onclick="toggleNav(false)">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Section selector -->
+        <select class="section-selector" id="section-selector" onchange="switchSection(this.value)">
+            <option value="all">All Sections</option>
+        </select>
+        
+        <!-- Question grid -->
+        <div class="question-grid" id="question-boxes"></div>
+    </aside>
+    
+    <!-- Bottom navigation for mobile -->
+    <nav class="bottom-nav d-lg-none">
+        <button class="nav-btn nav-btn-outline" onclick="prevQuestion()">
+            <i class="fas fa-chevron-left"></i>
+            <span>Previous</span>
+        </button>
+        <button class="nav-btn nav-btn-outline" onclick="nextQuestion()">
+            <span>Next</span>
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </nav>
+    
+    <!-- Results modal -->
+    <div class="results-modal" id="results-modal">
+        <div class="results-card">
+            <div class="results-header">
+                <h3 class="results-title">Test Results</h3>
+            </div>
+            <div class="results-body">
+                <div class="stats-grid">
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark))">
+                        <div class="stat-value" id="score-value">0</div>
+                        <div class="stat-label">Score</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--success), #1b9aaa)">
+                        <div class="stat-value" id="correct-value">0</div>
+                        <div class="stat-label">Correct</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--danger), var(--accent))">
+                        <div class="stat-value" id="incorrect-value">0</div>
+                        <div class="stat-label">Incorrect</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--gray), var(--dark))">
+                        <div class="stat-value" id="unattempted-value">0</div>
+                        <div class="stat-label">Unattempted</div>
+                    </div>
+                </div>
+            </div>
+            <div class="results-footer">
+                <button class="nav-btn nav-btn-primary" onclick="reviewTest()">
+                    <i class="fas fa-search me-1"></i>
+                    <span>Review Test</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Questions data
+        const questions = [];
+        const sections = {};
+        let currentLang = "en";
+        let currentQuestion = 0;
+        let answers = {};
+        let submitted = false;
+        let totalTime = 30 * 60;
+        
+        // Initialize the test
+        window.onload = function() {
+            initializeTest();
+            startTimer();
+            
+            // If on desktop, show the question navigation by default
+            if (window.innerWidth >= 992) {
+                document.getElementById('question-nav').classList.add('show');
+                document.getElementById('main-content').classList.add('with-nav');
+            }
+        };
+        
+        // Initialize test data
+        function initializeTest() {
+            // Add sections and questions
+            
+            sections["17"] = {
+                name: "Quantitative Aptitude",
+                start: 0,
+                end: 22
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="17">Quantitative Aptitude</option>`;
+            
+            sections["misc"] = {
+                name: "Miscellaneous",
+                start: 23,
+                end: 23
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="misc">Miscellaneous</option>`;
+            
+            
+                questions.push({
+                    id: "1",
+                    section: "17",
+                    question_en: "<p>1.<span style=\"font-family: Times New Roman;\"> Study the given bar graph and answer the question that follows.<br></span><span style=\"font-family: Times New Roman;\">The bar graph shows the exports of cars of type A and B (in ₹ millions ) from 2014 to 2018<br></span><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeay2EwszNjkQcj1H0EwROUaVC5tAV0nfE4qwnj7EajVnUYVLHslel6NFalUm8098DSt50PmXjY0n-4FeU5ejBACJN85jkQyIs6UAjC_dqubMHTKTph8TGJ-Mi8AmfrKE2hoyeuUJUcNw_VYRz54Jx_qQ?key=U4SuLwP1KOVtlxWs14tJEo6u\" width=\"270\" height=\"208\"></p>\n<p><span style=\"font-family: Times New Roman;\">The total exports of cars of type A from 2014 to 2016 is approximately what percentage less than the total exports of cars of type B from 2015 to 2017 (correct to one decimal place )&nbsp;</span></p>",
+                    question_hi: "<p>1.<span style=\"font-family: Baloo;\"> दिए गए दंड आलेख का अध्ययन कीजिए और नीचे दिए गए प्रश्न का उत्तर दीजिए।<br></span><span style=\"font-family: Baloo;\">बार ग्राफ 2014 से 2018 तक टाइप A और B (लाखों रुपये में) की कारों के निर्यात को दर्शाता है<br><strong id=\"docs-internal-guid-5c73b69e-7fff-76b9-722f-cafa56b0d01a\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXe9COo2egyQatJUhIk97HQ5bj6zegAlN7505_1b5nyko8M0f5LaK89IpzPyoi1oxutguccjENn9Ul3smdPw9g49MQVL0-9wFxcm3ibghXl4hAfMtzsX44x1FYbIGli5o-yy6p6Ycw?key=0gENOpV6ErMH7LH3Mtauxfuj\" width=\"337\" height=\"220\"></strong><br></span></p>\n<p><span style=\"font-family: Baloo;\">2014 से 2016 तक A टाइप की कारों का कुल निर्यात 2015 से 2017 से टाइप B की कारों के कुल निर्यात से लगभग कितना प्रतिशत कम है (एक दशमलव स्थान तक सही)</span></p>",
+                    options_en: ["<p>10.4%</p>", "<p>11.7%</p>", 
+                                "<p>11.3%</p>", "<p>13.8%</p>"],
+                    options_hi: ["<p>10.4%</p>", "<p>11.7%</p>",
+                                "<p>11.3%</p>", "<p>13.8%</p>"],
+                    solution_en: "<p>1.(d) <span style=\"font-family: Times New Roman;\">Exports of cars of type A from 2014 to 2016 = 200 + 150 + 275 = 625<br></span><span style=\"font-family: Times New Roman;\">Exports of cars of type B from 2015 to 2017 = 250 + 200 + 275 = 725<br></span><span style=\"font-family: Times New Roman;\">Required percentage = </span><span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>725</mn><mo>-</mo><mn>625</mn></mrow><mrow><mo>&#160;</mo><mn>725</mn></mrow></mfrac><mo>&#215;</mo><mn>100</mn></math> =&nbsp;13.8 (approx)</span></p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>1.(d) <span style=\"font-family: Baloo;\">2014 से 2016 तक A प्रकार की कारों का निर्यात = 200 + 150 + 275 = 625<br></span><span style=\"font-family: Baloo;\">2015 से 2017 तक B प्रकार की कारों का निर्यात = 250 + 200 + 275 = 725<br></span><span style=\"font-family: Baloo;\">आवश्यक प्रतिशत = <span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>725</mn><mo>-</mo><mn>625</mn></mrow><mrow><mo>&#160;</mo><mn>725</mn></mrow></mfrac><mo>&#215;</mo><mn>100</mn></math> =</span></span><span style=\"font-family: Baloo;\">&nbsp;13.8 (लगभग)</span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "2",
+                    section: "17",
+                    question_en: "<p>2. <span style=\"font-family: Times New Roman;\">The following pie chart shows the distribution of percentage of certain corporate office employees in various age groups.<br></span><span style=\"font-family: Times New Roman;\">Total number of employees of the corporate office = 2500<br></span><span style=\"font-family: Times New Roman;\">Study the chart carefully and answer the questions that follows.<br><strong id=\"docs-internal-guid-8b58e87a-7fff-4226-5c26-d6b26e43310a\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcd1g7L7NqbW2oKlJA87Ryj2R3jorCCKPflOOE1GtI2Ry1DhP2VJs27ctMJkVQk5l8ut1Zbak_wvULevGw0n3WxwLDcH0GZ5jo1Ovm_Utn-c8JfWcM_EPTRYb0qO4QM_QzBBZWzCg?key=0gENOpV6ErMH7LH3Mtauxfuj\" width=\"330\" height=\"212\"><br></strong></span><span style=\"font-family: Times New Roman;\">The number of the corporate office employees of the age group of 38+ years and above is how much more than that of 28+ to 38 years ?</span></p>",
+                    question_hi: "<p>2. <span style=\"font-family: Baloo;\">निम्नलिखित पाई चार्ट विभिन्न आयु समूहों में कुछ कॉर्पोरेट कार्यालय कर्मचारियों के प्रतिशत के वितरण को दर्शाता है।</span><span style=\"font-family: Baloo;\">कॉर्पोरेट कार्यालय के कर्मचारियों की कुल संख्या = 2500<br></span><span style=\"font-family: Baloo;\">चार्ट का ध्यानपूर्वक अध्ययन करें और निम्नलिखित प्रश्नों के उत्तर दें।<br><strong id=\"docs-internal-guid-b0991c46-7fff-91ed-9a90-43a6a57f80ad\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcwMtm5qTg_x7BclfJIShoP0Jf2NZXnMSe223l1YxkI5MDFLLnDCIMdNk2qnqyNGb7GQSREc2vVU-ttnjBf_3wKn-qi_zuvfLr4LbxDySPedc5LEwEtGIGGCfQ-nTrf8xouzuNwEw?key=0gENOpV6ErMH7LH3Mtauxfuj\" width=\"360\" height=\"230\"><br></strong></span><span style=\"font-family: Baloo;\">38 वर्ष और उससे अधिक आयु वर्ग के कॉर्पोरेट कार्यालय के कर्मचारियों की संख्या 28 से 38 वर्ष की आयु से कितनी अधिक है?</span></p>",
+                    options_en: ["<p>80%</p>", "<p>150%</p>", 
+                                "<p>120%</p>", "<p>20%</p>"],
+                    options_hi: ["<p>80%</p>", "<p>150%</p>",
+                                "<p>120%</p>", "<p>20%</p>"],
+                    solution_en: "<p>2.(c) <span style=\"font-family: Times New Roman;\">Number of the corporate office employees of the age group of 38 + years and above = (30 + 15 + 10 )% = 55%<br></span><span style=\"font-family: Times New Roman;\">Number of the corporate office employees of the age group of 28+ to 38 years = 25%<br></span><span style=\"font-family: Times New Roman;\">Difference = 55% - 25% = 30%<br></span><span style=\"font-family: Times New Roman;\">Required percentage = </span><span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>30</mn><mn>25</mn></mfrac><mo>&#215;</mo><mn>100</mn><mo>=</mo><mn>120</mn><mo>%</mo></math> </span></p>",
+                    solution_hi: "<p>2.(c) <span style=\"font-family: Baloo;\">38 वर्ष और उससे अधिक आयु वर्ग के कॉर्पोरेट कार्यालय के कर्मचारियों की संख्या = (30 + 15 + 10 )% = 55%<br></span><span style=\"font-family: Baloo;\">28 से 38 वर्ष के आयु वर्ग के कॉर्पोरेट कार्यालय के कर्मचारियों की संख्या = 25%<br></span><span style=\"font-family: Baloo;\">अंतर = 55% - 25% = 30%<br></span><span style=\"font-family: Baloo;\">आवश्यक प्रतिशत = <span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>30</mn><mn>25</mn></mfrac><mo>&#215;</mo><mn>100</mn><mo>=</mo><mn>120</mn><mo>%</mo></math></span></span></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "3",
+                    section: "17",
+                    question_en: "<p>3. <span style=\"font-family: Times New Roman;\">The number of cars passing the road near a colony from 6am to 12 noon has been shown in the following histogram.<br></span><span style=\"font-family: Times New Roman;\">What is the minimum change percentage in the number of cars in comparison to the previous hour? (correct to 2 decimal places)<br><strong id=\"docs-internal-guid-5cef4be4-7fff-acbb-2541-ebbf3511ade6\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcj9mXwAkMpjHi3iRC4_xHWaWQQOmo4_4IoLI53LxJHPleOKJMz5tClkA-DEYYupAaKjI_bR0oY9gXXREexBJ0UUODhadIlRyjfAudAuY89j5bAjof3DXHrFqJ4tofr2dq4DXsc?key=0gENOpV6ErMH7LH3Mtauxfuj\" width=\"265\" height=\"204\"></strong><br></span></p>",
+                    question_hi: "<p>3. <span style=\"font-family: Baloo;\">सुबह 6 बजे से दोपहर 12 बजे तक एक कॉलोनी के पास से गुजरने वाली कारों की संख्या को निम्नलिखित हिस्टोग्राम में दिखाया गया है।<br></span><span style=\"font-family: Baloo;\">पिछली घंटे की तुलना में कारों की संख्या में न्यूनतम परिवर्तन प्रतिशत क्या है? (2 दशमलव स्थानों तक सही)।<br></span><strong id=\"docs-internal-guid-0c74db4f-7fff-cf61-4c17-5fbc9a68f465\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfO2IDT86yJCen8FYWtHUvrFjbWBsCTOvaWHv3DWb0DE0mCH6nrUBq538_0-PQvXdwp3yCsLx2y9hgMoMIyzbV11ohN9UMNETnsw1XNGF9qQ-wAhlw8EQotopN1cp4L_8juz111TQ?key=0gENOpV6ErMH7LH3Mtauxfuj\" width=\"269\" height=\"199\"></strong></p>",
+                    options_en: ["<p>10.52%</p>", "<p>11.54%</p>", 
+                                "<p>23.81%</p>", "<p>15.25%</p>"],
+                    options_hi: ["<p>10.52%</p>", "<p>11.54%</p>",
+                                "<p>23.81%</p>", "<p>15.25%</p>"],
+                    solution_en: "<p>3.(b)<span style=\"font-family: Times New Roman;\">Change in percentage of number of cars from slot 6-7 to 7-8 = </span><span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>35</mn><mn>70</mn></mfrac><mo>&#215;</mo><mn>100</mn><mo>=</mo><mn>50</mn><mo>%</mo></math><br></span><span style=\"font-family: Times New Roman;\">Change in percentage of number of cars from slot 7-8 to 8-9 = </span><span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>25</mn><mn>105</mn></mfrac><mo>&#215;</mo><mn>100</mn><mo>=</mo><mn>23</mn><mo>.</mo><mn>8</mn><mo>%</mo></math><br></span><span style=\"font-family: Times New Roman;\">Change in percentage of number of cars from slot 8-9 to 9-10 = </span><span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>15</mn><mn>130</mn></mfrac><mo>&#215;</mo><mn>100</mn><mo>=</mo><mn>11</mn><mo>.</mo><mn>54</mn><mo>%</mo></math><br></span><span style=\"font-family: Times New Roman;\">Change in percentage of number of cars from slot 9-10 to 10-11 = </span><span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>20</mn><mn>115</mn></mfrac><mo>&#215;</mo><mn>100</mn><mo>=</mo><mn>17</mn><mo>.</mo><mn>4</mn><mo>%</mo></math><br></span><span style=\"font-family: Times New Roman;\">Change in percentage of number of cars from slot 10-11 to 11-12 = </span><span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>50</mn><mn>95</mn></mfrac><mo>&#215;</mo><mn>100</mn><mo>=</mo><mn>52</mn><mo>.</mo><mn>6</mn><mo>%</mo></math><br></span><span style=\"font-family: Times New Roman;\">Change in percentage of number of cars from slot 8-9 to 9-10 is minimum that is 11.54% </span></p>",
+                    solution_hi: "<p>3.(b) <span style=\"font-family: Baloo;\">स्लॉट 6-7 से 7-8 तक कारों की संख्या के प्रतिशत में परिवर्तन = <span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>35</mn><mn>70</mn></mfrac><mo>&#215;</mo><mn>100</mn><mo>=</mo><mn>50</mn><mo>%</mo></math></span></span><span style=\"font-family: Times New Roman;\"><br></span><span style=\"font-family: Baloo;\">स्लॉट 7-8 से 8-9 तक कारों की संख्या के प्रतिशत में परिवर्तन = <span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>25</mn><mn>105</mn></mfrac><mo>&#215;</mo><mn>100</mn><mo>=</mo><mn>23</mn><mo>.</mo><mn>8</mn><mo>%</mo></math></span></span><span style=\"font-family: Times New Roman;\"><br></span><span style=\"font-family: Baloo;\">स्लॉट 8-9 से 9-10 तक कारों की संख्या के प्रतिशत में परिवर्तन = <span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>15</mn><mn>130</mn></mfrac><mo>&#215;</mo><mn>100</mn><mo>=</mo><mn>11</mn><mo>.</mo><mn>54</mn><mo>%</mo></math></span></span><span style=\"font-family: Times New Roman;\"><br></span><span style=\"font-family: Baloo;\">स्लॉट 9-10 से 10-11 तक कारों की संख्या के प्रतिशत में परिवर्तन =<span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>20</mn><mn>115</mn></mfrac><mo>&#215;</mo><mn>100</mn><mo>=</mo><mn>17</mn><mo>.</mo><mn>4</mn><mo>%</mo></math></span></span><span style=\"font-family: Times New Roman;\"><br></span><span style=\"font-family: Baloo;\">स्लॉट 10-11 से 11-12 तक कारों की संख्या के प्रतिशत में परिवर्तन = <span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>50</mn><mn>95</mn></mfrac><mo>&#215;</mo><mn>100</mn><mo>=</mo><mn>52</mn><mo>.</mo><mn>6</mn><mo>%</mo></math></span></span><span style=\"font-family: Times New Roman;\"><br></span><span style=\"font-family: Baloo;\">स्लॉट 8-9 से 9-10 तक कारों की संख्या के प्रतिशत में बदलाव न्यूनतम है, यानी 11.54%</span></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "4",
+                    section: "17",
+                    question_en: "<p>4.<span style=\"font-family: Times New Roman;\"> The given bar chart represent the number of televisions sets (TV) manufactured ( in thousands) and the respective percentage of those TV sets sold by five different companies A,B,C,D and E in 2015 </span><span style=\"font-family: Times New Roman;\">Study the chart carefully and answer the question that follows&nbsp;<br><strong id=\"docs-internal-guid-07620fd7-7fff-2d5e-ce90-3cda1a7710f9\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXc0IaM7LkRIJDxFDL4P0INwQZu5pBFA8-pqkI7SbTEY9qypPOt6LWetQ0pR_2idEvGQoNk1ARZtgjZpaTZl7oSqlJvcWvdEJgEDPduYWmRqe05kojFP3TXRYUrC4WaEo0DmIVd1c76Dz01YsliPZtxNzw?key=0gENOpV6ErMH7LH3Mtauxfuj\" width=\"364\" height=\"221\"><br></strong></span><span style=\"font-family: Times New Roman;\">The average number of TV sets sold by companies C and D is what percentage of the number of TV sets manufactured by company E ? Express your answer correct to one place of decimal .</span></p>",
+                    question_hi: "<p>4.<span style=\"font-family: Baloo;\"> दिया गया बार चार्ट 2015 में निर्मित (हजारों में) टीवी सेट (TV) की संख्या और पांच अलग-अलग कंपनियों A, B, C, D और E द्वारा बेचे गए TV सेटों का संबंधित प्रतिशत दर्शाता है। </span><span style=\"font-family: Baloo;\">चार्ट का ध्यानपूर्वक अध्ययन करें और नीचे दिए गए प्रश्न का उत्तर दें<br><strong id=\"docs-internal-guid-52560eb3-7fff-7dba-7d6c-33e8858fd54a\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXesEo9vXBS5N39o_R0lQJXWjcBGk9H4ucqTcFjc7GbfRvgfT6YWlju7XVmYvDYcy5qx73RBrwGd_MqRtMyusz7-IJJW5J6AXt-0XBXygQseS0_fehKRRVtGaQfs3vtJLFpVly1t?key=0gENOpV6ErMH7LH3Mtauxfuj\" width=\"301\" height=\"214\"><br></strong></span><span style=\"font-family: Baloo;\">कंपनी C और D द्वारा बेचे गए टीवी सेटों की औसत संख्या कंपनी E द्वारा निर्मित टीवी सेटों की संख्या का कितना प्रतिशत है? अपने उत्तर को दशमलव के एक स्थान पर सही व्यक्त करें।</span></p>",
+                    options_en: ["<p>86.5%</p>", "<p>92.2%</p>", 
+                                "<p>90.5%</p>", "<p>89.1%</p>"],
+                    options_hi: ["<p>86.5%</p>", "<p>92.2%</p>",
+                                "<p>90.5%</p>", "<p>89.1%</p>"],
+                    solution_en: "<p>4.(c) <span style=\"font-family: Times New Roman;\">No of tv set sold by C = </span><span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>82</mn><mn>100</mn></mfrac><mo>&#215;</mo><mn>70</mn><mo>=</mo><mn>57</mn><mo>.</mo><mn>4</mn></math><br></span><span style=\"font-family: Times New Roman;\">No of tv set sold by D = </span><span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>56</mn><mn>100</mn></mfrac><mo>&#215;</mo><mn>85</mn><mo>=</mo><mn>47</mn><mo>.</mo><mn>5</mn></math><br></span><span style=\"font-family: Times New Roman;\">Total tv set sold by C and D = (57.5 + 47.5) = 105<br></span><span style=\"font-family: Times New Roman;\">Average tv set sold by C and D = </span><span style=\"font-family: Times New Roman;\"> <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>105</mn><mn>2</mn></mfrac><mo>=</mo><mn>52</mn><mo>.</mo><mn>5</mn></math><br></span><span style=\"font-family: Times New Roman;\">Number of TV set manufactured by E = 58<br></span><span style=\"font-family: Times New Roman;\">Required percentage = </span><span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>58</mn><mo>-</mo><mn>52</mn><mo>.</mo><mn>5</mn></mrow><mn>58</mn></mfrac><mo>&#215;</mo><mn>100</mn><mo>=</mo><mn>90</mn><mo>.</mo><mn>5</mn><mo>%</mo></math></span></p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>4.(c) <span style=\"font-family: Baloo;\">C द्वारा बेचे गए टीवी सेट की संख्या = <span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>82</mn><mn>100</mn></mfrac><mo>&#215;</mo><mn>70</mn><mo>=</mo><mn>57</mn><mo>.</mo><mn>4</mn></math></span></span><span style=\"font-family: Times New Roman;\"><br></span><span style=\"font-family: Baloo;\">D द्वारा बेचे गए टीवी सेट की संख्या = <span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>56</mn><mn>100</mn></mfrac><mo>&#215;</mo><mn>85</mn><mo>=</mo><mn>47</mn><mo>.</mo><mn>5</mn></math></span></span><span style=\"font-family: Times New Roman;\"><br></span><span style=\"font-family: Baloo;\">C और D द्वारा बेचा गया कुल टीवी सेट = (57.5 + 47.5) = 105<br></span><span style=\"font-family: Baloo;\">C और D द्वारा बेचा गया औसत टीवी सेट = <span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>105</mn><mn>2</mn></mfrac><mo>=</mo><mn>52</mn><mo>.</mo><mn>5</mn></math></span></span><span style=\"font-family: Times New Roman;\"><br></span><span style=\"font-family: Baloo;\">E द्वारा निर्मित टीवी सेट की संख्या = 58<br></span><span style=\"font-family: Baloo;\">आवश्यक प्रतिशत = <span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>58</mn><mo>-</mo><mn>52</mn><mo>.</mo><mn>5</mn></mrow><mn>58</mn></mfrac><mo>&#215;</mo><mn>100</mn><mo>=</mo><mn>90</mn><mo>.</mo><mn>5</mn><mo>%</mo></math></span></span></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "5",
+                    section: "17",
+                    question_en: "<p>5.<span style=\"font-family: Times New Roman;\"> study the given pie chart and answer the question that follows.&nbsp;<br></span><span style=\"font-family: Times New Roman;\">The pie chart shows the breakup of the total number of employees of a company working in different offices (A to E), in degrees. The total number of employees = 3600<br><strong id=\"docs-internal-guid-79c24ae0-7fff-a26a-f477-42564099ded6\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeZDUylFQEmdKu_n5iGsNKFKM-0G5FS4Q2hz8Bf9uRrF01Kw5-zZmB0wUr8IEdiBsFm1o2t10DBdvffLZKfH793ZRBhWTIIcxw14S63He6bxwbnJv3fobeTUzonTezT1Nx4WC9Ns57jP-0lWzYsTDuxQIha?key=XXvXLHQ8V0MVlutqwJCk7VqZ\" width=\"195\" height=\"193\"></strong><br></span></p>\n<p><span style=\"font-family: Times New Roman;\">If the percentage of males employees in office C is 20% and that of female employees in office D is 40% then what is the ratio of the number of female employees in offices D to that of female employees in offices C&nbsp;</span></p>",
+                    question_hi: "<p>5.<span style=\"font-family: Baloo;\"> दिए गए पाई चार्ट का अध्ययन करें और नीचे दिए गए प्रश्न का उत्तर दें।<br></span><span style=\"font-family: Baloo;\">पाई चार्ट विभिन्न कार्यालयों (A से E) में काम कर रहे एक कंपनी के कर्मचारियों की कुल संख्या को डिग्री में दिखाता है। कर्मचारियों की कुल संख्या = 3600<br><strong id=\"docs-internal-guid-79c24ae0-7fff-a26a-f477-42564099ded6\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeZDUylFQEmdKu_n5iGsNKFKM-0G5FS4Q2hz8Bf9uRrF01Kw5-zZmB0wUr8IEdiBsFm1o2t10DBdvffLZKfH793ZRBhWTIIcxw14S63He6bxwbnJv3fobeTUzonTezT1Nx4WC9Ns57jP-0lWzYsTDuxQIha?key=XXvXLHQ8V0MVlutqwJCk7VqZ\" width=\"195\" height=\"193\"><br></strong></span><span style=\"font-family: Baloo;\">यदि कार्यालय C में पुरुष कर्मचारियों का प्रतिशत 20% है और कार्यालय D में महिला कर्मचारियों का 40% है, तो कार्यालय D में महिला कर्मचारियों की संख्या का कार्यालय C में महिला कर्मचारियों की संख्या से अनुपात कितना है?</span></p>",
+                    options_en: ["<p>3 : 8</p>", "<p>2 : 3</p>", 
+                                "<p>3 : 2</p>", "<p>5 : 6</p>"],
+                    options_hi: ["<p>3 : 8</p>", "<p>2 : 3</p>",
+                                "<p>3 : 2</p>", "<p>5 : 6</p>"],
+                    solution_en: "<p>5.(d) <span style=\"font-family: Times New Roman;\">Female employe in C is 80% of 54<br></span><span style=\"font-family: Times New Roman;\">Female employe in D is 40% of 90<br></span><span style=\"font-family: Times New Roman;\">Required ratio = 40% of 90 : 80% of 54 = 5 : 6</span></p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>5.(d) <span style=\"font-family: Baloo;\">C में महिला कर्मचारी 54 का 80% है।<br></span><span style=\"font-family: Baloo;\">D में महिला कर्मचारी 90 का 40% है।<br></span><span style=\"font-family: Baloo;\">आवश्यक अनुपात = 90 का 40% : 54 का 80% = 5 : 6</span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "6",
+                    section: "17",
+                    question_en: "<p>6.<span style=\"font-family: Times New Roman;\"> The following bar graph shows receipts and expenditure of a business firm over 5 years Grain = Receipts - Expenditure&nbsp;<br></span><span style=\"font-family: Times New Roman;\">What is the percentage of increase in expenditure from 2018 to 2019 as compared to 2018?<br><strong id=\"docs-internal-guid-0445cb85-7fff-814f-eac7-f73698919f27\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfn2w_wyKqrJExKT-pWZ1s1m7xWoE4MJmRfMvTTHUUhw1LHGbzBM4PsrdJ-edUAQuLaI41au3ZPwM_Q6XlVzswKQBaZI2nNRB5GcKw84jY2gRuR-UXItmnNw6S3kbewSpmDfWwTnw?key=XXvXLHQ8V0MVlutqwJCk7VqZ\" width=\"315\" height=\"224\"></strong><br></span></p>",
+                    question_hi: "<p>6.<span style=\"font-family: Baloo;\"> निम्नलिखित बार ग्राफ 5 वर्षों में एक व्यावसायिक फर्म की प्राप्तियों और व्यय को दर्शाता है।<br></span><span style=\"font-family: Baloo;\">अनाज = प्राप्तियां - व्यय<br></span><span style=\"font-family: Baloo;\">2018 की तुलना में 2018 से 2019 तक व्यय में वृद्धि का प्रतिशत कितना है?<br><strong id=\"docs-internal-guid-910b2742-7fff-b2b5-160f-e92483c55d84\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdBDM46XMgnLUElRvkPscaAHwzB0ihMUKI34VpEb086l2o2qwrYwRSHzcGb5v-n1OFG1Ar1Ozs7cKzGgwv28wRDtvzY6cGHij_OZ_9Mu4tzTm2VUj4vOkdRSmCNbalm4cURYyC2?key=XXvXLHQ8V0MVlutqwJCk7VqZ\" width=\"311\" height=\"222\"></strong><br></span></p>",
+                    options_en: ["<p><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>6</mn><mfrac><mn>1</mn><mn>4</mn></mfrac><mo>%</mo></math></p>", "<p><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>8</mn><mfrac><mn>3</mn><mn>4</mn></mfrac><mo>%</mo></math></p>", 
+                                "<p><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>2</mn><mfrac><mn>1</mn><mn>2</mn></mfrac><mo>%</mo></math></p>", "<p><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>6</mn><mfrac><mn>2</mn><mn>3</mn></mfrac><mo>%</mo></math></p>"],
+                    options_hi: ["<p><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>6</mn><mfrac><mn>1</mn><mn>4</mn></mfrac><mo>%</mo></math></p>", "<p><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>8</mn><mfrac><mn>3</mn><mn>4</mn></mfrac><mo>%</mo></math></p>",
+                                "<p><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>2</mn><mfrac><mn>1</mn><mn>2</mn></mfrac><mo>%</mo></math></p>", "<p><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>6</mn><mfrac><mn>2</mn><mn>3</mn></mfrac><mo>%</mo></math></p>"],
+                    solution_en: "<p>6.(d) <span style=\"font-family: Times New Roman;\">Expenditure in 2018 = 75<br></span><span style=\"font-family: Times New Roman;\">Expenditure in 2019 = 80<br></span><span style=\"font-family: Times New Roman;\">Difference = 5<br></span><span style=\"font-family: Times New Roman;\">Required percentage = </span><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>5</mn><mn>75</mn></mfrac><mo>&#215;</mo><mn>100</mn><mo>=</mo><mfrac><mrow><mo>&#160;</mo><mn>20</mn><mo>&#160;</mo></mrow><mn>3</mn></mfrac><mo>=</mo><mn>6</mn><mfrac><mn>2</mn><mn>3</mn></mfrac><mo>%</mo></math></p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>6.(d) <span style=\"font-family: Baloo;\">2018 में व्यय = 75<br></span><span style=\"font-family: Baloo;\">2019 में खर्च = 80<br></span><span style=\"font-family: Baloo;\">अंतर = 5<br></span><span style=\"font-family: Baloo;\">आवश्यक प्रतिशत = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>5</mn><mn>75</mn></mfrac><mo>&#215;</mo><mn>100</mn><mo>=</mo><mfrac><mrow><mo>&#160;</mo><mn>20</mn><mo>&#160;</mo></mrow><mn>3</mn></mfrac><mo>=</mo><mn>6</mn><mfrac><mn>2</mn><mn>3</mn></mfrac><mo>%</mo></math></span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "7",
+                    section: "17",
+                    question_en: "<p>7.<span style=\"font-family: Times New Roman;\"> The given histogram shows the height of 232 students of an athletic club and their number.&nbsp;<br></span><span style=\"font-family: Times New Roman;\">Study the histogram carefully and answer the questions that follow<br><br></span><strong id=\"docs-internal-guid-ff99ed83-7fff-ff53-77e1-c5d5971d1177\">&nbsp; </strong><strong><strong id=\"docs-internal-guid-950b13ce-7fff-6951-2d17-e26e0d5181a3\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeG1vLzQv6Qo6R924kdeLeIYT58TA7AhhqBu2BimPE05_N7YU4u4NdPIueuNmXlAfWIL2jzIZ9ypriK8trgxuONW7mtnTZqYw0stRKEQ4kWHiY8xTthrhk0mx1rn6GxrSiWvhfzBw?key=XXvXLHQ8V0MVlutqwJCk7VqZ\" width=\"352\" height=\"172\"><br></strong></strong><span style=\"font-family: Times New Roman;\">If the histogram is to be presented by a line graph , what would be the starting point and the end point of the line diagram</span></p>",
+                    question_hi: "<p>7.<span style=\"font-family: Baloo;\"> दिया गया हिस्टोग्राम एक एथलेटिक क्लब के 232 छात्रों की ऊंचाई और उनकी संख्या को दर्शाता है।<br></span><span style=\"font-family: Baloo;\">हिस्टोग्राम का ध्यानपूर्वक अध्ययन करें और निम्नलिखित प्रश्नों के उत्तर दें:<br></span><span style=\"font-family: Baloo;\"><strong id=\"docs-internal-guid-0f028d85-7fff-3618-c10b-4ec475a03eb4\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdkbAd-xYobaLtKYBba4N_j3PUeB2FqmXFXG8K6R0iP_vtObAsoXP5tTyUpyAdfMCfGqxawMTlVOMNO5aq5Keyz9kW4PzynEvGWrxN6T8jApIZ4puQJYuWRNNk29eh8soS-RILuQQ?key=XXvXLHQ8V0MVlutqwJCk7VqZ\" width=\"415\" height=\"208\"><br></strong>यदि हिस्टोग्राम को एक रेखा ग्राफ (line graph) द्वारा प्रस्तुत किया जाना है, तो रेखा आरेख का प्रारंभिक बिंदु और अंत बिंदु क्या होगा</span></p>",
+                    options_en: ["<p>(122.5, 20) and (167.5, 20)</p>", "<p>(117.5,0)&nbsp; and (172.5 , 0)</p>", 
+                                "<p>(117.5 ,20) and (172.5 , 20)</p>", "<p>(122.5 ,0)&nbsp;&nbsp;&nbsp; and&nbsp; (167.5 ,0)</p>"],
+                    options_hi: ["<p>(122.5, 20) और (167.5, 20)</p>", "<p>(117.5,0) और (172.5 , 0)</p>",
+                                "<p>(117.5 ,20) और (172.5 , 20)</p>", "<p>(122.5 ,0) और (167.5 ,0)</p>"],
+                    solution_en: "<p>7.(b) <span style=\"font-family: Times New Roman;\">For </span><span style=\"font-family: Times New Roman;\">the histogram is to be presented by a line graph, we will take (x,y) coordinate of all the value. So the required coordinates for starting and final values are (122.5,20) and (167.5,12). But in the options these values are not given.&nbsp;<br></span><span style=\"font-family: Times New Roman;\">So, we would take one value (115 -120) before the 1st value and one value (170 -175) after the final </span><span style=\"font-family: Times New Roman;\">value .&nbsp;<br></span><span style=\"font-family: Times New Roman;\">Therefore the answer of the question is (117.5,0) and (172.5,0).</span></p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>7.(b) <span style=\"font-family: Baloo;\">हिस्टोग्राम के लिए एक लाइन ग्राफ द्वारा प्रस्तुत किया जाना है, हम सभी मूल्यों के निर्देशांक (x,y) लेंगे। तो प्रारंभिक और अंतिम मानों के लिए आवश्यक निर्देशांक (122.5,20) और (167.5,12) हैं। लेकिन विकल्पों में ये मान नहीं दिए गए हैं।<br></span><span style=\"font-family: Baloo;\">इसलिए, हम पहले मान से पहले एक मान (115-120) और अंतिम मान के बाद एक मान (170-175) लेंगे।<br></span><span style=\"font-family: Baloo;\">अतः प्रश्न का उत्तर (117.5,0) और (172.5,0) होगा।</span></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "8",
+                    section: "17",
+                    question_en: "<p>8. <span style=\"font-family: Times New Roman;\">Study the given bar graph and answer the questions that follows.&nbsp;<br></span><span style=\"font-family: Times New Roman;\">The bar graph shows the exports of cars of type A and B (in ₹ millions) from 2014 to 2018<br><strong id=\"docs-internal-guid-d510d828-7fff-6155-2f0b-f1b792138ef4\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfuqioULk746T1K77FEzxq9oNRlMktfwXUoOe0_lPtzIFQoT1riE-nGieBNzSOlRN68kvviLPPWkDcXE4OEgIP5KruojQHWdN1OC_FYXpZP8zLFwuPFnOHqYv1DXN3yElFh59iQdA?key=XXvXLHQ8V0MVlutqwJCk7VqZ\" width=\"361\" height=\"234\"><br></strong></span><span style=\"font-family: Times New Roman;\">In which year were the exports of cars of type B ₹20 million less than the average exports (per year) of cars of type A over the five years</span></p>",
+                    question_hi: "<p>8. <span style=\"font-family: Baloo;\">दिए गए दंड आलेख का अध्ययन कीजिए और नीचे दिए गए प्रश्नों के उत्तर दीजिए।<br></span><span style=\"font-family: Baloo;\">बार ग्राफ 2014 से 2018 तक A और B प्रकार की कारों के निर्यात (₹ मिलियन में) को दर्शाता है<br><strong id=\"docs-internal-guid-c0322f18-7fff-9a5a-e2dc-095b52d89ea6\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeRwVVAPDqfPC9g3Pr6IKxDzRBAp0cgsTvDUytR6N0HYQNfYfsO4ISaoQzryN97G3jCaRuC0Ox4Q6OdoICckAfAdJZoYMVFQGTwFQoGB5mgDr-trfkr3rvF5Io9_MvD1vlorpRdYw?key=XXvXLHQ8V0MVlutqwJCk7VqZ\" width=\"342\" height=\"225\"><br></strong></span><span style=\"font-family: Baloo;\">किस वर्ष प्रकार B की कारों का निर्यात प्रकार A की कारों के औसत निर्यात (प्रति वर्ष) से ​​20 मिलियन कम था?</span></p>",
+                    options_en: ["<p>2014</p>", "<p>2015</p>", 
+                                "<p>2016</p>", "<p>2017</p>"],
+                    options_hi: ["<p>2014</p>", "<p>2015</p>",
+                                "<p>2016</p>", "<p>2017</p>"],
+                    solution_en: "<p>8.(c) <span style=\"font-family: Times New Roman;\">Average export of a Car A = </span><span style=\"font-family: Times New Roman;\"> <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>200</mn><mo>+</mo><mn>150</mn><mo>+</mo><mn>275</mn><mo>+</mo><mn>175</mn><mo>+</mo><mn>300</mn></mrow><mrow><mn>5</mn><mo>&#160;</mo></mrow></mfrac></math><br>= <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>1100</mn><mn>5</mn></mfrac></math> = 220 million</span><span style=\"font-family: Times New Roman;\"> <br></span><span style=\"font-family: Times New Roman;\">According to the question = 220 - 20 = 200million<br></span><span style=\"font-family: Times New Roman;\">Export of B in 2016 is 200million hence c is answer </span></p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>8.(c) <span style=\"font-family: Baloo;\">कार A का औसत निर्यात =<span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>200</mn><mo>+</mo><mn>150</mn><mo>+</mo><mn>275</mn><mo>+</mo><mn>175</mn><mo>+</mo><mn>300</mn></mrow><mrow><mn>5</mn><mo>&#160;</mo></mrow></mfrac></math></span><br><span style=\"font-family: Times New Roman;\">= <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>1100</mn><mn>5</mn></mfrac></math> = 220 मिलियन<br></span></span><span style=\"font-family: Baloo;\">प्रश्न के अनुसार, = 220 - 20 = 200 मिलियन<br></span><span style=\"font-family: Baloo;\">2016 में B का निर्यात 200 मिलियन है इसलिए c उत्तर है।</span></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "9",
+                    section: "17",
+                    question_en: "<p>9. <span style=\"font-family: Times New Roman;\">The number of cars passing the road near a colony from 6am to 12noon has been shown in the following histogram .&nbsp;<br></span><span style=\"font-family: Times New Roman;\">During which hour is the number of cars passed less than the average number of cars passed from 7am to 12 noon ?<br></span><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeqdolenNMrnMFJAFyuUkaH_tGmpuPZfKXdCUCilfdyQLu6q77KUnLT0ftGGOj9uCv8ELeGSEa70DAG3S464iKkp3ducwu12Xe11XBY25sZSwilYsfcfJ7CNRcaeCEXpvhf-ZovfKHpfcEbWXfWaI6rB8k?key=U4SuLwP1KOVtlxWs14tJEo6u\" width=\"238\" height=\"224\"></p>",
+                    question_hi: "<p>9. <span style=\"font-family: Baloo;\">सुबह 6 बजे से दोपहर 12 बजे तक एक कॉलोनी के पास से गुजरने वाली कारों की संख्या को निम्नलिखित हिस्टोग्राम में दिखाया गया है।</span><span style=\"font-family: Baloo;\">किस घंटे के दौरान कारों की संख्या सुबह 7 बजे से दोपहर 12 बजे तक गुजरने वाली कारों की औसत संख्या से कम है?<br></span><strong id=\"docs-internal-guid-1af33c2c-7fff-9910-4eb9-b7a39a6b7d0b\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcBYuOVjIJxPGRIQ45HJ1UzHybw6r6J_WBgASZepKNA5e6aNWJYQ_2DKqp8sNaTJxnDME4jbzHTzMRCJICzvAOtqsFmaKt5lkaCQl-UVpOHG5JdbV2yoG0Mcy7gDbgP70PuVHgvoA?key=jtvRBx7GXjxr9j5yH7UqF15R\" width=\"217\" height=\"191\"></strong></p>",
+                    options_en: ["<p>6 - 7,10 - 11,11 - 12</p>", "<p>10 -11,11-12</p>", 
+                                "<p>7 - 8,8 - 9,9 - 10</p>", "<p>6 - 7,11 - 12</p>"],
+                    options_hi: ["<p>6 - 7,10 - 11,11 - 12</p>", "<p>10 - 11,11 - 12</p>",
+                                "<p>7 - 8,8 - 9,9 - 10</p>", "<p>6 - 7.11 - 12</p>"],
+                    solution_en: "<p>9.(a) <span style=\"font-family: Times New Roman;\">average number of cars passed from 7am to 12 noon = </span><span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>105</mn><mo>+</mo><mn>130</mn><mo>+</mo><mn>115</mn><mo>+</mo><mn>95</mn><mo>+</mo><mn>45</mn></mrow><mn>5</mn></mfrac></math> = 98<br></span><span style=\"font-family: Times New Roman;\">time slots having number of cars less than 98 are 6-7,10-11,11-12</span></p>",
+                    solution_hi: "<p>9.(a) <span style=\"font-family: Baloo;\">सुबह 7 बजे से दोपहर 12 बजे तक गुजरने वाली कारों की औसत संख्या = <span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>105</mn><mo>+</mo><mn>130</mn><mo>+</mo><mn>115</mn><mo>+</mo><mn>95</mn><mo>+</mo><mn>45</mn></mrow><mn>5</mn></mfrac></math> = 98<br></span></span><span style=\"font-family: Baloo;\">98 से कम कारों की संख्या वाले समय स्लॉट हैं: 6-7,10-11,11-12</span></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "10",
+                    section: "17",
+                    question_en: "<p>10. <span style=\"font-family: Baloo;\">The given bar graph shows the income and expenditure ( in crores र) of a company over 5 years , from 2014 to 2018.&nbsp;<br></span><span style=\"font-family: Times New Roman;\">Study the bar graph and answer the question that follows.<br><strong id=\"docs-internal-guid-a5fd8963-7fff-b6c3-aa41-e9e6642a0677\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfZDTuxIzsjLkQOElEFStLjcTIsvmPBNnCgvOEcULYS0S_boVYSxh_LU4mrFIks9qvgn3LOBCU6lPZLdVV2T9sSEYvKzn-o-lk2aE6gpncnsbfsHyA2pYTzAYvIGNMaMOfg8cIuzS42pkSLGpkGWQwSRrc?key=jtvRBx7GXjxr9j5yH7UqF15R\" width=\"361\" height=\"220\"><br></strong></span><span style=\"font-family: Times New Roman;\">What is the difference ( in crores ₹) between the expenditure for the years 2017 and 2018 taken together and the income for the years 2015 and 2016 taken together?</span></p>",
+                    question_hi: "<p>10. <span style=\"font-family: Baloo;\">दिया गया बार ग्राफ 2014 से 2018 तक 5 वर्षों में एक कंपनी की आय और व्यय (करोड़ रुपये में) को दर्शाता है।<br></span><span style=\"font-family: Baloo;\">दंड आलेख का अध्ययन करें और नीचे दिए गए प्रश्न का उत्तर दें।<br><strong id=\"docs-internal-guid-1624bd66-7fff-d833-d1f6-823bc16fd6f4\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXc_-M4znutrQZa8B5NFn8pzqj6uDo7Px9ADpzWpjE1fHNg4qKqXJCgXgWp2f8o9XyQ2u4ORVMq5wRknJLGUQ-6BjLVRKTm_7sD4eZ9n2xBgBzBQYc-pUqvzgG4XK9Nojn8MYaa2wQ?key=jtvRBx7GXjxr9j5yH7UqF15R\" width=\"330\" height=\"231\"><br></strong></span><span style=\"font-family: Baloo;\">वर्ष 2017 और 2018 के लिए एक साथ किए गए व्यय और वर्ष 2015 और 2016 के लिए एक साथ आय के बीच का अंतर (करोड़ रुपये में) कितना है?</span></p>",
+                    options_en: ["<p>15</p>", "<p>20</p>", 
+                                "<p>18</p>", "<p>16</p>"],
+                    options_hi: ["<p>15</p>", "<p>20</p>",
+                                "<p>18</p>", "<p>16</p>"],
+                    solution_en: "<p>10.(b) <span style=\"font-family: Times New Roman;\">expenditure for the years 2017 and 2018 taken together = 300 + 325 = 625<br></span><span style=\"font-family: Times New Roman;\">income for the years 2015 and 2016 taken together = 280 + 325 = 605<br></span><span style=\"font-family: Times New Roman;\">Required difference = 625 - 605 = 20</span></p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>10.(b) <span style=\"font-family: Baloo;\">वर्ष 2017 और 2018 को मिलाकर व्यय = 300 + 325 = 625<br></span><span style=\"font-family: Baloo;\">वर्ष 2015 और 2016 की कुल आय = 280 + 325 = 605<br></span><span style=\"font-family: Baloo;\">अभीष्ट अंतर = 625 - 605 = 20</span></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "11",
+                    section: "17",
+                    question_en: "<p>11. <span style=\"font-family: Times New Roman;\">The following bar graph shows the number of youth ( in lakhs) and the number of employed youth (in lakhs) in five state A,B,C,D and E.&nbsp;<br></span><span style=\"font-family: Times New Roman;\">What is the average number of youth in five states ?<br></span><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXe9zsAHAH6N2hy_JJE_TmzrBQN_HouDq9owJ9Ui6Xglus80TT_BP8XpRC9BGypxhhzoEb8UL7TSnWP8cFq7DTPG1KAp9x7SCJDrIiY4a5kf6W-2V3GFmVrP8DdYhkH4-5V9kKg9lk-8J5QJk4FSGwlEzNk?key=U4SuLwP1KOVtlxWs14tJEo6u\" width=\"382\" height=\"228\"></p>",
+                    question_hi: "<p>11. <span style=\"font-family: Baloo;\">निम्नलिखित बार ग्राफ पांच राज्यों A, B, C, D और E में युवाओं की संख्या (लाखों में) और नियोजित युवाओं की संख्या (लाखों में) दिखाता है।<br></span><span style=\"font-family: Baloo;\">पांच राज्यों में युवाओं की औसत संख्या क्या है?<br><strong id=\"docs-internal-guid-87dc5bd1-7fff-789b-7c2e-3af8783dc5db\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeVtj7m2q6Hw9js_1ZavR_0fZL29Cao-4lfPMKiVgGx7Ez4GtpIwOdErq5VHRBQAAUIZnoaCrBe6nbuspJpo_ytMwo9OfeBA4UOFsU7YzA5GHamdf0nMvpjA_0mWhGclhda2fY1Yw?key=jtvRBx7GXjxr9j5yH7UqF15R\" width=\"349\" height=\"243\"></strong><br></span></p>",
+                    options_en: ["<p>1200000</p>", "<p>1015000</p>", 
+                                "<p>1025000</p>", "<p>1010000</p>"],
+                    options_hi: ["<p>1200000</p>", "<p>1015000</p>",
+                                "<p>1025000</p>", "<p>1010000</p>"],
+                    solution_en: "<p>11.(d) <span style=\"font-family: Times New Roman;\">Average number of youth (in lakhs) in five state A,B,C,D and E&nbsp;<br></span>= <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>12</mn><mo>+</mo><mn>8</mn><mo>+</mo><mn>11</mn><mo>.</mo><mn>5</mn><mo>+</mo><mn>10</mn><mo>+</mo><mn>9</mn></mrow><mn>5</mn></mfrac></math> =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>50</mn><mo>.</mo><mn>5</mn></mrow><mn>5</mn></mfrac></math> = 10.1 lakh = 1010000</p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>11.(d) <span style=\"font-family: Baloo;\">पांच राज्यों A, B, C, D और E में युवाओं की औसत संख्या (लाख में) &nbsp;<br>= <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>12</mn><mo>+</mo><mn>8</mn><mo>+</mo><mn>11</mn><mo>.</mo><mn>5</mn><mo>+</mo><mn>10</mn><mo>+</mo><mn>9</mn></mrow><mn>5</mn></mfrac></math> =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>50</mn><mo>.</mo><mn>5</mn></mrow><mn>5</mn></mfrac></math> = 10.1 लाख = 1010000</span></p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "12",
+                    section: "17",
+                    question_en: "<p>12.<span style=\"font-family: Times New Roman;\"> Performance of 1800 students in grades has been shown in the following pie chart.<br></span><span style=\"font-family: Times New Roman;\">How many more students have obtained grade B than those who have obtained grade C?<br><strong id=\"docs-internal-guid-a74daa21-7fff-fb0d-43c6-9f7df357f489\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfUo11EXzdMnP4PjQ-Pgnrc9k-TNQlI0HrJWphBCocxUtvSfgQK76fRUvZAzw2Q7rMWwKGnuqCgHfzSmM-X_Gm-CtZuVKHA-MYXTzWFmFgsVyEy3pEx9GDSleyxZawe9w?key=jtvRBx7GXjxr9j5yH7UqF15R\" width=\"221\" height=\"215\"></strong><br></span></p>",
+                    question_hi: "<p>12.<span style=\"font-family: Baloo;\"> ग्रेड में 1800 छात्रों का प्रदर्शन निम्नलिखित पाई चार्ट में दिखाया गया है।<br></span><span style=\"font-family: Baloo;\">ग्रेड C प्राप्त करने वालों की तुलना में कितने अधिक छात्रों ने ग्रेड B प्राप्त किया है?</span></p>\n<p><strong id=\"docs-internal-guid-724f6e5f-7fff-1023-8818-bac973dff916\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXd-lO5QFy9m_eCuJRk2GDI5O9IKOZW5AA8M8QTOKRJehn3SMotmaJEmSqsq5RxDvtLqzlWll-82v3o8qipLAl8ZvWXhgjgHEfXeLCbf1QOsVYJTioAKq5Pv3adUHjGhnqBIJ32_8A?key=jtvRBx7GXjxr9j5yH7UqF15R\" width=\"214\" height=\"208\"></strong></p>",
+                    options_en: ["<p>50</p>", "<p>60</p>", 
+                                "<p>54</p>", "<p>3</p>"],
+                    options_hi: ["<p>50</p>", "<p>60</p>",
+                                "<p>54</p>", "<p>3</p>"],
+                    solution_en: "<p>12.(c) <span style=\"font-family: Times New Roman;\">Grade B students = 27%<br></span><span style=\"font-family: Times New Roman;\">Grade C students = 24%<br></span><span style=\"font-family: Times New Roman;\">Required difference = 3%<br></span><span style=\"font-family: Times New Roman;\">No of students (B - C) = </span><span style=\"font-family: Times New Roman;\"> <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>3</mn><mn>100</mn></mfrac><mo>&#215;</mo><mn>1800</mn><mo>=</mo><mn>54</mn></math></span></p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>12.(c) <span style=\"font-family: Baloo;\">ग्रेड B के छात्र = 27%<br></span><span style=\"font-family: Baloo;\">ग्रेड C के छात्र = 24%<br></span><span style=\"font-family: Baloo;\">आवश्यक अंतर = 3%<br></span><span style=\"font-family: Baloo;\">छात्रों की संख्या (B - C) = </span><span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>3</mn><mn>100</mn></mfrac><mo>&#215;</mo><mn>1800</mn><mo>=</mo><mn>54</mn></math></span></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "13",
+                    section: "17",
+                    question_en: "<p>13. <span style=\"font-family: Times New Roman;\">The following bar graph shows receipts and expenditure by a business firm over 5 years. Gain = Receipts - Expenditure&nbsp;<br><strong id=\"docs-internal-guid-a6d424ea-7fff-71d1-9ad3-cc7cc6cfb2bf\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdrxTxwXlgwQAoPBn33u_sQFzwZaK9KdQh91k6nNktfy-UwqcXU_VZ_mBjCr_MGPMer2WymW-0ASMzZnkqD8ie8bxenUBY7vS6Ae2iRqROAJHRoWpVydNNs2d5wCMAR3k48xYH97Q?key=jaX7qvR187IabjuCUoAziNA2\" width=\"315\" height=\"224\"><br></strong></span><span style=\"font-family: Times New Roman;\">In which of the following year does the company gain the minimum?</span></p>",
+                    question_hi: "<p>13. <span style=\"font-family: Baloo;\">निम्नलिखित बार ग्राफ 5 वर्षों में एक व्यावसायिक फर्म द्वारा प्राप्तियों और व्यय को दर्शाता है।&nbsp;<br></span><span style=\"font-family: Baloo;\">लाभ = प्राप्ति - व्यय<br><strong id=\"docs-internal-guid-0ca6a7be-7fff-ba02-9ccd-0b6095e45c65\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXf_7DSvndS1y4IBRRFALsJ5gZKcIHi2B-dQbe5mi2pwrZW9dQrCdvqmKFMsge5gT4RYJy8fZq7Tb58mPmJzPTb4VRPcEJqhIn_eWHuuumP-f5wxcbVFb8mY9_aClntu07NwSbbK?key=jaX7qvR187IabjuCUoAziNA2\" width=\"307\" height=\"219\"><br></strong></span><span style=\"font-family: Baloo;\">निम्नलिखित में से किस वर्ष कंपनी को न्यूनतम लाभ होता है?</span></p>",
+                    options_en: ["<p>2016</p>", "<p>2017</p>", 
+                                "<p>2019</p>", "<p>2018</p>"],
+                    options_hi: ["<p>2016</p>", "<p>2017</p>",
+                                "<p>2019</p>", "<p>2018</p>"],
+                    solution_en: "<p>13.(c) <span style=\"font-family: Times New Roman;\">According to the question Gain = Receipt - expenditure<br></span><span style=\"font-family: Times New Roman;\">Gain in 2016 = 54 - 51 = 3<br></span><span style=\"font-family: Times New Roman;\">Gain in 2017 = 64 - 60 = 4<br></span><span style=\"font-family: Times New Roman;\">Gain in 2018 = 80 - 75 = 5&nbsp;<br></span><span style=\"font-family: Times New Roman;\">Gain in 2019 = 82 - 80 = 2<br></span><span style=\"font-family: Times New Roman;\">Gain in 2020 = 93 - 87 = 6&nbsp;<br></span><span style=\"font-family: Times New Roman;\">Minimum gain is 2 units in 2019</span><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>13.(c) <span style=\"font-family: Baloo;\">प्रश्नानुसार, लाभ = प्राप्ति - व्यय<br></span><span style=\"font-family: Baloo;\">2016 में लाभ = 54 - 51 = 3<br></span><span style=\"font-family: Baloo;\">2017 में लाभ = 64 - 60 = 4<br></span><span style=\"font-family: Baloo;\">2018 में लाभ = 80 - 75 = 5<br></span><span style=\"font-family: Baloo;\">2019 में लाभ = 82 - 80 = 2<br></span><span style=\"font-family: Baloo;\">2020 में लाभ = 93 - 87 = 6<br></span><span style=\"font-family: Baloo;\">2019 में न्यूनतम लाभ 2 इकाई है।</span></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "14",
+                    section: "17",
+                    question_en: "<p>14. <span style=\"font-family: Times New Roman;\">The breakup of the total number of employees of a company working in different offices (A to E), in degrees, is given in the pie chart below.<br></span><span style=\"font-family: Times New Roman;\">Total number of employees = 2400</span></p>\n<p><strong id=\"docs-internal-guid-1a9a9f25-7fff-29d3-2054-e61c303bae3a\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXf3IsJ342faiXCiTonYtT4DWgZzsdmfZn8LWJN5uWCsXQ0C6LWiRqcmyBhVUoWo5GV_B-vqlOZTMMFPygZyg0UtQsNtIHwDkIoiajAeLlhtuiTNHGKztWeRTb1aJxPDspwPyY9hTw?key=jaX7qvR187IabjuCUoAziNA2\" width=\"255\" height=\"237\"><br></strong><span style=\"font-family: Times New Roman;\">If 40% of the employees in office A are shifted equally to office B and E, then what will be the sum of the number of employees in B and C?</span></p>",
+                    question_hi: "<p>14. <span style=\"font-family: Baloo;\">विभिन्न कार्यालयों (A से E) में कार्यरत एक कंपनी के कर्मचारियों की कुल संख्या का विवरण नीचे पाई चार्ट में दिया गया है।<br></span><span style=\"font-family: Baloo;\">कर्मचारियों की कुल संख्या = 2400<br><strong id=\"docs-internal-guid-1a9a9f25-7fff-29d3-2054-e61c303bae3a\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXf3IsJ342faiXCiTonYtT4DWgZzsdmfZn8LWJN5uWCsXQ0C6LWiRqcmyBhVUoWo5GV_B-vqlOZTMMFPygZyg0UtQsNtIHwDkIoiajAeLlhtuiTNHGKztWeRTb1aJxPDspwPyY9hTw?key=jaX7qvR187IabjuCUoAziNA2\" width=\"227\" height=\"211\"><br></strong></span><span style=\"font-family: Baloo;\">यदि कार्यालय A के 40% कर्मचारियों को कार्यालय B और E में समान रूप से स्थानांतरित किया जाता है, तो B और C में कर्मचारियों की संख्या का योग क्या होगा?</span></p>",
+                    options_en: ["<p>648</p>", "<p>765</p>", 
+                                "<p>545</p>", "<p>72</p>"],
+                    options_hi: ["<p>648</p>", "<p>765</p>",
+                                "<p>545</p>", "<p>72</p>"],
+                    solution_en: "<p>14.(a) <span style=\"font-family: Times New Roman;\">According to the question 40% of the employees of A shifted Equally to B and E<br></span><span style=\"font-family: Times New Roman;\">so 20% of A shifted in B = </span><span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>20</mn><mn>100</mn></mfrac><mo>&#215;</mo><mn>126</mn><mo>&#176;</mo><mo>=</mo><mn>25</mn><mo>.</mo><mn>2</mn><mo>&#176;</mo></math><br></span><span style=\"font-family: Times New Roman;\">Now total employees of B and C is =</span><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>&#160;</mo><mo>(</mo><mn>18</mn><mo>&#176;</mo><mo>+</mo><mn>25</mn><mo>.</mo><mn>2</mn><mo>&#176;</mo><mo>+</mo><mn>54</mn><mo>&#176;</mo><mo>)</mo><mo>=</mo><mfrac><mrow><mo>&#160;</mo><mn>97</mn><mo>.</mo><mn>2</mn><mo>&#176;</mo></mrow><mrow><mn>360</mn><mo>&#176;</mo></mrow></mfrac><mo>&#215;</mo><mn>2400</mn><mo>=</mo><mn>648</mn></math><span style=\"font-family: Times New Roman;\"> </span></p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>14.(a) <span style=\"font-family: Baloo;\">प्रश्न के अनुसार, A के 40% कर्मचारी समान रूप से B और E में स्थानांतरित हो गए।<br></span><span style=\"font-family: Baloo;\">A का 20% B में स्थानान्तरित हुआ = </span><span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>20</mn><mn>100</mn></mfrac><mo>&#215;</mo><mo>&#160;</mo><mn>126</mn><mo>&#176;</mo><mo>&#160;</mo><mo>=</mo><mo>&#160;</mo><mn>25</mn><mo>.</mo><mn>2</mn><mo>&#176;</mo></math><br></span><span style=\"font-family: Baloo;\">अब B और C के कुल कर्मचारी = (18&deg; + 25.2&deg; + 54&deg;) = </span><span style=\"font-family: Times New Roman;\"> <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>97</mn><mo>.</mo><mn>2</mn><mo>&#176;</mo></mrow><mrow><mn>360</mn><mo>&#176;</mo></mrow></mfrac><mo>&#215;</mo><mn>2400</mn><mo>=</mo><mn>648</mn><mo>&#160;</mo></math> </span></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "15",
+                    section: "17",
+                    question_en: "<p>15. <span style=\"font-family: Times New Roman;\">The following histogram shows the marks scored by 40 students in a test of 30 marks. A student has to score a minimum of 10 marks to pass the test.<br></span><br><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfF4EDgLfv-yKMO0fUrlyekCgBDca_ju4D8mx_2oTuWB-Hm5XeBq6ZN1fCdPvqduEutHLpQhD23GKzUvfw8GgZaPI38wnaEvRZtLHTLTG6oMOk1qWki_V9OqIwNSRyddsmt5_DoQWLZ_Y0FrX-K4OcwKR8?key=U4SuLwP1KOVtlxWs14tJEo6u\" width=\"318\" height=\"274\"></p>\n<p><span style=\"font-family: Times New Roman;\">What is the percentage of students who passed the test?</span></p>",
+                    question_hi: "<p>15. <span style=\"font-family: Baloo;\">निम्नलिखित हिस्टोग्राम 30 अंकों की एक परीक्षा में 40 छात्रों द्वारा प्राप्त अंकों को दर्शाता है। एक छात्र को परीक्षा पास करने के लिए कम से कम 10 अंक प्राप्त करने होंगे।</span><strong id=\"docs-internal-guid-9812be41-7fff-ef3e-cd06-24eafd267842\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeScsiN527sZ-MiF0he2YwsqTEhRbiR8imdyjlBjz8_zMsFDxs39s6qbK60lkmD_o2BTriWDyIH33AWvC7EbMW_Jd4OJ46iMQV7tr0LfoboXTOeChi76iUDtzIflpetaEvCQD39?key=jaX7qvR187IabjuCUoAziNA2\" width=\"247\" height=\"223\"><br></strong><span style=\"font-family: Baloo;\">परीक्षा उत्तीर्ण करने वाले छात्रों का प्रतिशत क्या है?</span></p>",
+                    options_en: ["<p>75%</p>", "<p>30%</p>", 
+                                "<p>72%</p>", "<p>66.66%</p>"],
+                    options_hi: ["<p>75%</p>", "<p>30%</p>",
+                                "<p>72%</p>", "<p>66.66%</p>"],
+                    solution_en: "<p>15.(a) <span style=\"font-family: Times New Roman;\">Number of students above 10 marks are (7 + 8 + 10 + 5 ) = 30<br></span><span style=\"font-family: Times New Roman;\">Total students = 40<br></span><span style=\"font-family: Times New Roman;\">Required percentage of pass students = </span><span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>30</mn><mn>40</mn></mfrac><mo>&#215;</mo><mn>100</mn><mo>=</mo><mn>75</mn><mo>%</mo></math></span></p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>15.(a)<span style=\"font-family: Baloo;\">10 अंक से ऊपर के छात्रों की संख्या = (7 + 8 + 10 + 5 ) = 30<br></span><span style=\"font-family: Baloo;\">कुल छात्र = 40<br></span><span style=\"font-family: Baloo;\">उत्तीर्ण छात्रों का आवश्यक प्रतिशत = <span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>30</mn><mn>40</mn></mfrac><mo>&#215;</mo><mn>100</mn><mo>=</mo><mn>75</mn><mo>%</mo></math></span></span></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "16",
+                    section: "17",
+                    question_en: "<p>16.<span style=\"font-family: Times New Roman;\"> Performance of 1800 students in grades has been shown in the following pie chart.<br></span><strong id=\"docs-internal-guid-320431b1-7fff-ba28-e0ce-dc4b4cde697a\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXer7sgMqbUR_UNbpo0kDOmTCNalFOBG7-PHk6NThjJ2AOZok9prJsLv0jl62e0DEO55GDUMjCut28pGMTPqqOB8P9ZDLJXzOTeTrIhxiYN2fbA9kMXuScABOAF4VnjDEZCH7CAJqg?key=jaX7qvR187IabjuCUoAziNA2\" width=\"221\" height=\"215\"></strong><br><span style=\"font-family: Times New Roman;\">The number of students getting grade B is what percentage of the number of students getting grade A?</span></p>",
+                    question_hi: "<p>16.<span style=\"font-family: Baloo;\"> ग्रेड में 1800 छात्रों का प्रदर्शन निम्नलिखित पाई चार्ट में दिखाया गया है।<br><strong id=\"docs-internal-guid-0e8236aa-7fff-d26c-940d-05396b223cdb\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXesjUk1NJYsYSxYklTYaHK9jcWWK2QqsfmwA5-OPC1GsVDcGstgDJ4UlQ4spUjPnd00HDBmzT38lVcKFYuRvteAlpq_LzNMrUUJhhmWybNOQpgDP8P88WLL-4VynS26qVg4LMQ30A?key=jaX7qvR187IabjuCUoAziNA2\" width=\"214\" height=\"208\"><br></strong></span><span style=\"font-family: Baloo;\">ग्रेड B प्राप्त करने वाले छात्रों की संख्या ग्रेड A प्राप्त करने वाले छात्रों की संख्या का कितना प्रतिशत है?</span></p>",
+                    options_en: ["<p>97%</p>", "<p>90%</p>", 
+                                "<p>95%</p>", "<p>85%</p>"],
+                    options_hi: ["<p>97%</p>", "<p>90%</p>",
+                                "<p>95%</p>", "<p>85%</p>"],
+                    solution_en: "<p>16.(b) <span style=\"font-family: Times New Roman;\">Grade A students = 30%<br></span><span style=\"font-family: Times New Roman;\">Grade B students = 27%<br></span><span style=\"font-family: Times New Roman;\">Required percentage = </span><span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>27</mn><mn>30</mn></mfrac><mo>&#215;</mo><mn>100</mn><mo>=</mo><mn>90</mn><mo>%</mo></math></span></p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>16.(b) <span style=\"font-family: Baloo;\">ग्रेड A के छात्र = 30%<br></span><span style=\"font-family: Baloo;\">ग्रेड B के छात्र = 27%<br></span><span style=\"font-family: Baloo;\">आवश्यक प्रतिशत = <span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>27</mn><mn>30</mn></mfrac><mo>&#215;</mo><mn>100</mn><mo>=</mo><mn>90</mn><mo>%</mo></math></span></span></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "17",
+                    section: "17",
+                    question_en: "<p>17.<span style=\"font-family: Times New Roman;\"> The given pie chart shows the percentage of students in five schools and the table shows the ratio of boys and girls in each school<br></span><span style=\"font-family: Times New Roman;\">Study the pie chart and table and answer the following questions<br></span><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1656056580/word/media/image2.png\" width=\"191\" height=\"186\"></p>\n<p><span style=\"font-family: Times New Roman;\">The table shows the ratio of girls and boys in the given five schools.<br></span><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1656056580/word/media/image4.png\" width=\"200\" height=\"214\"></p>\n<p>The numberof girls in school D is what percentage less than the umber of boys in school B ( correct to the nearest integer ) ?</p>",
+                    question_hi: "<p>17.<span style=\"font-family: Baloo;\"> दिया गया पाई चार्ट पांच स्कूलों में छात्रों का प्रतिशत दर्शाता है और तालिका प्रत्येक स्कूल में लड़कों और लड़कियों के अनुपात को दर्शाती है<br></span><span style=\"font-family: Baloo;\">पाई चार्ट और तालिका का अध्ययन करें और निम्नलिखित प्रश्नों के उत्तर दें:<br></span><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1656056580/word/media/image2.png\" width=\"191\" height=\"186\"></p>\n<p><strong id=\"docs-internal-guid-62c89141-7fff-d17f-920f-a1bdc31645f4\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfZ_uQMRU-wPYNlCQd1hwrIbDDhdq03tz4KRWTxzavL87rUyGSbnvvvZHIUnMArAPuUWW12rSC-cPIRHGdLJnDPId-sCHkXtstsuKujow_vrQXgmOcXRBtDCiD3SUpkK9_3umrU8Q?key=U4SuLwP1KOVtlxWs14tJEo6u\" width=\"197\" height=\"140\"></strong><br>स्कूल D में लड़कियों की संख्या स्कूल B में लड़कों की संख्या से कितने प्रतिशत कम है (निकटतम पूर्णांक तक सही)?</p>",
+                    options_en: ["<p>35%</p>", "<p>19%</p>", 
+                                "<p>27%</p>", "<p>33%</p>"],
+                    options_hi: ["<p>35%</p>", "<p>19%</p>",
+                                "<p>27%</p>", "<p>33%</p>"],
+                    solution_en: "<p>17.(d) <span style=\"font-family: Times New Roman;\">No of girls in school D =</span><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>1</mn><mn>3</mn></mfrac><mo>&times;</mo><mn>18</mn><mo>%</mo><mo>=</mo><mn>6</mn><mo>%</mo></math><br><span style=\"font-family: Times New Roman;\">No of boys in school B = </span><span style=\"font-family: Times New Roman;\"> <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>3</mn><mn>5</mn></mfrac><mo>&times;</mo><mn>15</mn><mo>%</mo><mo>=</mo><mn>9</mn><mo>%</mo></math><br></span><span style=\"font-family: Times New Roman;\">Required percentage =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>9</mn><mo>-</mo><mn>6</mn></mrow><mn>9</mn></mfrac></math> &times; 100 =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>3</mn><mn>9</mn></mfrac></math> &times; 100 = 33.33% &asymp; 33%</span></p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>17.(d) <span style=\"font-family: Baloo;\">स्कूल D में लड़कियों की संख्या = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>1</mn><mn>3</mn></mfrac><mo>&times;</mo><mn>18</mn><mo>%</mo><mo>=</mo><mn>6</mn><mo>%</mo></math><br></span><span style=\"font-family: Baloo;\">स्कूल B में लड़कों की संख्या = <span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>3</mn><mn>5</mn></mfrac><mo>&times;</mo><mn>15</mn><mo>%</mo><mo>=</mo><mn>9</mn><mo>%</mo></math><br></span></span><span style=\"font-family: Baloo;\">आवश्यक प्रतिशत = <span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>9</mn><mo>-</mo><mn>6</mn></mrow><mn>9</mn></mfrac></math> &times; 100 =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>3</mn><mn>9</mn></mfrac></math> &times; 100 = 33.33% &asymp; 33%</span></span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "18",
+                    section: "17",
+                    question_en: "<p>18.<span style=\"font-family: Times New Roman;\"> The breakup of the total number of employees of a company working in different offices ( A to E ) , in degrees , is given in the pie charts . the number of employees = 2400<br><strong id=\"docs-internal-guid-7e06d42f-7fff-fdc0-f438-037f8d8efd31\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcXo0DDERIo8RT4JST0VQifIa4jADwrbDuCwzhFgnyEe_YOOXIR9cGWLmbMpbcuQ1xA_f3216WtuRxeOiFpUf4FIoE5PHzj90qEJrcSjKKxVOyKYI0U2UMCtqM8Twj37JQee3nymQ?key=gaYRg4VpqCqLXvcuhmL-Ig\" width=\"236\" height=\"227\"><br></strong></span><span style=\"font-family: Times New Roman;\">If the percentage of male employees in office C is 20% and that of female employees in E is 40%, then what is the ratio of the number of female employees in E to that of female employees in C?</span></p>",
+                    question_hi: "<p>18.<span style=\"font-family: Baloo;\"> विभिन्न कार्यालयों (A से E) में कार्यरत एक कंपनी के कर्मचारियों की कुल संख्या का विवरण पाई चार्ट में दिया गया है। कर्मचारियों की संख्या = 2400<br><strong id=\"docs-internal-guid-7e06d42f-7fff-fdc0-f438-037f8d8efd31\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcXo0DDERIo8RT4JST0VQifIa4jADwrbDuCwzhFgnyEe_YOOXIR9cGWLmbMpbcuQ1xA_f3216WtuRxeOiFpUf4FIoE5PHzj90qEJrcSjKKxVOyKYI0U2UMCtqM8Twj37JQee3nymQ?key=gaYRg4VpqCqLXvcuhmL-Ig\" width=\"225\" height=\"216\"><br></strong></span><span style=\"font-family: Baloo;\">यदि कार्यालय C में पुरुष कर्मचारियों का प्रतिशत 20% है और E में महिला कर्मचारियों का प्रतिशत 40% है, तो E में महिला कर्मचारियों की संख्या का C में महिला कर्मचारियों की संख्या से अनुपात कितना है?</span></p>",
+                    options_en: ["<p>3 : 8</p>", "<p>5 : 4</p>", 
+                                "<p>2 : 3</p>", "<p>3 : 2</p>"],
+                    options_hi: ["<p>3 : 8</p>", "<p>5 : 4</p>",
+                                "<p>2 : 3</p>", "<p>3 : 2</p>"],
+                    solution_en: "<p>18.(c) <span style=\"font-family: Times New Roman;\">In office C&nbsp;<br></span><span style=\"font-family: Times New Roman;\">Male&nbsp; :&nbsp; female&nbsp;<br></span><span style=\"font-family: Times New Roman;\">&nbsp; 1&nbsp; &nbsp; &nbsp; :&nbsp; &nbsp; 4 <br></span><span style=\"font-family: Times New Roman;\">No of female employes = </span><span style=\"font-family: Times New Roman;\"> <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>4</mn><mn>5</mn></mfrac><mo>&#215;</mo><mfrac><mrow><mn>54</mn><mo>&#176;</mo></mrow><mrow><mn>360</mn><mo>&#176;</mo></mrow></mfrac><mo>&#215;</mo><mn>2400</mn><mo>=</mo><mn>288</mn></math><br></span><span style=\"font-family: Times New Roman;\">In office E&nbsp;<br></span><span style=\"font-family: Times New Roman;\">Male&nbsp; :&nbsp; female&nbsp;<br></span><span style=\"font-family: Times New Roman;\">&nbsp; 3&nbsp; &nbsp; &nbsp; :&nbsp; &nbsp;2 <br></span><span style=\"font-family: Times New Roman;\">No of female employes </span><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>=</mo><mfrac><mn>2</mn><mn>5</mn></mfrac><mo>&#215;</mo><mfrac><mrow><mn>72</mn><mo>&#176;</mo></mrow><mrow><mn>360</mn><mo>&#176;</mo></mrow></mfrac><mo>&#215;</mo><mn>2400</mn><mo>=</mo><mn>192</mn></math><br><span style=\"font-family: Cardo;\">Required ratio 192 : 288 &rArr; 2 : 3</span></p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>18.(c) <span style=\"font-family: Baloo;\">कार्यालय C में,&nbsp;<br></span><span style=\"font-family: Baloo;\">पुरुष&nbsp; &nbsp;:&nbsp; &nbsp;महिला<br></span><span style=\"font-family: Times New Roman;\"> 1&nbsp; &nbsp; &nbsp; &nbsp; :&nbsp; &nbsp; &nbsp;4 <br></span><span style=\"font-family: Baloo;\">महिला कर्मचारियों की संख्या = <span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>4</mn><mn>5</mn></mfrac><mo>&#215;</mo><mfrac><mrow><mn>54</mn><mo>&#176;</mo></mrow><mrow><mn>360</mn><mo>&#176;</mo></mrow></mfrac><mo>&#215;</mo><mn>2400</mn><mo>=</mo><mn>288</mn></math></span></span><span style=\"font-family: Times New Roman;\"><br></span><span style=\"font-family: Baloo;\">कार्यालय E में,&nbsp;<br></span><span style=\"font-family: Baloo;\">पुरुष&nbsp; &nbsp;:&nbsp; &nbsp;महिला<br></span><span style=\"font-family: Times New Roman;\">&nbsp; &nbsp;3&nbsp; &nbsp; &nbsp; :&nbsp; &nbsp; &nbsp;2 <br></span><span style=\"font-family: Baloo;\">महिला कर्मचारियों की संख्या = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>=</mo><mfrac><mn>2</mn><mn>5</mn></mfrac><mo>&#215;</mo><mfrac><mrow><mn>72</mn><mo>&#176;</mo></mrow><mrow><mn>360</mn><mo>&#176;</mo></mrow></mfrac><mo>&#215;</mo><mn>2400</mn><mo>=</mo><mn>192</mn></math></span><span style=\"font-family: Times New Roman;\"><br></span><span style=\"font-family: Arial Unicode MS;\">आवश्यक अनुपात 192 : 288 &rArr; 2 : 3</span></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "19",
+                    section: "17",
+                    question_en: "<p>19.<span style=\"font-family: Times New Roman;\"> The following bar graph shows the total number of youth (in lakhs) and the number of employed youth (in lakhs) in 5 states A,B,C,D and E&nbsp;<br></span><span style=\"font-family: Times New Roman;\">How many youth (in lakhs) are unemployed in state B and D taken together ?</span></p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>\n<p><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdc55_MQ4dBh0LoFmMRnvJmWDJgGeECHttGmgXR5UmNXR6XbXEocAVsfK6tY3dJrHqEGZKOtofqSynuVyGHjlrSsIJv4l5wV-X_4elDiwDaxofNg9xHyRPgVRUHQYHo4ovQY-t1WV23gxetVpCxx2jlwJ4?key=U4SuLwP1KOVtlxWs14tJEo6u\" width=\"440\" height=\"265\"></p>",
+                    question_hi: "<p>19.<span style=\"font-family: Baloo;\"> निम्नलिखित बार ग्राफ 5 राज्यों A, B, C, D और E में युवाओं की कुल संख्या (लाखों में) और नियोजित युवाओं की संख्या (लाखों में) दिखाता है।<br></span><span style=\"font-family: Baloo;\">राज्य B और D को मिलाकर कितने युवा (लाखों में) बेरोजगार हैं?<br><strong id=\"docs-internal-guid-84a146b2-7fff-31b5-ce98-0afd919e3a89\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXd4Ekn8WhfNAznbbEjwdrLSvAjj7HjWkT60T0s8ATyzJIWuXIKZOUHmSgqpClo3U5AqZ6ohesDQqOko87ZrzRnWl_WDgc16Ikr7vMS4cJor9mmegHNSyzdu9AvPOI6tAoaxhU2S?key=gaYRg4VpqCqLXvcuhmL-Ig\" width=\"334\" height=\"233\"></strong><br></span></p>",
+                    options_en: ["<p>4.25</p>", "<p>4.5</p>", 
+                                "<p>3.5</p>", "<p>3.25</p>"],
+                    options_hi: ["<p>4.25</p>", "<p>4.5</p>",
+                                "<p>3.5</p>", "<p>3.25</p>"],
+                    solution_en: "<p>19.(c) <span style=\"font-family: Times New Roman;\">Number of Unemployed youth = Total youth - employed youth<br></span><span style=\"font-family: Times New Roman;\">Number of Unemployed youth in B = 8 - 7 = 1<br></span><span style=\"font-family: Times New Roman;\">Number of Unemployed youth in D = 10 - 7.5 = 2.5<br></span><span style=\"font-family: Times New Roman;\">Required sum = 1 + 2.5 = 3.5 lakhs</span></p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>19.(c) <span style=\"font-family: Baloo;\">बेरोजगार युवाओं की संख्या = कुल युवा - नियोजित युवा<br></span><span style=\"font-family: Baloo;\">B में बेरोजगार युवाओं की संख्या = 8 - 7 = 1 लाख<br></span><span style=\"font-family: Baloo;\">D में बेरोजगार युवाओं की संख्या = 10 - 7.5 = 2.5 लाख<br></span><span style=\"font-family: Baloo;\">अभीष्ट योग = 1 + 2.5 = 3.5 लाख</span></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "20",
+                    section: "17",
+                    question_en: "<p>20. <span style=\"font-family: Times New Roman;\">Study the graph and answer the question follows&nbsp;<br><strong id=\"docs-internal-guid-8f6a7b56-7fff-3e6c-e2f2-32c3bdac9493\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXezm64kdHvyXP2MzeF4lqlM3iQmoPNimxlwOCmDcx7Jw3eu7ZAN3lg5NLWplYE2p6kxOm7YfGoPZ9WCB_BQlynadTXRs92Yi3J01W5eJiDxzdFXIWtOD2na1kVmtMprVwseSeQJSA?key=gaYRg4VpqCqLXvcuhmL-Ig\" width=\"330\" height=\"238\"><br></strong></span><span style=\"font-family: Times New Roman;\">What is the ratio of the total number of workers whose daily wages are less than ₹450 to the total number of workers whose daily wages are ₹650 and above ?</span></p>",
+                    question_hi: "<p>20. <span style=\"font-family: Baloo;\">ग्राफ का अध्ययन करें और निम्नलिखित प्रश्न का उत्तर दें:<br><strong id=\"docs-internal-guid-1457a011-7fff-a27e-e634-bc146fb986b4\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXepJqBTVCdmhfpiUbaujJB5Lb1ZnEXLX3gf5pw1fANlzgRmou2qRutF-zxqXmnUmfoaGfTM2O-FYMP_GoQTNUv_qvtOXWh-naJhrjsqF4SmBdr0KBkIwjbF4WIaTjq6l4TyO90iQA?key=gaYRg4VpqCqLXvcuhmL-Ig\" width=\"311\" height=\"225\"><br></strong></span><span style=\"font-family: Baloo;\">₹450 से कम दैनिक मजदूरी वाले श्रमिकों की कुल संख्या का उन श्रमिकों की कुल संख्या से अनुपात क्या है जिनकी दैनिक मजदूरी ₹650 और उससे अधिक है?</span></p>",
+                    options_en: ["<p>3 : 5</p>", "<p>1 : 4</p>", 
+                                "<p>6 : 7</p>", "<p>5 : 7</p>"],
+                    options_hi: ["<p>3 : 5</p>", "<p>1 : 4</p>",
+                                "<p>6 : 7</p>", "<p>5 : 7</p>"],
+                    solution_en: "<p>20.(c) <span style=\"font-family: Times New Roman;\">No of worker less than 450 is 30<br></span><span style=\"font-family: Times New Roman;\">No of worker greater than 650 is 35<br></span><span style=\"font-family: Times New Roman;\">Required ratio = 30 : 35<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>&#8658;</mo></math> </span><span style=\"font-family: Times New Roman;\">6 : 7</span></p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>20.(c) <span style=\"font-family: Baloo;\">450 से कम के कार्यकर्ता की संख्या 30 है।<br></span><span style=\"font-family: Baloo;\">650 से अधिक कर्मचारियों की संख्या 35 है।<br></span><span style=\"font-family: Arial Unicode MS;\">अभीष्ट अनुपात = 30 : 35 &rArr; 6 : 7</span></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "21",
+                    section: "17",
+                    question_en: "<p>21.<span style=\"font-family: Times New Roman;\"> Study the histogram and answer the question given below.<br></span><span style=\"font-family: Times New Roman;\">The graph represents the number of students obtaining a percentage of marks in class X Board examination in 2018 in a school.<br><strong id=\"docs-internal-guid-b6d70376-7fff-165a-dd56-174bcb2b8e46\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXd1x_ofTig6IQxcDd1oirVLdNkTpFchYJTLLWNlZMZzdX-8tP6ta1IGHlBVzFKPzwTanS7DTe_EPFa4A0EkIsExZ08-0CmTFBCjm0nV7B-4S4WqY98SxxdvJ3KMM-CJbmPbrSUP?key=1QNU4VXIFaNV2Y05S7o1G0Dd\" width=\"315\" height=\"191\"><br></strong></span><span style=\"font-family: Times New Roman;\">The number of students who have secured less than 60% marks is what percent less than the number of students who have secured 80% marks and above?</span></p>",
+                    question_hi: "<p>21.<span style=\"font-family: Baloo;\"> हिस्टोग्राम का अध्ययन करें और नीचे दिए गए प्रश्न का उत्तर दें।<br></span><span style=\"font-family: Baloo;\">ग्राफ एक स्कूल में 2018 में दसवीं कक्षा की बोर्ड परीक्षा में प्रतिशत अंक प्राप्त करने वाले छात्रों की संख्या का प्रतिनिधित्व करता है।<br></span><strong id=\"docs-internal-guid-65faa4b7-7fff-94a3-8754-8f08c77c730f\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeQIEdfr3HGlvxdGT1BvsH3pq7Nm9AKduPMVn_pddtq09taKGgtcFuZon_mZnWc40Xnhmq3nLMat2w0YJqfHJoK7cpgmdZ6vHxswyCA5UiisQbfqmTydMaz98ainb5NmFdfqqFRBg?key=1QNU4VXIFaNV2Y05S7o1G0Dd\" width=\"290\" height=\"173\"><br></strong><span style=\"font-family: Baloo;\">60% से कम अंक प्राप्त करने वाले छात्रों की संख्या 80% या उससे अधिक अंक प्राप्त करने वाले छात्रों की संख्या से कितने प्रतिशत कम है?</span></p>",
+                    options_en: ["<p>37.4%</p>", "<p>38.5%</p>", 
+                                "<p>33.5%</p>", "<p>29.7%</p>"],
+                    options_hi: ["<p>37.4%</p>", "<p>38.5%</p>",
+                                "<p>33.5%</p>", "<p>29.7%</p>"],
+                    solution_en: "<p>21.(b) <span style=\"font-family: Times New Roman;\">No of students scored less than 40 is (10 + 30) = 40<br></span><span style=\"font-family: Times New Roman;\">No of students scored more than 80 is (40 + 25 ) = 65<br></span><span style=\"font-family: Times New Roman;\">Difference = 65 - 40 = 25<br></span><span style=\"font-family: Times New Roman;\">Required percentage = </span><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>25</mn><mn>65</mn></mfrac><mo>&#215;</mo><mn>100</mn></math> = 38.46% &asymp; 38.5%</p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>21.(b) <span style=\"font-family: Baloo;\">40 से कम अंक प्राप्त करने वाले छात्रों की संख्या (10 + 30) = 40 है<br></span><span style=\"font-family: Baloo;\">80 से अधिक अंक प्राप्त करने वाले छात्रों की संख्या है (40 + 25 ) = 65<br></span><span style=\"font-family: Baloo;\">अंतर = 65 - 40 = 25<br></span><span style=\"font-family: Baloo;\">आवश्यक प्रतिशत = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>25</mn><mn>65</mn></mfrac><mo>&#215;</mo><mn>100</mn></math> = 38.46% &asymp; 38.5%</span></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "22",
+                    section: "17",
+                    question_en: "<p>22.<span style=\"font-family: Times New Roman;\"> The following pie charts show the number of students studying in different departments of An institute during the academic year 2019 and 2020. The total number of students was 2000 and 2400 Respectively , in </span><span style=\"font-family: Times New Roman;\">a academic</span><span style=\"font-family: Times New Roman;\"> year 2019 and 2020.<br></span><span style=\"font-family: Times New Roman;\">What is the ratio of Commerce and computer science students taken together in 2019 To Engineering and medical students taken together in 2020 ?<br><strong id=\"docs-internal-guid-67085969-7fff-29fd-10d4-1dbac9963d93\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXe7AMKEIw7-NBRgrG9N7ag6jOlBkYO3NtqwC_z2W4ZISuqQ98zaQ5YI0ynKEeqgdmXSyUkr9hwaClpifnabKJV4Rwhr198erFiT-m_vWaq3NGvCAttCS29aGmtRvSdE2A3L4zYi?key=1QNU4VXIFaNV2Y05S7o1G0Dd\" width=\"273\" height=\"237\">&nbsp; &nbsp; &nbsp; &nbsp; </strong></span><strong id=\"docs-internal-guid-e50470d6-7fff-328e-4afa-9b0368a8ddf9\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeA-PFFMb7W9Oz2mGTX7Wd6Y_-q4_RRwIInP5lsxy67YKm5_7qtYFT0SOFE7gAD4l9H7zTueNLYRANVTh90TrkiEQlbzVuiZv-Z6yuOMDYT6sbl2FUk0B6a8xIIAMezi0dz0_JE?key=1QNU4VXIFaNV2Y05S7o1G0Dd\" width=\"278\" height=\"241\"></strong></p>",
+                    question_hi: "<p>22.<span style=\"font-family: Baloo;\"> निम्नलिखित पाई चार्ट शैक्षणिक वर्ष 2019 और 2020 के दौरान एक संस्थान के विभिन्न विभागों में पढ़ने वाले छात्रों की संख्या को दर्शाता है। एक शैक्षणिक वर्ष 2019 और 2020 में छात्रों की कुल संख्या क्रमशः 2000 और 2400 थी।<br></span><span style=\"font-family: Baloo;\">2019 में वाणिज्य और कंप्यूटर विज्ञान के छात्रों को मिलाकर 2020 में इंजीनियरिंग और मेडिकल के छात्रों से अनुपात कितना है?</span></p>\n<p><strong id=\"docs-internal-guid-58cd821d-7fff-88a1-8a01-d797b880e1cc\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeO0S3WdQWA8j5WzwGsHyJWaxkm-W-CVoJ2uBSMxHecXTrq1FNASc_hCJ9R4KDQNl2dD88M_n9nJJEY-aS39a30RWQcgXa68uZP9054LpNRhtrFnvvZWhUwVYodyFO2wE4CCzsveQ?key=1QNU4VXIFaNV2Y05S7o1G0Dd\" width=\"286\" height=\"230\">&nbsp; &nbsp; &nbsp;</strong><strong id=\"docs-internal-guid-8d51eeae-7fff-94bd-1f22-db518b0f7468\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXd93Ub0QzBWYV6IuGHiPoL6bxxOT7wvM9zk27r6eQhZ518wkiqhU2j5Ku0yiGu9C4aX0YM2N-PeUyuMwihw--e3EV4ZVXkHS-EKaXnU1Jftr4Wp7DnDnIlwv6-siitnIRSVYjQqlg?key=1QNU4VXIFaNV2Y05S7o1G0Dd\" width=\"286\" height=\"230\"></strong></p>",
+                    options_en: ["<p>44 : 65</p>", "<p>65 : 44</p>", 
+                                "<p>22 : 39</p>", "<p>39 : 22</p>"],
+                    options_hi: ["<p>44 : 65</p>", "<p>65 : 44</p>",
+                                "<p>22 : 39</p>", "<p>39 : 22</p>"],
+                    solution_en: "<p>22.(b) <span style=\"font-family: Times New Roman;\">The sum of number of students in computer science department and commerce department in 2019 is (14 + 25)% of 2000 = </span><span style=\"font-family: Times New Roman;\"> <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>39</mn><mn>100</mn></mfrac><mo>&#215;</mo><mn>2000</mn><mo>=</mo><mn>780</mn></math><br></span><span style=\"font-family: Times New Roman;\">The sum of number of students in engineering and medical department in 2000 is (10 + 12)% of 2400 =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>22</mn><mn>100</mn></mfrac><mo>&#215;</mo><mn>2400</mn><mo>=</mo><mn>528</mn></math><br></span><span style=\"font-family: Times New Roman;\">Required ratio = 780 : 528&nbsp;<br></span><span style=\"font-family: Times New Roman;\">= 65 : 44</span></p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>22.(b) <span style=\"font-family: Baloo;\">2019 में कंप्यूटर विज्ञान विभाग और वाणिज्य विभाग में छात्रों की संख्या का योग (14 + 25)% of&nbsp;2000 =<span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>39</mn><mn>100</mn></mfrac><mo>&#215;</mo><mn>2000</mn><mo>=</mo><mn>780</mn></math></span></span><span style=\"font-family: Baloo;\"> है<br></span><span style=\"font-family: Baloo;\">2000 में इंजीनियरिंग और चिकित्सा विभाग में छात्रों की संख्या का योग है (10 + 12)% of 2400 = <span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>22</mn><mn>100</mn></mfrac><mo>&#215;</mo><mn>2400</mn><mo>=</mo><mn>528</mn></math></span></span><span style=\"font-family: Baloo;\">अभीष्ट अनुपात = 780 : 528<br></span><span style=\"font-family: Times New Roman;\">= 65 : 44</span></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "23",
+                    section: "17",
+                    question_en: "<p>23. <span style=\"font-family: Times New Roman;\">The following bar graph shows exports of car of type A and B (in Rs. millions) From 2014 to 2018, Study the graph and answer the question that follows. Export of Car of Type A and Type B (in Rs. millions) during 2014 to 2018.<br><strong id=\"docs-internal-guid-055cbc5c-7fff-28b2-7d21-637082c06696\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXf4hRaDRfIKyF-OVAOxsQBbRu7DHtU1vF8hs8tfdQtlmb_6_3GrBXuREnUC7ZcnBbbSaJacEfPfIzzCp1ZVP_KJMsgu96vZJVkcT3p5ZXDP4Q6-pnqTd8NFRRUeqG7SNqph_xfKUg?key=1QNU4VXIFaNV2Y05S7o1G0Dd\" width=\"299\" height=\"214\"><br></strong></span><span style=\"font-family: Times New Roman;\">The total exports of cars of type A in 2014 to 2018 is what percent more than the total Exports of cars of type B in 2015 to 2017 ? (Correct to one decimal place)</span></p>",
+                    question_hi: "<p>23. <span style=\"font-family: Baloo;\">निम्नलिखित बार ग्राफ 2014 से 2018 तक A और B प्रकार की कार के निर्यात (₹ मिलियन में) को दर्शाता है, </span><span style=\"font-family: Baloo;\">ग्राफ का अध्ययन करें और नीचे दिए गए प्रश्न का उत्तर दें। 2014 से 2018 के दौरान प्रकार A और प्रकार B (₹ लाख में) </span><span style=\"font-family: Baloo;\">की कार का निर्यात।<br></span><strong id=\"docs-internal-guid-b5fec83d-7fff-6cff-afcd-0d0526bc0b9a\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdc6-lMaXhKgIVTtPkUfRoDFb-6QDdX9SCq6MYjfFnuXqjhRt02E1kmZXTGjtmjoPNYWxs1bn0euSnnUyLpr_23bSzuYKzFb5W9boghMMOZ3ABYt9c2A_zTbDkN7VW5kh4Ryfzp-A?key=1QNU4VXIFaNV2Y05S7o1G0Dd\" width=\"274\" height=\"246\"><br></strong><span style=\"font-family: Baloo;\">2014 से 2018 में A प्रकार की कारों का कुल निर्यात 2015 से 2017 में B प्रकार की कारों के कुल निर्यात से कितना प्रतिशत अधिक है? (एक दशमलव स्थान पर सही)</span></p>",
+                    options_en: ["<p>44.3%</p>", "<p>50.4%</p>", 
+                                "<p>51.7%</p>", "<p>41.3%</p>"],
+                    options_hi: ["<p>44.3%</p>", "<p>50.4%</p>",
+                                "<p>51.7%</p>", "<p>41.3%</p>"],
+                    solution_en: "<p>23.(c) <span style=\"font-family: Times New Roman;\">Sum of Type A car exported from 2014 to 2018 = (200 + 150 + 275 + 175 + 300) = 1100<br></span><span style=\"font-family: Times New Roman;\">Sum of type B car exported from 2015 to 2017 = (250 + 200 + 275) = 725<br></span><span style=\"font-family: Times New Roman;\">Difference = 1100 - 725 = 375<br></span><span style=\"font-family: Times New Roman;\">Required percentage = </span><span style=\"font-family: Times New Roman;\"> <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>375</mn><mn>725</mn></mfrac><mo>&#215;</mo><mn>100</mn><mo>=</mo><mn>51</mn><mo>.</mo><mn>7</mn><mo>%</mo></math></span></p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>23.(c) <span style=\"font-family: Baloo;\">2014 से 2018 तक निर्यात की गई प्रकार A कार का योग = (200 + 150 + 275 + 175 + 300) = 1100<br></span><span style=\"font-family: Baloo;\">2015 से 2017 तक निर्यात की गई प्रकार B की कार का योग = (250 + 200 + 275) = 725<br></span><span style=\"font-family: Baloo;\">अंतर = 1100 - 725 = 375<br></span><span style=\"font-family: Baloo;\">आवश्यक प्रतिशत = <span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>375</mn><mn>725</mn></mfrac><mo>&#215;</mo><mn>100</mn><mo>=</mo><mn>51</mn><mo>.</mo><mn>7</mn><mo>%</mo></math></span></span></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "24",
+                    section: "misc",
+                    question_en: "<p>24. <span style=\"font-family: Times New Roman;\">Monthly expenditure of a family on different heads is shown in the following pie Chart. The family earns ₹1,08,000 every month.<br><strong id=\"docs-internal-guid-f2e80665-7fff-f821-49dc-f9b2620e7cd9\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcYYPZ0HJmLI7hHfy6LTTM7jUBpKAcYNmUaqfp8UXI0TXDjqn10gbeDKqn9zJJMP53jZ6ihRxIk4_vbAa7p_Te2_DbYGU1PDLu7jsjmFUR_r_dhYRexGjesE0MntNqtV0YQd7Mg?key=1QNU4VXIFaNV2Y05S7o1G0Dd\" width=\"276\" height=\"258\"><br></strong></span><span style=\"font-family: Times New Roman;\">What is the amount spent on Rent every month (in ₹)?</span></p>",
+                    question_hi: "<p>24. <span style=\"font-family: Baloo;\">विभिन्न मदों पर एक परिवार का मासिक व्यय निम्नलिखित पाई चार्ट में दिखाया गया है। परिवार हर महीने ₹1,08,000 कमाता है।<br><strong id=\"docs-internal-guid-adfe1911-7fff-9f2e-c0b2-14b6017db61d\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXc0Ujzh6lACGmlWAAysvfwtzp8ebkUYvrugtWLJ4aU2ENcDtOXic8MTWVkDwp22lgYUl7UJfuyD439g0O5-V0eMD46ibKMhPv1iEYllQACvhD8K60MnlvY4V-TfIWnNUv2mNZpIOw?key=1QNU4VXIFaNV2Y05S7o1G0Dd\" width=\"321\" height=\"299\"></strong><br></span></p>\n<p><span style=\"font-family: Baloo;\">प्रति माह किराए पर खर्च की गई राशि (₹ में) क्या है?</span></p>",
+                    options_en: ["<p>17,500</p>", "<p>21,000</p>", 
+                                "<p>15,000</p>", "<p>18,000</p>"],
+                    options_hi: ["<p>17,500</p>", "<p>21,000</p>",
+                                "<p>15,000</p>", "<p>18,000</p>"],
+                    solution_en: "<p>24.(d) <span style=\"font-family: Times New Roman;\">Amount spent on rent =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>60</mn><mo>&#176;</mo></mrow><mrow><mn>360</mn><mo>&#176;</mo></mrow></mfrac><mo>&#215;</mo><mn>108000</mn><mo>=</mo><mn>18000</mn><mi>Rs</mi></math></span></p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>24.(d) <span style=\"font-family: Baloo;\">किराए पर खर्च की गई राशि = <span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>60</mn><mo>&#176;</mo></mrow><mrow><mn>360</mn><mo>&#176;</mo></mrow></mfrac><mo>&#215;</mo><mn>108000</mn><mo>=</mo><mn>18000</mn></math> रुपये</span></span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+            
+            // Generate question boxes
+            const boxesContainer = document.getElementById('question-boxes');
+            questions.forEach((q, index) => {
+                const box = document.createElement('div');
+                box.className = 'q-box';
+                box.textContent = index + 1;
+                box.onclick = () => showQuestion(index);
+                box.id = `box-${index}`;
+                boxesContainer.appendChild(box);
+            });
+            
+            // Show first question
+            showQuestion(0);
+            updateProgress();
+        }
+        
+        // Show a specific question
+        
+        function formatContent(text) {
+            if (!text) return '';
+            return text.replace(/<img/g, '<img style="max-width:100%;height:auto;"');
+        }
+        
+        function showQuestion(index) {
+            if (index < 0 || index >= questions.length) return;
+            
+            currentQuestion = index;
+            const question = questions[index];
+            
+            // Update question counter
+            document.getElementById('question-counter').textContent = `Question ${index + 1} of ${questions.length}`;
+            
+            // Update question boxes
+            document.querySelectorAll('.q-box').forEach(box => box.classList.remove('current'));
+            document.getElementById(`box-${index}`).classList.add('current');
+            
+            // Generate question HTML
+            let html = `
+                <div class="question-card">
+                    <div class="question-text">
+                        <div class="en">${formatContent(question.question_en)}</div>
+                        <div class="hi" style="display:none">${formatContent(question.question_hi)} </div>
+                    </div>
+                    <div class="options" id="options-container">`;
+            
+            // Add options
+            ['a', 'b', 'c', 'd'].forEach((opt, i) => {
+                let optionClass = '';
+                let isCorrectAnswer = opt === question.correct;
+                let isUserAnswer = answers[question.id] === opt;
+                
+                // When reviewing, add appropriate classes
+                if (submitted) {
+                    if (isCorrectAnswer) {
+                        optionClass += ' correct-answer';
+                    } else if (isUserAnswer && !isCorrectAnswer) {
+                        optionClass += ' incorrect';
+                    }
+                }
+                
+                html += `
+                    <div class="option-item">
+                        <input class="option-input" type="radio" name="q${index}" 
+                            id="opt-${index}-${opt}" value="${opt}" 
+                            ${isUserAnswer ? 'checked' : ''}
+                            onclick="selectAnswer('${question.id}', '${opt}')">
+                       <label class="option-label${optionClass}" for="opt-${index}-${opt}">
+                            <div class="en">${question.options_en[i]}</div>
+                            <div class="hi" style="display:none">${question.options_hi[i]}</div>
+                        </label>
+                    </div>`;
+            });
+            
+            // Add solution if submitted
+            if (submitted) {
+                const isCorrect = answers[question.id] === question.correct;
+                const resultText = answers[question.id] ? (isCorrect ? 'Correct!' : 'Incorrect!') : 'Not attempted';
+                
+                html += `
+                    <div class="solution-container">
+                        <div class="solution-title">${resultText}</div>
+                        <div class="solution-text">
+                            <div class="en">${question.solution_en}</div>
+                            <div class="hi" style="display:none">${question.solution_hi}</div>
+                        </div>
+                    </div>`;
+            }
+            
+            html += `</div></div>`;
+            
+            document.getElementById('questions-container').innerHTML = html;
+            
+            // Apply language settings
+            applyLanguage();
+            
+            // If in mobile view, close the menu
+            if (window.innerWidth < 992) {
+                toggleNav(false);
+            }
+            
+            // Add review mode class if submitted
+            if (submitted) {
+                document.getElementById('options-container').classList.add('review-mode');
+            }
+        }
+        
+        // Apply current language
+        function applyLanguage() {
+            document.querySelectorAll(`.${currentLang}`).forEach(el => el.style.display = 'block');
+            document.querySelectorAll(`.${currentLang === 'en' ? 'hi' : 'en'}`).forEach(el => el.style.display = 'none');
+            
+            // Update language button text
+            document.getElementById('lang-text').textContent = currentLang === 'en' ? 'Hi' : 'En';
+        }
+        
+        // Select an answer
+        function selectAnswer(qId, option) {
+            if (submitted) return;
+            
+            answers[qId] = option;
+            updateProgress();
+            
+            // Mark question as attempted in the navigation
+            const index = questions.findIndex(q => q.id === qId);
+            if (index >= 0) {
+                const box = document.getElementById(`box-${index}`);
+                box.classList.add('attempted');
+                box.classList.remove('unattempted');
+            }
+        }
+        
+        // Navigate to previous/next question
+        function prevQuestion() { 
+            if (currentQuestion > 0) showQuestion(currentQuestion - 1); 
+        }
+        
+        function nextQuestion() { 
+            if (currentQuestion < questions.length - 1) showQuestion(currentQuestion + 1); 
+        }
+        
+        // Switch section
+        function switchSection(sectionId) {
+            if (sectionId === 'all') {
+                showQuestion(0);
+                return;
+            }
+            
+            const section = sections[sectionId];
+            if (section) showQuestion(section.start);
+        }
+        
+        // Toggle language
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'hi' : 'en';
+            applyLanguage();
+        }
+        
+        // Toggle navigation sidebar
+        function toggleNav(show) {
+            const nav = document.getElementById('question-nav');
+            const overlay = document.getElementById('nav-overlay');
+            
+            if (show === undefined) {
+                show = !nav.classList.contains('show');
+            }
+            
+            if (show) {
+                nav.classList.add('show');
+                overlay.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            } else {
+                nav.classList.remove('show');
+                overlay.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+        }
+        
+        // Update progress
+        function updateProgress() {
+            const attempted = Object.keys(answers).length;
+            document.getElementById('attempted-count').textContent = attempted;
+        }
+        
+        // Start timer
+        function startTimer() {
+            const timerDisplay = document.getElementById('timer-display');
+            let timeLeft = totalTime;
+            
+            const timerInterval = setInterval(() => {
+                if (timeLeft <= 0 || submitted) {
+                    clearInterval(timerInterval);
+                    if (!submitted) submitTest();
+                    return;
+                }
+                
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                timeLeft--;
+            }, 1000);
+        }
+        
+        // Confirm before submitting
+        function confirmSubmit() {
+            if (submitted) return;
+            
+            const attempted = Object.keys(answers).length;
+            const remaining = questions.length - attempted;
+            
+            // Create a more modern confirmation dialog
+            const confirmHtml = `
+                <div style="text-align: center; padding: 20px;">
+                    <h4 style="margin-bottom: 16px; color: var(--dark);">Confirm Submission</h4>
+                    <p style="margin-bottom: 24px; color: var(--gray);">
+                        You have attempted ${attempted} of ${questions.length} questions.<br>
+                        ${remaining} questions are unattempted.
+                    </p>
+                    <div style="display: flex; justify-content: center; gap: 12px;">
+                        <button onclick="this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; border: 1px solid var(--light-gray); background: white; border-radius: 8px; cursor: pointer;">
+                            Cancel
+                        </button>
+                        <button onclick="submitTest(); this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer;">
+                            Submit Test
+                        </button>
+                    </div>
+                </div>`;
+            
+            // Create modal element
+            const modal = document.createElement('div');
+            modal.className = 'results-modal show';
+            modal.innerHTML = `
+                <div class="results-card" style="max-width: 400px;">
+                    <button class="cancel-btn" style="position: absolute; top: 12px; right: 12px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--gray);" onclick="this.closest('.results-modal').remove()">
+                        ×
+                    </button>
+                    ${confirmHtml}
+                </div>`;
+            
+            document.body.appendChild(modal);
+        }
+        
+        // Submit test
+        function submitTest() {
+            if (submitted) return;
+            
+            submitted = true;
+            
+            let score = 0;
+            let correctCount = 0;
+            let incorrectCount = 0;
+            let unattemptedCount = 0;
+            
+            questions.forEach((q, index) => {
+                const userAns = answers[q.id];
+                const box = document.getElementById(`box-${index}`);
+                
+                box.classList.remove('attempted');
+                
+                if (!userAns) {
+                    unattemptedCount++;
+                    box.classList.add('unattempted');
+                } else if (userAns === q.correct) {
+                    correctCount++;
+                    score += q.pos_marks;
+                    box.classList.add('correct');
+                } else {
+                    incorrectCount++;
+                    score -= q.neg_marks;
+                    box.classList.add('incorrect');
+                }
+            });
+            
+            // Update result values
+            document.getElementById('score-value').textContent = score.toFixed(2);
+            document.getElementById('correct-value').textContent = correctCount;
+            document.getElementById('incorrect-value').textContent = incorrectCount;
+            document.getElementById('unattempted-value').textContent = unattemptedCount;
+            
+            // Show the results modal
+            document.getElementById('results-modal').classList.add('show');
+            
+            // Disable submit button
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-check"></i>';
+            submitBtn.style.backgroundColor = 'var(--success)';
+            
+            // Refresh current question view to show solution
+            showQuestion(currentQuestion);
+        }
+        
+        // Review test
+        function reviewTest() {
+            document.getElementById('results-modal').classList.remove('show');
+            showQuestion(0);
+        }
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target === document.getElementById('results-modal')) {
+                document.getElementById('results-modal').classList.remove('show');
+            }
+        });
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') prevQuestion();
+            if (e.key === 'ArrowRight') nextQuestion();
+        });
+    </script>
+</body>
+</html>

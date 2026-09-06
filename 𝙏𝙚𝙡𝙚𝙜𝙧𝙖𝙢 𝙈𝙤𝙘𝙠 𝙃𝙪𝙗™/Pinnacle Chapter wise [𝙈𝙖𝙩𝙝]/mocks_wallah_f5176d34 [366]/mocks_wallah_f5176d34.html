@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mocks Wallah</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --primary-light: #a29bfe;
+            --primary-dark: #5649c0;
+            --secondary: #00cec9;
+            --accent: #fd79a8;
+            --success: #00b894;
+            --warning: #fdcb6e;
+            --danger: #d63031;
+            --light: #f8f9fa;
+            --dark: #2d3436;
+            --gray: #636e72;
+            --light-gray: #dfe6e9;
+            --card-bg: #ffffff;
+            --body-bg: #f5f6fa;
+            --header-bg: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            --footer-bg: #ffffff;
+            --box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            --box-shadow-sm: 0 2px 10px rgba(0,0,0,0.05);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background-color: var(--body-bg);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            color: var(--dark);
+            line-height: 1.6;
+            padding-bottom: 80px; /* Space for fixed navigation */
+            overflow-x: hidden;
+        }
+        
+        /* Header Styles */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: var(--header-bg);
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            z-index: 1000;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .header-brand {
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .header-brand i {
+            margin-right: 8px;
+            font-size: 1.2rem;
+        }
+        
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .control-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .control-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .control-btn.active {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .timer-display {
+            background: rgba(0,0,0,0.2);
+            border-radius: 18px;
+            padding: 4px 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+        
+        .timer-display i {
+            margin-right: 6px;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-top: 60px;
+            padding: 16px;
+            min-height: calc(100vh - 140px);
+        }
+        
+        .question-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--box-shadow-sm);
+            border: none;
+            transition: var(--transition);
+        }
+        
+        .question-counter {
+            font-size: 0.9rem;
+            color: var(--gray);
+            text-align: center;
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+        
+        .question-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+        
+        .option-item {
+            margin-bottom: 12px;
+            position: relative;
+        }
+        
+        .option-input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+            .question-text {
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        hyphens: auto;
+        max-width: 100%;
+    }
+
+    .question-text img,
+    .option-label img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 8px 0;
+        border-radius: 8px;
+    }
+
+    .option-label {
+        overflow: hidden;
+    }
+
+    .question-card {
+        overflow: hidden;
+    }
+        
+        .option-label {
+            display: block;
+            padding: 14px 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--light-gray);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .option-label:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .option-input:checked + .option-label {
+            border-color: var(--primary);
+            background: rgba(108, 92, 231, 0.05);
+            box-shadow: 0 0 0 1px var(--primary);
+        }
+        
+        .option-input:checked + .option-label::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--primary);
+        }
+        
+        /* When reviewing answers */
+        .review-mode .option-input:checked + .option-label.correct {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.correct::after {
+            background: var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.incorrect {
+            border-color: var(--danger);
+            background: rgba(214, 48, 49, 0.05);
+            box-shadow: 0 0 0 1px var(--danger);
+        }
+        
+        .MathJax, .mjx-chtml {
+            overflow-x: auto;
+            max-width: 100%;
+            display: inline-block;
+        }
+
+        
+        .review-mode .option-input:checked + .option-label.incorrect::after {
+            background: var(--danger);
+        }
+        
+        .review-mode .option-label.correct-answer {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-label.correct-answer::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--success);
+        }
+        
+        .solution-container {
+            margin-top: 20px;
+            padding: 16px;
+            background: rgba(108, 92, 231, 0.05);
+            border-radius: 12px;
+            border-left: 3px solid var(--primary);
+        }
+        
+        .solution-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+        
+        /* Question Navigation */
+        .question-nav {
+            position: fixed;
+            top: 60px;
+            right: 0;
+            bottom: 80px;
+            width: 100%;
+            max-width: 320px;
+            background: var(--card-bg);
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            transform: translateX(100%);
+            transition: var(--transition);
+            z-index: 900;
+            overflow-y: auto;
+            padding: 16px;
+        }
+        
+        .question-nav.show {
+            transform: translateX(0);
+        }
+        
+        .nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .nav-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+        
+        .question-stats {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .stat-badge {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        
+        .section-selector {
+            width: 100%;
+            margin-bottom: 16px;
+            border-radius: 12px;
+            padding: 10px 16px;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            font-size: 0.9rem;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 16px;
+        }
+        
+        .question-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+            gap: 8px;
+        }
+        
+        .q-box {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .q-box:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .q-box.attempted {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .q-box.correct {
+            background-color: var(--success);
+            color: white;
+            border-color: var(--success);
+        }
+        
+        .q-box.incorrect {
+            background-color: var(--danger);
+            color: white;
+            border-color: var(--danger);
+        }
+        
+        .q-box.current {
+            border: 2px solid var(--accent) !important;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .q-box.unattempted {
+            background-color: var(--gray);
+            color: white;
+            border-color: var(--gray);
+        }
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: var(--footer-bg);
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            z-index: 800;
+        }
+        
+        .nav-btn {
+            height: 48px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 20px;
+            transition: var(--transition);
+            gap: 8px;
+        }
+        
+        .nav-btn i {
+            font-size: 1rem;
+        }
+        
+        .nav-btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .nav-btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+        
+        .nav-btn-outline:hover {
+            background: rgba(108, 92, 231, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        /* Overlay when nav is open */
+        .nav-overlay {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            bottom: 80px;
+            background: rgba(0,0,0,0.5);
+            z-index: 800;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+        }
+        
+        .nav-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        /* Results Modal */
+        .results-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1100;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+            padding: 16px;
+        }
+        
+        .results-modal.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .results-card {
+            background: white;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+            transform: translateY(20px);
+            transition: var(--transition);
+        }
+        
+        .results-modal.show .results-card {
+            transform: translateY(0);
+        }
+        
+        .results-header {
+            background: var(--header-bg);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .results-title {
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .results-body {
+            padding: 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            color: white;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+        
+        .results-footer {
+            padding: 16px 20px;
+            display: flex;
+            justify-content: center;
+            border-top: 1px solid var(--light-gray);
+        }
+        
+        /* Responsive Adjustments */
+        @media (min-width: 992px) {
+            .question-nav {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-right: 320px;
+            }
+            
+            .nav-overlay {
+                display: none;
+            }
+            
+            .bottom-nav {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .question-grid {
+                grid-template-columns: repeat(auto-fill, minmax(36px, 1fr));
+                gap: 6px;
+            }
+            
+            .q-box {
+                width: 36px;
+                height: 36px;
+                font-size: 0.9rem;
+            }
+            
+            .option-label {
+                padding: 12px 14px;
+            }
+            
+            .question-text {
+                font-size: 1rem;
+            }
+            
+            .header-brand {
+                font-size: 1rem;
+            }
+            
+            .control-btn {
+                width: 32px;
+                height: 32px;
+            }
+            
+            .timer-display {
+                font-size: 0.8rem;
+                padding: 4px 10px;
+            }
+            
+            .nav-btn {
+                height: 44px;
+                padding: 0 16px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="#" class="header-brand">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Mocks Wallah</span>
+            </a>
+            
+            <div class="header-controls">
+                <!-- Timer -->
+                <div class="timer-display">
+                    <i class="far fa-clock"></i>
+                    <span id="timer-display">15:00</span>
+                </div>
+                
+                <!-- Language toggle -->
+                <button class="control-btn" id="lang-btn" onclick="toggleLanguage()">
+                    <span id="lang-text">En</span>
+                </button>
+                
+                <!-- Submit button -->
+                <button class="control-btn" id="submit-btn" onclick="confirmSubmit()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+                
+                <!-- Questions toggle for mobile -->
+                <button class="control-btn nav-toggle-btn" id="nav-toggle" onclick="toggleNav()">
+                    <i class="fas fa-th"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main content -->
+    <main class="main-content" id="main-content">
+        <div class="question-counter" id="question-counter">Question 1 of 17</div>
+        
+        <!-- Questions will be displayed here -->
+        <div id="questions-container"></div>
+    </main>
+    
+    <!-- Overlay for mobile nav -->
+    <div class="nav-overlay" id="nav-overlay" onclick="toggleNav(false)"></div>
+    
+    <!-- Question navigation sidebar -->
+    <aside class="question-nav" id="question-nav">
+        <div class="nav-header">
+            <h3 class="nav-title">Questions</h3>
+            <div class="question-stats">
+                <span class="stat-badge bg-primary" id="attempted-count">0</span>
+                <span class="stat-badge bg-gray" id="total-count">17</span>
+                <button class="control-btn d-lg-none" onclick="toggleNav(false)">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Section selector -->
+        <select class="section-selector" id="section-selector" onchange="switchSection(this.value)">
+            <option value="all">All Sections</option>
+        </select>
+        
+        <!-- Question grid -->
+        <div class="question-grid" id="question-boxes"></div>
+    </aside>
+    
+    <!-- Bottom navigation for mobile -->
+    <nav class="bottom-nav d-lg-none">
+        <button class="nav-btn nav-btn-outline" onclick="prevQuestion()">
+            <i class="fas fa-chevron-left"></i>
+            <span>Previous</span>
+        </button>
+        <button class="nav-btn nav-btn-outline" onclick="nextQuestion()">
+            <span>Next</span>
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </nav>
+    
+    <!-- Results modal -->
+    <div class="results-modal" id="results-modal">
+        <div class="results-card">
+            <div class="results-header">
+                <h3 class="results-title">Test Results</h3>
+            </div>
+            <div class="results-body">
+                <div class="stats-grid">
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark))">
+                        <div class="stat-value" id="score-value">0</div>
+                        <div class="stat-label">Score</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--success), #1b9aaa)">
+                        <div class="stat-value" id="correct-value">0</div>
+                        <div class="stat-label">Correct</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--danger), var(--accent))">
+                        <div class="stat-value" id="incorrect-value">0</div>
+                        <div class="stat-label">Incorrect</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--gray), var(--dark))">
+                        <div class="stat-value" id="unattempted-value">0</div>
+                        <div class="stat-label">Unattempted</div>
+                    </div>
+                </div>
+            </div>
+            <div class="results-footer">
+                <button class="nav-btn nav-btn-primary" onclick="reviewTest()">
+                    <i class="fas fa-search me-1"></i>
+                    <span>Review Test</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Questions data
+        const questions = [];
+        const sections = {};
+        let currentLang = "en";
+        let currentQuestion = 0;
+        let answers = {};
+        let submitted = false;
+        let totalTime = 15 * 60;
+        
+        // Initialize the test
+        window.onload = function() {
+            initializeTest();
+            startTimer();
+            
+            // If on desktop, show the question navigation by default
+            if (window.innerWidth >= 992) {
+                document.getElementById('question-nav').classList.add('show');
+                document.getElementById('main-content').classList.add('with-nav');
+            }
+        };
+        
+        // Initialize test data
+        function initializeTest() {
+            // Add sections and questions
+            
+            sections["17"] = {
+                name: "Quantitative Aptitude",
+                start: 0,
+                end: 15
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="17">Quantitative Aptitude</option>`;
+            
+            sections["misc"] = {
+                name: "Miscellaneous",
+                start: 16,
+                end: 16
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="misc">Miscellaneous</option>`;
+            
+            
+                questions.push({
+                    id: "1",
+                    section: "17",
+                    question_en: "<p>1. <span style=\"font-family: Times New Roman;\">Some students (only boys and girls) from different schools appeared for an Olympiad exam. 20% of the boys and 15% of the girls failed the exam. The number of boys who passed the exam was 70 more than that of the girls who passed the exam&rsquo;. A total of 90 students failed. Find the numbers of students that appeared for the exam.</span></p>",
+                    question_hi: "<p>1. <span style=\"font-family: Baloo;\">विभिन्न स्कूलों के कुछ छात्र (केवल लड़के और लड़कियां) ओलंपियाड परीक्षा के लिए उपस्थित हुए। 20% लड़के और 15% लड़कियां परीक्षा में फेल हो गए। परीक्षा उत्तीर्ण करने वाले लड़कों की संख्या परीक्षा उत्तीर्ण करने वाली लड़कियों की संख्या से 70 अधिक थी। कुल 90 छात्र फेल हुए। परीक्षा में बैठने वाले छात्रों की संख्या ज्ञात </span><span style=\"font-family: Baloo;\">कीजिए ?</span></p>",
+                    options_en: ["<p>420</p>", "<p>400</p>", 
+                                "<p>500</p>", "<p>350</p>"],
+                    options_hi: ["<p>420</p>", "<p>400</p>",
+                                "<p>500</p>", "<p>350</p>"],
+                    solution_en: "<p>1.(c) <span style=\"font-family: Times New Roman;\">Let total number of boys = 100x and total number of girls = 100y<br></span><span style=\"font-family: Times New Roman;\">According to the question,<br></span><span style=\"font-family: Times New Roman;\">Number of boys failed = 20x and number of girls failed = 15y<br></span><span style=\"font-family: Times New Roman;\">Also, (100x &ndash; 20x) = (100y &ndash; 15y) + 70<br></span><span style=\"font-family: Times New Roman;\">80x = 85y + 70<br></span><span style=\"font-family: Times New Roman;\">80x &ndash; 85y = 70 &hellip;&hellip;(1)<br></span><span style=\"font-family: Times New Roman;\">Total students failed = 90<br></span><span style=\"font-family: Times New Roman;\">So, 20x + 15y = 90 &hellip;.(2)<br></span><span style=\"font-family: Times New Roman;\">Solving equation (1) and (2), we get<br></span><span style=\"font-family: Times New Roman;\">x = 3 and y = 2<br></span><span style=\"font-family: Times New Roman;\">Total number of students who appeared in the exam&nbsp;<br></span><span style=\"font-family: Times New Roman;\">= 100x + 100y = 100(x + y) = 100(3 + 2) = 100(5) = 500</span></p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>1.(c) <span style=\"font-family: Baloo;\">माना लड़कों की कुल संख्या = 100x और लड़कियों की कुल संख्या = 100y<br></span><span style=\"font-family: Baloo;\">प्रश्न के अनुसार,<br></span><span style=\"font-family: Baloo;\">अनुत्तीर्ण लड़कों की संख्या = 20x और अनुत्तीर्ण लड़कियों की संख्या = 15y<br></span><span style=\"font-family: Baloo;\">साथ ही, (100x &ndash; 20x) = (100y &ndash; 15y) + 70<br></span><span style=\"font-family: Times New Roman;\">80x = 85y + 70<br></span><span style=\"font-family: Times New Roman;\">80x &ndash; 85y = 70 &hellip;&hellip;(1)<br></span><span style=\"font-family: Baloo;\">कुल, छात्र अनुत्तीर्ण = 90<br></span><span style=\"font-family: Baloo;\">इसलिए, 20x + 15y = 90&hellip;.(2)<br></span><span style=\"font-family: Baloo;\">समीकरण (1) और (2) को हल करने पर, हम प्राप्त करते हैं<br></span><span style=\"font-family: Baloo;\">x = 3 और y = 2<br></span><span style=\"font-family: Baloo;\">परीक्षा में बैठने वाले छात्रों की कुल संख्या<br></span><span style=\"font-family: Times New Roman;\">= 100x + 100y = 100(x + y) = 100(3 + 2) = 100(5) = 500</span></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "2",
+                    section: "17",
+                    question_en: "<p>2.<span style=\"font-family: Times New Roman;\"> The reduction of 15% in the price of salt enables a person to buy 2 kg more for Rs. 272. The reduced price of salt per kg (in Rs.) is:</span></p>",
+                    question_hi: "<p>2.<span style=\"font-family: Baloo;\"> नमक की कीमत में 15% की कमी एक व्यक्ति को 272 रुपये में 2 kg अधिक खरीदने में सक्षम बनाती है। प्रति kgनमक की घटी हुई कीमत (रुपये में) है:</span></p>",
+                    options_en: ["<p>20.40</p>", "<p>22.16</p>", 
+                                "<p>24.25</p>", "<p>25.00</p>"],
+                    options_hi: ["<p>20.40</p>", "<p>22.16</p>",
+                                "<p>24.25</p>", "<p>25.00</p>"],
+                    solution_en: "<p>2.(a)<span style=\"font-family: Times New Roman;\">15% = </span><span style=\"font-family: Times New Roman;\"> <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>15</mn><mrow><mn>100</mn><mo>&#160;</mo></mrow></mfrac><mo>=</mo><mfrac><mrow><mo>&#160;</mo><mn>3</mn></mrow><mrow><mn>20</mn><mo>&#160;</mo></mrow></mfrac></math>&nbsp;<br></span><span style=\"font-family: Times New Roman;\">Let original price = 20x,&nbsp;<br></span><span style=\"font-family: Times New Roman;\">so reduced price = 20x &ndash; 3x = 17x<br></span><span style=\"font-family: Times New Roman;\">According to the question,<br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>272</mn><mrow><mn>17</mn><mi mathvariant=\"normal\">x</mi></mrow></mfrac><mo>-</mo><mfrac><mn>272</mn><mrow><mn>20</mn><mi mathvariant=\"normal\">x</mi></mrow></mfrac></math>= 2<br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>5440</mn><mo>-</mo><mn>4624</mn></mrow><mrow><mn>340</mn><mi mathvariant=\"normal\">x</mi></mrow></mfrac></math>= 2<br>816 = 680x<br>x = 1.2<br></span><span style=\"font-family: Times New Roman;\">Reduced price = 17x = 17(1.2) = </span><span style=\"font-family: Times New Roman;\">₹</span><span style=\"font-family: Times New Roman;\">20.4</span></p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>2.(a)<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>15</mn><mo>%</mo><mo>=</mo><mfrac><mn>15</mn><mrow><mn>100</mn><mo>&#160;</mo></mrow></mfrac><mo>=</mo><mfrac><mrow><mo>&#160;</mo><mn>3</mn></mrow><mrow><mn>20</mn><mo>&#160;</mo></mrow></mfrac></math><span style=\"font-family: Times New Roman;\">&nbsp;<br></span><span style=\"font-family: Baloo;\">माना मूल मूल्य = 20x,<br></span><span style=\"font-family: Baloo;\">इसलिए घटी हुई कीमत = 20x &ndash; 3x = 17x<br></span><span style=\"font-family: Baloo;\">प्रश्न के अनुसार,<span style=\"font-family: Times New Roman;\"><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>272</mn><mrow><mn>17</mn><mi mathvariant=\"normal\">x</mi></mrow></mfrac><mo>-</mo><mfrac><mn>272</mn><mrow><mn>20</mn><mi mathvariant=\"normal\">x</mi></mrow></mfrac></math>= 2<br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>5440</mn><mo>-</mo><mn>4624</mn></mrow><mrow><mn>340</mn><mi mathvariant=\"normal\">x</mi></mrow></mfrac></math>= 2</span><span style=\"font-family: Times New Roman;\"><br>816 = 680x<br>x = 1.2</span><br></span><span style=\"font-family: Baloo;\">घटी हुई कीमत= 17x = 17(1.2) = </span><span style=\"font-family: Times New Roman;\">₹</span><span style=\"font-family: Times New Roman;\">20.4</span></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "3",
+                    section: "17",
+                    question_en: "<p>3. <span style=\"font-family: Times New Roman;\">In a manufacturing unit, it was noted that the price of raw material has increased by 25% </span><span style=\"font-family: Times New Roman;\">and the labor cost has gone up from 30% of the cost of raw material to 38% of the cost </span><span style=\"font-family: Times New Roman;\">of raw material. What percentage of the consumption of raw </span><span style=\"font-family: Times New Roman;\">material be reduced</span><span style=\"font-family: Times New Roman;\"> to keep </span><span style=\"font-family: Times New Roman;\">the cost the same as that before the increase?</span></p>",
+                    question_hi: "<p>3. <span style=\"font-family: Baloo;\">एक निर्माण इकाई में, यह नोट किया गया कि कच्चे माल की कीमत में 25% की वृद्धि हुई है और श्रम लागत कच्चे माल की लागत के 30% से बढ़कर कच्चे माल की लागत का 38% हो गई है। कच्चे माल की खपत का कितना प्रतिशत कम किया जाए ताकि लागत वृद्धि से पहले की लागत को समान रखा जा सके?</span></p>",
+                    options_en: ["<p>20.7%</p>", "<p>30.2%</p>", 
+                                "<p>24.6%</p>", "<p>25.6%</p>"],
+                    options_hi: ["<p>20.7%</p>", "<p>30.2%</p>",
+                                "<p>24.6%</p>", "<p>25.6%</p>"],
+                    solution_en: "<p>3.(c)<br><img src=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAYoAAADGCAIAAABD8VDkAAAgAElEQVR4Ae2dfVBUx5r/e84CKSYVa0KBhU5JLCkKCipctgoWU5H1WlwvipR3jWK81GZkg1yNyPXluoYyRnPXBcGLiblUorE0alTALLhxYsDFpWJQLF/YQFSIYETKISOs4A5Chs3MqdM/yVPbv0P3nOEwoBLz8IfV5+nn9MvnPP093X16EkLxDwkgASQwIQmQCdkqbBQSQAJIgKI8YRAgASQwQQn8f3ki+IcEkAASmAAEmFiiPE2Ap4FNQAJIQEVAU55YBiaQgEgAQki0o8U7AeTmnQ/L5UDxsyfmhwkkIBLgokd0QItHAsjNIxbRyIFCeRIRoUWTABc9mn6YMZwAchvOQ/OKA4XypEkKM0QCXPSIDmjxSAC5ecQiGjlQKE8iIrRoEuCiR9MPM4YTQG7DeWhecaBQnjRJYYZIgIse0QEtHgkgN49YRCMHCuVJRIQWTQJc9Gj6YcZwAshtOA/NKw4UypMmKcwQCXDRIzqgxSMB5OYRi2jkQKE8iYjQokmAix5NP8wYTgC5DeehecWBQnnSJIUZIgEuekQHtHgkgNw8YhGNHCiUJxERWjQJcNGj6YcZwwkgt+E8NK84UChPmqQwQyTARY/ogBaPBJCbRyyikQOF8iQiQosmAS56NP0wYzgB5Dach+YVBwrlSZMUZogEuOgRHdDikQBy84hFNHKgUJ5ERGjRJMBFj6YfZgwngNyG89C84kChPGmSwgyRABc9ogNaPBJAbh6xiEYOFMqTiAgtmgS46NH0EzIaGhqMRiPcrvVvWFiY3W4Xbh2dob+/f/bs2awKq9UK99vt9pdfftnf37+ysnJ0JY6Ht8/cvFdutVpZTwkhJpPp0qVL7Ba73R4WFsYcZs+e3d/fz3InZoIDhfI0MR/TBG0VFz2jaqUsy3/961/ZaGHCMTg4WF1dHR4ePi7yRCm9f//+Sy+9BBWxWthI/u1vf/vDDz+MquVjdx4LN++1Dw4O/uu//iujGhER0dHRwW5xuVx79uyZPHny2bNnZVlm9gmb4EChPE3YJzURG8ZFz2ibqJ5DMeGAQm7evDlr1qyxz54opeoJFKvlqZw9AbqGhobnn3+eKdTcuXPVsyS73W6xWNSW0T61x+nPBRjK0+OE/7Ovi4ue0fbHizwpivL2228/OnkabVPH13+M3Lw3pqGhoaCgIDk5mSlUUVGRoihwF8qTd3qY+/QQGOMwE+XJ7Xbv2rVLfLcrinLx4sUFCxb4+/sTQvz9/fPy8pxOJ6BUlwNLwsbGxqioqODg4KamJnH2VFhYyIauxWJhz8PpdL7zzjuBgYGEkJkzZ7a2tkIW568oyocffhgYGDh//nyxqaw0L4kxcvNSMqW0oaFhz549HR0dERERUJEkSRUVFXCXKE+yLO/bty8kJIQQEhUVdfbsWW7KSQgxGo1Wq1W9dWU0GhsaGhgZNUbvzRtVLgcKZ0+jovdLd+aiZ7Q41LICy6729vZ//Md/FMf8vn37CCHbtm2TZfmzzz7z8/MjhKxatcrtdkOl9fX1ICthYWFNTU3Xrl2LiooihBQWForypCjKv/zLv0Dj2bhyOBzz5s0jhBQVFX3//ffR0dHBwcHXr1+nlKr9X3vttfb29s8++8xgMMAQHW2vKaVj5Oa9RpAnSumlS5dMJhPUxbbJOXlyuVyrVq0ihGRnZ/f29qampkqSVFNTQym9efMmE7iDBw9yluPHjzMyr7zyysDAgPdW+ZbLgUJ58g3jL/QuLnpGS4GTp56enoyMDPGLEtOXmJiY7u5u9gVKvXfOigoNDT1//jyldN++faGhoR5nT5RS8bW/Z88eQojZbLbZbJTSrKwsQkhOTg4si5j//Pnz792753Q6X3nllYk8e4JnceTIEXhGhBDYJufkqaamRpKkwMDAy5cvU0p37dpFCElJSYGZKbs9NTV1cHCQUvrGG29AgcuWLXO73YODg0uWLDl37txoH71Ofy7AUJ50ckO3IQJc9IwWCtMUNoQIIaI8KYpSXFxMCAE5sNlsZrOZEOJRnvz8/LjRwtSNEMK2xpncwOzJ4XAkJiYSQmbNmvXgwQOmX9HR0ffu3WOXhJD4+Pj79++Ptqec/xi5caVxl2z2RCl1uVzZ2dkMb1pa2nfffce2xt1u97Jly9SiDB80g4KCWlpaKKVdXV0wCQ0NDb1169a9e/fmzZsXEBAAt7S3t7e0tMyfP3/sQLgusEsOFMoTI4OJkQlw0TPyDcM91PJktVq1Zk/sJlmWjx8/HhsbK0kSIYSNIthwgYNUaiPcqEeeWlpagoKC2DBmCaaATM7YPIK1yofEGLl5r1EtT5RSh8Oh3iZfs2YNWz7fu3cvOjqadZYl2KJVUZTMzEywHz169Ny5cwcPHmTnyMrKyvbu3bt582bv7RlLLgcK5WksMH9x93LRM9r+c/JEKdXae3q42rLZbMnJySaT6d///d9hj5aNIrU8MUFhjdEjT6wl4u1QDpMntlfFyvchMUZu3mvk5IlSqt4mV89P2TJZTZIr/OTJk9DaZcuW7dq1q6WlpaSkBCy/++mPm6tyt4/xkgOF8jRGnr+s27noGW3nmSiwZRf35e7ChQv/8z//Qym9cuVKcHAwIaSkpMTjoGJFifqiR56ampqee+45bkam7s7PWp64bXK2fO7q6poxYwYhxGAwnDlzRt1flm5vb4eltMlkWr169eDg4LVr12DH3WAwJCQkPLqVnbh7gPLEngsmRiYw7vKkrhI+8z948IBtDMEOyKOQJzZQCSEnT55UNwPSP3d5opRWVFTAopjJ08DAAFv3FRYWir2mlLrd7sWLF8ODLikpoZQ6nc6UlBSwPNKVHcqTxyeCRr0EHp08KYpSVFT02muvKYrCzYwuXLgAu7PqJQnno+6AntmToig5OTnQHfgmBSNz//79cMrhZyRPZ86cKSoqUhOAtKIoa9euVS/uKKVspZaYmOhwOMDz+PHjd+7cYSUcPXoUjj41NDSAEe4Sv0KwW8YrwQUYzp7GC+wvohwuekbVZ+43d9u3b4dfgblcrqamptdee40QAi/nW7duhYaGEkICAgJqa2vr6+vhcxL7HE4pZeeeQkJC4KsTa4z6N3e7d+9Wfvpj557Ybz7YBo0kSfv373e5XBUVFU1NTex0D3R24cKF7Dgoq2K0ibFw817XwMDA66+/HhERcePGDdETtsnZ7InbON+6desPP/zw5Zdf/ud//qf6XvhuoL4LLOPyEVNdkZjmQKE8iYjQokmAix5NPyGDTXagBK1/9+7dC+rwwQcf+Pv7h4WFff7557Is792719/fX5KktWvXDgwMiKWxAwTqqRPUYrVa2VQILGy3u7W1Fc4lEkKSkpKam5uh4Zy/uL0l9G8EA9Q7gtPos9nvnLl+qUvq6OjIzs5WH3y9e/fuihUr4Dh+TExMbW0t+wUM3Dg4OJiamqpex4kWdRXjmOZAoTyNI9unvyguep7+Do9TD5GbTpAcKJQnndzQbYgAFz0IRScB5OYbKJQnndzQbYgADjPf4gC56eTGgUJ50skN3YYIcNGDUHQSQG6+gUJ50skN3YYI4DDzLQ6Qm05uHCiUJ53c0G2IABc9CEUnAeTmGyiUJ53c0G2IAA4z3+IAuenkxoFCedLJDd2GCHDRg1B0EkBuvoFCedLJDd2GCOAw8y0OkJtObhwolCed3NBtiAAXPQhFJwHk5hsolCed3NBtiAAOM9/iALnp5MaBQnnSyQ3dhghw0YNQdBJAbr6BQnnSyQ3dhgjgMPMtDpCbTm4cKJQnndzQbYgAFz0IRScB5OYbKJQnndzQbYgADjPf4gC56eTGgeLlCbLxXySABJDAkyLAtAzl6Uk9AqwXCSABzwQ05YllYAIJiAQgmkQ7WrwTQG7e+bBcDhQ/e2J+mEACIgEuekQHtHgkgNw8YhGNHCiUJxERWjQJcNGj6YcZwwkgt+E8NK84UChPmqQwQyTARY/ogBaPBJCbRyyikQOF8iQiQosmAS56NP0wYzgB5Dach+YVBwrlSZMUZogEuOgRHdDikQBy84hFNHKgUJ5ERGjRJMBFj6YfZgwngNyG89C84kChPGmSwgyRABc9ogNaPBJAbh6xiEYOFMqTiAgtmgS46NH0w4zhBJDbcB6aVxwolCdNUpghEuCiR3RAi0cCyM0jFtHIgUJ5EhGhRZMAFz2afpgxnAByG85D84oDhfKkSQozRAJc9IgOaPFIALl5xCIaOVAoTyIitGgS4KJH0w8zhhNAbsN5aF5xoFCeNElhhkiAix7RAS0eCSA3j1hEIwcK5UlEhBZNAlz0aPphxnACyG04D80rDhTKkyYp3zI+/vhjSZL27dun53an03n48OHw8HCr1arH/4n7cNHzxNvDGjA4OLhkyZLQ0NCWlhZmnDiJCcvt7NmzzzzzzIYNGxRFmQi4OFCjkKeGhgaj0Qj3q/99/vnnFyxY0NzcPBG698TboF+efvjhh2PHjs2dO5cQ8hTLk8vlSk9Pnz17dn9//6N7Ok+NPPX09CQkJLDxZTAYqqurHx23p0eeKKWKopSWlhoMhrCwMLvdTikdGBgoKCiQfvqrqKh4dBwfQ8lut3v//v2PdBSJvTh69OiTkicf+su93MTuiJYjR44QQh61PIn1Ukrv3Llz/Phxj1mP2aif25EjR4KDg6f9319aWprD4XjMrT127BiM7sdcr/gfsx/F7AnaarPZzGYzkyfQrIKCAkJIVFRUV1fX4+/SeNV48eLF3/3ud49ZnqxW65OSJx/6q3+YwUO5efPmyy+/bDQaH788KYpSUFBQWFg4XuExlnJ0cnM4HEuWLGlvbx9LXWO89/bt28nJyT9XebLb7WE//ak7cPny5cDAQKPR2NDQMEY6T+r2jo6OiIiIxz+KnpQ8+dZfncMMHqLL5VqxYsWJEyfCwsIeP9iKigpJkn5e8lRWVrZmzZonuA3kcDiSk5PVk4/HPB65ABv17MmjPJ07d87Pz0+Up+bm5qSkJKgyMjKyqqpKUZT+/v7Zs2eDESYOMETVFkppYWEhWCwWi8jozp0769evj46O7uzsLC8vnzp1KiHkt7/97d27d10uV3FxsclkIoRkZGSo58Y2m23p0qWSJBFCpk6dum/fPlmWKaU1NTWTJk1iDWAdkWW5tLQUCjeZTMXFxS6Xi1Iqy3JtbW1CQsLOnTsbGxvDw8ODg4OvXLnicrnKysq4rW6tSqFTeuSpr69v7dq1/v7+0Ozy8nJ1BDc3N8+bNw8aP3PmzPPnz6txnT17NioqihBiMpnS0tI+/PBDL/1V3+gxDbV4zBKNR44c2bFjR2dnpxd5gnCCYkFK1BbYkpNl+dSpU0C7r68vNzdXkqRJkyZVVVWxSnt6ejZt2hQbG2u3291u9+bNm9nTZEtLRVHKy8tDQkIA44IFC06fPs1KeKQJPdzYuIiJiTl8+LDT6fTSJDY6mJQwC3sT2O32DRs2xMbGdnZ21tbWQhi8+uqrbESow5hSevXq1fDwcDU34H/37t309HRCiCRJc+bMyc7OfnQrDA7UOMiTy+XKzs4mhCQmJrKeU0qvX78eHByclZXldDpv3rwZERFhMpmuXbtGKe3u7p4zZw4h5ODBg/AM6uvrTSZTSEjIN998w57Kvn375syZ09vbyyyQuHLlyttvvx0QEGA2m//85z8fPHjwu+++e+ONNwghK1asePPNNw8cOMAs27Ztg7u6u7tjYmKgwN7e3jlz5qj3HSE42KOFRWtRUdG8efO6u7v7+voyMjIIIUVFRf/7v/977Nix1NRUQkh2dvabb765dOnSh/txH3/88YEDB1566SX1Ys17pZTSEeWpo6MjKipq69atTqezt7d31qxZhJCysjLoVGVl5aRJk/bv3y/Lcnt7e1JSkiRJbBPw+vXrERER1dXVsiw3NjbOmDGDzSbE/nKQPV5y0ePRB4w3b95ctmyZw+EAuVGD5e6SZXn79u2EENY2p9O5fPlywPjjjz+Wl5cvXryYEPLGG2+kpKRs3769uLjYaDSazWZYB924cWPHjh0mk4mNVUopfMlhZYIoR0RENDU1ybJcVVVlMpke2xcJPdxqamqmTZvG1GHatGlnz57lWKkv29raZsyYoe7y+fPn2TqaMTGbzXl5eWlpaYcOHYKghRGhBqumZLFY1GU6nc60tLS33nrL6XT29PRkZGR4eZTq5vmW5kCNSZ5kWb569erChQsJIdOmTWtsbFS3adeuXeqBmp+fr76srq42GAxMOxRFycnJCQgIuHDhAhSiKMrGjRvPnTunLpOlHzx4MGvWrJCQEPYhubOz84UXXggLC7t+/Tq4wTZZcnLywMAApbSqqko9BiorK9WX4nC9cOFCZGTkzZs3oTQonw0JWM++/PLLPT09iqI8ePAAZjTcVrf3SkeUJ/jslZKSwt6l+/btMxgMxcXFoPIxMTE5OTlsMgWvBNbIysrKWbNmPXjwALpQXV397rvvQlrsL9i9/8tFj5YzLOsuXrxIKR1RnhgE9SCBuQCTjzNnzhgMhqSkpLt370KlMD9iDm63e/HixepxJcpTfn5+RkYGY1VSUsJu1+rIeNl1coOJeWNjI3zPNZlMly5d0moDPEF1lznUg4ODqampkiQdPHgQen3r1q3Q0FC1vsC6R02ekyebzRYTE3P58mVoRldX18qVKyf67Alww7/Tpk07fPgwSIAa5cmTJ0NDQ7/++mswctOEe/fuRUdHx8fH379/HxyOHz9OCNm8eTNcdnZ2wutXXSZLi89GHG/c0/r6669DQ0NPnjwJhXDhK96em5u7ePFit9sN/uDAFJa7nTWM66b3StnI1BonLS0tQUFBe/fuZeWrE2VlZaw9YAeVJ4TALZWVlZIkscXgvXv3Tpw4AZ5if9Ula6V1DrMjR45s3boVhgT3FDyWDNDUg4STJ5E2vF3U3LhxJd6Sn59vMpnq6+uhDS0tLSztsVXjaNTJjdUoyzJ8buJWJMyBUgpP0Is8UUo5JvBSV8uTSIm7Bd7xsAaC2ktLSye6PAEUeFdLklRTU6MGx6Xv3LmzYcOGwMBAbixt27aNLa/cbvc///M/v/jii+zzX1lZ2QcffMAVxS7FZyOON62B0dPTU1RUBHsQbEhwtw8MDCQnJ6tVmKXhFvG5Qts4eWIN9ljpiPKkVRoUm5WVFRgYyN5sYITpG2zY9fT0wGJz7ty53ME0rr+snd4TeobZzZs3Fy1a1NPTA0VpPQV1RT7Ik0iGG1fiA2ptbZ0+fTohJDMz02azqRvwqNN6uHFtcLlcmZmZ4vNlbuIQEFFzTMSHLlLiblEUZevWrYSQsLCw48ePw14ta8O4JzhQY1rcUUrLy8sNBkNERERHR4fYVpvNlp6ePmXKlP3795eWlnLydOHChYCAAFibXLt2bffu3TC0ysrKBgcHLRYLbFSJxXp8dYjoxacFG6tBQUHbt28/ffq00WjUkicozeOuPLRHfK5gF4eNl0pHlCeYH1VWVooQmICqd4hZgazlfX19a9asgae+aNEitjgScYlViBYuekQHl8v1T//0T3V1dSxLfAosiyUejzxRSm0226JFi6AXubm54pSfNWl8EyNy81gdrLzUM0S1GzzBUc2exIcuhjEnT7DeLC0thW9H4eHh3nfE1C30Ic2BGqs8sX3x5ORk9b44pfTKlStsa5wNGzVrp9OZkpLywgsv2Gy2t99++9q1a+3t7WazOSUl5dKlS6tXr2YLK7Gf4rMR0XMDo6Ojg22Ni1un3O1wqV57cm0Qnys4cPLkvVKPWNQVQWlswavOgqk7IeTo0aNqO9ySm5urNrJhOXfuXJiZc/1VO3tJc9EjegIWcBP/ZaLJ3fjY5AnqbW5uhpPZq1at8hJjXCPHcjkiN4+Ft7W1TZ8+XWv7FZ7gY5AnaJvT6SwqKvL39zeZTGzHxmOzx2LkQI1VniilcIIGvmqxfcfBwcF/+Id/MJvNbBbNjVvoQ0lJycMGvfPOO+vXr3f/9Lds2TKTybRs2TL2ccpjb8VnI443Tp5ggcmWQpy+iLfDB2y2VwXNuHnz5hdffCGqG2sk103vlY4oT9BItuCFWtxud2lp6eDgINDLzMxk2CmlsCnDNRvegWvWrPHz84NwF/vLuuAlwUWP6Hn79u0//vGP2aq/jIyMgICA4ODgzMzM/fv3i7cwCGwmy46VsJcZ97DYLcxB3GcRb1FX3d/fn5qaGhoaeuvWLbX9EaVH5Oax3nPnzs2ZM4d76zNPcQhwAS8yER+6SEmcPbEaKaXV1dWSJGm9L9WevqU5UKOWJ/HUOHyyhd+1sF1YAKGWJ9j5tlqtsiyz4QSfEtgOFKX05MmTeg6gi88GLOr5Dve0LBaLeiVfX18fGBhYWFioKIosy+LtNTU1kiSZTKbTp09Dg3t7ey0WC3zMhucqPieQJ7aZ7b1SpibMn3uoMMEkhGzZsgWOXCmK8umnnx44cOBh8MFkkx3XgMMQOTk5CQkJsPXz5ZdfwuczKNZqtXLypMbFVe3xkosejz6ckXsKXC5cwiqGfYLs7e1NS0sjhLBVLXwnzc/PZ7cDZ/XM0WKxBAUFsS+54gMqLy+/ffs2K6GwsHBCydP//PTHmudyuVauXMnOiDA7S8DHSvb0FUX57LPPAgIC2LdaRVEyMjLUY1AMcqCknmtbLBY1Frvd/sknn7ABC09TDHvWqjEmuAAbnTyx39wZDIbS0lLW6IcjfMuWLXBw65133unq6nK73cuWLYOzKm1tbTt27Jg/fz4hZP78+Zs2bWL7puCm/jzR1dUVFRWl5uWxw99+++2UKVOMRiM7hSha4BgIO3ywbds2QsjChQuvXr164MCBtLQ0Pz+/+Pj4jRs3tra2wldYo9F48uTJI0eONDQ0uFyuVatWAa9nn33WbDb/zd/8DXzRl2V5//79hJBf/epX6oh/KHN/+tOfYPMV1MR7pcx/+fLl7OgA199Lly7BEdPw8PDXX389Li7uN7/5DXujwtno+Pj4trY2WZZPnDgxffp09jXaarVOmzbt9OnTLperr68vPT2dLe7E/nL1erzkosejD2fUI0/w0CVJysvLe//991NSUuAkXWRk5M6dOwcGBnbv3g3PDijJspyXl0cIWblyJWzWdnd3x8XFGQyG8vJyaAB89ExMTGxqaiouLnY4HIWFhXFxcY2NjbIs22y2xMTEibO46+7ujoiIeHhg+J133uno6Kirq5s/f35JSQkbYhxVuITpc1xc3KFDhywWy7p168xmsyRJS5cuvXLlyvfffx8ZGenn58e+XMEYMZlMcAZIURQI46SkJBZRubm5BoPhgw8+OHXqVHV1td1uj4iIKCgocDgcsix/9NFHkydPnoiLOxBaCFD4l52uppQ6HA52QBy2wG02G1iioqIuX77c1NQUHBz80ksvqcczTJe4L3R5eXns9JPHpwJvTtaSwp/+2CWcZmKHaMFutVodDgccrQwJCfn888/v3LkTGxsbHh7Olnt1dXVTp06dNGkSmwO6XK6SkhJ2zhjs8ApSVwdLDM4On2+9VMr5qzcRuF43NzfPnDnz4fI5MDDwzTffVG/oKopSW1sbExMD74bU1FT1F7ovvvhiypQpzz77LOQuXbqUbY1TSsX+cvWKl9Br0e7FokeeKKW1tbVwOj89Pf3u3bsgJadOnXp43NRisTDaRqPRarWGhYUxy+zZs+vq6tT/LQ1YJLrd7h07dkiSlJCQ0NraSil97733zGYzHL739/dft26dmqSXLow9Sw+3f/u3f4NI8/f3z8zMvHHjxoj1DgwMZGVlEUJCQkLKy8s7Ozujo6PXr19vt9u50WqxWMQRoQbLwq+tre3FF1/09/ffuXOny+Wy2+3x8fHQMEJITEzMhN4aHxEZOjzFBPQMs6e4+z53DbnpRMeBGt3iTmcd6Pa0EuCi52nt5rj3C7npRMqBQnnSyQ3dhghw0YNQdBJAbr6BQnnSyQ3dhgjgMPMtDpCbTm4cKJQnndzQbYgAFz0IRScB5OYbKJQnndzQbYgADjPf4gC56eTGgUJ50skN3YYIcNGDUHQSQG6+gUJ50skN3YYI4DDzLQ6Qm05uHCiUJ53c0G2IABc9CEUnAeTmGyiUJ53c0G2IAA4z3+IAuenkxoFCedLJDd2GCHDRg1B0EkBuvoFCedLJDd2GCOAw8y0OkJtObhwolCed3NBtiAAXPQhFJwHk5hsolCed3NBtiAAOM9/iALnp5MaBQnnSyQ3dhghw0YNQdBJAbr6B4uUJOOK/SAAJIIEnRYBpGcrTk3oEWC8SQAKeCWjKE8vABBIQCUA0iXa0eCeA3LzzYbkcKH72xPwwgQREAlz0iA5o8UgAuXnEIho5UChPIiK0aBLgokfTDzOGE0Buw3loXnGgUJ40SWGGSICLHtEBLR4JIDePWEQjBwrlSUSEFk0CXPRo+mHGcALIbTgPzSsOFMqTJinMEAlw0SM6oMUjAeTmEYto5EChPImI0KJJgIseTT/MGE4AuQ3noXnFgUJ50iSFGSIBLnpEB7R4JIDcPGIRjRwolCcREVo0CXDRo+mHGcMJILfhPDSvOFAoT5qkMEMkwEWP6IAWjwSQm0csopEDhfIkIkKLJgEuejT9MGM4AeQ2nIfmFQcK5UmTFGaIBLjoER3Q4pEAcvOIRTRyoFCeRERo0STARY+mH2YMJ4DchvPQvOJAoTxpksIMkQAXPaIDWjwSQG4esYhGDhTKk4gILZoEuOjR9MOM4QSQ23AemlccqCcgT319fUVFRZGRkQ0NDZrNxIwJSYCLngnZRr2NOnv27DPPPLNhwwZFUfTe46vfU8NtcHBwyZIloaGhLS0tvsLwdh8HahTyZLfbw8LC4H72b2FhobfahDybzbZnz54ZM2YYjUaUJwHPRDdw0eO9uQMDA7t37/7bv/1bu93u3ZNS2trampSUBOXPnDnz/PnzI94yRoeJKU+KonzzzTdz587duXPniB1UFNHenn0AAB/YSURBVOWrr76aOXMmIUSSpKVLl969e3fEu8biMHHliVKqKMpnn30WEBBACMnPz3e5XL51NSsr66mXp4aGhi+//NI3PhP2Lp3y5Ha7Dx8+/PLLLxNCwsLCRpSnS5cuBQcHx8fHv/766+Hh4TDYKioqHj+HY8eOjdhaH1qlk1tHR8eKFStMJhMhRM+Lv6KiIigo6MSJE7Ist7W1xcfHR0REdHR0+NDCsdxy586d48ePj6UEdi8HahSzJygC5lBjFJfCwsIxlsD6MzETLpcrMzPTarVOzOb53CoueryX8+DBg1mzZo0oT263e/Xq1WfOnIHSZFkuKCgghERHR9+7d897FeObe/v27eTk5CcoT9CdyspKPfLU3t5uNpu3bdvGIFy7ds1kMqWnp/s8b2BF6U8oilJQUKBHTPWUyQUYypMeaKPzURSlqKiIEPILl6f+/v7Zs2ePKE82m+3IkSNqxA6HIzEx8TG/wBwOR3Jy8oitVbdTf5obdd5vtFqteuRp7969XIy53e7Fixc/Zm4VFRWSJP3M5EmW5dLS0qlTp8JEfeHChbdv32ZPBWZPV65c+fzzz0NCQgghM2fObG1tZQ6U0r6+vk2bNgUGBhJCpk6dWlJSAu+EhoYGo9EIzxvGP7OwB+NyucrKysLDw61Wa1VV1aRJk2JiYrQmvc3NzWzXIykpSd0MWNsnJCRAL1JTU7nc8vJyaP/UqVMXLFhw+vTp/v7+ZcuWQfPgX4vFou7Xzzo9qmGmU548ArFYLOxpcg6FhYXQDCYlzDJ79uz+/n5Kqd1u37BhQ2xsbGdnZ21tbVRUFCHk1VdfdTgcUJosy7W1tQkJCbDFc/XqVVhUsgcHoXX37t309HR4+nPmzMnOzobyuSaNeDkqbjrlKSsri5MnSml+fj4hZO/evVyT1BvHICVqC3RWluVTp04Bk76+vtzcXEmSJk2aVFVVxUrr6enZtGlTbGys3W53u92bN29mxAghwF9RFHFcsBK8JzhQj2r2tGfPHj8/v/LyclmWy8vLJUlKSUlxOp3QOJCnjRs3xsTEWCwW2HFXL5s7OjpiYmIyMjL6+voGBga2bNlCCMnOzgaFcjqdy5cvVz+b3t7eWbNmQUA/ePDgo48+iouLI4Rs3rz5rbfe+vu///uAgIALFy6IaCoqKkJDQ0+fPq0oyvnz541Go9lsbm9vh4224uLi4ODg06dPy7Lc2Ng4Y8YMk8l06dIlKKempiYiIqKpqUmW5aqqKpPJxKZLEGHsUqz3Z2rhosd7L3yWJ0VRMjIyvCzu2traZsyYweSJUgrPDobHjRs3duzYYTKZzGZzXl5eWlraoUOHUlNTCSGwFPrxxx/Ly8sXL17MTVIgFNnizul0pqWlvfXWW06ns6enJyMjg8mf946LuaPiplOecnNzRSUCpfY4l5Flefv27eouq8eRmskbb7yRkpKyffv24uJi9YhgYNXkYXKgrtHLuBDJcBYO1CORp4GBAfU8WdyDAIgFBQWyLFNKYV5NCMnJyVF++lu7dm1UVFRXVxe0HgKFEFJWVgYWKEE9/rn3LSzgf//737tcLlmWHzx4wIGglN68eXPKlCklJSWslldeecVkMn399deU0uvXrwcHB7NcSmlNTY0kSYmJifASzs/Pz8jIYJ+lS0pKWHtQniilPstTV1dXVFSUOuK5ZyeWDHMBJh+Dg4OpqamSJB08eBAe0K1bt0JDQ5kDpfTcuXN+fn7qWjh5stlsMTExly9fhtq7urpWrlw5cWZPZWVlhBD1W59SCtMZdafU6ETh48bRmTNnDAZDUlIS+wIIBbLAhvWjd3nyMi7UjfGYfhzy5Ha7V61aNXfuXPYsuQcvbo3Drh68MGHPj1sTVVdXGwyG1NTUwcFBSimHlVLKyZMegdi7d29QUJDWCY5t27Zx6wun05mSkmIwGGAfNz8/32Qy1dfXA+iWlhaW1lO7x8czwY1c9HhvrSgi3v1ZbllZWWxsbHd3N7NwCbFkTp4gHtSjCN6RankSX/tclNpsNrPZnJWVxWb9paWlLKS5Jnm/HBU3UUQ8Fs5e6lu2bBkYGBgcHKysrJw2bZo4pWK3iyVz40hkAq95Jk8iWPEWL+OCtUQrwYF6JLMnVrcsy/X19fPmzeM+MIvypJ5hVVVVwcEFVg6lFN5+LOA4rL7JExeO6upgAvgwOm02m9qufju1trZOnz6dEJKZmcm5oTz5PHvq7u7+9a9/zVbQavgs7YM8wS2jkqeH8/itW7dC6B4/fhxm+qwNo0pwo877vaKIaPn39vb+4Q9/kCQJdm+PHTsWFhamtY9BKRVL5saRqDViJHOjRrzFy7jQ6gizc6AelTwpilJbWxsdHT1z5sz6+vqMjAymLDD34SYm6oDbtWsXISQrK4s1GjY7w376g60BDqsP8uR2u9PT00UBgkq7urpmzJjx3HPPNTU1qZsB9bLJs81mW7RoETDNzc0dGBgAZ/Ghqgv5+aa56PHeEfUz9e7Jcl0u15o1a9iKjNm5hFjyiLMnH+SJUgpfeCZNmkQICQ8PP3v2LNcSnZej4iaKiM5aPC731PeKJXPjSNQaMZJHlCdKqda4UDfGY5oD9UjkSVGU4uJif3//8vJyWPlzXRJnTxA9sLgDIosXL3a73awPEH9su5TD6oM8wS1+fn7nzp1jtbAEtEfMhXq5LyPNzc3wdW/VqlXQZvGhspJ/1gkuerz3RRQR7/6Kouz86Y9t52n5iyU/InmCBjidzqKiIn9/f7YvqdUwLfuouIkiolWs2t7T05OQkCBJ0smTJ9V2dVosmRtH4yVPUKk4LtSN8ZjmQI2zPF2/fv2rr766cePG5MmT1dvGI8pTZ2fnCy+8kJmZqSgK7EO98MILnZ2drA+wEQAO47X3BM8G9uNZRXfu3IEPeTk5OerPHOCQn5/PzfvA3t/fn5qaGhoaeuvWLTaLVq/YWfk/6wQXPd77IoqIF39FUT799NPNmzfrOVIolvxI5QmaXV1dLUnS5s2bvfRCK2tU3EQR0SqW2V0uV3Z2tvrrNstSJ8SSH6k8wQJfPS7UjfGY5kCNpzw9DKxt27Z1dnaCBjN5kmX51VdfhcUdTC7E2dORI0eef/55+GTmdrvh6JD6q1l1dfVzzz1XV1cHvTp69CghhDncvn37V7/6VWBgIPvOAk/i6NGjHimAEXTQaDT+x3/8B1icTmdeXt7169cppRcuXAgICOA+IKakpLBTueXl5dxhLk6evNfupWETNouLHu/tFEWE+dvt9vr6erabAydl1qxZo9Yml8v1l7/8xePBcfh+ZDKZrl27pv6t1axZs+ATLRxNUK/coTHx8fH379+HZkCU5ubmslZZLBb2BGE/4ZNPPmFTOVDAJyhPsJPLzj2wZrNz9kuWLGEHu1iuOgEfK9n7uLe3Ny0tjRBSWVkJbpcvXw4MDMzPz2d3iePIYrGoPygBRjUWL+OCFauV4AJsdPLEfnPn5+dXU1PD6lAU5fbt27//6c/tdsOnN6PRePjw4aamptWrV0dFRRkMhtzc3HfffZdSCrtLcXFx33zzjSzLp0+fDg0NVf/GqqOjIyIiwmg0st8TJSQkFBUVsVhhylJcXLx9+/b09PQFCxbABuHHH388ODi4adMmQkhqampfXx9rJ5dgx7vhRJnFYpk8eTKrheW+8sor3d3dLpfr3XffjY2NZcc7CwsL4+LiGhsbZVm22WyJiYlscQcfaNPT05uamnbv3q1epXJt+HldctHjvfFwOsloNHK/74VD4eyYCGhTaGjo8uXLs//vD358pw56rq6SkhJCSFxc3KFDhywWy7p168xmM/ws9sqVK99//31kZKQ6Sr/99tspU6aYTKbGxkZQtP379xNCkpKS2JDOzc01GAwffPDBqVOnqqur7XZ7REREQUGBw+GQZfmjjz6aPHkyvEG5xox4qZ8bO520fPly9sUQyoetJXauhVI6ODhYV1cHGwsbN27k/MVWwYkNSZLy8vLef//9lJQUmHNFRkbu3LkTfsJNCFm4cCEUJctyXl4eIWTlypXwLunu7o6LizMYDOXl5VB+S0tLUFBQYmJiU1NTcXGxw+HwMi7EJnEWDtQo5AneHnC/1r9svlBVVQXHqZctW9bb2/vee+9JksQIwvlU+KU1hEhzczPXUJvNtnTpUvgqERkZyX06URTlk08+CQwMlCRp7dq1AwMDmZmZc+fOvXjx4vfff6/+Lyt4XIuxumDvE5oaHh5eUVHBFJDtjMLZd39//xUrVqi/0L333ntms9nf3//hd0Z/f/9169axrXGn07lixQqDwbBo0SJ2hIRV+vNNcNHjpSMWi0UdJOpPZm63OycnJyQkBD47lJaWwlNW+xNCxI0/dXUDAwNwbDokJKS8vLyzszM6Onr9+vV2ux3e56w0i8UCSxhmsVqt6uaxjzZtbW0vvviiv7//zp07XS6X3W6Pj4+H2CCExMTEPOqtca7l6oPHlNKmpqaQkJCcnBz1/uazzz6bmZl548YNNRwv6draWojn9PT0u3fvgpScOnVKlmU1E6PRaLVa1eNo9uzZdXV17AcbbN/D7Xbv2LFDkqSEhAT4TYWXceGlYZAFz4i5jUKe2D2Y+MUS4KLnF8thtB1HbjqJcaBQnnRyQ7chAlz0IBSdBJCbb6BQnnRyQ7chAjjMfIsD5KaTGwcK5UknN3QbIsBFD0LRSQC5+QYK5UknN3QbIoDDzLc4QG46uXGgUJ50ckO3IQJc9CAUnQSQm2+gUJ50ckO3IQI4zHyLA+SmkxsHCuVJJzd0GyLARQ9C0UkAufkGCuVJJzd0GyKAw8y3OEBuOrlxoFCedHJDtyECXPQgFJ0EkJtvoFCedHJDtyECOMx8iwPkppMbBwrlSSc3dBsiwEUPQtFJALn5BgrlSSc3dBsigMPMtzhAbjq5caBQnnRyQ7chAlz0IBSdBJCbb6B4eQKO+C8SQAJI4EkRYFqG8vSkHgHWiwSQgGcCmvLEMjCBBEQCEE2iHS3eCSA373xYLgeKnz0xP0wgAZEAFz2iA1o8EkBuHrGIRg4UypOICC2aBLjo0fTDjOEEkNtwHppXHCiUJ01SmCES4KJHdECLRwLIzSMW0ciBQnkSEaFFkwAXPZp+mDGcAHIbzkPzigOF8qRJCjNEAlz0iA5o8UgAuXnEIho5UChPIiK0aBLgokfTDzOGE0Buw3loXnGgUJ40SWGGSICLHtEBLR4JIDePWEQjBwrlSUSEFk0CXPRo+mHGcALIbTgPzSsOFMqTJinMEAlw0SM6oMUjAeTmEYto5EChPImI0KJJgIseTT/MGE4AuQ3noXnFgUJ50iSFGSIBLnpEB7R4JIDcPGIRjRwolCcREVo0CXDRo+mHGcMJILfhPDSvOFAoT5qkMEMkwEWP6IAWjwSQm0csopEDhfIkIkKLJgEuejT9MGM4AeQ2nIfmFQcK5UmTFGaIBLjoER3Q4pEAcvOIRTRyoH4G8uR0Og8fPhweHm61WsX+oOVxEuCi53FWPe51nT179plnntmwYYOiKONeOFfgU8NtcHBwyZIloaGhLS0tXB/H5ZIDNTp5slgscL/WvwaD4cyZM+PSUCjkhx9+OHbs2Ny5cwkhKE/jCNa3orjo8V7IkSNH1HGSkpLidDq1bmltbU1KSgL/mTNnnj9/XstzvOwTWZ6cTuexY8f+7u/+TpKk2bNn9/f3e+y1oihfffXVzJkzCSGSJC1duvTu3bsePcfLOKHlKTMzc8uWLQMDA5TS/v7+2bNnM9VQFKWxsXHGjBk6ReTYsWN2u10ntaNHj7KKdN4yXm5ut3v//v1a8TFetfxcytEvTz09PUlJSWazedr//VVWVmp189KlS8HBwfHx8a+//np4eDgMtoqKCi3/R2cfVVjqb4Z+bpTSy5cvh4eH+/v7r1+//rvvvpNlWauiioqKoKCgEydOyLLc1tYWHx8fERHR0dGh5f+I7Hfu3Dl+/Pi4FM6BGsXsaWBg4M0333Q4HNAOTp7AePLkyVOnTo3Y0Nu3bycnJ+uXJ6vV+qTk6eLFi7/73e9QnuCZctHj5UGXlZX9+c9/9uLAstxu9+rVq9mkW5blgoICQkh0dPS9e/eY22NIjDYs9TdJP7dTp04ZjcYZM2aMuHpqb283m83btm1jzbh27ZrJZEpPT3e5XMz4qBOKohQUFBQWFo5LRRyoUchTf3//nj17WCM8ytOtW7cuXrzIfDwmHA5HcnJyWFjYxJenjo6OiIgIL7Nrjx18io1c9Gj11OFwLFiw4Nq1a1oOarvNZjty5Ija4nA4EhMTjUZjQ0OD2v5I0z6Epf726OR26dIl009/ly5dGrHwvXv3cu9st9u9ePHix8ytoqJCkqQnL08cL4/yxHyam5vnzZsHT0W9lXD16lWYvUMW42uz2ZYuXSpJEiFk6tSp+/btU89p9cye+vr61q5d6+/vDyWUl5ertzz7+vo2bdoUGBgIuSUlJeo3zNmzZ6OiogghJpMpLS3tww8/pJTW1NRMmjSJtfMxP3VGckIldA6zyspKg8Hw7LPPZmZm3rhxw4cuWCwWLeCFhYXQDPaGYxb2IrHb7Rs2bIiNje3s7KytrYWH++qrr7K5vyzLtbW1CQkJO3fupJRqheXdu3fT09NhsTlnzpzs7Gzf5tF6uPX398MeKyfWWvSysrLY8GE++fn5hJC9e/cyCyTsdntYWBg0A6REbYENGVmWT506BUz6+vpyc3MlSZo0aVJVVRUrraenZ9OmTbGxsXa73e12b968GcqEf4G/oijl5eUhISEw1hYsWHD69GlWgvcEB2oUsyeuXC/yVFlZOWnSpP3798uy3N7enpSUJEmSeivBYrGw2KKUdnd3x8TEzJkzp/envzlz5hgMhurqalbjiPLU0dERFRW1detWp9PZ29s7a9YsQkhZWRmU0NHRERMTk5GR0dfXNzAwsGXLFkJIdnY2KNT169cjIiKqq6tlWYbtM/YqgD6yoGft+cUmuOjxyOGHH37IyMiA9wT4r169GvYrPfqLRkVRMjIyvCzu2traZsyYoQ6h8+fPG41GeFI3btzYsWOHyWQym815eXlpaWmHDh1KTU0lhMBS6McffywvL1+8eDEhhD1rSikXlk6nMy0t7a233nI6nT09PRkZGT5Hgh5u1dXVD8M+MTGRaahIRm3Jzc0VlQiUWt0pdossy9u3b1d32el0Ll++HDROzeSNN95ISUnZvn17cXGx0Wg0m83t7e2UUgZWTb6hocFoNKprrKmpiYiIaGpqkmW5qqrKZDLp3I8W/z+v4y9PoDU5OTls8nL9+vXg4GDWSTEOqqqq1NQqKyvVl5RS7/LkcrnS09PVH4b27dtnMBiKi4sppYqirF27NioqqqurCx4VhB3Tr8rKylmzZj148AByq6ur3333XUijPLHghoSeYcZucTgcu3fvhhkoexmwXC+Jrq6uqKgodcRzzvBc1IME5gJMPgYHB1NTUyVJOnjwIMThrVu3QkNDmQOl9Ny5c35+fupaOHmy2WwxMTGXL1+G2ru6ulauXPmIZk+KomRmZhJC/vjHP27atMlkMhFCwsPDq6qq2DjiIJSVlRFC1GFPKYXpjLpT6rtgHKlzQc6YfJw5c8ZgMCQlJbEvgFAgc4D1o5q8KE/5+fkZGRms2SUlJex2dWM8prkAG395AmrqBimKkpOTo1Z6Lg6+/vrr0NDQkydPQovFDnuXp5aWlqCgIHFCC6XBDqLFYlHjgDdVamrq4OBgZWWlJElsMXjv3r0TJ06AM8qTGpr4cuNyPV7evHkzIiKCvQw8+nDGsrKy2NjY7u5uzs4uR5Qn8RX44MGDWbNmqeVJDDMuLG02m9lszsrKYuchSktLH5E83b9/Pz4+nhDy2muvtbe3s+/g3LKDEaCUwmYZIQQ+pkMkT5s2TT3Q1P7sNe9FnkQmMFdQD2eOknhLfn6+yWSqr6+H2ltaWliaa494+cjlKSsrKzAwkL1zoAVwMoBpBNdD1sqenp6ioiJYtaohepcn77kwNcvPz2e1UErhXQovgZ6enpdeeokQMnfu3ObmZrUbypOahm/yRCm9ePGi0WhUv1G5YtWX3d3dv/71r73vDfsgT+KjFMcVF5aKomzdupUQEhYWdvz4cfVmqLrBetLcqBNvgdlfUFCQ+oMdbOF5We719vb+4Q9/gB3bmTNnHjt2LCwsLCAg4MKFC2IVvsmTOLg4SiLG1tbW6dOnE0IyMzNtNpvHlmgZOVDjPHsaGBhITk4mhKi30xgXL/IEW3FBQUHbt28/ffo0t5oVGam7B/M1rWM1u3btIoRkZWWpb4FoYHPUvr6+NWvWAJpFixaxma0Y0+pCfoFpLnp0EoAVgXrmonWjy+Vas2YNW5FpuT0eeaKUyrJcWloK69Pw8PCzZ89qNcm7fURuXEBCaffu3YuOjn7uueeampq8lw+5Hpd76hthHKlf/NziTtQaceiNKE+UUpvNtmjRIuh1bm6u/p1HDtQ4yxNMqgkhR48eFbnk5uaCkeshbF3D1jilVA8jsfDNmzerjSwNfBcvXux2u5kRooHbfGVM586dC3N4lCdGDBJc9HC5Xi43btzIPQLRWVGUnT/9sW0L0Qcsj02eoDqn01lUVOTv728ymb7++mutVnmxj8gNlOjhWlI93YBuan3B5Krr6elJSEiQJIltknAObJbwGOQJqm5ubk5ISCCErFq1Sj36xIYxCwdq/OWppKQE5nXqIIMVLAPHydOGDRvU68HRyhP4qze/KaVut7u0tHRwcBDOqr3wwgudnZ2MAmwrZGZmqhsJb8s1a9b4+fmdO3eOnYzX89pnJT/dCS56dHbW7Xanp6ezD6ke71IU5dNPP928ebP6wIdHT/Zc2OSXUgrvG/WT4mJMfNOIYcbdwtVeXV0tSZLWW5Bz5i5H5AZb4yzw4HZoM/cS5UqGS5fLlZ2drf4e7dHtsc2eWO39/f2pqamhoaG3bt1iRi8JDtT4yxNsRZtMJnYqD7bGExISenp6oGUWi0XdYovFopan+vr6wMDAwsJCRVFgwQ/qprX57XQ6U1JSYI8Qghti/cCBA6BTy5YtI4SUlJQwLtXV1c8991xdXR2l9Msvv1QfJbVarSxKID7i4+Pv37/P7v0lJ7jo8YjC5XJ1d3erVebixYuvvPKK+nu53W6vr69nuzlwUmbNmjXqu1wu11/+8hePB8dhtchiTFGUzz77LCAggH2BhaMJ6smI+ChBntiMHib+6rC02+2ffPIJe4GBAj4ieaKU1tXVBQQEZGVlsYkGdy5cluX6+nrxMDM7Z79kyRI1ZPHpwMdK9lW9t7c3LS2NEMI2Ri5fvhwYGKjeqAVFUy+GLBaLeo8MMKqxlJeX3759m9VeWFiopsrsHhNcgPkuT//1X/8Fe9ibNm1SRxWlFA6SxsfHt7W1ybJ84sSJ6dOnqzc7c3NzDQbDBx98cOrUqYfnm7Zt20YIWbhw4dWrVw8cOJCWlubn5xcfH79x48bW1lZZlv/0pz8RQpYvX86+oXB9g+O28C329ddfj4uL+81vfsMeFRz+NhqN7NdJCQkJRUVFEHlWq3XatGmnT592uVx9fX3p6elscQffp41G48mTJ48cOfI4DzFzHZwgl1z0eGzVX//6V0JIXFxcXV1dR0fHjh07kpOT1WsWOBTOvuWBNoWGhi5fvjz7//7gx3fqoOfqgkl6XFzcoUOHLBbLunXrzGYz/Cz2ypUr33//fWRkpJ+fX01NDdz47bffTpkyxWQyNTY2wnGT/fv3E0KSkpJYnHBhabfbIyIiCgoKHA6HLMsfffTR5MmTH9HiDppUVFTk5+f37rvvulwum822cOHC5ORk1jzYWlLvlA8ODtbV1cECauPGjVqjg6GDExuSJOXl5b3//vspKSkw54qMjNy5c+fAwMDu3bthJEJRsizn5eURQlauXAnvku7u7ri4OIPBUF5eDsXCd/PExMSmpqbi4mKHw1FYWBgXF9fY2CjLss1mS0xMfKyLO3gRQaSyf9WfHhVFqa2tjYmJgeO2qamp3Bextra2F1980d/ff+fOnS6Xy+FwZGRkEEJCQkI+//zzO3fuxMbGhoeHX758matLPZ9n0CHR3NwMP90ODAx88803ud049an0yMhI9YeYL774YsqUKc8++6zHn33X1dVNnTp10qRJ7OQBV+8v6lKPPP33f//30qVLwTMyMvLw4cPcsHG73Tk5OSEhIbDjW1paCt+eWCxBgs1hPRIeGBiAY9MhISHl5eWdnZ3R0dHr16+32+3wPmelWSwWdqwcjFarVf3f3mBBxYWl3W6Pj4+HdzAhJCYm5tFtjUMfYSd+6tSp8AMGLoybmppCQkJycnJgegXzmtEeza+trYXy09PT7969C1Jy6tSphyeo1UyMRqPVamUHzQkhs2fPrqurMxqNDCzsYbnd7h07dkiSlJCQ0NraSil97733zGYznMv19/dft24dNxg9PlAwQuHMwffZEysCE78cAlz0/HI6PsaeIjedADlQKE86uaHbEAEuehCKTgLIzTdQKE86uaHbEAEcZr7FAXLTyY0DhfKkkxu6DRHgogeh6CSA3HwDhfKkkxu6DRHAYeZbHCA3ndw4UChPOrmh2xABLnoQik4CyM03UChPOrmh2xABHGa+xQFy08mNA4XypJMbug0R4KIHoegkgNx8A4XypJMbug0RwGHmWxwgN53cOFAoTzq5odsQAS56EIpOAsjNN1AoTzq5odsQARxmvsUBctPJjQOF8qSTG7oNEeCiB6HoJIDcfAOF8qSTG7oNEcBh5lscIDed3DhQKE86uaHbEAEuehCKTgLIzTdQvDwBR/wXCSABJPCkCDAtQ3l6Uo8A60UCSMAzAQ/yxEyYQAJIAAlMBAL/f/Y0EVqDbUACSAAJMAL/D6LJY3gE+qTqAAAAAElFTkSuQmCC\" width=\"293\" height=\"147\"><br><span style=\"font-family: Times New Roman;\">Required reduction =<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>6</mn><mo>.</mo><mn>9</mn><mo>-</mo><mn>5</mn><mo>.</mo><mn>2</mn></mrow><mrow><mn>6</mn><mo>.</mo><mn>9</mn></mrow></mfrac><mo>&#215;</mo><mn>100</mn></math> </span><span style=\"font-family: Times New Roman;\"> = 24.6%</span></p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>3.(c) <br><img src=\"data:image/png;base64,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\" width=\"293\" height=\"125\"><br><span style=\"font-family: Baloo;\">आवश्यक कमी =<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>6</mn><mo>.</mo><mn>9</mn><mo>-</mo><mn>5</mn><mo>.</mo><mn>2</mn></mrow><mrow><mn>6</mn><mo>.</mo><mn>9</mn></mrow></mfrac><mo>&#215;</mo><mn>100</mn><mo>&#160;</mo></math> </span><span style=\"font-family: Times New Roman;\"> = 24.6%</span></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "4",
+                    section: "17",
+                    question_en: "<p>4. <span style=\"font-family: Times New Roman;\">The price of petrol shot up by 5%. Before the hike, the price was Rs. 82 per </span><span style=\"font-family: Times New Roman;\">litre</span><span style=\"font-family: Times New Roman;\">. A&nbsp; </span><span style=\"font-family: Times New Roman;\">man</span><span style=\"font-family: Times New Roman;\"> travels 3045 km every month and his car gives a mileage of 15 km per </span><span style=\"font-family: Times New Roman;\">litre</span><span style=\"font-family: Times New Roman;\">. What is the increase in the monthly expenditure (to the nearest Rs.) on the man&rsquo;s travel due to the hike in the petrol prices?</span></p>",
+                    question_hi: "<p>4. <span style=\"font-family: Baloo;\">पेट्रोल की कीमत में 5% की तेजी आई। बढ़ोतरी से पहले कीमत 82 रुपये प्रति लीटर थी। एक आदमी हर महीने 3045 किलोमीटर की यात्रा करता है और उसकी कार 15 किलोमीटर प्रति लीटर का माइलेज देती है। पेट्रोल की कीमतों में वृद्धि के कारण आदमी की यात्रा पर मासिक व्यय (निकटतम रुपये तक) में कितनी वृद्धि हुई है?</span></p>",
+                    options_en: ["<p>832</p>", "<p>859</p>", 
+                                "<p>758</p>", "<p>944</p>"],
+                    options_hi: ["<p>832</p>", "<p>859</p>",
+                                "<p>758</p>", "<p>944</p>"],
+                    solution_en: "<p>4.(a) <span style=\"font-family: Times New Roman;\">New price of petrol = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>82</mn><mo>&#215;</mo><mfrac><mrow><mn>105</mn><mo>&#160;</mo></mrow><mn>100</mn></mfrac></math></span><span style=\"font-family: Times New Roman;\"> = </span><span style=\"font-family: Times New Roman;\">₹</span><span style=\"font-family: Times New Roman;\">86.1<br></span><span style=\"font-family: Times New Roman;\">Quantity of petrol used by a man in one month </span><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>=</mo><mfrac><mrow><mi>Distance</mi><mo>&#160;</mo><mi>travelled</mi></mrow><mrow><mi>Car</mi><mo>&#160;</mo><mi>mileage</mi></mrow></mfrac><mo>=</mo><mfrac><mn>3045</mn><mn>15</mn></mfrac><mo>&#160;</mo></math><span style=\"font-family: Times New Roman;\"> = 203 </span><span style=\"font-family: Times New Roman;\">litres<br></span><span style=\"font-family: Times New Roman;\">Required increase in monthly expenditure = (86.1 - 82) &times; </span><span style=\"font-family: Times New Roman;\">203 = 4.1&nbsp;&times; </span><span style=\"font-family: Times New Roman;\">203 = 832.3<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>&#8776;</mo><mo>&#160;</mo></math> </span><span style=\"font-family: Times New Roman;\"> </span><span style=\"font-family: Times New Roman;\">₹</span><span style=\"font-family: Times New Roman;\">832 </span></p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>4.(a)<span style=\"font-family: Baloo;\">पेट्रोल की नई कीमत = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>82</mn><mo>&#215;</mo><mfrac><mrow><mn>105</mn><mo>&#160;</mo></mrow><mn>100</mn></mfrac></math></span><span style=\"font-family: Times New Roman;\"> </span><span style=\"font-family: Times New Roman;\"> = </span><span style=\"font-family: Times New Roman;\">₹</span><span style=\"font-family: Times New Roman;\">86.1<br></span><span style=\"font-family: Baloo;\">एक आदमी द्वारा एक महीने में इस्तेमाल किए गए पेट्रोल की मात्रा =</span><span style=\"font-family: Times New Roman;\"> <math style=\"font-family: Verdana;\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mi>&#2340;&#2351;</mi><mo>&#160;</mo><mi>&#2325;&#2368;</mi><mo>&#160;</mo><mi>&#2327;&#2312;</mi><mo>&#160;</mo><mi>&#2342;&#2370;&#2352;&#2368;</mi></mrow><mrow><mi>&#2325;&#2366;&#2352;</mi><mo>&#160;</mo><mi>&#2325;&#2366;</mi><mo>&#160;</mo><mi>&#2350;&#2366;&#2311;&#2354;&#2375;&#2332;</mi></mrow></mfrac><mo>=</mo><mfrac><mn>3045</mn><mrow><mn>15</mn><mo>&#160;</mo></mrow></mfrac></math> </span><span style=\"font-family: Baloo;\"> = 203 लीटर<br></span><span style=\"font-family: Baloo;\">मासिक व्यय में आवश्यक वृद्धि = <span style=\"font-family: Times New Roman;\">(86.1 - 82) &times; </span><span style=\"font-family: Times New Roman;\">203 = 4.1&nbsp;&times; </span><span style=\"font-family: Times New Roman;\">203 = 832.3<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>&#8776;</mo><mo>&#160;</mo></math> </span><span style=\"font-family: Times New Roman;\"> </span><span style=\"font-family: Times New Roman;\">₹</span><span style=\"font-family: Times New Roman;\">832</span></span></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "5",
+                    section: "17",
+                    question_en: "<p>5. <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>11</mn><mn>5</mn></mfrac></math><span style=\"font-family: Times New Roman;\"> </span><span style=\"font-family: Times New Roman;\">&nbsp;of a number A is 22% of a number B .The number B is equal to 2.5% of a third number C . If the value of C is 5500, then the sum of 80% of A and 40% of B is :</span></p>",
+                    question_hi: "<p>5. <span style=\"font-family: Baloo;\"> एक संख्या A का <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>11</mn><mn>5</mn></mfrac></math></span><span style=\"font-family: Baloo;\">, एक संख्या B का 22% है। संख्या B, तीसरी संख्या C के 2.5% के बराबर है। यदि C का मान 5500 है, तो A के 80% और B के 40% का योग क्या है?</span></p>",
+                    options_en: ["<p>88</p>", "<p>75</p>", 
+                                "<p>48</p>", "<p>66</p>"],
+                    options_hi: ["<p>88</p>", "<p>75</p>",
+                                "<p>48</p>", "<p>66</p>"],
+                    solution_en: "<p>5.(d)<br><span style=\"font-family: Times New Roman;\">C = 5500<br></span><span style=\"font-family: Times New Roman;\">So, B =</span><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>2</mn><mo>.</mo><mn>5</mn></mrow><mn>100</mn></mfrac><mo>&#215;</mo><mn>5500</mn><mo>&#160;</mo></math><span style=\"font-family: Times New Roman;\">= 137.5<br></span><span style=\"font-family: Times New Roman;\">Also,</span><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>11</mn><mn>5</mn></mfrac><mo>&#215;</mo><mi mathvariant=\"normal\">A</mi><mo>=</mo><mfrac><mn>22</mn><mn>100</mn></mfrac><mo>&#215;</mo><mn>137</mn><mo>.</mo><mn>5</mn><mo>&#160;</mo><mo>&#160;</mo><mo>&#160;</mo></math><span style=\"font-family: Times New Roman;\">&nbsp;<br></span><span style=\"font-family: Times New Roman;\">So, A = 13.75<br></span><span style=\"font-family: Times New Roman;\">Sum of 80% of A and 40% of B&nbsp;<br></span>=&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>80</mn><mn>100</mn></mfrac></math>&times; 13.75 +&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>40</mn><mn>100</mn></mfrac></math>&times; 137.5<br>= 11 + 55<br>= 66</p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>5.(d)<br><span style=\"font-family: Times New Roman;\">C = 5500<br></span><span style=\"font-family: Times New Roman;\">इसलिए, B =</span><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>2</mn><mo>.</mo><mn>5</mn></mrow><mn>100</mn></mfrac><mo>&#215;</mo><mn>5500</mn><mo>&#160;</mo></math><span style=\"font-family: Times New Roman;\">= 137.5<br></span><span style=\"font-family: Times New Roman;\">एवं ,</span><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>11</mn><mn>5</mn></mfrac><mo>&#215;</mo><mi mathvariant=\"normal\">A</mi><mo>=</mo><mfrac><mn>22</mn><mn>100</mn></mfrac><mo>&#215;</mo><mn>137</mn><mo>.</mo><mn>5</mn><mo>&#160;</mo><mo>&#160;</mo><mo>&#160;</mo></math><span style=\"font-family: Times New Roman;\">&nbsp;<br></span><span style=\"font-family: Times New Roman;\">इसलिए , A = 13.75<br></span><span style=\"font-family: Times New Roman;\">A के 80% और B के 40% का योग<br></span>=&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>80</mn><mn>100</mn></mfrac></math>&times; 13.75 +&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>40</mn><mn>100</mn></mfrac></math>&times; 137.5<br>= 11 + 55<br>= 66</p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "6",
+                    section: "17",
+                    question_en: "<p>6.<span style=\"font-family: Times New Roman;\"> In a factory with 400 employees, the ratio of the number of male employees to that of female employees is 5 : 3. There are 87.5% regular employees in the factory. If 92% of male employees are regular employees. Then what is the percentage of regular female employees?</span></p>",
+                    question_hi: "<p>6.<span style=\"font-family: Baloo;\"> 400 कर्मचारियों वाली एक फैक्ट्री में, पुरुष कर्मचारियों की संख्या और महिला कर्मचारियों की संख्या का अनुपात 5 : 3 है। कारखाने में 87.5% नियमित कर्मचारी हैं। यदि 92% पुरुष कर्मचारी नियमित कर्मचारी हैं। तो फिर नियमित महिला कर्मचारियों का प्रतिशत क्या है?</span></p>",
+                    options_en: ["<p>80%</p>", "<p>78%</p>", 
+                                "<p>87.5%</p>", "<p>85%</p>"],
+                    options_hi: ["<p>80%</p>", "<p>78%</p>",
+                                "<p>87.5%</p>", "<p>85%</p>"],
+                    solution_en: "<p>6.(a) <span style=\"font-family: Times New Roman;\">Number of regular employees = </span><span style=\"font-family: Times New Roman;\"> </span><span style=\"font-family: Times New Roman;\"> <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>87</mn><mo>.</mo><mn>5</mn></mrow><mn>100</mn></mfrac><mo>&#215;</mo><mn>400</mn><mo>&#160;</mo></math>= 350<br></span><span style=\"font-family: Times New Roman;\">Number of irregular employees = 400 &ndash; 350 = 50&nbsp;<br></span><span style=\"font-family: Times New Roman;\">According to the question,<br><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXduRg-NEYO_QV6z_IgslvRMbL1a_ggwsVcjELiPqiPpCSJwN6xR2sjd1K_67xID40BIu3qZ4SuHeQL-KWR1gVYlYh7rTGjsDwCvFGEuuf3BxrtkBgesWE5a6k-T-SRKeHAz_sZ6QazIgEWvPejQxXRH-yQ?key=OO2kKPzYRFvomI5i8WRKFL3l\" width=\"250\" height=\"163\"><br></span></p>\n<p><span style=\"font-family: Times New Roman;\">Percentage of regular female employees = </span><span style=\"font-family: Times New Roman;\"> </span><span style=\"font-family: Times New Roman;\"> <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>120</mn><mn>150</mn></mfrac><mo>&#215;</mo><mn>100</mn><mo>=</mo><mn>80</mn><mo>%</mo></math></span></p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>6.(a) <span style=\"font-family: Baloo;\">नियमित कर्मचारियों की संख्या = <span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>87</mn><mo>.</mo><mn>5</mn></mrow><mn>100</mn></mfrac><mo>&#215;</mo><mn>400</mn><mo>&#160;</mo></math></span></span><span style=\"font-family: Times New Roman;\">= 350<br></span><span style=\"font-family: Baloo;\">अनियमित कर्मचारियों की संख्या = 400 &ndash; 350 = 50&nbsp;<br></span><span style=\"font-family: Baloo;\">प्रश्न के अनुसार,<br><strong id=\"docs-internal-guid-80f56f06-7fff-6937-4451-3567086f94b6\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeevDyJ7qlcp9RKBCQZDf3xLgnUNFHcVEJ84KaaFXl61nmGIFGPA76vg3mdM0VM-aIMemtH15LhGOzTc4Wx0mMm_Do70tp9mOoEV-H25zo-ODwpTG5xaZHlMfNDVjcy1vyVdlzQHQ?key=VBeJN-gszFqCZnjmyRoKqD5b\" width=\"244\" height=\"154\"></strong><br></span></p>\n<p><span style=\"font-family: Baloo;\">नियमित महिला कर्मचारियों का प्रतिशत = <span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>120</mn><mn>150</mn></mfrac><mo>&#215;</mo><mn>100</mn><mo>=</mo><mn>80</mn><mo>%</mo></math></span></span></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "7",
+                    section: "17",
+                    question_en: "<p>7.<span style=\"font-family: Times New Roman;\"> A spends 65% of his income. His income is increased by 20.1% and the expenditure is increased by 20%. By what percent (correct to one decimal place) does his saving increase or decrease?</span></p>",
+                    question_hi: "<p>7.<span style=\"font-family: Baloo;\"> A अपनी आय का 65% खर्च करता है। उसकी आय में 20.1% की वृद्धि होती है और व्यय में 20% की वृद्धि होती है। उसकी बचत कितने प्रतिशत (एक दशमलव स्थान तक सही) बढ़ती या घटती है?</span></p>",
+                    options_en: ["<p>Increase by 20.3%</p>", "<p>Decrease by 17.7%</p>", 
+                                "<p>Increase by 21.5%</p>", "<p>Decrease by 18.9%</p>"],
+                    options_hi: ["<p>20.3% की वृद्धि</p>", "<p>17.7% की कमी</p>",
+                                "<p>21.5% की वृद्धि</p>", "<p>18.9% की कमी</p>"],
+                    solution_en: "<p>7.(a) <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>65</mn><mo>%</mo><mo>=</mo><mfrac><mrow><mo>&#160;</mo><mn>13</mn></mrow><mn>20</mn></mfrac></math>,<br><span style=\"font-family: Times New Roman;\">Income = Expenditure + Savings<br></span><span style=\"font-family: Times New Roman;\">20 = 13 + 7<br></span><span style=\"font-family: Times New Roman;\">Let the change in savings be &ldquo;x&rdquo; percent<br></span><span style=\"font-family: Times New Roman;\">As change in income = sum of change in expenditure and change in savings.<br>20 &times; 20.1 = 13 &times; 20 + 7 &times;(x)<br>402 = 260 + 7x<br>7x = 402 - 260 = 142<br>x =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>142</mn><mn>7</mn></mfrac></math> = 20.3%</span></p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>7.(a) <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>65</mn><mo>%</mo><mo>=</mo><mfrac><mrow><mo>&#160;</mo><mn>13</mn></mrow><mn>20</mn></mfrac></math>,<br><span style=\"font-family: Baloo;\">आय = व्यय + बचत<br></span><span style=\"font-family: Times New Roman;\">20 = 13 + 7<br></span><span style=\"font-family: Baloo;\">माना बचत में परिवर्तन \"x\" प्रतिशत<br></span><span style=\"font-family: Baloo;\">आय में परिवर्तन के रूप में = व्यय में परिवर्तन और बचत में परिवर्तन का योग।<br></span><span style=\"font-family: Times New Roman;\">20 &times; 20.1 = 13 &times; 20 + 7 &times;(x)<br>402 = 260 + 7x<br>7x = 402 - 260 = 142<br>x =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>142</mn><mn>7</mn></mfrac></math> = 20.3%</span></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "8",
+                    section: "17",
+                    question_en: "<p>8. <span style=\"font-family: Times New Roman;\">The price of an item is reduced by 20%. As a result, customers can get 2 kg more of it for Rs. 360. Find the original price(in Rs.) per kg of the item.</span></p>",
+                    question_hi: "<p>8. <span style=\"font-family: Baloo;\">एक वस्तु की कीमत 20% कम हो जाती है। जिसके चलते , ग्राहक 360में 2 kgअधिक वस्तु खरीद सकता है। वस्तु का प्राम्भिक मूल्य (रुपये में) प्रति kgज्ञात कीजिए।</span></p>",
+                    options_en: ["<p>40</p>", "<p>45</p>", 
+                                "<p>48</p>", "<p>36</p>"],
+                    options_hi: ["<p>40</p>", "<p>45</p>",
+                                "<p>48</p>", "<p>36</p>"],
+                    solution_en: "<p>8.(b) <span style=\"font-family: Times New Roman;\">Let original price = 5y, so new price = </span><span style=\"font-family: Times New Roman;\"> </span><span style=\"font-family: Times New Roman;\"> <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>80</mn><mrow><mn>100</mn><mo>&#160;</mo></mrow></mfrac><mo>&#215;</mo><mn>5</mn><mi mathvariant=\"normal\">y</mi><mo>=</mo><mn>4</mn><mi mathvariant=\"normal\">y</mi></math><br></span><span style=\"font-family: Times New Roman;\">According to the question,<br>2 =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>360</mn><mrow><mn>4</mn><mi mathvariant=\"normal\">y</mi></mrow></mfrac><mo>-</mo><mfrac><mn>360</mn><mrow><mn>5</mn><mi mathvariant=\"normal\">y</mi></mrow></mfrac></math><br>2 =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>360</mn><mrow><mn>20</mn><mi mathvariant=\"normal\">y</mi></mrow></mfrac></math><br>y = 9<br></span><span style=\"font-family: Times New Roman;\">Original price = 5y = 5(9) =&nbsp;</span><span style=\"font-family: Times New Roman;\">₹</span><span style=\"font-family: Times New Roman;\">45</span></p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>8.(b) <span style=\"font-family: Baloo;\">माना मूल मूल्य = 5y, इसलिए नया मूल्य <span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>80</mn><mrow><mn>100</mn><mo>&#160;</mo></mrow></mfrac><mo>&#215;</mo><mn>5</mn><mi mathvariant=\"normal\">y</mi><mo>=</mo><mn>4</mn><mi mathvariant=\"normal\">y</mi></math></span></span><br><span style=\"font-family: Baloo;\">प्रश्न के अनुसार,<br></span><span style=\"font-family: Times New Roman;\">2 = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>360</mn><mrow><mn>4</mn><mi mathvariant=\"normal\">y</mi></mrow></mfrac><mo>-</mo><mfrac><mn>360</mn><mrow><mn>5</mn><mi mathvariant=\"normal\">y</mi></mrow></mfrac></math><br>2 =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>360</mn><mrow><mn>20</mn><mi mathvariant=\"normal\">y</mi></mrow></mfrac></math><br>y = 9<br></span><span style=\"font-family: Baloo;\">वास्तविक मूल्य = 5y = 5(9) = ₹45</span></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "9",
+                    section: "17",
+                    question_en: "<p>9.<span style=\"font-family: Times New Roman;\"> In an election between two candidates, 5% of the registered voters did not </span><span style=\"font-family: Times New Roman;\">caste</span><span style=\"font-family: Times New Roman;\"> their vote. 10% of the votes were found to be either invalid or of </span><span style=\"font-family: Times New Roman;\">NOTA</span><span style=\"font-family: Times New Roman;\">. The winning candidate received 60% of the votes in his </span><span style=\"font-family: Times New Roman;\">favour</span><span style=\"font-family: Times New Roman;\"> and won the election by 17271 votes. FInd the number of registered voters.</span></p>",
+                    question_hi: "<p>9.<span style=\"font-family: Baloo;\"> दो उम्मीदवारों के बीच एक चुनाव में, पंजीकृत मतदाताओं में से 5% ने अपना वोट नहीं डाला। 10% मतदाताओं को अमान्य या </span><span style=\"font-family: Times New Roman;\">NOTA </span><span style=\"font-family: Baloo;\">पाया गया । जीतने वाले उम्मीदवार ने अपने पक्ष में 60% वोट प्राप्त किए और 17271 वोटों से चुनाव जीता। पंजीकृत मतदाताओं की संख्या ज्ञात कीजिए।</span></p>",
+                    options_en: ["<p>90525</p>", "<p>100000</p>", 
+                                "<p>101000</p>", "<p>102500</p>"],
+                    options_hi: ["<p>90525</p>", "<p>100000</p>",
+                                "<p>101000</p>", "<p>102500</p>"],
+                    solution_en: "<p>9.(c)<span style=\"font-family: Times New Roman;\">Let total number of registered voters = 100<br><strong id=\"docs-internal-guid-90d69f0d-7fff-6ef6-2260-d83485827717\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdIf9IrSbc33ovgMvj8TGrgaE0Z_WQC44bLQxL-G1bFWJxpuCyrxJqfdotpOlJH_TBkQE33qWpn7FNX5v__ioqOBQACHugrdFFDlu2FtMq9cVwU_JcH_Nks3cVw10ms6_6RRDTc6A?key=W2t4PNJuvluPr9caVJDJIroW\" width=\"212\" height=\"171\"></strong><br></span></p>\n<p><span style=\"font-family: Times New Roman;\">According to the question,<br></span><span style=\"font-family: Times New Roman;\">Winner got 60% of valid votes and the loser got 40% of valid votes.<br></span><span style=\"font-family: Times New Roman;\">So, 60% - 40% = 20% which corresponds to 17271 votes.<br></span><span style=\"font-family: Times New Roman;\">So, total number of valid votes =<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>17271</mn><mo>&#215;</mo><mn>100</mn></mrow><mn>20</mn></mfrac></math> </span><span style=\"font-family: Times New Roman;\"> = 86355<br></span><span style=\"font-family: Times New Roman;\">Now, 86355 corresponds to 85.5, so total number of registered voters =<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>86355</mn><mo>&#215;</mo><mn>100</mn></mrow><mrow><mn>85</mn><mo>.</mo><mn>5</mn></mrow></mfrac></math></span><span style=\"font-family: Times New Roman;\">= 101000 </span></p>",
+                    solution_hi: "<p>9.(c)<span style=\"font-family: Baloo;\">मान लीजिये कि पंजीकृत मतदाताओं की कुल संख्या = 100<br><strong id=\"docs-internal-guid-fa2e1a2b-7fff-82a0-088b-2f114617e994\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfaCZM4TiGs_GzVEOS15DENzlnY3jYrETHZQ_fEyRP6LVrWu2O30Zwf6xlxolgsukXMi3pc_pxwDj5lF1kAAcRAuNA_5eckAA1IrrGaquCJs5bnsR0MxP3bDg70haxP48yXeKx5?key=W2t4PNJuvluPr9caVJDJIroW\" width=\"181\" height=\"162\"></strong><br></span></p>\n<p><span style=\"font-family: Baloo;\">प्रश्न के अनुसार,<br></span><span style=\"font-family: Baloo;\">विजेता को वैध मतों का 60% और हारने वाले को वैध मतों का 40% प्राप्त हुआ।<br></span><span style=\"font-family: Baloo;\">तो, 60% - 40% = 20% जो 17271 मतों के अनुरूप है।<br></span><span style=\"font-family: Baloo;\">तो, वैध मतों की कुल संख्या=<span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>17271</mn><mo>&#215;</mo><mn>100</mn></mrow><mn>20</mn></mfrac></math></span></span><span style=\"font-family: Times New Roman;\">= 86355<br></span><span style=\"font-family: Baloo;\">अब, 86355, 85.5 के तुल्य है, इसलिए पंजीकृत मतदाताओं की कुल संख्या =<span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>86355</mn><mo>&#215;</mo><mn>100</mn></mrow><mrow><mn>85</mn><mo>.</mo><mn>5</mn></mrow></mfrac></math></span></span><span style=\"font-family: Times New Roman;\">= 101000</span></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "10",
+                    section: "17",
+                    question_en: "<p>10. <span style=\"font-family: Times New Roman;\"> A man started off a business with a certain capital amount. In the first year, he earned 60% </span><span style=\"font-family: Times New Roman;\">Profit and donated 50% of the total capital (initial amount + profit). He followed the same procedure with the remaining capital after the second and the third year. If at the end of the three years, he is left with Rs. 15,360, what was the initial amount with which the man started his business?</span></p>",
+                    question_hi: "<p>10.<span style=\"font-family: Baloo;\"> एक व्यक्ति ने एक निश्चित पूंजी राशि के साथ एक व्यवसाय शुरू किया। पहले वर्ष में, उसने 60% अर्जित किया कुल पूंजी का 50% लाभ और दान किया (शुरुआती राशि लाभ)। उन्होंने दूसरे और तीसरे वर्ष के बाद शेष पूंजी के साथ भी यही प्रक्रिया अपनाई। यदि तीन वर्ष के अंत में, उसके पास 15,360 रूपये, वह प्रारंभिक राशि क्या थी जिससे आदमी ने अपना व्यवसाय शुरू किया?</span></p>",
+                    options_en: ["<p>20,000</p>", "<p>30,000</p>", 
+                                "<p>25,000</p>", "<p>32,000</p>"],
+                    options_hi: ["<p>20,000</p>", "<p>30,000</p>",
+                                "<p>25,000</p>", "<p>32,000</p>"],
+                    solution_en: "<p>10.(b)<span style=\"font-family: Times New Roman;\">Let initially man have 100 units&nbsp;<br></span><span style=\"font-family: Times New Roman;\">Now according to the question<br></span><span style=\"font-family: Times New Roman;\">He earn 60% and then he donate 50% of his capital and this process repeat 2 more times as shown in below flowchart<br><strong id=\"docs-internal-guid-a935a9a7-7fff-ab62-4113-435fd7d5c298\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdk-lffxYEzNWwUPF6vHBZ7CETJ5iulg6MKYW3LDMYUZi7OZADwWJW2gGGVFLAbd_yZaj9fzb5OikXQbbspuyibUL9iuaUNQR5G428cdVZlESTjr2kgbREcUmOmMdGW-1T8SCVb?key=msGj7vOMp6Awhv0I333mXwlu\" width=\"297\" height=\"162\"></strong><br></span><span style=\"font-family: Times New Roman;\">He finally left with&nbsp;<br></span><span style=\"font-family: Times New Roman;\">51.2 units = 15360 Rs<br></span><span style=\"font-family: Times New Roman;\">1 unit = 300 Rs<br></span><span style=\"font-family: Times New Roman;\">100 units = 100 &times; 300 = 30,000 Rs </span></p>",
+                    solution_hi: "<p>10.(b)<span style=\"font-family: Baloo;\">माना प्रारंभ में मनुष्य के पास 100 इकाई हैं<br></span><span style=\"font-family: Baloo;\">अब प्रश्न के अनुसार,<br></span><span style=\"font-family: Baloo;\">वह 60% कमाता है और फिर वह अपनी पूंजी का 50% दान करता है और यह प्रक्रिया 2 बार और दोहराता है जैसा कि नीचे फ़्लोचार्ट में दिखाया गया है<br><strong id=\"docs-internal-guid-819accaf-7fff-06b9-10e6-9a52e8de7f0f\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeQbl2b1ZZmFUt_x_sMMjNkugzq59j5UVuI8P_bnA0pdWZJpZSQsBs0oOQIXAXsGj2SqOZwrvuH5u12tdV7X2iUwmqCl9Dcv-x-d1ENJNF7QdKuXo-KT9j4OlXcIy9NKyZlw61t?key=msGj7vOMp6Awhv0I333mXwlu\" width=\"263\" height=\"148\"></strong><br></span><span style=\"font-family: Baloo;\">वह अंत में साथ गया<br></span><span style=\"font-family: Baloo;\">51.2 इकाई = 15360 रुपये<br></span><span style=\"font-family: Baloo;\">1 इकाई = 300 रु<br></span><span style=\"font-family: Baloo;\">100 इकाई = 100 &times; 300 = 30,000 रुपये</span></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "11",
+                    section: "17",
+                    question_en: "<p>11. <span style=\"font-family: Times New Roman;\">A is 120% of B and B is 65% of C. If the sum of A, B and C is 121.5, then the value of (C - 2B + A) is:</span></p>",
+                    question_hi: "<p>11.<span style=\"font-family: Baloo;\"> A, B का 120% है और B, C का 65% है। यदि A, B और C का योग 121.5 है, तो (C - 2B + A) का मान है:</span></p>",
+                    options_en: ["<p>14</p>", "<p>35</p>", 
+                                "<p>24</p>", "<p>39</p>"],
+                    options_hi: ["<p>14</p>", "<p>35</p>",
+                                "<p>24</p>", "<p>39</p>"],
+                    solution_en: "<p>11.(c) <span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>120</mn><mo>%</mo><mo>=</mo><mfrac><mn>120</mn><mn>100</mn></mfrac><mo>&#8658;</mo><mfrac><mrow><mo>&#160;</mo><mn>6</mn></mrow><mn>5</mn></mfrac><mo>&#160;</mo></math></span><span style=\"font-family: Times New Roman;\"> </span><span style=\"font-family: Times New Roman;\"> and 65% = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>65</mn><mn>100</mn></mfrac><mo>&#8658;</mo><mfrac><mn>13</mn><mn>20</mn></mfrac></math>&nbsp;<br></span><span style=\"font-family: Times New Roman;\">According to the question<br></span>A&nbsp;&nbsp;&nbsp; :&nbsp;&nbsp; B&nbsp;&nbsp; :&nbsp;&nbsp; C<br>6&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp;&nbsp; 5<br><u>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 13&nbsp;&nbsp; :&nbsp;&nbsp; 20<br></u><u>78&nbsp;&nbsp; :&nbsp;&nbsp; 65&nbsp; :&nbsp; 100<br></u><span style=\"font-family: Times New Roman;\">Now A + B + C = 243 units<br></span><span style=\"font-family: Times New Roman;\">243 units = 121.5<br></span><span style=\"font-family: Times New Roman;\">1 unit = 0.5<br></span><span style=\"font-family: Times New Roman;\">C &ndash; 2B + A = (100 &ndash; 2 &times; 65 + 78)<br></span><span style=\"font-family: \'Times New Roman\';\">48units = 48 &times; 0.5 = 24</span></p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>11.(c)<span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>120</mn><mo>%</mo><mo>=</mo><mfrac><mn>120</mn><mn>100</mn></mfrac><mo>&#8658;</mo><mfrac><mrow><mo>&#160;</mo><mn>6</mn></mrow><mn>5</mn></mfrac><mo>&#160;</mo></math></span><span style=\"font-family: Baloo;\">और 65% =<span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>65</mn><mn>100</mn></mfrac><mo>&#8658;</mo><mfrac><mn>13</mn><mn>20</mn></mfrac></math><br></span></span><span style=\"font-family: Baloo;\">प्रश्न के अनुसार<br></span>A&nbsp;&nbsp;&nbsp; :&nbsp;&nbsp; B&nbsp;&nbsp; :&nbsp;&nbsp; C<br>6&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp;&nbsp; 5<br><u>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 13&nbsp;&nbsp; :&nbsp;&nbsp; 20<br></u><u>78&nbsp;&nbsp; :&nbsp;&nbsp; 65&nbsp; :&nbsp; 100<br></u><span style=\"font-family: Baloo;\">अब A + B + C = 243 इकाइयाँ<br></span><span style=\"font-family: Baloo;\">243 इकाइयाँ = 121.5<br></span><span style=\"font-family: Baloo;\">1 इकाइयाँ = 0.5<br></span><span style=\"font-family: Times New Roman;\">C &ndash; 2B + A = (100 &ndash; 2 &times; 65 + 78)<br></span><span style=\"font-family: Baloo;\">48 इकाइयाँ = 48 &times; 0.5 = 24</span></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "12",
+                    section: "17",
+                    question_en: "<p>12.<span style=\"font-family: Times New Roman;\"> A fruit seller sells 45% of the oranges that he has along with one more oranges to a customer . He then sells 20% of the remaining oranges and 2 more oranges to a second customer. He then sells 90% of the now remaining oranges to a third customer and is still left with 5 oranges. How many oranges did the fruit seller have initially?</span></p>",
+                    question_hi: "<p>12. <span style=\"font-family: Baloo;\">एक फल विक्रेता एक ग्राहक को आपने पास मौजूद कुल संतरो में से 45% और एक संतरा बेचता है। फिर वह शेष संतरो का 20% और 2 और संतरे दूसरे ग्राहक को बेचता है। फिर वह अब बचे हुए संतरे का 90% तीसरा ग्राहक बेचता है और उसके पास अभी भी 5 संतरे बचे हैं। फल विक्रेता के पास प्रारंभ में कितने संतरे थे?</span></p>",
+                    options_en: ["<p>100</p>", "<p>111</p>", 
+                                "<p>121</p>", "<p>120</p>"],
+                    options_hi: ["<p>100</p>", "<p>111</p>",
+                                "<p>121</p>", "<p>120</p>"],
+                    solution_en: "<p>12.(d) <span style=\"font-family: Times New Roman;\">Let initially fruit seller have x oranges<br></span><span style=\"font-family: Times New Roman;\">In first case orange left with fruit seller = N = [((100 - 45)% of x) &ndash; 1]<br></span><span style=\"font-family: Times New Roman;\">In second case orange left with fruit seller = M =[((100 - 20)% of N) &ndash; 2]<br></span><span style=\"font-family: Times New Roman;\">Finally orange left with fruit seller, 5 = (100 - 90)% of M&nbsp;<br></span><span style=\"font-family: Times New Roman;\">So combining all three conditions =&nbsp;<br>[{(x &times;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>55</mn><mn>100</mn></mfrac></math>- 1) &times;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>80</mn><mn>100</mn></mfrac></math>- }&nbsp;&times;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>10</mn><mn>100</mn></mfrac></math>] = 5<br>&rArr; {(x &times;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>11</mn><mn>20</mn></mfrac></math>-1)&nbsp;&times;&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>4</mn><mn>5</mn></mfrac></math>- 2} = 50<br>&rArr; (x&nbsp;&times;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>11</mn><mn>20</mn></mfrac></math>-1) &times; <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>4</mn><mn>5</mn></mfrac></math> = 50 + 2<br>&rArr; (x &times;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>11</mn><mn>20</mn></mfrac></math>- 1) &times; 4 = 52 &times; 5<br>&rArr; x &times;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>11</mn><mn>20</mn></mfrac></math>= 65 + 1<br>&rArr; x &times;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>11</mn><mn>20</mn></mfrac></math>= 66<br>&rArr; x = 120</span><br><strong><span style=\"font-family: Times New Roman;\">Short trick :<br></span></strong><span style=\"font-family: Times New Roman;\">Check by options d<br></span><span style=\"font-family: Times New Roman;\">120&nbsp;<br></span><span style=\"font-family: Times New Roman;\">55% of 120 &ndash; 1 = 65<br></span><span style=\"font-family: Times New Roman;\">80% of 65 &ndash; 2 = 50<br></span><span style=\"font-family: Times New Roman;\">10% of 50 = 5&nbsp;<br></span><span style=\"font-family: Times New Roman;\">So 120 satisfy all the conditions </span><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>12.(d)<span style=\"font-family: Baloo;\">माना प्रारंभ में फल विक्रेता के पास x संतरा है<br></span><span style=\"font-family: Baloo;\">पहले मामले में फल विक्रेता के पास बचा संतरा = N = [(x का (100 - 45)%) &ndash; 1]<br></span><span style=\"font-family: Baloo;\">दूसरे मामले में फल विक्रेता के पास बचा संतरा = M = [(N का(100 - 20)%) &ndash; 2]<br></span><span style=\"font-family: Baloo;\">अंत में फल विक्रेता के पास संतरा बचा, 5 = M का (100 - 90)%<br></span><span style=\"font-family: Baloo;\">अतः तीनों स्थितियों का संयोजन =<br></span><span style=\"font-family: Times New Roman;\">[{(x &times;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>55</mn><mn>100</mn></mfrac></math>- 1) &times;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>80</mn><mn>100</mn></mfrac></math>- }&nbsp;&times;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>10</mn><mn>100</mn></mfrac></math>] = 5<br>&rArr; {(x &times;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>11</mn><mn>20</mn></mfrac></math>-1)&nbsp;&times;&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>4</mn><mn>5</mn></mfrac></math>- 2} = 50<br>&rArr; (x&nbsp;&times;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>11</mn><mn>20</mn></mfrac></math>-1) &times; <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>4</mn><mn>5</mn></mfrac></math> = 50 + 2<br>&rArr; (x &times;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>11</mn><mn>20</mn></mfrac></math>- 1) &times; 4 = 52 &times; 5<br>&rArr; x &times;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>11</mn><mn>20</mn></mfrac></math>= 65 + 1<br>&rArr; x &times;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>11</mn><mn>20</mn></mfrac></math>= 66<br>&rArr; x = 120<br></span><strong><span style=\"font-family: Baloo;\">शॉर्ट ट्रिक:<br></span></strong><span style=\"font-family: Baloo;\">विकल्प d द्वारा जाँच करें<br></span><span style=\"font-family: Times New Roman;\">120<br></span><span style=\"font-family: Baloo;\">120 का 55% &ndash; 1 = 65<br></span><span style=\"font-family: Baloo;\">65 का 80% &ndash; 2 = 50<br></span><span style=\"font-family: Baloo;\">50 का 10% = 5<br></span><span style=\"font-family: Baloo;\">इसलिए, 120 सभी शर्तों को पूरा करते हैं।</span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "13",
+                    section: "17",
+                    question_en: "<p><span style=\"font-family: Times New Roman;\">13. </span><span style=\"font-family: Times New Roman;\">A reduction of 20% in the price of bananas enables a customer to buy 6 more bananas for ₹80. What is the reduced price of banana per dozen (in ₹)</span></p>",
+                    question_hi: "<p>13. <span style=\"font-family: Baloo;\">केले की कीमत में 20% की कमी से ग्राहक ₹80 में 6 और केले खरीद सकता है। प्रति दर्जन केले की घटी हुई कीमत क्या है?</span></p>",
+                    options_en: ["<p>32</p>", "<p>35</p>", 
+                                "<p>36</p>", "<p>40</p>"],
+                    options_hi: ["<p>32</p>", "<p>35</p>",
+                                "<p>36</p>", "<p>40</p>"],
+                    solution_en: "<p>13.(a)<span style=\"font-family: Times New Roman;\">Consumption = price &times; quantity<br></span><span style=\"font-family: Gungsuh;\">If consumption is constant ,&nbsp;<br></span><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>&#160;</mo><mi>then</mi><mo>&#160;</mo><mi>price</mi><mo>&#8733;</mo><mfrac><mn>1</mn><mi>quantity</mi></mfrac></math><br>20% =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>20</mn><mn>100</mn></mfrac></math>=<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>1</mn><mn>5</mn></mfrac></math><br><span style=\"font-family: Times New Roman;\">Price&nbsp; &nbsp; &nbsp; &nbsp;:&nbsp; &nbsp;5&nbsp; &nbsp;:&nbsp; &nbsp;4<br></span><span style=\"font-family: Times New Roman;\">Quantity :&nbsp; &nbsp;4&nbsp; &nbsp;:&nbsp; &nbsp;5<br></span><span style=\"font-family: Times New Roman;\">Quantity increased by 1 units = 6 banana<br></span><span style=\"font-family: Times New Roman;\">So 5 units = 30 banana<br></span><span style=\"font-family: Times New Roman;\">So reduced price per dozen =<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi>amount</mi><mi>quantity</mi></mfrac></math>=<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>80</mn><mstyle displaystyle=\"true\"><mfrac><mn>30</mn><mn>12</mn></mfrac></mstyle></mfrac></math> </span><span style=\"font-family: Times New Roman;\"> = 32 Rs</span></p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>13.(a) <span style=\"font-family: Baloo;\">खपत = कीमत &times; मात्रा<br></span><span style=\"font-family: Arial Unicode MS;\">यदि खपत स्थिर है, तो <math style=\"font-family:Verdana\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>&#160;</mo><mi>&#2325;&#2368;&#2350;&#2340;</mi><mo>&#160;</mo><mo>&#8733;</mo><mfrac><mrow><mo>&#160;</mo><mn>1</mn></mrow><mi>&#2350;&#2366;&#2340;&#2381;&#2352;&#2366;</mi></mfrac></math> <br></span>20% =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>20</mn><mn>100</mn></mfrac></math>=<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>1</mn><mn>5</mn></mfrac></math><br><span style=\"font-family: Baloo;\">कीमत&nbsp; &nbsp;:&nbsp; &nbsp; 5&nbsp; &nbsp;:&nbsp; &nbsp;4<br></span><span style=\"font-family: Baloo;\">मात्रा&nbsp; &nbsp; &nbsp; :&nbsp; &nbsp;4&nbsp; &nbsp; :&nbsp; &nbsp;5<br></span><span style=\"font-family: Baloo;\">मात्रा में 1 इकाई की वृद्धि = 6 केले<br></span><span style=\"font-family: Baloo;\">अतः 5 इकाई = 30 केला<br></span><span style=\"font-family: Baloo;\">तो, कम कीमत प्रति दर्जन <span style=\"font-family: Times New Roman;\">=<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi>amount</mi><mi>quantity</mi></mfrac></math>=<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>80</mn><mstyle displaystyle=\"true\"><mfrac><mn>30</mn><mn>12</mn></mfrac></mstyle></mfrac></math></span><span style=\"font-family: Times New Roman;\">= 32 Rs</span></span><span style=\"font-family: Baloo;\">&nbsp;= 32 रुपये।</span></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "14",
+                    section: "17",
+                    question_en: "<p>14.<span style=\"font-family: Times New Roman;\"> A is 25% more than B, and B is 40% less than C. If C is 20% more than D,then A is what percentage less than D?</span></p>",
+                    question_hi: "<p>14.<span style=\"font-family: Baloo;\"> A, B से 25% अधिक है, और B, C से 40% कम है। यदि C, D से 20% अधिक है, तो A, D से कितना प्रतिशत कम है?</span></p>",
+                    options_en: ["<p>11%</p>", "<p>10%</p>", 
+                                "<p>9%</p>", "<p>12%</p>"],
+                    options_hi: ["<p>11%</p>", "<p>10%</p>",
+                                "<p>9%</p>", "<p>12%</p>"],
+                    solution_en: "<p>14.(b)<br><span style=\"font-family: Times New Roman;\">A&nbsp; :&nbsp; &nbsp; &nbsp;B&nbsp; :&nbsp; &nbsp; C&nbsp; &nbsp;:&nbsp; D<br></span>5&nbsp;&nbsp; :&nbsp;&nbsp; 4<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 3&nbsp;&nbsp;&nbsp; :&nbsp;&nbsp;&nbsp; 5<br><u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 6&nbsp; &nbsp;:&nbsp; &nbsp; 5<br></u><u>90 :&nbsp; 72&nbsp;&nbsp; :&nbsp; 120 : 100 <br></u><span style=\"font-family: Times New Roman;\">Required percentage =</span><span style=\"font-family: Times New Roman;\"> <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>100</mn><mo>-</mo><mn>90</mn></mrow><mn>100</mn></mfrac><mo>&#215;</mo><mn>100</mn></math> = 10%</span></p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>14.(b)<br><span style=\"font-family: Times New Roman;\">A&nbsp; :&nbsp; &nbsp; &nbsp;B&nbsp; :&nbsp; &nbsp; C&nbsp; &nbsp;:&nbsp; D<br></span>5&nbsp;&nbsp; :&nbsp;&nbsp; 4<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 3&nbsp;&nbsp;&nbsp; :&nbsp;&nbsp;&nbsp; 5<br><u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 6&nbsp; &nbsp;:&nbsp; &nbsp; 5<br></u><u>90 :&nbsp; 72&nbsp;&nbsp; :&nbsp; 120 : 100 <br></u><span style=\"font-family: Times New Roman;\">आवश्यक प्रतिशत =</span><span style=\"font-family: Times New Roman;\"> <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>100</mn><mo>-</mo><mn>90</mn></mrow><mn>100</mn></mfrac><mo>&#215;</mo><mn>100</mn></math> = 10%</span></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "15",
+                    section: "17",
+                    question_en: "<p>15. <span style=\"font-family: Times New Roman;\">A person&rsquo;s salary was decreased by 50% and subsequently increased by 50%. By what percent does his salary increase or decrease?</span></p>",
+                    question_hi: "<p>15. <span style=\"font-family: Baloo;\">एक व्यक्ति के वेतन में 50% की कमी की गई और बाद में 50% की वृद्धि की गई। उसके वेतन में कितने प्रतिशत की वृद्धि या कमी होती है?</span></p>",
+                    options_en: ["<p>Decrease 18%</p>", "<p>Increase 15%</p>", 
+                                "<p>Increase 20%</p>", "<p>Decrease 25%</p>"],
+                    options_hi: ["<p>18% की कमी</p>", "<p>15% की वृद्धि</p>",
+                                "<p>20% की वृद्धि</p>", "<p>25% की कमी</p>"],
+                    solution_en: "<p>15.(d) <span style=\"font-family: Times New Roman;\">50% = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>1</mn><mn>2</mn></mfrac></math>&nbsp;<br></span><strong>Initial&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp;&nbsp;&nbsp; final <br></strong>&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1<br><u>&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 3<br></u>&nbsp;<u>&nbsp; 4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp;&nbsp;&nbsp;&nbsp; 3<br></u><span style=\"font-family: Times New Roman;\">Percentage change =<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mo>-</mo><mn>1</mn></mrow><mn>4</mn></mfrac><mo>&#215;</mo><mn>100</mn></math> </span><span style=\"font-family: Times New Roman;\"> = 25% decrease</span></p>",
+                    solution_hi: "<p>15.(d) <span style=\"font-family: Times New Roman;\">50% = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>1</mn><mn>2</mn></mfrac></math><br></span><strong>प्रारंभिक </strong><strong>: </strong><strong>अंतिम<br></strong>&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1<br><u>&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 3<br></u>&nbsp;<u>&nbsp; 4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp;&nbsp;&nbsp;&nbsp; 3<br></u><span style=\"font-family: Baloo;\">प्रतिशत = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mo>-</mo><mn>1</mn></mrow><mn>4</mn></mfrac><mo>&#215;</mo><mn>100</mn></math></span><span style=\"font-family: Baloo;\"> = 25% घटा।</span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "16",
+                    section: "17",
+                    question_en: "<p>16.<span style=\"font-family: Times New Roman;\"> Ankita&rsquo;s weight is 20% less than that of her grandmother. The grandmother weighs 26 kg less than grandmother&rsquo;s husband whose weight is 81 kg. If Ankita&rsquo;s brother is 8 kg heavier than Ankita, then what is the weight (in kg) of Ankita&rsquo;s brother?</span></p>",
+                    question_hi: "<p>16. <span style=\"font-family: Baloo;\">अंकिता का भार उसकी दादी के भार से 20% कम है। दादी का वजन दादी के पति से 26 kg कम है, जिसका वजन 81 kg है। यदि अंकिता का भाई अंकिता से 8 kg भारी है, तो अंकिता के भाई का भार कितना है?</span></p>",
+                    options_en: ["<p>60</p>", "<p>19</p>", 
+                                "<p>36</p>", "<p>52</p>"],
+                    options_hi: ["<p>60</p>", "<p>19</p>",
+                                "<p>36</p>", "<p>52</p>"],
+                    solution_en: "<p>16.(d)&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>20</mn><mo>%</mo><mo>=</mo><mfrac><mn>1</mn><mn>5</mn></mfrac></math><br><span style=\"font-family: Times New Roman;\">Let ratio of weight of Ankita and his grandmother is&nbsp;<br></span>Ankita&nbsp; :&nbsp; Grandmother<br>&nbsp;4x&nbsp; &nbsp; &nbsp; &nbsp; :&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 5x<br><span style=\"font-family: Times New Roman;\">According to the question<br></span><span style=\"font-family: Times New Roman;\">Grandfather&rsquo;s weight = 5x + 26 = 81<br></span><span style=\"font-family: Times New Roman;\">x = 11<br></span><span style=\"font-family: Times New Roman;\">So Ankita&rsquo;s weight = 4x = 4 &times; 11 = 44 kg<br></span><span style=\"font-family: Times New Roman;\">Ankita\'s brother weight = 44 + 8 = 52 kg</span></p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>16.(d) <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>20</mn><mo>%</mo><mo>=</mo><mfrac><mn>1</mn><mn>5</mn></mfrac></math><br><span style=\"font-family: Baloo;\">माना, अंकिता और उसकी दादी के वजन का अनुपात है<br></span><span style=\"font-family: Baloo;\">अंकिता : दादी<br></span><span style=\"font-family: \'Times New Roman\';\">4x&nbsp; &nbsp; &nbsp; &nbsp; :&nbsp; &nbsp; &nbsp; 5x<br></span><span style=\"font-family: Baloo;\">प्रश्न के अनुसार,<br></span><span style=\"font-family: Baloo;\">दादाजी का भार = 5x + 26 = 81<br></span><span style=\"font-family: Times New Roman;\">x = 11<br></span><span style=\"font-family: Baloo;\">अत: अंकिता का भार = 4x = 4 &times; 11 = 44 kg<br></span><span style=\"font-family: Baloo;\">अंकिता के भाई का भार = 44 + 8 = 52 kg&nbsp;</span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "17",
+                    section: "misc",
+                    question_en: "<p>17.<span style=\"font-family: Times New Roman;\"> A reduction of 15% in the price of wheat enables a housewife to buy 6 kg more for Rs.2,720. The reduced price of wheat per kg (in ₹) is:</span></p>",
+                    question_hi: "<p>17. <span style=\"font-family: Baloo;\">गेहूं की कीमत में 15% की कमी, एक गृहिणी को 2,720 रुपये में 6 kg अधिक खरीदने में सक्षम बनाती है। गेहूं की घटी हुई कीमत प्रति kg (रुपये में) है:</span></p>",
+                    options_en: ["<p>75</p>", "<p>68</p>", 
+                                "<p>70</p>", "<p>65</p>"],
+                    options_hi: ["<p>75</p>", "<p>68</p>",
+                                "<p>70</p>", "<p>65</p>"],
+                    solution_en: "<p>17.(b) <span style=\"font-family: Times New Roman;\">Consumption = price &times; quantity<br></span><span style=\"font-family: Gungsuh;\">If consumption is constant the price &prop;&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>1</mn><mi>quantity</mi></mfrac></math><br></span><span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>15</mn><mo>%</mo><mo>=</mo><mfrac><mrow><mo>&#160;</mo><mn>15</mn></mrow><mn>100</mn></mfrac><mo>=</mo><mfrac><mn>3</mn><mn>20</mn></mfrac></math>&nbsp;<br></span><span style=\"font-family: Times New Roman;\">Price :&nbsp; &nbsp; &nbsp; &nbsp;20 : 17<br></span><span style=\"font-family: Times New Roman;\">Quantity : 17 : 20<br></span><span style=\"font-family: Times New Roman;\">Quantity increased by 3 units = 6 kg<br></span><span style=\"font-family: Times New Roman;\">So 20 units = 40kg<br></span><span style=\"font-family: Times New Roman;\">So reduced price per kg <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>=</mo><mfrac><mi>amount</mi><mi>quantity</mi></mfrac><mo>=</mo><mfrac><mn>2720</mn><mn>40</mn></mfrac></math></span><span style=\"font-family: Times New Roman;\"> = 68 Rs</span><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>17.(b) <span style=\"font-family: Baloo;\">खपत = कीमत &times; मात्रा<br></span><span style=\"font-family: Arial Unicode MS;\">यदि खपत स्थिर है तो कीमत &prop;&nbsp;<math style=\"font-family:Verdana\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>1</mn><mi>&#2350;&#2366;&#2340;&#2381;&#2352;&#2366;</mi></mfrac></math><br></span><span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>15</mn><mo>%</mo><mo>=</mo><mfrac><mrow><mo>&#160;</mo><mn>15</mn></mrow><mn>100</mn></mfrac><mo>=</mo><mfrac><mn>3</mn><mn>20</mn></mfrac></math>&nbsp;<br></span><span style=\"font-family: Baloo;\">कीमत :&nbsp; &nbsp; 20 : 17<br></span><span style=\"font-family: Baloo;\">मात्रा :&nbsp; &nbsp; &nbsp; &nbsp;17 : 20<br></span><span style=\"font-family: Baloo;\">मात्रा में 3 इकाई की वृद्धि हुई = 6 kg<br></span><span style=\"font-family: Baloo;\">तो, 20 इकाइयाँ = 40 kg<br></span><span style=\"font-family: Baloo;\">तो, घटी हुई कीमत प्रति kg</span><span style=\"font-family: Baloo;\"> <span style=\"font-family: Times New Roman;\"><math style=\"font-family:Verdana\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>=</mo><mfrac><mi>&#2325;&#2368;&#2350;&#2340;</mi><mi>&#2350;&#2366;&#2340;&#2381;&#2352;&#2366;</mi></mfrac><mo>=</mo><mfrac><mn>2720</mn><mn>40</mn></mfrac></math> = 68</span>रुपये</span></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+            
+            // Generate question boxes
+            const boxesContainer = document.getElementById('question-boxes');
+            questions.forEach((q, index) => {
+                const box = document.createElement('div');
+                box.className = 'q-box';
+                box.textContent = index + 1;
+                box.onclick = () => showQuestion(index);
+                box.id = `box-${index}`;
+                boxesContainer.appendChild(box);
+            });
+            
+            // Show first question
+            showQuestion(0);
+            updateProgress();
+        }
+        
+        // Show a specific question
+        
+        function formatContent(text) {
+            if (!text) return '';
+            return text.replace(/<img/g, '<img style="max-width:100%;height:auto;"');
+        }
+        
+        function showQuestion(index) {
+            if (index < 0 || index >= questions.length) return;
+            
+            currentQuestion = index;
+            const question = questions[index];
+            
+            // Update question counter
+            document.getElementById('question-counter').textContent = `Question ${index + 1} of ${questions.length}`;
+            
+            // Update question boxes
+            document.querySelectorAll('.q-box').forEach(box => box.classList.remove('current'));
+            document.getElementById(`box-${index}`).classList.add('current');
+            
+            // Generate question HTML
+            let html = `
+                <div class="question-card">
+                    <div class="question-text">
+                        <div class="en">${formatContent(question.question_en)}</div>
+                        <div class="hi" style="display:none">${formatContent(question.question_hi)} </div>
+                    </div>
+                    <div class="options" id="options-container">`;
+            
+            // Add options
+            ['a', 'b', 'c', 'd'].forEach((opt, i) => {
+                let optionClass = '';
+                let isCorrectAnswer = opt === question.correct;
+                let isUserAnswer = answers[question.id] === opt;
+                
+                // When reviewing, add appropriate classes
+                if (submitted) {
+                    if (isCorrectAnswer) {
+                        optionClass += ' correct-answer';
+                    } else if (isUserAnswer && !isCorrectAnswer) {
+                        optionClass += ' incorrect';
+                    }
+                }
+                
+                html += `
+                    <div class="option-item">
+                        <input class="option-input" type="radio" name="q${index}" 
+                            id="opt-${index}-${opt}" value="${opt}" 
+                            ${isUserAnswer ? 'checked' : ''}
+                            onclick="selectAnswer('${question.id}', '${opt}')">
+                       <label class="option-label${optionClass}" for="opt-${index}-${opt}">
+                            <div class="en">${question.options_en[i]}</div>
+                            <div class="hi" style="display:none">${question.options_hi[i]}</div>
+                        </label>
+                    </div>`;
+            });
+            
+            // Add solution if submitted
+            if (submitted) {
+                const isCorrect = answers[question.id] === question.correct;
+                const resultText = answers[question.id] ? (isCorrect ? 'Correct!' : 'Incorrect!') : 'Not attempted';
+                
+                html += `
+                    <div class="solution-container">
+                        <div class="solution-title">${resultText}</div>
+                        <div class="solution-text">
+                            <div class="en">${question.solution_en}</div>
+                            <div class="hi" style="display:none">${question.solution_hi}</div>
+                        </div>
+                    </div>`;
+            }
+            
+            html += `</div></div>`;
+            
+            document.getElementById('questions-container').innerHTML = html;
+            
+            // Apply language settings
+            applyLanguage();
+            
+            // If in mobile view, close the menu
+            if (window.innerWidth < 992) {
+                toggleNav(false);
+            }
+            
+            // Add review mode class if submitted
+            if (submitted) {
+                document.getElementById('options-container').classList.add('review-mode');
+            }
+        }
+        
+        // Apply current language
+        function applyLanguage() {
+            document.querySelectorAll(`.${currentLang}`).forEach(el => el.style.display = 'block');
+            document.querySelectorAll(`.${currentLang === 'en' ? 'hi' : 'en'}`).forEach(el => el.style.display = 'none');
+            
+            // Update language button text
+            document.getElementById('lang-text').textContent = currentLang === 'en' ? 'Hi' : 'En';
+        }
+        
+        // Select an answer
+        function selectAnswer(qId, option) {
+            if (submitted) return;
+            
+            answers[qId] = option;
+            updateProgress();
+            
+            // Mark question as attempted in the navigation
+            const index = questions.findIndex(q => q.id === qId);
+            if (index >= 0) {
+                const box = document.getElementById(`box-${index}`);
+                box.classList.add('attempted');
+                box.classList.remove('unattempted');
+            }
+        }
+        
+        // Navigate to previous/next question
+        function prevQuestion() { 
+            if (currentQuestion > 0) showQuestion(currentQuestion - 1); 
+        }
+        
+        function nextQuestion() { 
+            if (currentQuestion < questions.length - 1) showQuestion(currentQuestion + 1); 
+        }
+        
+        // Switch section
+        function switchSection(sectionId) {
+            if (sectionId === 'all') {
+                showQuestion(0);
+                return;
+            }
+            
+            const section = sections[sectionId];
+            if (section) showQuestion(section.start);
+        }
+        
+        // Toggle language
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'hi' : 'en';
+            applyLanguage();
+        }
+        
+        // Toggle navigation sidebar
+        function toggleNav(show) {
+            const nav = document.getElementById('question-nav');
+            const overlay = document.getElementById('nav-overlay');
+            
+            if (show === undefined) {
+                show = !nav.classList.contains('show');
+            }
+            
+            if (show) {
+                nav.classList.add('show');
+                overlay.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            } else {
+                nav.classList.remove('show');
+                overlay.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+        }
+        
+        // Update progress
+        function updateProgress() {
+            const attempted = Object.keys(answers).length;
+            document.getElementById('attempted-count').textContent = attempted;
+        }
+        
+        // Start timer
+        function startTimer() {
+            const timerDisplay = document.getElementById('timer-display');
+            let timeLeft = totalTime;
+            
+            const timerInterval = setInterval(() => {
+                if (timeLeft <= 0 || submitted) {
+                    clearInterval(timerInterval);
+                    if (!submitted) submitTest();
+                    return;
+                }
+                
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                timeLeft--;
+            }, 1000);
+        }
+        
+        // Confirm before submitting
+        function confirmSubmit() {
+            if (submitted) return;
+            
+            const attempted = Object.keys(answers).length;
+            const remaining = questions.length - attempted;
+            
+            // Create a more modern confirmation dialog
+            const confirmHtml = `
+                <div style="text-align: center; padding: 20px;">
+                    <h4 style="margin-bottom: 16px; color: var(--dark);">Confirm Submission</h4>
+                    <p style="margin-bottom: 24px; color: var(--gray);">
+                        You have attempted ${attempted} of ${questions.length} questions.<br>
+                        ${remaining} questions are unattempted.
+                    </p>
+                    <div style="display: flex; justify-content: center; gap: 12px;">
+                        <button onclick="this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; border: 1px solid var(--light-gray); background: white; border-radius: 8px; cursor: pointer;">
+                            Cancel
+                        </button>
+                        <button onclick="submitTest(); this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer;">
+                            Submit Test
+                        </button>
+                    </div>
+                </div>`;
+            
+            // Create modal element
+            const modal = document.createElement('div');
+            modal.className = 'results-modal show';
+            modal.innerHTML = `
+                <div class="results-card" style="max-width: 400px;">
+                    <button class="cancel-btn" style="position: absolute; top: 12px; right: 12px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--gray);" onclick="this.closest('.results-modal').remove()">
+                        ×
+                    </button>
+                    ${confirmHtml}
+                </div>`;
+            
+            document.body.appendChild(modal);
+        }
+        
+        // Submit test
+        function submitTest() {
+            if (submitted) return;
+            
+            submitted = true;
+            
+            let score = 0;
+            let correctCount = 0;
+            let incorrectCount = 0;
+            let unattemptedCount = 0;
+            
+            questions.forEach((q, index) => {
+                const userAns = answers[q.id];
+                const box = document.getElementById(`box-${index}`);
+                
+                box.classList.remove('attempted');
+                
+                if (!userAns) {
+                    unattemptedCount++;
+                    box.classList.add('unattempted');
+                } else if (userAns === q.correct) {
+                    correctCount++;
+                    score += q.pos_marks;
+                    box.classList.add('correct');
+                } else {
+                    incorrectCount++;
+                    score -= q.neg_marks;
+                    box.classList.add('incorrect');
+                }
+            });
+            
+            // Update result values
+            document.getElementById('score-value').textContent = score.toFixed(2);
+            document.getElementById('correct-value').textContent = correctCount;
+            document.getElementById('incorrect-value').textContent = incorrectCount;
+            document.getElementById('unattempted-value').textContent = unattemptedCount;
+            
+            // Show the results modal
+            document.getElementById('results-modal').classList.add('show');
+            
+            // Disable submit button
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-check"></i>';
+            submitBtn.style.backgroundColor = 'var(--success)';
+            
+            // Refresh current question view to show solution
+            showQuestion(currentQuestion);
+        }
+        
+        // Review test
+        function reviewTest() {
+            document.getElementById('results-modal').classList.remove('show');
+            showQuestion(0);
+        }
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target === document.getElementById('results-modal')) {
+                document.getElementById('results-modal').classList.remove('show');
+            }
+        });
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') prevQuestion();
+            if (e.key === 'ArrowRight') nextQuestion();
+        });
+    </script>
+</body>
+</html>
