@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mocks Wallah</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --primary-light: #a29bfe;
+            --primary-dark: #5649c0;
+            --secondary: #00cec9;
+            --accent: #fd79a8;
+            --success: #00b894;
+            --warning: #fdcb6e;
+            --danger: #d63031;
+            --light: #f8f9fa;
+            --dark: #2d3436;
+            --gray: #636e72;
+            --light-gray: #dfe6e9;
+            --card-bg: #ffffff;
+            --body-bg: #f5f6fa;
+            --header-bg: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            --footer-bg: #ffffff;
+            --box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            --box-shadow-sm: 0 2px 10px rgba(0,0,0,0.05);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background-color: var(--body-bg);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            color: var(--dark);
+            line-height: 1.6;
+            padding-bottom: 80px; /* Space for fixed navigation */
+            overflow-x: hidden;
+        }
+        
+        /* Header Styles */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: var(--header-bg);
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            z-index: 1000;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .header-brand {
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .header-brand i {
+            margin-right: 8px;
+            font-size: 1.2rem;
+        }
+        
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .control-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .control-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .control-btn.active {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .timer-display {
+            background: rgba(0,0,0,0.2);
+            border-radius: 18px;
+            padding: 4px 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+        
+        .timer-display i {
+            margin-right: 6px;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-top: 60px;
+            padding: 16px;
+            min-height: calc(100vh - 140px);
+        }
+        
+        .question-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--box-shadow-sm);
+            border: none;
+            transition: var(--transition);
+        }
+        
+        .question-counter {
+            font-size: 0.9rem;
+            color: var(--gray);
+            text-align: center;
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+        
+        .question-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+        
+        .option-item {
+            margin-bottom: 12px;
+            position: relative;
+        }
+        
+        .option-input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+            .question-text {
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        hyphens: auto;
+        max-width: 100%;
+    }
+
+    .question-text img,
+    .option-label img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 8px 0;
+        border-radius: 8px;
+    }
+
+    .option-label {
+        overflow: hidden;
+    }
+
+    .question-card {
+        overflow: hidden;
+    }
+        
+        .option-label {
+            display: block;
+            padding: 14px 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--light-gray);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .option-label:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .option-input:checked + .option-label {
+            border-color: var(--primary);
+            background: rgba(108, 92, 231, 0.05);
+            box-shadow: 0 0 0 1px var(--primary);
+        }
+        
+        .option-input:checked + .option-label::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--primary);
+        }
+        
+        /* When reviewing answers */
+        .review-mode .option-input:checked + .option-label.correct {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.correct::after {
+            background: var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.incorrect {
+            border-color: var(--danger);
+            background: rgba(214, 48, 49, 0.05);
+            box-shadow: 0 0 0 1px var(--danger);
+        }
+        
+        .MathJax, .mjx-chtml {
+            overflow-x: auto;
+            max-width: 100%;
+            display: inline-block;
+        }
+
+        
+        .review-mode .option-input:checked + .option-label.incorrect::after {
+            background: var(--danger);
+        }
+        
+        .review-mode .option-label.correct-answer {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-label.correct-answer::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--success);
+        }
+        
+        .solution-container {
+            margin-top: 20px;
+            padding: 16px;
+            background: rgba(108, 92, 231, 0.05);
+            border-radius: 12px;
+            border-left: 3px solid var(--primary);
+        }
+        
+        .solution-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+        
+        /* Question Navigation */
+        .question-nav {
+            position: fixed;
+            top: 60px;
+            right: 0;
+            bottom: 80px;
+            width: 100%;
+            max-width: 320px;
+            background: var(--card-bg);
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            transform: translateX(100%);
+            transition: var(--transition);
+            z-index: 900;
+            overflow-y: auto;
+            padding: 16px;
+        }
+        
+        .question-nav.show {
+            transform: translateX(0);
+        }
+        
+        .nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .nav-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+        
+        .question-stats {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .stat-badge {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        
+        .section-selector {
+            width: 100%;
+            margin-bottom: 16px;
+            border-radius: 12px;
+            padding: 10px 16px;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            font-size: 0.9rem;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 16px;
+        }
+        
+        .question-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+            gap: 8px;
+        }
+        
+        .q-box {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .q-box:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .q-box.attempted {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .q-box.correct {
+            background-color: var(--success);
+            color: white;
+            border-color: var(--success);
+        }
+        
+        .q-box.incorrect {
+            background-color: var(--danger);
+            color: white;
+            border-color: var(--danger);
+        }
+        
+        .q-box.current {
+            border: 2px solid var(--accent) !important;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .q-box.unattempted {
+            background-color: var(--gray);
+            color: white;
+            border-color: var(--gray);
+        }
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: var(--footer-bg);
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            z-index: 800;
+        }
+        
+        .nav-btn {
+            height: 48px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 20px;
+            transition: var(--transition);
+            gap: 8px;
+        }
+        
+        .nav-btn i {
+            font-size: 1rem;
+        }
+        
+        .nav-btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .nav-btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+        
+        .nav-btn-outline:hover {
+            background: rgba(108, 92, 231, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        /* Overlay when nav is open */
+        .nav-overlay {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            bottom: 80px;
+            background: rgba(0,0,0,0.5);
+            z-index: 800;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+        }
+        
+        .nav-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        /* Results Modal */
+        .results-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1100;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+            padding: 16px;
+        }
+        
+        .results-modal.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .results-card {
+            background: white;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+            transform: translateY(20px);
+            transition: var(--transition);
+        }
+        
+        .results-modal.show .results-card {
+            transform: translateY(0);
+        }
+        
+        .results-header {
+            background: var(--header-bg);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .results-title {
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .results-body {
+            padding: 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            color: white;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+        
+        .results-footer {
+            padding: 16px 20px;
+            display: flex;
+            justify-content: center;
+            border-top: 1px solid var(--light-gray);
+        }
+        
+        /* Responsive Adjustments */
+        @media (min-width: 992px) {
+            .question-nav {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-right: 320px;
+            }
+            
+            .nav-overlay {
+                display: none;
+            }
+            
+            .bottom-nav {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .question-grid {
+                grid-template-columns: repeat(auto-fill, minmax(36px, 1fr));
+                gap: 6px;
+            }
+            
+            .q-box {
+                width: 36px;
+                height: 36px;
+                font-size: 0.9rem;
+            }
+            
+            .option-label {
+                padding: 12px 14px;
+            }
+            
+            .question-text {
+                font-size: 1rem;
+            }
+            
+            .header-brand {
+                font-size: 1rem;
+            }
+            
+            .control-btn {
+                width: 32px;
+                height: 32px;
+            }
+            
+            .timer-display {
+                font-size: 0.8rem;
+                padding: 4px 10px;
+            }
+            
+            .nav-btn {
+                height: 44px;
+                padding: 0 16px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="#" class="header-brand">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Mocks Wallah</span>
+            </a>
+            
+            <div class="header-controls">
+                <!-- Timer -->
+                <div class="timer-display">
+                    <i class="far fa-clock"></i>
+                    <span id="timer-display">15:00</span>
+                </div>
+                
+                <!-- Language toggle -->
+                <button class="control-btn" id="lang-btn" onclick="toggleLanguage()">
+                    <span id="lang-text">En</span>
+                </button>
+                
+                <!-- Submit button -->
+                <button class="control-btn" id="submit-btn" onclick="confirmSubmit()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+                
+                <!-- Questions toggle for mobile -->
+                <button class="control-btn nav-toggle-btn" id="nav-toggle" onclick="toggleNav()">
+                    <i class="fas fa-th"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main content -->
+    <main class="main-content" id="main-content">
+        <div class="question-counter" id="question-counter">Question 1 of 20</div>
+        
+        <!-- Questions will be displayed here -->
+        <div id="questions-container"></div>
+    </main>
+    
+    <!-- Overlay for mobile nav -->
+    <div class="nav-overlay" id="nav-overlay" onclick="toggleNav(false)"></div>
+    
+    <!-- Question navigation sidebar -->
+    <aside class="question-nav" id="question-nav">
+        <div class="nav-header">
+            <h3 class="nav-title">Questions</h3>
+            <div class="question-stats">
+                <span class="stat-badge bg-primary" id="attempted-count">0</span>
+                <span class="stat-badge bg-gray" id="total-count">20</span>
+                <button class="control-btn d-lg-none" onclick="toggleNav(false)">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Section selector -->
+        <select class="section-selector" id="section-selector" onchange="switchSection(this.value)">
+            <option value="all">All Sections</option>
+        </select>
+        
+        <!-- Question grid -->
+        <div class="question-grid" id="question-boxes"></div>
+    </aside>
+    
+    <!-- Bottom navigation for mobile -->
+    <nav class="bottom-nav d-lg-none">
+        <button class="nav-btn nav-btn-outline" onclick="prevQuestion()">
+            <i class="fas fa-chevron-left"></i>
+            <span>Previous</span>
+        </button>
+        <button class="nav-btn nav-btn-outline" onclick="nextQuestion()">
+            <span>Next</span>
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </nav>
+    
+    <!-- Results modal -->
+    <div class="results-modal" id="results-modal">
+        <div class="results-card">
+            <div class="results-header">
+                <h3 class="results-title">Test Results</h3>
+            </div>
+            <div class="results-body">
+                <div class="stats-grid">
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark))">
+                        <div class="stat-value" id="score-value">0</div>
+                        <div class="stat-label">Score</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--success), #1b9aaa)">
+                        <div class="stat-value" id="correct-value">0</div>
+                        <div class="stat-label">Correct</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--danger), var(--accent))">
+                        <div class="stat-value" id="incorrect-value">0</div>
+                        <div class="stat-label">Incorrect</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--gray), var(--dark))">
+                        <div class="stat-value" id="unattempted-value">0</div>
+                        <div class="stat-label">Unattempted</div>
+                    </div>
+                </div>
+            </div>
+            <div class="results-footer">
+                <button class="nav-btn nav-btn-primary" onclick="reviewTest()">
+                    <i class="fas fa-search me-1"></i>
+                    <span>Review Test</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Questions data
+        const questions = [];
+        const sections = {};
+        let currentLang = "en";
+        let currentQuestion = 0;
+        let answers = {};
+        let submitted = false;
+        let totalTime = 15 * 60;
+        
+        // Initialize the test
+        window.onload = function() {
+            initializeTest();
+            startTimer();
+            
+            // If on desktop, show the question navigation by default
+            if (window.innerWidth >= 992) {
+                document.getElementById('question-nav').classList.add('show');
+                document.getElementById('main-content').classList.add('with-nav');
+            }
+        };
+        
+        // Initialize test data
+        function initializeTest() {
+            // Add sections and questions
+            
+            sections["17"] = {
+                name: "Quantitative Aptitude",
+                start: 0,
+                end: 18
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="17">Quantitative Aptitude</option>`;
+            
+            sections["misc"] = {
+                name: "Miscellaneous",
+                start: 19,
+                end: 19
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="misc">Miscellaneous</option>`;
+            
+            
+                questions.push({
+                    id: "1",
+                    section: "17",
+                    question_en: "<p>1. If x = 4cosA + 5sinA and y = 4 sinA - 5 cosA, then the value of x<sup>2</sup> + y<sup>2</sup> is:</p>",
+                    question_hi: "<p>1. यदि x = 4cosA + 5sinA तथा y = 4 sinA - 5 cosA है, तो x<sup>2</sup> + y<sup>2</sup> का मान क्या होगा?</p>",
+                    options_en: ["<p>41</p>", "<p>0</p>", 
+                                "<p>16</p>", "<p>25</p>"],
+                    options_hi: ["<p>41</p>", "<p>0</p>",
+                                "<p>16</p>", "<p>25</p>"],
+                    solution_en: "<pre>1.(a) x = 4cosA + 5sinA<br>y = 4sinA - 5cosA<br>x<sup>2</sup> = 16cos<sup>2</sup>A + 25sin<sup>2</sup>A + 40 cosA sinA<br>y<sup>2 </sup>= 16sin<sup>2</sup>A + 25cos<sup>2</sup>A - 40 cosA sinA<br>x<sup>2</sup> + y<sup>2</sup> = 16(cos<sup>2</sup>A + sin<sup>2</sup>A) + 25(sin<sup>2</sup>A + cos<sup>2</sup>A) = 41</pre>",
+                    solution_hi: "<pre>1.(a) x = 4cosA + 5sinA<br>y = 4sinA - 5cosA<br>x<sup>2</sup> = 16cos<sup>2</sup>A + 25sin<sup>2</sup>A + 40 cosA sinA<br>y<sup>2 </sup>= 16sin<sup>2</sup>A + 25cos<sup>2</sup>A - 40 cosA sinA<br>x<sup>2</sup> + y<sup>2</sup> = 16(cos<sup>2</sup>A + sin<sup>2</sup>A) + 25(sin<sup>2</sup>A + cos<sup>2</sup>A) = 41</pre>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.25
+                });
+                questions.push({
+                    id: "2",
+                    section: "17",
+                    question_en: "<p>2. If A + B = 45&deg;, then the value of 2(1 + tanA)(1 + tanB) is:</p>",
+                    question_hi: "<p>2. यदि A+B = 45&deg; है, तो 2(1+ tanA)(1+ tanB) का मान होगा :</p>",
+                    options_en: ["<p>2</p>", "<p>4</p>", 
+                                "<p>1</p>", "<p>0</p>"],
+                    options_hi: ["<p>2</p>", "<p>4</p>",
+                                "<p>1</p>", "<p>0</p>"],
+                    solution_en: "<p>2.(b) We know that, if x + y = 45&deg; then (1+ tanx)(1+ tany) = 2<br>Here A + B = 45&deg; Then,<br>2(1+ tanA)(1+ tanB) = 4</p>",
+                    solution_hi: "<p>2.(b) हम जानते हैं की,<br>जब x+y = 45&deg; तो, (1+ tanx)(1+ tany) = 2<br>यंहा, A+B= 45&deg;<br>तो,<br>2(1+ tanA)(1+ tanB)= 4</p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.25
+                });
+                questions.push({
+                    id: "3",
+                    section: "17",
+                    question_en: "<p>3. If 2sin&theta; + 15 cos<sup>2</sup>&theta; = 7, 0&deg; &lt; &theta; &lt; 90&deg;, then tan&theta; + cos&theta; + sec&theta; =</p>",
+                    question_hi: "<p>3. यदि 2sin&theta; + 15 cos<sup>2</sup>&theta; = 7, 0&deg; &lt; &theta; &lt; 90&deg; है, तो tan&theta; + cos&theta; + sec&theta; = ?</p>",
+                    options_en: ["<p>3<math display=\"inline\"><mfrac><mrow><mn>3</mn></mrow><mrow><mn>5</mn></mrow></mfrac></math></p>", "<p>3</p>", 
+                                "<p>3<math display=\"inline\"><mfrac><mrow><mn>4</mn></mrow><mrow><mn>5</mn></mrow></mfrac></math></p>", "<p>4</p>"],
+                    options_hi: ["<p>3<math display=\"inline\"><mfrac><mrow><mn>3</mn></mrow><mrow><mn>5</mn></mrow></mfrac></math></p>", "<p>3</p>",
+                                "<p>3<math display=\"inline\"><mfrac><mrow><mn>4</mn></mrow><mrow><mn>5</mn></mrow></mfrac></math></p>", "<p>4</p>"],
+                    solution_en: "<p>3.(a) 2sin&theta; + 15 cos<sup>2</sup>&theta; = 7,&nbsp;<br>0&deg; &lt; &theta; &lt; 90&deg;<br><math display=\"inline\"><mo>&#8658;</mo></math> 2sin&theta; + 15(1 - sin<sup>2</sup>&theta;) = 7<br><math display=\"inline\"><mo>&#8658;</mo></math> 15 sin<sup>2</sup>&theta; - 2sin&theta; - 8 = 0<br><math display=\"inline\"><mo>&#8658;</mo></math> sin&theta; = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mo>-</mo><mo>(</mo><mo>-</mo><mn>2</mn><mo>)</mo><mo>&#177;</mo><msqrt><mn>4</mn><mo>-</mo><mn>4</mn><mo>(</mo><mn>15</mn><mo>)</mo><mo>(</mo><mo>-</mo><mn>8</mn><mo>)</mo></msqrt></mrow><mn>30</mn></mfrac></math><br>= <math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>2</mn><mo>&#177;</mo><msqrt><mn>484</mn></msqrt></mrow><mn>30</mn></mfrac></math>= <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>2</mn><mo>&#177;</mo><mn>22</mn></mrow><mn>30</mn></mfrac></math><br><math display=\"inline\"><mo>&#8658;</mo></math> sin&theta; = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>4</mn><mn>5</mn></mfrac></math>or - <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>2</mn><mn>3</mn></mfrac></math><br>As &theta; is between 0&deg; and 90&deg;, sin&theta; will be <br>positive.<br>cos&theta; = <math display=\"inline\"><mfrac><mrow><mn>3</mn></mrow><mrow><mn>5</mn></mrow></mfrac></math>, tan&theta; = <math display=\"inline\"><mfrac><mrow><mn>4</mn></mrow><mrow><mn>3</mn></mrow></mfrac></math> and sec&theta; = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>5</mn><mn>3</mn></mfrac></math><br>Put values in: tan&theta; + cos&theta; + sec&theta;<br>We get; <math display=\"inline\"><mfrac><mrow><mn>4</mn></mrow><mrow><mn>3</mn></mrow></mfrac></math> + <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>3</mn><mn>5</mn></mfrac></math>+ <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>5</mn><mn>3</mn></mfrac></math>= <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>3</mn><mfrac><mn>3</mn><mn>5</mn></mfrac></math></p>",
+                    solution_hi: "<p>3.(a) <br>2sin&theta; +15 cos<sup>2</sup>&theta; = 7, 0&deg; &lt; &theta; &lt; 90&deg;<br><math display=\"inline\"><mo>&#8658;</mo></math> 2sin&theta; + 15(1 - sin<sup>2</sup>&theta;) = 7<br><math display=\"inline\"><mo>&#8658;</mo></math> 15 sin<sup>2</sup>&theta; - 2sin&theta; - 8 = 0<br><math display=\"inline\"><mo>&#8658;</mo></math> sin&theta; =<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mo>-</mo><mo>(</mo><mo>-</mo><mn>2</mn><mo>)</mo><mo>&#177;</mo><msqrt><mn>4</mn><mo>-</mo><mn>4</mn><mo>(</mo><mn>15</mn><mo>)</mo><mo>(</mo><mo>-</mo><mn>8</mn><mo>)</mo></msqrt></mrow><mn>30</mn></mfrac></math><br>= <math display=\"inline\"><mfrac><mrow><mn>2</mn><mo>&#177;</mo><msqrt><mn>484</mn></msqrt></mrow><mrow><mn>30</mn></mrow></mfrac></math> = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>2</mn><mo>&#177;</mo><mn>22</mn></mrow><mn>30</mn></mfrac></math><br><math display=\"inline\"><mo>&#8658;</mo><mi>&#160;</mi></math>sin&theta; = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>4</mn><mn>5</mn></mfrac></math> या - <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>2</mn><mn>3</mn></mfrac></math><br>चूंकि &theta;, 0&deg; और 90&deg; के बीच है, sin&theta; धनात्मक होगा।<br>cos&theta;= <math display=\"inline\"><mfrac><mrow><mn>3</mn></mrow><mrow><mn>5</mn></mrow></mfrac></math>, tan&theta; = <math display=\"inline\"><mfrac><mrow><mn>4</mn></mrow><mrow><mn>3</mn></mrow></mfrac></math>और sec&theta; =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>5</mn><mn>3</mn></mfrac></math><br>Tan&theta; + cos&theta; + sec&theta; में मान रखने पर ।<br>हम पाते हैं की, <math display=\"inline\"><mfrac><mrow><mn>4</mn></mrow><mrow><mn>3</mn></mrow></mfrac></math> + <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>3</mn><mn>5</mn></mfrac></math>+ <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>5</mn><mn>3</mn></mfrac></math>= <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>3</mn><mfrac><mn>3</mn><mn>5</mn></mfrac></math></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.25
+                });
+                questions.push({
+                    id: "4",
+                    section: "17",
+                    question_en: "<p>4. The value of the expression cosec(85&deg; + &theta;) - sec(5&deg; - &theta;) - tan(55&deg; + &theta;) + cot(35&deg; - &theta;) is:</p>",
+                    question_hi: "<p>4. व्यंजक cosec(85&deg; + &theta;) - sec(5&deg; - &theta;) - tan(55&deg; + &theta;) + cot(35&deg; - &theta;) का मान है :</p>",
+                    options_en: ["<p><math display=\"inline\"><mfrac><mrow><mn>3</mn></mrow><mrow><mn>2</mn></mrow></mfrac></math></p>", "<p>0</p>", 
+                                "<p>-1</p>", "<p>1</p>"],
+                    options_hi: ["<p><math display=\"inline\"><mfrac><mrow><mn>3</mn></mrow><mrow><mn>2</mn></mrow></mfrac></math></p>", "<p>0</p>",
+                                "<p>-1</p>", "<p>1</p>"],
+                    solution_en: "<p>4.(b) Put &theta; = 5&deg; in given equation: <br>cosec(85&deg; + &theta;) - sec(5&deg; - &theta;) - tan(55&deg; + &theta;) + cot(35&deg; - &theta;)<br>We get:<br>Cosec 90&deg;- sec0&deg; - tan60&deg; + cot30&deg;<br><math display=\"inline\"><mo>&#8658;</mo><mi>&#160;</mi><mn>1</mn><mo>-</mo><mn>1</mn><mo>-</mo></math> <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt><mo>+</mo><msqrt><mn>3</mn></msqrt><mo>&#160;</mo></math> &rArr; 0</p>",
+                    solution_hi: "<p>4.(b) <br>दिए गए समीकरण में &theta; = 5&deg; रखें। cosec(85&deg; + &theta;) - sec(5&deg;- &theta;) - tan(55&deg; + &theta;) + cot(35&deg;- &theta;)<br>हम पाते हैं की, Cosec 90&deg;- sec 0&deg; - tan 60&deg; + cot 30&deg;<br><math display=\"inline\"><mo>&#8658;</mo><mi>&#160;</mi><mn>1</mn><mo>-</mo><mn>1</mn><mo>-</mo></math> <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt><mo>+</mo><msqrt><mn>3</mn></msqrt><mo>&#160;</mo></math>&rArr; 0</p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.25
+                });
+                questions.push({
+                    id: "5",
+                    section: "17",
+                    question_en: "<p>5. If 2sin&theta; - 8 cos<sup>2</sup>&theta; + 5 = 0, 0&deg; &lt; &theta; &lt; 90&deg;, then what is the value of (tan 2&theta; + cosec 2&theta;)?</p>",
+                    question_hi: "<p>5. यदि 2 sin&theta; - 8 cos<sup>2</sup>&theta; + 5 = 0, 0&deg; &lt; &theta; &lt; 90&deg; है, तो (tan 2&theta; + cosec 2&theta;) का मान क्या होगा ?</p>",
+                    options_en: ["<p>3<math display=\"inline\"><msqrt><mn>3</mn></msqrt></math></p>", "<p>2<math display=\"inline\"><msqrt><mn>3</mn></msqrt></math></p>", 
+                                "<p><math display=\"inline\"><mfrac><mrow><mn>4</mn><msqrt><mn>3</mn></msqrt></mrow><mrow><mn>3</mn></mrow></mfrac></math></p>", "<p><math display=\"inline\"><mi>&#160;</mi><mfrac><mrow><mn>5</mn><msqrt><mn>3</mn></msqrt></mrow><mrow><mn>3</mn></mrow></mfrac></math></p>"],
+                    options_hi: ["<p>3<math display=\"inline\"><msqrt><mn>3</mn></msqrt></math></p>", "<p>2<math display=\"inline\"><msqrt><mn>3</mn></msqrt></math></p>",
+                                "<p><math display=\"inline\"><mfrac><mrow><mn>4</mn><msqrt><mn>3</mn></msqrt></mrow><mrow><mn>3</mn></mrow></mfrac></math></p>", "<p><math display=\"inline\"><mfrac><mrow><mn>5</mn><msqrt><mn>3</mn></msqrt></mrow><mrow><mn>3</mn></mrow></mfrac></math></p>"],
+                    solution_en: "<p>5.(d) It is given that <br>2 sin&theta; - 8 cos<sup>2</sup>&theta; + 5 = 0<br>And 0&deg; &lt; &theta; &lt; 90&deg;<br>cos<sup>2</sup>&theta; = 1- sin<sup>2</sup>&theta;<br>2 sin&theta; - 8 cos<sup>2</sup>&theta; + 5 = 0<br>2 sin&theta; - 8(1 - sin<sup>2</sup>&theta;) + 5 = 0<br>8sin<sup>2</sup>&theta; + 2 sin&theta; - 3 = 0<br>Solve the quadratic equation, we get<br>Sin&theta; = <math display=\"inline\"><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac></math> or - <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>3</mn><mn>4</mn></mfrac></math><br>Sin&theta; can not be negative for 0&deg; &lt; &theta; &lt; 90&deg;<br>Thus &theta; = 30&deg;<br>Now, tan 2&theta; + cosec 2&theta; = tan 60&deg; + <br>cosec 60&deg;<br>= <math display=\"inline\"><msqrt><mn>3</mn></msqrt><mo>+</mo></math> <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>2</mn><msqrt><mn>3</mn></msqrt></mfrac></math>= <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>5</mn><msqrt><mn>3</mn></msqrt></mfrac><mo>&#160;</mo></math>= <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>5</mn><msqrt><mn>3</mn></msqrt></mrow><mn>3</mn></mfrac></math></p>",
+                    solution_hi: "<p>5.(d) दिया गया है की, <br>2 sin&theta; - 8 cos<sup>2</sup>&theta; + 5 = 0<br>और 0&deg; &lt; &theta; &lt; 90&deg;<br>Cos<sup>2</sup>&theta; = 1- sin<sup>2</sup>&theta;<br>2 sin&theta; - 8 cos<sup>2</sup>&theta; + 5 = 0&nbsp;<br>2 sin&theta; - 8(1-sin<sup>2</sup>&theta;)+5 = 0<br>8sin<sup>2</sup>&theta; + 2 sin&theta; - 3 =0<br>द्विघात समीकरण को हल करने के बाद, हम पाते हैं,<br>Sin&theta; = <math display=\"inline\"><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac></math> या - <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>3</mn><mn>4</mn></mfrac></math><br>sin&theta; 0&deg; &lt; &theta; &lt; 90&deg; के लिए ऋणात्मक नहीं हो सकता ।<br>इस प्रकार, &theta;= 30&deg;<br>अब, tan 2&theta; + cosec 2&theta; = tan 60&deg;+ cosec 60&deg;<br>= <math display=\"inline\"><msqrt><mn>3</mn></msqrt><mo>+</mo></math> <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>2</mn><msqrt><mn>3</mn></msqrt></mfrac></math>= <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>5</mn><msqrt><mn>3</mn></msqrt></mfrac><mo>&#160;</mo></math>= <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>5</mn><msqrt><mn>3</mn></msqrt></mrow><mn>3</mn></mfrac></math></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.25
+                });
+                questions.push({
+                    id: "6",
+                    section: "17",
+                    question_en: "<p>6. If sec&theta; - tan&theta; = <math display=\"inline\"><mfrac><mrow><mi>x</mi></mrow><mrow><mi>y</mi></mrow></mfrac><mo>,</mo></math> (0 &lt; x &lt; y) and 0&deg; &lt; &theta; &lt; 90&deg;, then sin&theta; is equal to:</p>",
+                    question_hi: "<p>6. यदि sec&theta; - tan&theta; = <math display=\"inline\"><mfrac><mrow><mi>x</mi></mrow><mrow><mi>y</mi></mrow></mfrac></math> (0 &lt; x &lt; y) तथा 0&deg; &lt; &theta; &lt; 90&deg; है, तो sin&theta; का मान किसके बराबर है ?</p>",
+                    options_en: ["<p><math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><msup><mi>y</mi><mn>2</mn></msup></mrow><mrow><mn>2</mn><mi>x</mi><mi>y</mi></mrow></mfrac></math></p>", "<p><math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>2</mn><mi>x</mi><mi>y</mi></mrow><mrow><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><msup><mi>y</mi><mn>2</mn></msup></mrow></mfrac></math></p>", 
+                                "<p><math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><msup><mi>y</mi><mn>2</mn></msup><mo>-</mo><msup><mi>x</mi><mn>2</mn></msup></mrow><mrow><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><msup><mi>y</mi><mn>2</mn></msup></mrow></mfrac></math></p>", "<p><math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><msup><mi>y</mi><mn>2</mn></msup></mrow><mrow><msup><mi>y</mi><mn>2</mn></msup><mo>-</mo><msup><mrow><mi>&#160;</mi><mi>x</mi></mrow><mn>2</mn></msup></mrow></mfrac></math></p>"],
+                    options_hi: ["<p><math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><msup><mi>y</mi><mn>2</mn></msup></mrow><mrow><mn>2</mn><mi>x</mi><mi>y</mi></mrow></mfrac></math></p>", "<p><math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>2</mn><mi>x</mi><mi>y</mi></mrow><mrow><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><msup><mi>y</mi><mn>2</mn></msup></mrow></mfrac></math></p>",
+                                "<p><math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><msup><mi>y</mi><mn>2</mn></msup><mo>-</mo><msup><mi>x</mi><mn>2</mn></msup></mrow><mrow><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><msup><mi>y</mi><mn>2</mn></msup></mrow></mfrac></math></p>", "<p><math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><msup><mi>y</mi><mn>2</mn></msup></mrow><mrow><msup><mi>y</mi><mn>2</mn></msup><mo>-</mo><msup><mi>x</mi><mn>2</mn></msup></mrow></mfrac></math></p>"],
+                    solution_en: "<p>6.(c) sec<math display=\"inline\"><mi>&#952;</mi></math> - tan&theta; = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi>x</mi><mi>y</mi></mfrac></math>&hellip;(1)<br>Then sec<math display=\"inline\"><mi>&#952;</mi></math> + tan&theta; = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi>y</mi><mi>x</mi></mfrac></math>&hellip;(2) as<br>(sec<sup>2</sup><math display=\"inline\"><mi>&#952;</mi></math> - tan<sup>2</sup>&theta; = 1)<br>Add (1) and (2), we get:</p>\n<p>2sec<math display=\"inline\"><mi>&#952;</mi></math> = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><msup><mi>y</mi><mn>2</mn></msup></mrow><mrow><mi>x</mi><mi>y</mi></mrow></mfrac></math></p>\n<p>sec<math display=\"inline\"><mi>&#952;</mi></math> = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><msup><mi>y</mi><mn>2</mn></msup></mrow><mrow><mn>2</mn><mi>x</mi><mi>y</mi></mrow></mfrac></math></p>\n<p>cos<math display=\"inline\"><mi>&#952;</mi></math> = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>2</mn><mi>x</mi><mi>y</mi></mrow><mrow><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><msup><mi>y</mi><mn>2</mn></msup></mrow></mfrac></math></p>\n<p>sin<math display=\"inline\"><mi>&#952;</mi></math>= <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>1</mn><mo>-</mo><msup><mrow><mo>(</mo><mfrac><mrow><mn>2</mn><mi>x</mi><mi>y</mi></mrow><mrow><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><msup><mi>y</mi><mn>2</mn></msup></mrow></mfrac><mo>)</mo></mrow><mn>2</mn></msup></msqrt></math> = <math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><msup><mi>y</mi><mn>2</mn></msup><mo>-</mo><msup><mi>x</mi><mn>2</mn></msup></mrow><mrow><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><msup><mi>y</mi><mn>2</mn></msup></mrow></mfrac></math></p>",
+                    solution_hi: "<p>.6(c)<br>sec<math display=\"inline\"><mi>&#952;</mi></math> - tan&theta; = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi>x</mi><mi>y</mi></mfrac></math>&hellip;(1)<br>तो, sec<math display=\"inline\"><mi>&#952;</mi></math> + tan&theta; = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi>y</mi><mi>x</mi></mfrac></math>&hellip;(2) जैसा की, (sec<sup>2</sup>&theta;- tan<sup>2</sup>&theta; = 1)<br>समीकरण 1 और 2 को जोड़ने पर हम पाते हैं की, <br>2sec<math display=\"inline\"><mi>&#952;</mi></math> = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><msup><mi>y</mi><mn>2</mn></msup></mrow><mrow><mi>x</mi><mi>y</mi></mrow></mfrac></math><br>sec<math display=\"inline\"><mi>&#952;</mi></math> = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><msup><mi>y</mi><mn>2</mn></msup></mrow><mrow><mn>2</mn><mi>x</mi><mi>y</mi></mrow></mfrac></math> ,&nbsp;cos<math display=\"inline\"><mi>&#952;</mi></math> = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>2</mn><mi>x</mi><mi>y</mi></mrow><mrow><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><msup><mi>y</mi><mn>2</mn></msup></mrow></mfrac></math><br>sin<math display=\"inline\"><mi>&#952;</mi></math> = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>1</mn><mo>-</mo><msup><mrow><mo>(</mo><mfrac><mrow><mn>2</mn><mi>x</mi><mi>y</mi></mrow><mrow><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><msup><mi>y</mi><mn>2</mn></msup></mrow></mfrac><mo>)</mo></mrow><mn>2</mn></msup></msqrt></math>=<math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><msup><mi>y</mi><mn>2</mn></msup><mo>-</mo><msup><mi>x</mi><mn>2</mn></msup></mrow><mrow><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><msup><mi>y</mi><mn>2</mn></msup></mrow></mfrac></math></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.25
+                });
+                questions.push({
+                    id: "7",
+                    section: "17",
+                    question_en: "<p>7. If 5<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msup><mi>sin</mi><mn>2</mn></msup></math>&theta; + 14cos&theta; = 13, 0&deg; &lt; &theta; &lt; 90&deg;, then what is the value of <math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mi>s</mi><mi>e</mi><mi>c</mi><mi>&#952;</mi><mo>+</mo><mi>c</mi><mi>o</mi><mi>t</mi><mi>&#952;</mi></mrow><mrow><mi>c</mi><mi>o</mi><mi>s</mi><mi>e</mi><mi>c</mi><mi>&#952;</mi><mo>+</mo><mi>t</mi><mi>a</mi><mi>n</mi><mi>&#952;</mi></mrow></mfrac></math>?</p>",
+                    question_hi: "<p>7. यदि 5<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msup><mi>sin</mi><mn>2</mn></msup></math>&theta; + 14cos&theta; = 13, 0&deg; &lt; &theta; &lt; 90&deg; है, तो <math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mi>s</mi><mi>e</mi><mi>c</mi><mi>&#952;</mi><mo>+</mo><mi>c</mi><mi>o</mi><mi>t</mi><mi>&#952;</mi></mrow><mrow><mi>c</mi><mi>o</mi><mi>s</mi><mi>e</mi><mi>c</mi><mi>&#952;</mi><mo>+</mo><mi>t</mi><mi>a</mi><mi>n</mi><mi>&#952;</mi></mrow></mfrac></math> का मान क्या होगा ?</p>",
+                    options_en: ["<p><math display=\"inline\"><mfrac><mrow><mn>9</mn></mrow><mrow><mn>8</mn></mrow></mfrac></math></p>", "<p><math display=\"inline\"><mfrac><mrow><mn>31</mn></mrow><mrow><mn>29</mn></mrow></mfrac></math></p>", 
+                                "<p><math display=\"inline\"><mfrac><mrow><mn>21</mn></mrow><mrow><mn>28</mn></mrow></mfrac></math></p>", "<p><math display=\"inline\"><mfrac><mrow><mn>32</mn></mrow><mrow><mn>27</mn></mrow></mfrac></math></p>"],
+                    options_hi: ["<p><math display=\"inline\"><mfrac><mrow><mn>9</mn></mrow><mrow><mn>8</mn></mrow></mfrac></math></p>", "<p><math display=\"inline\"><mfrac><mrow><mn>31</mn></mrow><mrow><mn>29</mn></mrow></mfrac></math></p>",
+                                "<p><math display=\"inline\"><mfrac><mrow><mn>21</mn></mrow><mrow><mn>28</mn></mrow></mfrac></math></p>", "<p><math display=\"inline\"><mfrac><mrow><mn>32</mn></mrow><mrow><mn>27</mn></mrow></mfrac></math></p>"],
+                    solution_en: "<p>7.(b) 5sin<sup>2</sup>&theta; + 14cos&theta; = 13,<br>0&deg; &lt; &theta; &lt; 90&deg;<br>Put sin<sup>2</sup>&theta; = 1 - cos<sup>2</sup>&theta;<br>We get: 5cos<sup>2</sup>&theta; - 14cos&theta; + 8 = 0<br>cos&theta; = <math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>14</mn><mo>&#177;</mo><msqrt><mn>196</mn><mo>-</mo><mn>160</mn></msqrt></mrow><mn>10</mn></mfrac></math> = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>14</mn><mo>&#177;</mo><mn>6</mn></mrow><mn>10</mn></mfrac></math> = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>4</mn><mn>5</mn></mfrac></math><br>Sin&theta; = <math display=\"inline\"><mfrac><mrow><mn>3</mn></mrow><mrow><mn>5</mn></mrow></mfrac></math><br><math display=\"inline\"><mfrac><mrow><mi>s</mi><mi>e</mi><mi>c</mi><mi>&#952;</mi><mo>+</mo><mi>c</mi><mi>o</mi><mi>t</mi><mi>&#952;</mi></mrow><mrow><mi>c</mi><mi>o</mi><mi>s</mi><mi>e</mi><mi>c</mi><mi>&#952;</mi><mo>+</mo><mi>t</mi><mi>a</mi><mi>n</mi><mi>&#952;</mi></mrow></mfrac></math>= <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mstyle displaystyle=\"true\"><mfrac><mn>5</mn><mn>4</mn></mfrac></mstyle><mo>+</mo><mstyle displaystyle=\"true\"><mfrac><mn>4</mn><mn>3</mn></mfrac></mstyle></mrow><mrow><mstyle displaystyle=\"true\"><mfrac><mn>5</mn><mn>3</mn></mfrac></mstyle><mo>+</mo><mstyle displaystyle=\"true\"><mfrac><mn>3</mn><mn>4</mn></mfrac></mstyle></mrow></mfrac></math>= <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>31</mn><mn>29</mn></mfrac></math></p>",
+                    solution_hi: "<p>7.(b)&nbsp;5sin<sup>2</sup>&theta; + 14cos&theta; = 13, 0&deg; &lt; &theta; &lt; 90&deg;<br>sin<sup>2</sup>&theta; = 1 - cos<sup>2</sup>&theta; रखें।<br>हम पाते हैं की : 5cos<sup>2</sup>&theta; - 14cos&theta; + 8=0<br>cos&theta; = <math display=\"inline\"><mfrac><mrow><mn>14</mn><mi>&#160;</mi><mo>&#177;</mo><mi>&#160;</mi><msqrt><mn>196</mn><mo>-</mo><mn>160</mn></msqrt></mrow><mrow><mn>10</mn></mrow></mfrac></math> = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>14</mn><mo>&#177;</mo><mn>6</mn></mrow><mn>10</mn></mfrac></math>= <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>4</mn><mn>5</mn></mfrac></math><br>Sin&theta; =<math display=\"inline\"><mi>&#160;</mi><mfrac><mrow><mn>3</mn></mrow><mrow><mn>5</mn></mrow></mfrac></math><br><math display=\"inline\"><mfrac><mrow><mi>s</mi><mi>e</mi><mi>c</mi><mi>&#952;</mi><mo>+</mo><mi>c</mi><mi>o</mi><mi>t</mi><mi>&#952;</mi></mrow><mrow><mi>c</mi><mi>o</mi><mi>s</mi><mi>e</mi><mi>c</mi><mi>&#952;</mi><mo>+</mo><mi>t</mi><mi>a</mi><mi>n</mi><mi>&#952;</mi></mrow></mfrac></math>= <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mstyle displaystyle=\"true\"><mfrac><mn>5</mn><mn>4</mn></mfrac></mstyle><mo>+</mo><mstyle displaystyle=\"true\"><mfrac><mn>4</mn><mn>3</mn></mfrac></mstyle></mrow><mrow><mstyle displaystyle=\"true\"><mfrac><mn>5</mn><mn>3</mn></mfrac></mstyle><mo>+</mo><mstyle displaystyle=\"true\"><mfrac><mn>3</mn><mn>4</mn></mfrac></mstyle></mrow></mfrac></math>= <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>31</mn><mn>29</mn></mfrac></math></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.25
+                });
+                questions.push({
+                    id: "8",
+                    section: "17",
+                    question_en: "<p>8. The value of <math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mi>t</mi><mi>a</mi><mi>n</mi><mn>30</mn><mo>&#176;</mo><mi>c</mi><mi>o</mi><mi>s</mi><mi>e</mi><mi>c</mi><mn>60</mn><mo>&#176;</mo><mo>+</mo><mi>t</mi><mi>a</mi><mi>n</mi><mn>60</mn><mo>&#176;</mo><mi>s</mi><mi>e</mi><mi>c</mi><mn>30</mn><mo>&#176;</mo></mrow><mrow><msup><mrow><mi>s</mi><mi>i</mi><mi>n</mi></mrow><mn>2</mn></msup><mn>30</mn><mo>&#176;</mo><mo>+</mo><mn>4</mn><msup><mrow><mi>c</mi><mi>o</mi><mi>t</mi></mrow><mn>2</mn></msup><mn>45</mn><mo>&#176;</mo><mo>-</mo><msup><mrow><mi>s</mi><mi>e</mi><mi>c</mi></mrow><mn>2</mn></msup><mn>60</mn><mo>&#176;</mo></mrow></mfrac></math> is:</p>",
+                    question_hi: "<p>8. <math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mi>t</mi><mi>a</mi><mi>n</mi><mn>30</mn><mo>&#176;</mo><mi>c</mi><mi>o</mi><mi>s</mi><mi>e</mi><mi>c</mi><mn>60</mn><mo>&#176;</mo><mo>+</mo><mi>t</mi><mi>a</mi><mi>n</mi><mn>60</mn><mo>&#176;</mo><mi>s</mi><mi>e</mi><mi>c</mi><mn>30</mn><mo>&#176;</mo></mrow><mrow><msup><mrow><mi>s</mi><mi>i</mi><mi>n</mi></mrow><mn>2</mn></msup><mn>30</mn><mo>&#176;</mo><mo>+</mo><mn>4</mn><msup><mrow><mi>c</mi><mi>o</mi><mi>t</mi></mrow><mn>2</mn></msup><mn>45</mn><mo>&#176;</mo><mo>-</mo><msup><mrow><mi>s</mi><mi>e</mi><mi>c</mi></mrow><mn>2</mn></msup><mn>60</mn><mo>&#176;</mo></mrow></mfrac></math> का मान है :</p>",
+                    options_en: ["<p><math display=\"inline\"><mfrac><mrow><mn>2</mn></mrow><mrow><mn>3</mn></mrow></mfrac></math></p>", "<p><math display=\"inline\"><mfrac><mrow><mn>32</mn></mrow><mrow><mn>3</mn></mrow></mfrac></math></p>", 
+                                "<p><math display=\"inline\"><mfrac><mrow><mn>8</mn></mrow><mrow><mn>3</mn></mrow></mfrac></math></p>", "<p><math display=\"inline\"><mfrac><mrow><mn>32</mn></mrow><mrow><mn>99</mn></mrow></mfrac></math></p>"],
+                    options_hi: ["<p><math display=\"inline\"><mfrac><mrow><mn>2</mn></mrow><mrow><mn>3</mn></mrow></mfrac></math></p>", "<p><math display=\"inline\"><mfrac><mrow><mn>32</mn></mrow><mrow><mn>3</mn></mrow></mfrac></math></p>",
+                                "<p><math display=\"inline\"><mfrac><mrow><mn>8</mn></mrow><mrow><mn>3</mn></mrow></mfrac></math></p>", "<p><math display=\"inline\"><mfrac><mrow><mn>32</mn></mrow><mrow><mn>99</mn></mrow></mfrac></math></p>"],
+                    solution_en: "<p>8.(b) <math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mi>tan</mi><mn>30</mn><mo>&#176;</mo><mi>cosec</mi><mn>60</mn><mo>&#176;</mo><mo>+</mo><mi>tan</mi><mn>60</mn><mo>&#176;</mo><mi>sec</mi><mn>30</mn><mo>&#176;</mo></mrow><mrow><msup><mi>sin</mi><mn>2</mn></msup><mn>30</mn><mo>&#176;</mo><mo>+</mo><mn>4</mn><msup><mi>cot</mi><mn>2</mn></msup><mn>45</mn><mo>&#176;</mo><mo>-</mo><msup><mi>sec</mi><mn>2</mn></msup><mn>60</mn><mo>&#176;</mo></mrow></mfrac></math></p>\n<p>&rArr;<math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mfrac><mn>1</mn><msqrt><mn>3</mn></msqrt></mfrac><mo>&#215;</mo><mfrac><mn>2</mn><msqrt><mn>3</mn></msqrt></mfrac><mo>+</mo><msqrt><mn>3</mn></msqrt><mo>&#215;</mo><mfrac><mn>2</mn><msqrt><mn>3</mn></msqrt></mfrac></mrow><mrow><mfrac><mn>1</mn><mn>4</mn></mfrac><mo>+</mo><mn>4</mn><mo>(</mo><mn>1</mn><mo>)</mo><mo>-</mo><mn>4</mn></mrow></mfrac></math> <math display=\"inline\"><mo>&#8658;</mo></math> <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mstyle displaystyle=\"true\"><mfrac><mn>2</mn><mn>3</mn></mfrac></mstyle><mo>+</mo><mn>2</mn></mrow><mrow><mo>&#160;</mo><mstyle displaystyle=\"true\"><mfrac><mn>1</mn><mn>4</mn></mfrac></mstyle></mrow></mfrac><mo>&#8658;</mo><mfrac><mrow><mo>&#160;</mo><mn>32</mn></mrow><mn>3</mn></mfrac><mo>&#160;</mo></math></p>",
+                    solution_hi: "<p>8.(b) <math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mi>tan</mi><mn>30</mn><mo>&#176;</mo><mi>cosec</mi><mn>60</mn><mo>&#176;</mo><mo>+</mo><mi>tan</mi><mn>60</mn><mo>&#176;</mo><mi>sec</mi><mn>30</mn><mo>&#176;</mo></mrow><mrow><msup><mi>sin</mi><mn>2</mn></msup><mn>30</mn><mo>&#176;</mo><mo>+</mo><mn>4</mn><msup><mi>cot</mi><mn>2</mn></msup><mn>45</mn><mo>&#176;</mo><mo>-</mo><msup><mi>sec</mi><mn>2</mn></msup><mn>60</mn><mo>&#176;</mo></mrow></mfrac></math></p>\n<p>&rArr;<math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mfrac><mn>1</mn><msqrt><mn>3</mn></msqrt></mfrac><mo>&#215;</mo><mfrac><mn>2</mn><msqrt><mn>3</mn></msqrt></mfrac><mo>+</mo><msqrt><mn>3</mn></msqrt><mo>&#215;</mo><mfrac><mn>2</mn><msqrt><mn>3</mn></msqrt></mfrac></mrow><mrow><mfrac><mn>1</mn><mn>4</mn></mfrac><mo>+</mo><mn>4</mn><mo>(</mo><mn>1</mn><mo>)</mo><mo>-</mo><mn>4</mn></mrow></mfrac></math> <math display=\"inline\"><mo>&#8658;</mo></math> <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mstyle displaystyle=\"true\"><mfrac><mn>2</mn><mn>3</mn></mfrac></mstyle><mo>+</mo><mn>2</mn></mrow><mrow><mo>&#160;</mo><mstyle displaystyle=\"true\"><mfrac><mn>1</mn><mn>4</mn></mfrac></mstyle></mrow></mfrac><mo>&#8658;</mo><mfrac><mrow><mo>&#160;</mo><mn>32</mn></mrow><mn>3</mn></mfrac><mo>&#160;</mo></math></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.25
+                });
+                questions.push({
+                    id: "9",
+                    section: "17",
+                    question_en: "<p>9. If 7sin<sup>2</sup>&theta; - cos<sup>2</sup>&theta; + 2sin&theta; = 2, 0&deg; &lt; &theta; &lt; 90&deg;, then the value of <math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mi>s</mi><mi>e</mi><mi>c</mi><mn>2</mn><mi>&#952;</mi><mo>+</mo><mi>c</mi><mi>o</mi><mi>t</mi><mn>2</mn><mi>&#952;</mi></mrow><mrow><mi>c</mi><mi>o</mi><mi>s</mi><mi>e</mi><mi>c</mi><mn>2</mn><mi>&#952;</mi><mo>+</mo><mi>t</mi><mi>a</mi><mi>n</mi><mn>2</mn><mi>&#952;</mi></mrow></mfrac></math> is:</p>",
+                    question_hi: "<p>9. यदि 7sin<sup>2</sup>&theta; - cos<sup>2</sup>&theta; + 2sin&theta; = 2, 0&deg; &lt; &theta; &lt; 90&deg; है, तो&nbsp;<math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mi>s</mi><mi>e</mi><mi>c</mi><mn>2</mn><mi>&#952;</mi><mi>&#160;</mi><mo>+</mo><mi>&#160;</mi><mi>c</mi><mi>o</mi><mi>t</mi><mn>2</mn><mi>&#952;</mi></mrow><mrow><mi>c</mi><mi>o</mi><mi>s</mi><mi>e</mi><mi>c</mi><mn>2</mn><mi>&#952;</mi><mi>&#160;</mi><mo>+</mo><mi>&#160;</mi><mi>t</mi><mi>a</mi><mi>n</mi><mn>2</mn><mi>&#952;</mi></mrow></mfrac></math> का मान होगा :</p>",
+                    options_en: ["<p><math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>2</mn><msqrt><mn>3</mn></msqrt><mo>+</mo><mn>1</mn></mrow><mn>3</mn></mfrac></math></p>", "<p>1</p>", 
+                                "<p><math display=\"inline\"><mfrac><mrow><mn>1</mn></mrow><mrow><mn>5</mn></mrow></mfrac></math>(1 + 2<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math>)</p>", "<p><math display=\"inline\"><mfrac><mrow><mn>2</mn></mrow><mrow><mn>5</mn></mrow></mfrac></math>(1 + <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math>)</p>"],
+                    options_hi: ["<p><math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>2</mn><msqrt><mn>3</mn></msqrt><mo>+</mo><mn>1</mn></mrow><mn>3</mn></mfrac></math></p>", "<p>1</p>",
+                                "<p><math display=\"inline\"><mfrac><mrow><mn>1</mn></mrow><mrow><mn>5</mn></mrow></mfrac></math>(1 + 2<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math>)</p>", "<p><math display=\"inline\"><mfrac><mrow><mn>2</mn></mrow><mrow><mn>5</mn></mrow></mfrac></math>(1 +<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math>)</p>"],
+                    solution_en: "<p>9.(c) <br>7sin<sup>2</sup>&theta; - cos<sup>2</sup>&theta; + 2sin&theta; = 2, 0&deg; &lt; &theta; &lt; 90&deg;<br>Put, cos<sup>2</sup>&theta; = 1 - sin<sup>2</sup>&theta;<br>We get: 7sin<sup>2</sup>&theta; - (1- sin<sup>2</sup>&theta;) + 2 sin&theta; = 2<br>8sin<sup>2</sup>&theta; + 2sin&theta; - 3 = 0<br>Sin&theta; = <math display=\"inline\"><mfrac><mrow><mo>-</mo><mn>2</mn><mi>&#160;</mi><mo>&#177;</mo><mi>&#160;</mi><msqrt><mn>4</mn><mi>&#160;</mi><mo>+</mo><mi>&#160;</mi><mn>96</mn></msqrt></mrow><mrow><mn>16</mn></mrow></mfrac></math> = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mo>-</mo><mn>2</mn><mo>&#177;</mo><mn>10</mn></mrow><mn>16</mn></mfrac></math><br>As 0&deg; &lt; &theta; &lt; 90&deg;; Sin&theta; is positive<br>Sin&theta; = <math display=\"inline\"><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac></math> &rArr; &theta; = 30&deg;<br>Now put values in <math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mi>s</mi><mi>e</mi><mi>c</mi><mn>2</mn><mi>&#952;</mi><mo>+</mo><mi>c</mi><mi>o</mi><mi>t</mi><mn>2</mn><mi>&#952;</mi></mrow><mrow><mi>c</mi><mi>o</mi><mi>s</mi><mi>e</mi><mi>c</mi><mn>2</mn><mi>&#952;</mi><mo>+</mo><mi>t</mi><mi>a</mi><mi>n</mi><mn>2</mn><mi>&#952;</mi></mrow></mfrac></math><br>= <math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mi>s</mi><mi>e</mi><mi>c</mi><mi>&#160;</mi><mn>60</mn><mo>&#176;</mo><mo>+</mo><mi>c</mi><mi>o</mi><mi>t</mi><mn>60</mn><mo>&#176;</mo></mrow><mrow><mi>c</mi><mi>o</mi><mi>s</mi><mi>e</mi><mi>c</mi><mi>&#160;</mi><mn>60</mn><mo>&#176;</mo><mo>+</mo><mi>t</mi><mi>a</mi><mi>n</mi><mn>60</mn><mo>&#176;</mo></mrow></mfrac></math> = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>2</mn><mo>+</mo><mstyle displaystyle=\"true\"><mfrac><mn>1</mn><msqrt><mn>3</mn></msqrt></mfrac></mstyle></mrow><mrow><mstyle displaystyle=\"true\"><mfrac><mn>2</mn><msqrt><mn>3</mn></msqrt></mfrac></mstyle><mo>+</mo><msqrt><mn>3</mn></msqrt></mrow></mfrac></math><br>= <math display=\"inline\"><mfrac><mrow><mn>1</mn></mrow><mrow><mn>5</mn></mrow></mfrac></math>(1 + 2<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math>)</p>",
+                    solution_hi: "<p>9.(c)<br>7sin<sup>2</sup>&theta;-cos<sup>2</sup>&theta; + 2sin&theta;=2, 0&deg; &lt; &theta; &lt; 90&deg;<br>cos<sup>2</sup>&theta; = 1-sin<sup>2</sup>&theta; रखें।<br>हम पाते हैं की,<br>7sin<sup>2</sup>&theta;-(1-sin<sup>2</sup>&theta;) + 2 sin&theta; = 2<br>8sin<sup>2</sup>&theta;+2sin&theta;-3 = 0<br>Sin&theta; = <math display=\"inline\"><mfrac><mrow><mo>-</mo><mn>2</mn><mo>&#177;</mo><msqrt><mn>4</mn><mo>+</mo><mn>96</mn></msqrt></mrow><mrow><mn>16</mn></mrow></mfrac></math>= -2 &plusmn; 1016<br>जैसा की 0&deg; &lt; &theta; &lt; 90&deg;; में sin&theta; सकारात्मक है ।<br>Sin&theta; = <math display=\"inline\"><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac></math> &rArr; &theta; = 30&deg;<br>अब <math display=\"inline\"><mfrac><mrow><mi>s</mi><mi>e</mi><mi>c</mi><mn>2</mn><mi>&#952;</mi><mi>&#160;</mi><mo>+</mo><mi>&#160;</mi><mi>c</mi><mi>o</mi><mi>t</mi><mn>2</mn><mi>&#952;</mi></mrow><mrow><mi>c</mi><mi>o</mi><mi>s</mi><mi>e</mi><mi>c</mi><mn>2</mn><mi>&#952;</mi><mi>&#160;</mi><mo>+</mo><mi>&#160;</mi><mi>t</mi><mi>a</mi><mi>n</mi><mn>2</mn><mi>&#952;</mi></mrow></mfrac></math> में मान रखने पर, <math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mi>s</mi><mi>e</mi><mi>c</mi><mi>&#160;</mi><mn>60</mn><mo>&#176;</mo><mo>+</mo><mi>c</mi><mi>o</mi><mi>t</mi><mn>60</mn><mo>&#176;</mo></mrow><mrow><mi>c</mi><mi>o</mi><mi>s</mi><mi>e</mi><mi>c</mi><mi>&#160;</mi><mn>60</mn><mo>&#176;</mo><mo>+</mo><mi>t</mi><mi>a</mi><mi>n</mi><mn>60</mn><mo>&#176;</mo></mrow></mfrac></math>= <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>2</mn><mo>+</mo><mstyle displaystyle=\"true\"><mfrac><mn>1</mn><msqrt><mn>3</mn></msqrt></mfrac></mstyle></mrow><mrow><mstyle displaystyle=\"true\"><mfrac><mn>2</mn><msqrt><mn>3</mn></msqrt></mfrac></mstyle><mo>+</mo><msqrt><mn>3</mn></msqrt></mrow></mfrac></math></p>\n<p>= <math display=\"inline\"><mfrac><mrow><mn>1</mn></mrow><mrow><mn>5</mn></mrow></mfrac></math>(1 + 2<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math>)&nbsp;</p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.25
+                });
+                questions.push({
+                    id: "10",
+                    section: "17",
+                    question_en: "<p>10. The expression 3sec<sup>2</sup>&theta; tan<sup>2</sup>&theta; + tan<sup>6</sup>&theta;- sec<sup>6</sup>&theta; is equal to:</p>",
+                    question_hi: "<p>10. व्यंजक 3sec<sup>2</sup>&theta; tan<sup>2</sup>&theta; + tan<sup>6</sup>&theta; - sec<sup>6</sup>&theta; किसके बराबर है ?</p>",
+                    options_en: ["<p>-2</p>", "<p>1</p>", 
+                                "<p>2</p>", "<p>-1</p>"],
+                    options_hi: ["<p>-2</p>", "<p>1</p>",
+                                "<p>2</p>", "<p>-1</p>"],
+                    solution_en: "<p>10.(d) <br>3sec<sup>2</sup>&theta; tan<sup>2</sup>&theta; + tan<sup>6</sup>&theta; - sec<sup>6</sup>&theta; = ?<br>We know that: sec<sup>2</sup>&theta; - tan<sup>2</sup>&theta; = 1<br>Cubing both sides we get:<br>Sec<sup>6</sup>&theta; - tan<sup>6</sup>&theta; - 3sec<sup>2</sup>&theta;tan<sup>2</sup>&theta; = 1<br>Thus,<br>3sec<sup>2</sup>&theta; tan<sup>2</sup>&theta; + tan<sup>6</sup>&theta; - sec<sup>6</sup>&theta; = -1</p>",
+                    solution_hi: "<p>10.(d) <br>3sec<sup>2</sup>&theta; tan<sup>2</sup>&theta; + tan<sup>6</sup>&theta; - sec<sup>6</sup>&theta; = ?<br>We know that: sec<sup>2</sup>&theta; - tan<sup>2</sup>&theta; = 1<br>Cubing both sides we get:<br>Sec<sup>6</sup>&theta; - tan<sup>6</sup>&theta; - 3sec<sup>2</sup>&theta;tan<sup>2</sup>&theta; = 1<br>Thus,<br>3sec<sup>2</sup>&theta; tan<sup>2</sup>&theta; + tan<sup>6</sup>&theta; - sec<sup>6</sup>&theta; = -1</p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.25
+                });
+                questions.push({
+                    id: "11",
+                    section: "17",
+                    question_en: "<p>11. The value of <math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><msup><mrow><mi>t</mi><mi>a</mi><mi>n</mi></mrow><mn>2</mn></msup><mi>&#952;</mi><mo>-</mo><msup><mrow><mi>s</mi><mi>i</mi><mi>n</mi></mrow><mn>2</mn></msup><mi>&#952;</mi></mrow><mrow><mn>2</mn><mo>+</mo><msup><mrow><mi>t</mi><mi>a</mi><mi>n</mi></mrow><mn>2</mn></msup><mi>&#952;</mi><mo>+</mo><msup><mrow><mi>c</mi><mi>o</mi><mi>t</mi></mrow><mn>2</mn></msup><mi>&#952;</mi></mrow></mfrac></math> is:</p>",
+                    question_hi: "<p>11. <math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><msup><mrow><mi>t</mi><mi>a</mi><mi>n</mi></mrow><mn>2</mn></msup><mi>&#952;</mi><mo>-</mo><msup><mrow><mi>s</mi><mi>i</mi><mi>n</mi></mrow><mn>2</mn></msup><mi>&#952;</mi></mrow><mrow><mn>2</mn><mo>+</mo><msup><mrow><mi>t</mi><mi>a</mi><mi>n</mi></mrow><mn>2</mn></msup><mi>&#952;</mi><mo>+</mo><msup><mrow><mi>c</mi><mi>o</mi><mi>t</mi></mrow><mn>2</mn></msup><mi>&#952;</mi></mrow></mfrac></math> का मान है :</p>",
+                    options_en: ["<p>cosec<sup>6</sup><math display=\"inline\"><mi>&#952;</mi></math></p>", "<p>cos<sup>4</sup><math display=\"inline\"><mi>&#952;</mi></math></p>", 
+                                "<p>sin<sup>6</sup><math display=\"inline\"><mi>&#952;</mi></math></p>", "<p>sec<sup>4</sup><math display=\"inline\"><mi>&#952;</mi></math></p>"],
+                    options_hi: ["<p>cosec<sup><s>6</s></sup><math display=\"inline\"><mi>&#952;</mi></math></p>", "<p>cos<sup>4</sup><math display=\"inline\"><mi>&#952;</mi></math></p>",
+                                "<p>sin<sup>6</sup><math display=\"inline\"><mi>&#952;</mi></math></p>", "<p>sec<sup>4</sup><math display=\"inline\"><mi>&#952;</mi></math></p>"],
+                    solution_en: "<p>11.(c)&nbsp; put &theta; = 45&deg; in <math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><msup><mi>tan</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>-</mo><msup><mi>sin</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi></mrow><mrow><mn>2</mn><mo>+</mo><msup><mi>tan</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>+</mo><msup><mi>cot</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi></mrow></mfrac></math></p>\n<p>=&nbsp;<math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><msup><mi>tan</mi><mn>2</mn></msup><mn>45</mn><mo>&#176;</mo><mo>-</mo><msup><mi>sin</mi><mn>2</mn></msup><mn>45</mn><mo>&#176;</mo></mrow><mrow><mn>2</mn><mo>+</mo><msup><mi>tan</mi><mn>2</mn></msup><mn>45</mn><mo>&#176;</mo><mo>+</mo><msup><mi>cot</mi><mn>2</mn></msup><mn>45</mn><mo>&#176;</mo></mrow></mfrac></math>=<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>1</mn><mn>8</mn></mfrac></math></p>\n<p>Only option (c) satisfies.</p>",
+                    solution_hi: "<p>11.(c)&nbsp;put &theta; = 45&deg; in&nbsp;<math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><msup><mi>tan</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>-</mo><msup><mi>sin</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi></mrow><mrow><mn>2</mn><mo>+</mo><msup><mi>tan</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>+</mo><msup><mi>cot</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi></mrow></mfrac></math></p>\n<p>=&nbsp;<math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><msup><mi>tan</mi><mn>2</mn></msup><mn>45</mn><mo>&#176;</mo><mo>-</mo><msup><mi>sin</mi><mn>2</mn></msup><mn>45</mn><mo>&#176;</mo></mrow><mrow><mn>2</mn><mo>+</mo><msup><mi>tan</mi><mn>2</mn></msup><mn>45</mn><mo>&#176;</mo><mo>+</mo><msup><mi>cot</mi><mn>2</mn></msup><mn>45</mn><mo>&#176;</mo></mrow></mfrac></math>=<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>1</mn><mn>8</mn></mfrac></math></p>\n<p>केवल विकल्प (c) सभी शर्तों को संतुष्ट करता है।</p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.25
+                });
+                questions.push({
+                    id: "12",
+                    section: "17",
+                    question_en: "<p>12. If sec&theta; + tan&theta; = p, 0&deg; &lt; &theta; &lt; 90&deg;, then <math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><msup><mi>p</mi><mn>2</mn></msup><mo>-</mo><mn>1</mn></mrow><mrow><msup><mi>p</mi><mn>2</mn></msup><mo>+</mo><mn>1</mn></mrow></mfrac></math> is equal to:</p>",
+                    question_hi: "<p>12. यदि sec&theta; + tan&theta; = p है, जहाँ 0&deg; &lt; &theta; &lt; 90&deg; है, तो <math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><msup><mi>p</mi><mn>2</mn></msup><mo>-</mo><mn>1</mn></mrow><mrow><msup><mi>p</mi><mn>2</mn></msup><mo>+</mo><mn>1</mn></mrow></mfrac></math> का मान किसके बराबर होगा ?</p>",
+                    options_en: ["<p>cosec&theta;</p>", "<p>sin&theta;</p>", 
+                                "<p>cos&theta;</p>", "<p>2cosec&theta;</p>"],
+                    options_hi: ["<p>cosec&theta;</p>", "<p>sin&theta;</p>",
+                                "<p>cos&theta;</p>", "<p>2cosec&theta;</p>"],
+                    solution_en: "<p>12.(b) sec&theta; + tan&theta; = p</p>\n<p>Then, sec&theta; - tan&theta; =&nbsp;<math display=\"inline\"><mfrac><mrow><mn>1</mn></mrow><mrow><mi>p</mi></mrow></mfrac></math> (sec<sup>2</sup>&theta; - tan<sup>2</sup>&theta; = 1)</p>\n<p>p +&nbsp;<math display=\"inline\"><mfrac><mrow><mn>1</mn></mrow><mrow><mi>p</mi></mrow></mfrac></math> = 2 sec&theta;</p>\n<p><math display=\"inline\"><mi>p</mi><mo>-</mo></math> <math display=\"inline\"><mfrac><mrow><mn>1</mn></mrow><mrow><mi>p</mi></mrow></mfrac></math> = 2 tan&theta;</p>\n<p><math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><msup><mi>p</mi><mn>2</mn></msup><mo>-</mo><mn>1</mn></mrow><mrow><msup><mi>p</mi><mn>2</mn></msup><mo>+</mo><mn>1</mn></mrow></mfrac></math> = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mi>p</mi><mo>-</mo><mstyle displaystyle=\"true\"><mfrac><mn>1</mn><mi>p</mi></mfrac></mstyle></mrow><mrow><mi>p</mi><mo>+</mo><mfrac><mn>1</mn><mi>p</mi></mfrac></mrow></mfrac></math>= sin&theta;</p>",
+                    solution_hi: "<p>12.(b) sec&theta; + tan&theta; = p</p>\n<p>तो, sec&theta; - tan&theta; =&nbsp;<math display=\"inline\"><mfrac><mrow><mn>1</mn></mrow><mrow><mi>p</mi></mrow></mfrac></math> (sec<sup>2</sup>&theta; - tan<sup>2</sup>&theta; = 1)</p>\n<p>p +<math display=\"inline\"><mfrac><mrow><mn>1</mn></mrow><mrow><mi>p</mi></mrow></mfrac></math> = 2 sec&theta;</p>\n<p><math display=\"inline\"><mi>p</mi><mo>-</mo></math><math display=\"inline\"><mfrac><mrow><mn>1</mn></mrow><mrow><mi>p</mi></mrow></mfrac></math>= 2 tan&theta;</p>\n<p><math display=\"inline\"><mfrac><mrow><msup><mrow><mi>p</mi></mrow><mrow><mn>2</mn></mrow></msup><mo>-</mo><mn>1</mn></mrow><mrow><msup><mrow><mi>p</mi></mrow><mrow><mn>2</mn></mrow></msup><mo>+</mo><mn>1</mn></mrow></mfrac></math> = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mi>p</mi><mo>-</mo><mstyle displaystyle=\"true\"><mfrac><mn>1</mn><mi>p</mi></mfrac></mstyle></mrow><mrow><mi>p</mi><mo>+</mo><mfrac><mn>1</mn><mi>p</mi></mfrac></mrow></mfrac></math> = sin&theta;</p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.25
+                });
+                questions.push({
+                    id: "13",
+                    section: "17",
+                    question_en: "<p>13. If 7cos<sup>2</sup>&theta; + 3sin<sup>2</sup>&theta; = 6, 0&deg; &lt; &theta; &lt; 90&deg;, then the value of <math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><msup><mrow><mi>c</mi><mi>o</mi><mi>t</mi></mrow><mn>2</mn></msup><mn>2</mn><mi>&#952;</mi><mo>+</mo><msup><mrow><mi>s</mi><mi>e</mi><mi>c</mi></mrow><mn>2</mn></msup><mn>2</mn><mi>&#952;</mi></mrow><mrow><msup><mrow><mi>t</mi><mi>a</mi><mi>n</mi></mrow><mn>2</mn></msup><mn>2</mn><mi>&#952;</mi><mo>-</mo><msup><mrow><mi>&#160;</mi><mi>s</mi><mi>i</mi><mi>n</mi></mrow><mn>2</mn></msup><mn>2</mn><mi>&#952;</mi></mrow></mfrac></math> is:</p>",
+                    question_hi: "<p>13. यदि 7cos<sup>2</sup>&theta; + 3sin<sup>2</sup>&theta; = 6, 0&deg; &lt; &theta; &lt; 90&deg; है, तो <math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><msup><mrow><mi>c</mi><mi>o</mi><mi>t</mi></mrow><mn>2</mn></msup><mn>2</mn><mi>&#952;</mi><mo>+</mo><msup><mrow><mi>s</mi><mi>e</mi><mi>c</mi></mrow><mn>2</mn></msup><mn>2</mn><mi>&#952;</mi></mrow><mrow><msup><mrow><mi>t</mi><mi>a</mi><mi>n</mi></mrow><mn>2</mn></msup><mn>2</mn><mi>&#952;</mi><mo>-</mo><msup><mrow><mi>s</mi><mi>i</mi><mi>n</mi></mrow><mn>2</mn></msup><mn>2</mn><mi>&#952;</mi></mrow></mfrac></math> का मान ज्ञात कीजिए।</p>",
+                    options_en: ["<p><math display=\"inline\"><mfrac><mrow><mn>52</mn></mrow><mrow><mn>27</mn></mrow></mfrac></math></p>", "<p><math display=\"inline\"><mfrac><mrow><mn>26</mn></mrow><mrow><mn>15</mn></mrow></mfrac></math></p>", 
+                                "<p><math display=\"inline\"><mfrac><mrow><mn>28</mn></mrow><mrow><mn>27</mn></mrow></mfrac></math></p>", "<p><math display=\"inline\"><mfrac><mrow><mn>49</mn></mrow><mrow><mn>45</mn></mrow></mfrac></math></p>"],
+                    options_hi: ["<p><math display=\"inline\"><mfrac><mrow><mn>52</mn></mrow><mrow><mn>27</mn></mrow></mfrac></math></p>", "<p><math display=\"inline\"><mfrac><mrow><mn>26</mn></mrow><mrow><mn>15</mn></mrow></mfrac></math></p>",
+                                "<p><math display=\"inline\"><mfrac><mrow><mn>28</mn></mrow><mrow><mn>27</mn></mrow></mfrac></math></p>", "<p><math display=\"inline\"><mfrac><mrow><mn>49</mn></mrow><mrow><mn>45</mn></mrow></mfrac></math></p>"],
+                    solution_en: "<p>13.(a) <br>7cos<sup>2</sup>&theta; + 3sin<sup>2</sup>&theta; = 6, 0&deg; &lt; &theta; &lt; 90&deg;<br>sin<sup>2</sup>&theta; = 1 - cos<sup>2</sup>&theta;<br>4cos<sup>2</sup>&theta; = 3<br>Cos&theta; = <math display=\"inline\"><mfrac><mrow><msqrt><mn>3</mn></msqrt></mrow><mrow><mn>2</mn></mrow></mfrac></math> &rArr; &theta; = 30&deg;<br><math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><msup><mrow><mi>c</mi><mi>o</mi><mi>t</mi></mrow><mn>2</mn></msup><mn>2</mn><mi>&#952;</mi><mo>+</mo><msup><mrow><mi>s</mi><mi>e</mi><mi>c</mi></mrow><mn>2</mn></msup><mn>2</mn><mi>&#952;</mi></mrow><mrow><msup><mrow><mi>t</mi><mi>a</mi><mi>n</mi></mrow><mn>2</mn></msup><mn>2</mn><mi>&#952;</mi><mo>-</mo><msup><mrow><mi>s</mi><mi>i</mi><mi>n</mi></mrow><mn>2</mn></msup><mn>2</mn><mi>&#952;</mi></mrow></mfrac></math> = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mi>c</mi><mi>o</mi><msup><mi>t</mi><mn>2</mn></msup><mn>60</mn><mo>+</mo><mi>s</mi><mi>e</mi><msup><mi>c</mi><mn>2</mn></msup><mn>60</mn></mrow><mrow><msup><mi>tan</mi><mn>2</mn></msup><mn>60</mn><mo>-</mo><msup><mi>sin</mi><mn>2</mn></msup><mn>60</mn></mrow></mfrac></math><br>= <math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mfrac><mn>1</mn><mn>3</mn></mfrac><mo>+</mo><mn>4</mn></mrow><mrow><mn>3</mn><mo>-</mo><mfrac><mn>3</mn><mn>4</mn></mfrac></mrow></mfrac></math> = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>52</mn><mn>27</mn></mfrac></math></p>",
+                    solution_hi: "<p>13.(a) <br>7cos<sup>2</sup>&theta; + 3sin<sup>2</sup>&theta; = 6, 0&deg; &lt; &theta; &lt; 90&deg;<br>sin<sup>2</sup>&theta; = 1 - cos<sup>2</sup>&theta;<br>4cos<sup>2</sup>&theta; = 3<br>Cos&theta; = <math display=\"inline\"><mfrac><mrow><msqrt><mn>3</mn></msqrt></mrow><mrow><mn>2</mn></mrow></mfrac></math> &rArr; &theta; = 30&deg;<br><math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><msup><mrow><mi>c</mi><mi>o</mi><mi>t</mi></mrow><mn>2</mn></msup><mn>2</mn><mi>&#952;</mi><mo>+</mo><msup><mrow><mi>s</mi><mi>e</mi><mi>c</mi></mrow><mn>2</mn></msup><mn>2</mn><mi>&#952;</mi></mrow><mrow><msup><mrow><mi>t</mi><mi>a</mi><mi>n</mi></mrow><mn>2</mn></msup><mn>2</mn><mi>&#952;</mi><mo>-</mo><msup><mrow><mi>s</mi><mi>i</mi><mi>n</mi></mrow><mn>2</mn></msup><mn>2</mn><mi>&#952;</mi></mrow></mfrac></math> = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mi>c</mi><mi>o</mi><msup><mi>t</mi><mn>2</mn></msup><mn>60</mn><mo>+</mo><mi>s</mi><mi>e</mi><msup><mi>c</mi><mn>2</mn></msup><mn>60</mn></mrow><mrow><msup><mi>tan</mi><mn>2</mn></msup><mn>60</mn><mo>-</mo><msup><mi>sin</mi><mn>2</mn></msup><mn>60</mn></mrow></mfrac></math><br>= <math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mfrac><mn>1</mn><mn>3</mn></mfrac><mo>+</mo><mn>4</mn></mrow><mrow><mn>3</mn><mo>-</mo><mfrac><mn>3</mn><mn>4</mn></mfrac></mrow></mfrac></math> = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>52</mn><mn>27</mn></mfrac></math></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.25
+                });
+                questions.push({
+                    id: "14",
+                    section: "17",
+                    question_en: "<p>14. The value of <math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mo>(</mo><mi>c</mi><mi>o</mi><mi>s</mi><mi>&#160;</mi><mn>9</mn><mo>&#176;</mo><mo>+</mo><mi>s</mi><mi>i</mi><mi>n</mi><mi>&#160;</mi><mn>81</mn><mo>&#176;</mo><mo>)</mo><mo>(</mo><mi>s</mi><mi>e</mi><mi>c</mi><mi>&#160;</mi><mn>9</mn><mo>&#176;</mo><mo>+</mo><mi>c</mi><mi>o</mi><mi>s</mi><mi>e</mi><mi>c</mi><mi>&#160;</mi><mn>81</mn><mo>&#176;</mo><mo>)</mo></mrow><mrow><mn>2</mn><msup><mrow><mi>s</mi><mi>i</mi><mi>n</mi></mrow><mn>2</mn></msup><mn>63</mn><mo>&#176;</mo><mo>+</mo><mn>1</mn><mo>+</mo><mn>2</mn><msup><mrow><mi>s</mi><mi>i</mi><mi>n</mi></mrow><mn>2</mn></msup><mn>27</mn><mo>&#176;</mo></mrow></mfrac></math> is:</p>",
+                    question_hi: "<p>14. <math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mo>(</mo><mi>c</mi><mi>o</mi><mi>s</mi><mi>&#160;</mi><mn>9</mn><mo>&#176;</mo><mo>+</mo><mi>s</mi><mi>i</mi><mi>n</mi><mi>&#160;</mi><mn>81</mn><mo>&#176;</mo><mo>)</mo><mo>(</mo><mi>s</mi><mi>e</mi><mi>c</mi><mi>&#160;</mi><mn>9</mn><mo>&#176;</mo><mo>+</mo><mi>c</mi><mi>o</mi><mi>s</mi><mi>e</mi><mi>c</mi><mi>&#160;</mi><mn>81</mn><mo>&#176;</mo><mo>)</mo></mrow><mrow><mn>2</mn><msup><mrow><mi>s</mi><mi>i</mi><mi>n</mi></mrow><mn>2</mn></msup><mn>63</mn><mo>&#176;</mo><mo>+</mo><mn>1</mn><mo>+</mo><mn>2</mn><msup><mrow><mi>s</mi><mi>i</mi><mi>n</mi></mrow><mn>2</mn></msup><mn>27</mn><mo>&#176;</mo></mrow></mfrac></math> का मान होगा :</p>",
+                    options_en: ["<p><math display=\"inline\"><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac></math></p>", "<p><math display=\"inline\"><mfrac><mrow><mn>4</mn></mrow><mrow><mn>3</mn></mrow></mfrac></math></p>", 
+                                "<p>2</p>", "<p>1</p>"],
+                    options_hi: ["<p><math display=\"inline\"><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac></math></p>", "<p><math display=\"inline\"><mfrac><mrow><mn>4</mn></mrow><mrow><mn>3</mn></mrow></mfrac></math></p>",
+                                "<p>2</p>", "<p>1</p>"],
+                    solution_en: "<p>14.(b)<br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mo>(</mo><mi>c</mi><mi>o</mi><mi>s</mi><mn>9</mn><mo>&#176;</mo><mo>+</mo><mi>s</mi><mi>i</mi><mi>n</mi><mn>81</mn><mo>&#176;</mo><mo>)</mo><mo>(</mo><mi>s</mi><mi>e</mi><mi>c</mi><mi>&#160;</mi><mn>9</mn><mo>&#176;</mo><mo>+</mo><mi>c</mi><mi>o</mi><mi>s</mi><mi>e</mi><mi>c</mi><mn>81</mn><mo>&#176;</mo><mo>)</mo></mrow><mrow><mn>2</mn><msup><mrow><mi>s</mi><mi>i</mi><mi>n</mi></mrow><mn>2</mn></msup><mn>63</mn><mo>&#176;</mo><mo>+</mo><mn>1</mn><mo>+</mo><mn>2</mn><msup><mrow><mi>s</mi><mi>i</mi><mi>n</mi></mrow><mn>2</mn></msup><mn>27</mn><mo>&#176;</mo></mrow></mfrac></math></p>\n<p>=&nbsp;<math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mo>(</mo><mi>c</mi><mi>o</mi><mi>s</mi><mi>&#160;</mi><mn>9</mn><mo>&#176;</mo><mo>+</mo><mi>c</mi><mi>o</mi><mi>s</mi><mn>9</mn><mo>&#176;</mo><mo>)</mo><mo>(</mo><mi>s</mi><mi>e</mi><mi>c</mi><mn>9</mn><mo>&#176;</mo><mo>+</mo><mi>s</mi><mi>e</mi><mi>c</mi><mn>9</mn><mo>&#176;</mo><mo>)</mo></mrow><mrow><mn>2</mn><msup><mrow><mi>s</mi><mi>i</mi><mi>n</mi></mrow><mn>2</mn></msup><mn>63</mn><mo>&#176;</mo><mo>+</mo><mn>1</mn><mo>+</mo><mn>2</mn><msup><mrow><mi>c</mi><mi>o</mi><mi>s</mi></mrow><mn>2</mn></msup><mn>63</mn><mo>&#176;</mo></mrow></mfrac></math></p>\n<p>= <math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mo>(</mo><mn>2</mn><mi>c</mi><mi>o</mi><mi>s</mi><mn>9</mn><mo>&#176;</mo><mo>)</mo><mo>(</mo><mn>2</mn><mi>s</mi><mi>e</mi><mi>c</mi><mn>9</mn><mo>&#176;</mo><mo>)</mo></mrow><mrow><mn>2</mn><mfenced><mrow><msup><mrow><mi>s</mi><mi>i</mi><mi>n</mi></mrow><mn>2</mn></msup><mn>63</mn><mo>&#176;</mo><mo>+</mo><msup><mrow><mi>c</mi><mi>o</mi><mi>s</mi></mrow><mn>2</mn></msup><mn>63</mn><mo>&#176;</mo></mrow></mfenced><mo>+</mo><mn>1</mn></mrow></mfrac></math></p>\n<p>=&nbsp;<math display=\"inline\"><mfrac><mrow><mn>4</mn></mrow><mrow><mn>3</mn></mrow></mfrac></math></p>",
+                    solution_hi: "<p>14.(b)<br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mo>(</mo><mi>c</mi><mi>o</mi><mi>s</mi><mn>9</mn><mo>&#176;</mo><mo>+</mo><mi>s</mi><mi>i</mi><mi>n</mi><mn>81</mn><mo>&#176;</mo><mo>)</mo><mo>(</mo><mi>s</mi><mi>e</mi><mi>c</mi><mi>&#160;</mi><mn>9</mn><mo>&#176;</mo><mo>+</mo><mi>c</mi><mi>o</mi><mi>s</mi><mi>e</mi><mi>c</mi><mn>81</mn><mo>&#176;</mo><mo>)</mo></mrow><mrow><mn>2</mn><msup><mrow><mi>s</mi><mi>i</mi><mi>n</mi></mrow><mn>2</mn></msup><mn>63</mn><mo>&#176;</mo><mo>+</mo><mn>1</mn><mo>+</mo><mn>2</mn><msup><mrow><mi>s</mi><mi>i</mi><mi>n</mi></mrow><mn>2</mn></msup><mn>27</mn><mo>&#176;</mo></mrow></mfrac></math></p>\n<p>=&nbsp;<math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mo>(</mo><mi>c</mi><mi>o</mi><mi>s</mi><mi>&#160;</mi><mn>9</mn><mo>&#176;</mo><mo>+</mo><mi>c</mi><mi>o</mi><mi>s</mi><mn>9</mn><mo>&#176;</mo><mo>)</mo><mo>(</mo><mi>s</mi><mi>e</mi><mi>c</mi><mn>9</mn><mo>&#176;</mo><mo>+</mo><mi>s</mi><mi>e</mi><mi>c</mi><mn>9</mn><mo>&#176;</mo><mo>)</mo></mrow><mrow><mn>2</mn><msup><mrow><mi>s</mi><mi>i</mi><mi>n</mi></mrow><mn>2</mn></msup><mn>63</mn><mo>&#176;</mo><mo>+</mo><mn>1</mn><mo>+</mo><mn>2</mn><msup><mrow><mi>c</mi><mi>o</mi><mi>s</mi></mrow><mn>2</mn></msup><mn>63</mn><mo>&#176;</mo></mrow></mfrac></math></p>\n<p>=&nbsp;<math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mo>(</mo><mn>2</mn><mi>c</mi><mi>o</mi><mi>s</mi><mn>9</mn><mo>&#176;</mo><mo>)</mo><mo>(</mo><mn>2</mn><mi>s</mi><mi>e</mi><mi>c</mi><mn>9</mn><mo>&#176;</mo><mo>)</mo></mrow><mrow><mn>2</mn><mfenced><mrow><msup><mrow><mi>s</mi><mi>i</mi><mi>n</mi></mrow><mn>2</mn></msup><mn>63</mn><mo>&#176;</mo><mo>+</mo><msup><mrow><mi>c</mi><mi>o</mi><mi>s</mi></mrow><mn>2</mn></msup><mn>63</mn><mo>&#176;</mo></mrow></mfenced><mo>+</mo><mn>1</mn></mrow></mfrac></math></p>\n<p>=&nbsp;<math display=\"inline\"><mfrac><mrow><mn>4</mn></mrow><mrow><mn>3</mn></mrow></mfrac></math></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.25
+                });
+                questions.push({
+                    id: "15",
+                    section: "17",
+                    question_en: "<p>15. If 12cos<sup>2</sup>&theta; - 2sin<sup>2</sup>&theta; + 3cos&theta; = 3,0&deg; &lt; &theta; &lt; 90&deg;, then what is the value of <math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mi>c</mi><mi>o</mi><mi>s</mi><mi>e</mi><mi>c</mi><mi>&#952;</mi><mo>+</mo><mi>s</mi><mi>e</mi><mi>c</mi><mi>&#952;</mi></mrow><mrow><mi>t</mi><mi>a</mi><mi>n</mi><mi>&#952;</mi><mo>+</mo><mi>c</mi><mi>o</mi><mi>t</mi><mi>&#952;</mi></mrow></mfrac></math> ?</p>",
+                    question_hi: "<p>15. यदि 12cos<sup>2</sup>&theta; - 2sin<sup>2</sup>&theta; + 3cos&theta; = 3, 0&deg; &lt; &theta; &lt; 90&deg; है, तो <math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mi>c</mi><mi>o</mi><mi>s</mi><mi>e</mi><mi>c</mi><mi>&#952;</mi><mo>+</mo><mi>s</mi><mi>e</mi><mi>c</mi><mi>&#952;</mi></mrow><mrow><mi>t</mi><mi>a</mi><mi>n</mi><mi>&#952;</mi><mo>+</mo><mi>c</mi><mi>o</mi><mi>t</mi><mi>&#952;</mi></mrow></mfrac></math> का मान क्या होगा ?</p>",
+                    options_en: ["<p><math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>4</mn><mo>+</mo><msqrt><mn>3</mn></msqrt></mrow><mn>4</mn></mfrac></math></p>", "<p><math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>1</mn><mo>+</mo><mn>2</mn><msqrt><mn>2</mn></msqrt></mrow><mn>2</mn></mfrac></math></p>", 
+                                "<p><math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>2</mn><mo>+</mo><msqrt><mn>3</mn></msqrt></mrow><mn>4</mn></mfrac></math></p>", "<p><math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mi>&#160;</mi><mfrac><mrow><mn>1</mn><mo>+</mo><msqrt><mn>3</mn></msqrt></mrow><mn>2</mn></mfrac></math></p>"],
+                    options_hi: ["<p><math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>4</mn><mo>+</mo><msqrt><mn>3</mn></msqrt></mrow><mn>4</mn></mfrac></math></p>", "<p><math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>1</mn><mo>+</mo><mn>2</mn><msqrt><mn>2</mn></msqrt></mrow><mn>2</mn></mfrac></math></p>",
+                                "<p><math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>2</mn><mo>+</mo><msqrt><mn>3</mn></msqrt></mrow><mn>4</mn></mfrac></math></p>", "<p><math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>1</mn><mo>+</mo><msqrt><mn>3</mn></msqrt></mrow><mn>2</mn></mfrac></math></p>"],
+                    solution_en: "<p>15.(d) 12cos<sup>2</sup>&theta; - 2sin<sup>2</sup>&theta; + 3cos&theta; = 3, 0&deg; &lt; &theta; &lt; 90&deg;</p>\n<p>Put sin<sup>2</sup>&theta; = 1 - cos<sup>2</sup>&theta;</p>\n<p>We get: 14 cos2&theta; + 3 cos&theta; - 5 = 0</p>\n<p>cos&theta; =&nbsp;<math display=\"inline\"><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac></math> &rArr; &theta; = 60&deg;</p>\n<p><math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mi>c</mi><mi>o</mi><mi>s</mi><mi>e</mi><mi>c</mi><mi>&#952;</mi><mo>+</mo><mi>s</mi><mi>e</mi><mi>c</mi><mi>&#952;</mi></mrow><mrow><mi>t</mi><mi>a</mi><mi>n</mi><mi>&#952;</mi><mo>+</mo><mi>c</mi><mi>o</mi><mi>t</mi><mi>&#952;</mi></mrow></mfrac></math> =<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mo>&#160;</mo><mi>cos</mi><mi>e</mi><mi>c</mi><mn>60</mn><mo>&#176;</mo><mo>+</mo><mi>s</mi><mi>e</mi><mi>c</mi><mn>60</mn><mo>&#176;</mo></mrow><mrow><mi>tan</mi><mn>60</mn><mo>&#176;</mo><mo>+</mo><mi>c</mi><mi>o</mi><mi>t</mi><mn>60</mn><mo>&#176;</mo><mo>&#160;</mo></mrow></mfrac></math></p>\n<p>=&nbsp;<math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mfrac><mn>2</mn><msqrt><mn>3</mn></msqrt></mfrac><mo>+</mo><mn>2</mn></mrow><mrow><msqrt><mn>3</mn></msqrt><mo>+</mo><mfrac><mn>1</mn><msqrt><mn>3</mn></msqrt></mfrac></mrow></mfrac></math> =<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>1</mn><mo>+</mo><msqrt><mn>3</mn></msqrt></mrow><mn>2</mn></mfrac></math></p>",
+                    solution_hi: "<p>15.(d) 12cos<sup>2</sup>&theta; - 2sin<sup>2</sup>&theta; + 3cos&theta; = 3, 0&deg; &lt; &theta; &lt; 90&deg;</p>\n<p>&nbsp;sin<sup>2</sup>&theta; = 1 - cos<sup>2</sup>&theta; रखें</p>\n<p>हम पाते हैं की, 14 cos2&theta; + 3 cos&theta; - 5 = 0</p>\n<p>cos&theta; =&nbsp;<math display=\"inline\"><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac></math> &rArr; &theta; = 60&deg;</p>\n<p><math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mi>c</mi><mi>o</mi><mi>s</mi><mi>e</mi><mi>c</mi><mi>&#952;</mi><mo>+</mo><mi>s</mi><mi>e</mi><mi>c</mi><mi>&#952;</mi></mrow><mrow><mi>t</mi><mi>a</mi><mi>n</mi><mi>&#952;</mi><mo>+</mo><mi>c</mi><mi>o</mi><mi>t</mi><mi>&#952;</mi></mrow></mfrac></math> =<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mo>&#160;</mo><mi>cos</mi><mi>e</mi><mi>c</mi><mn>60</mn><mo>&#176;</mo><mo>+</mo><mi>s</mi><mi>e</mi><mi>c</mi><mn>60</mn><mo>&#176;</mo></mrow><mrow><mi>tan</mi><mn>60</mn><mo>&#176;</mo><mo>+</mo><mi>c</mi><mi>o</mi><mi>t</mi><mn>60</mn><mo>&#176;</mo><mo>&#160;</mo></mrow></mfrac></math></p>\n<p>=&nbsp;<math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mfrac><mn>2</mn><msqrt><mn>3</mn></msqrt></mfrac><mo>+</mo><mn>2</mn></mrow><mrow><msqrt><mn>3</mn></msqrt><mo>+</mo><mfrac><mn>1</mn><msqrt><mn>3</mn></msqrt></mfrac></mrow></mfrac></math> =<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>1</mn><mo>+</mo><msqrt><mn>3</mn></msqrt></mrow><mn>2</mn></mfrac></math></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.25
+                });
+                questions.push({
+                    id: "16",
+                    section: "17",
+                    question_en: "<p>16. The value of <math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><msup><mi>sec</mi><mn>6</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>-</mo><msup><mi>tan</mi><mn>6</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>-</mo><mn>3</mn><msup><mi>sec</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><msup><mi>tan</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>+</mo><mn>1</mn></mrow><mrow><msup><mi>cos</mi><mn>4</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>-</mo><msup><mi>sin</mi><mn>4</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>+</mo><mn>2</mn><msup><mi>sin</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>+</mo><mn>2</mn></mrow></mfrac></math> is:</p>",
+                    question_hi: "<p>16. <math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><msup><mi>sec</mi><mn>6</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>-</mo><msup><mi>tan</mi><mn>6</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>-</mo><mn>3</mn><msup><mi>sec</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><msup><mi>tan</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>+</mo><mn>1</mn></mrow><mrow><msup><mi>cos</mi><mn>4</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>-</mo><msup><mi>sin</mi><mn>4</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>+</mo><mn>2</mn><msup><mi>sin</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>+</mo><mn>2</mn></mrow></mfrac></math> का मान क्या है ?</p>",
+                    options_en: ["<p><math display=\"inline\"><mfrac><mrow><mn>2</mn></mrow><mrow><mn>3</mn></mrow></mfrac></math></p>", "<p>1</p>", 
+                                "<p><math display=\"inline\"><mfrac><mrow><mn>3</mn></mrow><mrow><mn>4</mn></mrow></mfrac></math></p>", "<p><math display=\"inline\"><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac></math></p>"],
+                    options_hi: ["<p><math display=\"inline\"><mfrac><mrow><mn>2</mn></mrow><mrow><mn>3</mn></mrow></mfrac></math></p>", "<p>1</p>",
+                                "<p><math display=\"inline\"><mfrac><mrow><mn>3</mn></mrow><mrow><mn>4</mn></mrow></mfrac></math></p>", "<p><math display=\"inline\"><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac></math></p>"],
+                    solution_en: "<p>16.(a) <math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><msup><mi>sec</mi><mn>6</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>-</mo><msup><mi>tan</mi><mn>6</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>-</mo><mn>3</mn><msup><mi>sec</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><msup><mi>tan</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>+</mo><mn>1</mn></mrow><mrow><msup><mi>cos</mi><mn>4</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>-</mo><msup><mi>sin</mi><mn>4</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>+</mo><mn>2</mn><msup><mi>sin</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>+</mo><mn>2</mn></mrow></mfrac></math></p>\n<p>&rArr; a<sup>3</sup> - b<sup>3</sup> = (a - b)(a<sup>2</sup> + b<sup>2</sup> + ab)</p>\n<p><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><msup><mi>sec</mi><mn>6</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>-</mo><msup><mi>tan</mi><mn>6</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>-</mo><mn>3</mn><msup><mi>sec</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><msup><mi>tan</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>+</mo><mn>1</mn></mrow><mrow><msup><mi>cos</mi><mn>4</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>-</mo><msup><mi>sin</mi><mn>4</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>+</mo><mn>2</mn><msup><mi>sin</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>+</mo><mn>2</mn></mrow></mfrac></math></p>\n<p><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mo>(</mo><msup><mi>sec</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>-</mo><msup><mi>tan</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>)</mo><mo>(</mo><msup><mi>sec</mi><mn>4</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>+</mo><msup><mi>tan</mi><mn>4</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>+</mo><mn>3</mn><msup><mi>sec</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><msup><mi>tan</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>)</mo><mo>-</mo><mn>3</mn><msup><mi>sec</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><msup><mi>tan</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>+</mo><mn>1</mn></mrow><mrow><mo>(</mo><msup><mi>cos</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>-</mo><msup><mi>sin</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>)</mo><mo>(</mo><msup><mi>cos</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>+</mo><msup><mi>sin</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>)</mo><mo>+</mo><mn>2</mn><msup><mi>sin</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>+</mo><mn>2</mn></mrow></mfrac></math></p>\n<p><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mo>(</mo><msup><mi>sec</mi><mn>4</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>+</mo><msup><mi>tan</mi><mn>4</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>+</mo><mn>3</mn><msup><mi>sec</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><msup><mi>tan</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>)</mo><mo>-</mo><mn>3</mn><msup><mi>sec</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><msup><mi>tan</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>+</mo><mn>1</mn></mrow><mrow><mo>(</mo><msup><mi>cos</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>-</mo><msup><mi>sin</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>)</mo><mo>+</mo><mn>2</mn><msup><mi>sin</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>+</mo><mn>2</mn></mrow></mfrac></math></p>\n<p><math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><msup><mi>sec</mi><mn>4</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>+</mo><msup><mi>tan</mi><mn>4</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>+</mo><mn>1</mn></mrow><mrow><msup><mi>cos</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>+</mo><msup><mi>sin</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>+</mo><mn>2</mn></mrow></mfrac></math></p>\n<p><math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><msup><mi>sec</mi><mn>4</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>+</mo><msup><mi>tan</mi><mn>4</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>+</mo><mn>1</mn></mrow><mn>3</mn></mfrac></math> = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>2</mn><mn>3</mn></mfrac></math></p>",
+                    solution_hi: "<p>16.(a) <math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><msup><mi>sec</mi><mn>6</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>-</mo><msup><mi>tan</mi><mn>6</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>-</mo><mn>3</mn><msup><mi>sec</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><msup><mi>tan</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>+</mo><mn>1</mn></mrow><mrow><msup><mi>cos</mi><mn>4</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>-</mo><msup><mi>sin</mi><mn>4</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>+</mo><mn>2</mn><msup><mi>sin</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>+</mo><mn>2</mn></mrow></mfrac></math></p>\n<p>&rArr; a<sup>3</sup> - b<sup>3</sup> = (a - b)(a<sup>2</sup> + b<sup>2</sup> + ab)</p>\n<p><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><msup><mi>sec</mi><mn>6</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>-</mo><msup><mi>tan</mi><mn>6</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>-</mo><mn>3</mn><msup><mi>sec</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><msup><mi>tan</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>+</mo><mn>1</mn></mrow><mrow><msup><mi>cos</mi><mn>4</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>-</mo><msup><mi>sin</mi><mn>4</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>+</mo><mn>2</mn><msup><mi>sin</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>+</mo><mn>2</mn></mrow></mfrac></math></p>\n<p><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mo>(</mo><msup><mi>sec</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>-</mo><msup><mi>tan</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>)</mo><mo>(</mo><msup><mi>sec</mi><mn>4</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>+</mo><msup><mi>tan</mi><mn>4</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>+</mo><mn>3</mn><msup><mi>sec</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><msup><mi>tan</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>)</mo><mo>-</mo><mn>3</mn><msup><mi>sec</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><msup><mi>tan</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>+</mo><mn>1</mn></mrow><mrow><mo>(</mo><msup><mi>cos</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>-</mo><msup><mi>sin</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>)</mo><mo>(</mo><msup><mi>cos</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>+</mo><msup><mi>sin</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>)</mo><mo>+</mo><mn>2</mn><msup><mi>sin</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>+</mo><mn>2</mn></mrow></mfrac></math></p>\n<p><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mo>(</mo><msup><mi>sec</mi><mn>4</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>+</mo><msup><mi>tan</mi><mn>4</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>+</mo><mn>3</mn><msup><mi>sec</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><msup><mi>tan</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>)</mo><mo>-</mo><mn>3</mn><msup><mi>sec</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><msup><mi>tan</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>+</mo><mn>1</mn></mrow><mrow><mo>(</mo><msup><mi>cos</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>-</mo><msup><mi>sin</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>)</mo><mo>+</mo><mn>2</mn><msup><mi>sin</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>+</mo><mn>2</mn></mrow></mfrac></math></p>\n<p><math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><msup><mi>sec</mi><mn>4</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>+</mo><msup><mi>tan</mi><mn>4</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>+</mo><mn>1</mn></mrow><mrow><msup><mi>cos</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>+</mo><msup><mi>sin</mi><mn>2</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>+</mo><mn>2</mn></mrow></mfrac></math></p>\n<p><math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><msup><mi>sec</mi><mn>4</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>+</mo><msup><mi>tan</mi><mn>4</mn></msup><mi mathvariant=\"normal\">&#952;</mi><mo>+</mo><mn>1</mn></mrow><mn>3</mn></mfrac></math> = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>2</mn><mn>3</mn></mfrac></math></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.25
+                });
+                questions.push({
+                    id: "17",
+                    section: "17",
+                    question_en: "<p>17. If 11sin<sup>2</sup>&theta; - cos<sup>2</sup>&theta; + 4sin&theta; - 4 = 0 , 0&deg; &lt; &theta; &lt; 90&deg;, then what is the value of <math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mi>c</mi><mi>o</mi><mi>s</mi><mn>2</mn><mi>&#952;</mi><mo>+</mo><mi>c</mi><mi>o</mi><mi>t</mi><mn>2</mn><mi>&#952;</mi></mrow><mrow><mi>s</mi><mi>e</mi><mi>c</mi><mn>2</mn><mi>&#952;</mi><mo>-</mo><mi>t</mi><mi>a</mi><mi>n</mi><mn>2</mn><mi>&#952;</mi></mrow></mfrac></math> ?</p>",
+                    question_hi: "<p>17. यदि 11sin<sup>2</sup>&theta; - cos<sup>2</sup>&theta; + 4sin&theta; - 4 = 0, 0&deg; &lt; &theta; &lt; 90&deg; है, तो <math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mi>c</mi><mi>o</mi><mi>s</mi><mn>2</mn><mi>&#952;</mi><mo>+</mo><mi>c</mi><mi>o</mi><mi>t</mi><mn>2</mn><mi>&#952;</mi></mrow><mrow><mi>s</mi><mi>e</mi><mi>c</mi><mn>2</mn><mi>&#952;</mi><mo>-</mo><mi>t</mi><mi>a</mi><mi>n</mi><mn>2</mn><mi>&#952;</mi></mrow></mfrac></math> का मान क्या होगा ?</p>",
+                    options_en: ["<p><math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>10</mn><mo>+</mo><mn>5</mn><msqrt><mn>3</mn></msqrt></mrow><mn>3</mn></mfrac></math></p>", "<p><math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>12</mn><mo>+</mo><mn>7</mn><msqrt><mn>3</mn></msqrt></mrow><mn>6</mn></mfrac></math></p>", 
+                                "<p><math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>10</mn><mo>+</mo><mn>7</mn><msqrt><mn>3</mn></msqrt></mrow><mn>6</mn></mfrac></math></p>", "<p><math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>12</mn><mo>+</mo><mn>5</mn><msqrt><mn>3</mn></msqrt></mrow><mn>3</mn></mfrac></math></p>"],
+                    options_hi: ["<p><math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>10</mn><mo>+</mo><mn>5</mn><msqrt><mn>3</mn></msqrt></mrow><mn>3</mn></mfrac></math></p>", "<p><math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>12</mn><mo>+</mo><mn>7</mn><msqrt><mn>3</mn></msqrt></mrow><mn>6</mn></mfrac></math></p>",
+                                "<p><math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>10</mn><mo>+</mo><mn>7</mn><msqrt><mn>3</mn></msqrt></mrow><mn>6</mn></mfrac></math></p>", "<p><math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>12</mn><mo>+</mo><mn>5</mn><msqrt><mn>3</mn></msqrt></mrow><mn>3</mn></mfrac></math></p>"],
+                    solution_en: "<p>17.(b) 11sin<sup>2</sup>&theta; - cos<sup>2</sup>&theta; + 4sin&theta; - 4</p>\n<p>= 0 , 0&deg; &lt; &theta; &lt; 90&deg;</p>\n<p>Cos<sup>2</sup>&theta; = 1 - sin<sup>2</sup>&theta;</p>\n<p>11 sin<sup>2</sup>&theta; - 1 + sin<sup>2</sup>&theta; + 4 sin&theta; - 4 = 0</p>\n<p>12 sin<sup>2</sup>&theta; + 4 sin&theta; - 5 = 0</p>\n<p>Sin&theta; =&nbsp;<math display=\"inline\"><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac></math> &rArr; &theta; = 30&deg;</p>\n<p><math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mi>c</mi><mi>o</mi><mi>s</mi><mn>2</mn><mi>&#952;</mi><mo>+</mo><mi>c</mi><mi>o</mi><mi>t</mi><mn>2</mn><mi>&#952;</mi></mrow><mrow><mi>s</mi><mi>e</mi><mi>c</mi><mn>2</mn><mi>&#952;</mi><mo>-</mo><mi>t</mi><mi>a</mi><mi>n</mi><mn>2</mn><mi>&#952;</mi></mrow></mfrac></math> =<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mi>cos</mi><mn>60</mn><mo>&#176;</mo><mo>+</mo><mi>c</mi><mi>o</mi><mi>t</mi><mn>60</mn><mo>&#176;</mo></mrow><mrow><mi>s</mi><mi>e</mi><mi>c</mi><mn>60</mn><mo>&#176;</mo><mo>-</mo><mi>tan</mi><mn>60</mn><mo>&#176;</mo><mo>&#160;</mo></mrow></mfrac></math></p>\n<p>=&nbsp;<math display=\"inline\"><mfrac><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac><mi>&#160;</mi><mo>+</mo><mi>&#160;</mi><mfrac><mrow><mn>1</mn></mrow><mrow><msqrt><mn>3</mn></msqrt></mrow></mfrac></mrow><mrow><mn>2</mn><mi>&#160;</mi><mo>-</mo><mi>&#160;</mi><msqrt><mn>3</mn></msqrt></mrow></mfrac><mi>&#160;</mi></math> = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>12</mn><mo>+</mo><mn>7</mn><msqrt><mn>3</mn></msqrt></mrow><mn>6</mn></mfrac></math></p>",
+                    solution_hi: "<p>17.(b) 11sin<sup>2</sup>&theta; - cos<sup>2</sup>&theta; + 4sin&theta; - 4</p>\n<p>= 0 , 0&deg; &lt; &theta; &lt; 90&deg;</p>\n<p>Cos<sup>2</sup>&theta; = 1 - sin<sup>2</sup>&theta;</p>\n<p>11 sin<sup>2</sup>&theta; - 1 + sin<sup>2</sup>&theta; + 4 sin&theta; - 4 = 0</p>\n<p>12 sin<sup>2</sup>&theta; + 4 sin&theta; - 5 = 0</p>\n<p>Sin&theta; =&nbsp;<math display=\"inline\"><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac></math> &rArr; &theta; = 30&deg;</p>\n<p><math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mi>c</mi><mi>o</mi><mi>s</mi><mn>2</mn><mi>&#952;</mi><mo>+</mo><mi>c</mi><mi>o</mi><mi>t</mi><mn>2</mn><mi>&#952;</mi></mrow><mrow><mi>s</mi><mi>e</mi><mi>c</mi><mn>2</mn><mi>&#952;</mi><mo>-</mo><mi>t</mi><mi>a</mi><mi>n</mi><mn>2</mn><mi>&#952;</mi></mrow></mfrac></math> =<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mi>cos</mi><mn>60</mn><mo>&#176;</mo><mo>+</mo><mi>c</mi><mi>o</mi><mi>t</mi><mn>60</mn><mo>&#176;</mo></mrow><mrow><mi>s</mi><mi>e</mi><mi>c</mi><mn>60</mn><mo>&#176;</mo><mo>-</mo><mi>tan</mi><mn>60</mn><mo>&#176;</mo><mo>&#160;</mo></mrow></mfrac></math></p>\n<p>=&nbsp;<math display=\"inline\"><mfrac><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac><mi>&#160;</mi><mo>+</mo><mi>&#160;</mi><mfrac><mrow><mn>1</mn></mrow><mrow><msqrt><mn>3</mn></msqrt></mrow></mfrac></mrow><mrow><mn>2</mn><mi>&#160;</mi><mo>-</mo><mi>&#160;</mi><msqrt><mn>3</mn></msqrt></mrow></mfrac><mi>&#160;</mi></math> = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>12</mn><mo>+</mo><mn>7</mn><msqrt><mn>3</mn></msqrt></mrow><mn>6</mn></mfrac></math></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.25
+                });
+                questions.push({
+                    id: "18",
+                    section: "17",
+                    question_en: "<p>18. If 5cos&theta; - 12sin&theta; = 0, then what is the value of <math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>1</mn><mo>+</mo><mi>s</mi><mi>i</mi><mi>n</mi><mi>&#952;</mi><mo>+</mo><mi>c</mi><mi>o</mi><mi>s</mi><mi>&#952;</mi></mrow><mrow><mn>1</mn><mo>-</mo><mi>s</mi><mi>i</mi><mi>n</mi><mi>&#952;</mi><mo>+</mo><mi>c</mi><mi>o</mi><mi>s</mi><mi>&#952;</mi></mrow></mfrac></math> ?</p>",
+                    question_hi: "<p>18. यदि 5cos&theta; - 12sin&theta; = 0 है, तो <math display=\"inline\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>1</mn><mo>+</mo><mi>s</mi><mi>i</mi><mi>n</mi><mi>&#952;</mi><mo>+</mo><mi>c</mi><mi>o</mi><mi>s</mi><mi>&#952;</mi></mrow><mrow><mn>1</mn><mo>-</mo><mi>s</mi><mi>i</mi><mi>n</mi><mi>&#952;</mi><mo>+</mo><mi>c</mi><mi>o</mi><mi>s</mi><mi>&#952;</mi></mrow></mfrac></math>&nbsp;का मान क्या होगा ?</p>",
+                    options_en: ["<p><math display=\"inline\"><mfrac><mrow><mn>3</mn></mrow><mrow><mn>2</mn></mrow></mfrac></math></p>", "<p><math display=\"inline\"><mfrac><mrow><mn>3</mn></mrow><mrow><mn>4</mn></mrow></mfrac></math></p>", 
+                                "<p><math display=\"inline\"><mfrac><mrow><mn>5</mn></mrow><mrow><mn>4</mn></mrow></mfrac></math></p>", "<p><math display=\"inline\"><mfrac><mrow><mn>5</mn></mrow><mrow><mn>2</mn></mrow></mfrac></math></p>"],
+                    options_hi: ["<p><math display=\"inline\"><mfrac><mrow><mn>3</mn></mrow><mrow><mn>2</mn></mrow></mfrac></math></p>", "<p><math display=\"inline\"><mfrac><mrow><mn>3</mn></mrow><mrow><mn>4</mn></mrow></mfrac></math></p>",
+                                "<p><math display=\"inline\"><mfrac><mrow><mn>5</mn></mrow><mrow><mn>4</mn></mrow></mfrac></math></p>", "<p><math display=\"inline\"><mfrac><mrow><mn>5</mn></mrow><mrow><mn>2</mn></mrow></mfrac></math></p>"],
+                    solution_en: "<p>18(a) 5cos&theta; - 12sin&theta; = 0</p>\n<p><math display=\"inline\"><mo>&#8658;</mo></math> tan&theta; = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>5</mn><mn>12</mn></mfrac></math>, sin&theta; = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>5</mn><mn>13</mn></mfrac></math>, cos&theta; = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>12</mn><mn>13</mn></mfrac></math></p>\n<p><math display=\"inline\"><mo>&#8658;</mo></math> <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>1</mn><mo>+</mo><mi>sin</mi><mi>&#952;</mi><mo>+</mo><mi>cos</mi><mi>&#952;</mi></mrow><mrow><mn>1</mn><mo>-</mo><mi>sin</mi><mi>&#952;</mi><mo>+</mo><mi>cos</mi><mi>&#952;</mi></mrow></mfrac><mo>=</mo><mfrac><mrow><mn>13</mn><mo>+</mo><mn>5</mn><mo>+</mo><mn>12</mn></mrow><mrow><mn>13</mn><mo>-</mo><mn>5</mn><mo>+</mo><mn>12</mn></mrow></mfrac></math>= <math display=\"inline\"><mfrac><mrow><mn>30</mn></mrow><mrow><mn>20</mn></mrow></mfrac></math> = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>3</mn><mn>2</mn></mfrac></math></p>",
+                    solution_hi: "<p>18(a) 5cos&theta; - 12sin&theta; = 0</p>\n<p><math display=\"inline\"><mo>&#8658;</mo></math> tan&theta; = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>5</mn><mn>12</mn></mfrac></math>, sin&theta; = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>5</mn><mn>13</mn></mfrac></math>, cos&theta; = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>12</mn><mn>13</mn></mfrac></math></p>\n<p><math display=\"inline\"><mo>&#8658;</mo></math> <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>1</mn><mo>+</mo><mi>sin</mi><mi>&#952;</mi><mo>+</mo><mi>cos</mi><mi>&#952;</mi></mrow><mrow><mn>1</mn><mo>-</mo><mi>sin</mi><mi>&#952;</mi><mo>+</mo><mi>cos</mi><mi>&#952;</mi></mrow></mfrac><mo>=</mo><mfrac><mrow><mn>13</mn><mo>+</mo><mn>5</mn><mo>+</mo><mn>12</mn></mrow><mrow><mn>13</mn><mo>-</mo><mn>5</mn><mo>+</mo><mn>12</mn></mrow></mfrac></math>= <math display=\"inline\"><mfrac><mrow><mn>30</mn></mrow><mrow><mn>20</mn></mrow></mfrac></math> = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>3</mn><mn>2</mn></mfrac></math></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.25
+                });
+                questions.push({
+                    id: "19",
+                    section: "17",
+                    question_en: "<p>19. The value of cos 0&deg;cos 30&deg;cos 45&deg;cos 60&deg;cos 90&deg; is:</p>",
+                    question_hi: "<p>19. cos 0&deg;cos 30&deg;cos 45&deg;cos 60&deg;cos 90&deg; का मान क्या होगा ?</p>",
+                    options_en: ["<p>5</p>", "<p><math display=\"inline\"><mfrac><mrow><msqrt><mn>6</mn></msqrt></mrow><mrow><mn>8</mn></mrow></mfrac></math></p>", 
+                                "<p>3</p>", "<p>0</p>"],
+                    options_hi: ["<p>5</p>", "<p><math display=\"inline\"><mfrac><mrow><msqrt><mn>6</mn></msqrt></mrow><mrow><mn>8</mn></mrow></mfrac></math></p>",
+                                "<p>3</p>", "<p>0</p>"],
+                    solution_en: "<p>19.(d) cos 0&deg;cos 30&deg;cos 45&deg;cos 60&deg;cos 90&deg; = 0<br>[cos 90&deg; = 0]</p>",
+                    solution_hi: "<p>19.(d)<br>cos 0&deg;cos 30&deg;cos 45&deg;cos 60&deg;cos 90&deg; = 0<br>[cos 90&deg; = 0]</p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.25
+                });
+                questions.push({
+                    id: "20",
+                    section: "misc",
+                    question_en: "<p>20. If xcosA - ysinA = 1 and xsinA + ycosA = 4, then the value of 17x<sup>2 </sup>+ 17y<sup>2</sup> is:</p>",
+                    question_hi: "<p>20. यदि xcosA - ysinA = 1 तथा xsinA + ycosA = 4 है, तो 17x<sup>2</sup> + 17y<sup>2</sup> का मान क्या होगा ?</p>",
+                    options_en: ["<p>0</p>", "<p>49</p>", 
+                                "<p>7</p>", "<p>289</p>"],
+                    options_hi: ["<p>0</p>", "<p>49</p>",
+                                "<p>7</p>", "<p>289</p>"],
+                    solution_en: "<p>20.(d) xcosA - ysinA = 1 and xsinA + ycosA = 4<br><math display=\"inline\"><mo>&#8658;</mo></math> (x<sup>2 </sup>+ y<sup>2 </sup>)(sin<sup>2 </sup>A + cos<sup>2 </sup>A) = (1 + 16) = 17<br><math display=\"inline\"><mo>&#8658;</mo></math> 17(x<sup>2 </sup>&nbsp;+ y<sup>2 </sup>) = 289</p>",
+                    solution_hi: "<p>20.(d) xcosA - ysinA = 1 और xsinA + ycosA = 4<br><math display=\"inline\"><mo>&#8658;</mo></math> (x<sup>2 </sup>+ y<sup>2 </sup>)(sin<sup>2 </sup>A + cos<sup>2 </sup>A) = (1 + 16) = 17<br><math display=\"inline\"><mo>&#8658;</mo></math> 17(x<sup>2 </sup>&nbsp;+ y<sup>2 </sup>) = 289</p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.25
+                });
+            
+            // Generate question boxes
+            const boxesContainer = document.getElementById('question-boxes');
+            questions.forEach((q, index) => {
+                const box = document.createElement('div');
+                box.className = 'q-box';
+                box.textContent = index + 1;
+                box.onclick = () => showQuestion(index);
+                box.id = `box-${index}`;
+                boxesContainer.appendChild(box);
+            });
+            
+            // Show first question
+            showQuestion(0);
+            updateProgress();
+        }
+        
+        // Show a specific question
+        
+        function formatContent(text) {
+            if (!text) return '';
+            return text.replace(/<img/g, '<img style="max-width:100%;height:auto;"');
+        }
+        
+        function showQuestion(index) {
+            if (index < 0 || index >= questions.length) return;
+            
+            currentQuestion = index;
+            const question = questions[index];
+            
+            // Update question counter
+            document.getElementById('question-counter').textContent = `Question ${index + 1} of ${questions.length}`;
+            
+            // Update question boxes
+            document.querySelectorAll('.q-box').forEach(box => box.classList.remove('current'));
+            document.getElementById(`box-${index}`).classList.add('current');
+            
+            // Generate question HTML
+            let html = `
+                <div class="question-card">
+                    <div class="question-text">
+                        <div class="en">${formatContent(question.question_en)}</div>
+                        <div class="hi" style="display:none">${formatContent(question.question_hi)} </div>
+                    </div>
+                    <div class="options" id="options-container">`;
+            
+            // Add options
+            ['a', 'b', 'c', 'd'].forEach((opt, i) => {
+                let optionClass = '';
+                let isCorrectAnswer = opt === question.correct;
+                let isUserAnswer = answers[question.id] === opt;
+                
+                // When reviewing, add appropriate classes
+                if (submitted) {
+                    if (isCorrectAnswer) {
+                        optionClass += ' correct-answer';
+                    } else if (isUserAnswer && !isCorrectAnswer) {
+                        optionClass += ' incorrect';
+                    }
+                }
+                
+                html += `
+                    <div class="option-item">
+                        <input class="option-input" type="radio" name="q${index}" 
+                            id="opt-${index}-${opt}" value="${opt}" 
+                            ${isUserAnswer ? 'checked' : ''}
+                            onclick="selectAnswer('${question.id}', '${opt}')">
+                       <label class="option-label${optionClass}" for="opt-${index}-${opt}">
+                            <div class="en">${question.options_en[i]}</div>
+                            <div class="hi" style="display:none">${question.options_hi[i]}</div>
+                        </label>
+                    </div>`;
+            });
+            
+            // Add solution if submitted
+            if (submitted) {
+                const isCorrect = answers[question.id] === question.correct;
+                const resultText = answers[question.id] ? (isCorrect ? 'Correct!' : 'Incorrect!') : 'Not attempted';
+                
+                html += `
+                    <div class="solution-container">
+                        <div class="solution-title">${resultText}</div>
+                        <div class="solution-text">
+                            <div class="en">${question.solution_en}</div>
+                            <div class="hi" style="display:none">${question.solution_hi}</div>
+                        </div>
+                    </div>`;
+            }
+            
+            html += `</div></div>`;
+            
+            document.getElementById('questions-container').innerHTML = html;
+            
+            // Apply language settings
+            applyLanguage();
+            
+            // If in mobile view, close the menu
+            if (window.innerWidth < 992) {
+                toggleNav(false);
+            }
+            
+            // Add review mode class if submitted
+            if (submitted) {
+                document.getElementById('options-container').classList.add('review-mode');
+            }
+        }
+        
+        // Apply current language
+        function applyLanguage() {
+            document.querySelectorAll(`.${currentLang}`).forEach(el => el.style.display = 'block');
+            document.querySelectorAll(`.${currentLang === 'en' ? 'hi' : 'en'}`).forEach(el => el.style.display = 'none');
+            
+            // Update language button text
+            document.getElementById('lang-text').textContent = currentLang === 'en' ? 'Hi' : 'En';
+        }
+        
+        // Select an answer
+        function selectAnswer(qId, option) {
+            if (submitted) return;
+            
+            answers[qId] = option;
+            updateProgress();
+            
+            // Mark question as attempted in the navigation
+            const index = questions.findIndex(q => q.id === qId);
+            if (index >= 0) {
+                const box = document.getElementById(`box-${index}`);
+                box.classList.add('attempted');
+                box.classList.remove('unattempted');
+            }
+        }
+        
+        // Navigate to previous/next question
+        function prevQuestion() { 
+            if (currentQuestion > 0) showQuestion(currentQuestion - 1); 
+        }
+        
+        function nextQuestion() { 
+            if (currentQuestion < questions.length - 1) showQuestion(currentQuestion + 1); 
+        }
+        
+        // Switch section
+        function switchSection(sectionId) {
+            if (sectionId === 'all') {
+                showQuestion(0);
+                return;
+            }
+            
+            const section = sections[sectionId];
+            if (section) showQuestion(section.start);
+        }
+        
+        // Toggle language
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'hi' : 'en';
+            applyLanguage();
+        }
+        
+        // Toggle navigation sidebar
+        function toggleNav(show) {
+            const nav = document.getElementById('question-nav');
+            const overlay = document.getElementById('nav-overlay');
+            
+            if (show === undefined) {
+                show = !nav.classList.contains('show');
+            }
+            
+            if (show) {
+                nav.classList.add('show');
+                overlay.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            } else {
+                nav.classList.remove('show');
+                overlay.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+        }
+        
+        // Update progress
+        function updateProgress() {
+            const attempted = Object.keys(answers).length;
+            document.getElementById('attempted-count').textContent = attempted;
+        }
+        
+        // Start timer
+        function startTimer() {
+            const timerDisplay = document.getElementById('timer-display');
+            let timeLeft = totalTime;
+            
+            const timerInterval = setInterval(() => {
+                if (timeLeft <= 0 || submitted) {
+                    clearInterval(timerInterval);
+                    if (!submitted) submitTest();
+                    return;
+                }
+                
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                timeLeft--;
+            }, 1000);
+        }
+        
+        // Confirm before submitting
+        function confirmSubmit() {
+            if (submitted) return;
+            
+            const attempted = Object.keys(answers).length;
+            const remaining = questions.length - attempted;
+            
+            // Create a more modern confirmation dialog
+            const confirmHtml = `
+                <div style="text-align: center; padding: 20px;">
+                    <h4 style="margin-bottom: 16px; color: var(--dark);">Confirm Submission</h4>
+                    <p style="margin-bottom: 24px; color: var(--gray);">
+                        You have attempted ${attempted} of ${questions.length} questions.<br>
+                        ${remaining} questions are unattempted.
+                    </p>
+                    <div style="display: flex; justify-content: center; gap: 12px;">
+                        <button onclick="this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; border: 1px solid var(--light-gray); background: white; border-radius: 8px; cursor: pointer;">
+                            Cancel
+                        </button>
+                        <button onclick="submitTest(); this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer;">
+                            Submit Test
+                        </button>
+                    </div>
+                </div>`;
+            
+            // Create modal element
+            const modal = document.createElement('div');
+            modal.className = 'results-modal show';
+            modal.innerHTML = `
+                <div class="results-card" style="max-width: 400px;">
+                    <button class="cancel-btn" style="position: absolute; top: 12px; right: 12px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--gray);" onclick="this.closest('.results-modal').remove()">
+                        ×
+                    </button>
+                    ${confirmHtml}
+                </div>`;
+            
+            document.body.appendChild(modal);
+        }
+        
+        // Submit test
+        function submitTest() {
+            if (submitted) return;
+            
+            submitted = true;
+            
+            let score = 0;
+            let correctCount = 0;
+            let incorrectCount = 0;
+            let unattemptedCount = 0;
+            
+            questions.forEach((q, index) => {
+                const userAns = answers[q.id];
+                const box = document.getElementById(`box-${index}`);
+                
+                box.classList.remove('attempted');
+                
+                if (!userAns) {
+                    unattemptedCount++;
+                    box.classList.add('unattempted');
+                } else if (userAns === q.correct) {
+                    correctCount++;
+                    score += q.pos_marks;
+                    box.classList.add('correct');
+                } else {
+                    incorrectCount++;
+                    score -= q.neg_marks;
+                    box.classList.add('incorrect');
+                }
+            });
+            
+            // Update result values
+            document.getElementById('score-value').textContent = score.toFixed(2);
+            document.getElementById('correct-value').textContent = correctCount;
+            document.getElementById('incorrect-value').textContent = incorrectCount;
+            document.getElementById('unattempted-value').textContent = unattemptedCount;
+            
+            // Show the results modal
+            document.getElementById('results-modal').classList.add('show');
+            
+            // Disable submit button
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-check"></i>';
+            submitBtn.style.backgroundColor = 'var(--success)';
+            
+            // Refresh current question view to show solution
+            showQuestion(currentQuestion);
+        }
+        
+        // Review test
+        function reviewTest() {
+            document.getElementById('results-modal').classList.remove('show');
+            showQuestion(0);
+        }
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target === document.getElementById('results-modal')) {
+                document.getElementById('results-modal').classList.remove('show');
+            }
+        });
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') prevQuestion();
+            if (e.key === 'ArrowRight') nextQuestion();
+        });
+    </script>
+</body>
+</html>
