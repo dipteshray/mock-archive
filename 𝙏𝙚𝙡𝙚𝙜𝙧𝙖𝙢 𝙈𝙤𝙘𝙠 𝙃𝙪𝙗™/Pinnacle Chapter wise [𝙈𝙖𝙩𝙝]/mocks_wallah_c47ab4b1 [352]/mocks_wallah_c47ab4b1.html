@@ -1,0 +1,1449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mocks Wallah</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --primary-light: #a29bfe;
+            --primary-dark: #5649c0;
+            --secondary: #00cec9;
+            --accent: #fd79a8;
+            --success: #00b894;
+            --warning: #fdcb6e;
+            --danger: #d63031;
+            --light: #f8f9fa;
+            --dark: #2d3436;
+            --gray: #636e72;
+            --light-gray: #dfe6e9;
+            --card-bg: #ffffff;
+            --body-bg: #f5f6fa;
+            --header-bg: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            --footer-bg: #ffffff;
+            --box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            --box-shadow-sm: 0 2px 10px rgba(0,0,0,0.05);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background-color: var(--body-bg);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            color: var(--dark);
+            line-height: 1.6;
+            padding-bottom: 80px; /* Space for fixed navigation */
+            overflow-x: hidden;
+        }
+        
+        /* Header Styles */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: var(--header-bg);
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            z-index: 1000;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .header-brand {
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .header-brand i {
+            margin-right: 8px;
+            font-size: 1.2rem;
+        }
+        
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .control-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .control-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .control-btn.active {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .timer-display {
+            background: rgba(0,0,0,0.2);
+            border-radius: 18px;
+            padding: 4px 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+        
+        .timer-display i {
+            margin-right: 6px;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-top: 60px;
+            padding: 16px;
+            min-height: calc(100vh - 140px);
+        }
+        
+        .question-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--box-shadow-sm);
+            border: none;
+            transition: var(--transition);
+        }
+        
+        .question-counter {
+            font-size: 0.9rem;
+            color: var(--gray);
+            text-align: center;
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+        
+        .question-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+        
+        .option-item {
+            margin-bottom: 12px;
+            position: relative;
+        }
+        
+        .option-input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+            .question-text {
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        hyphens: auto;
+        max-width: 100%;
+    }
+
+    .question-text img,
+    .option-label img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 8px 0;
+        border-radius: 8px;
+    }
+
+    .option-label {
+        overflow: hidden;
+    }
+
+    .question-card {
+        overflow: hidden;
+    }
+        
+        .option-label {
+            display: block;
+            padding: 14px 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--light-gray);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .option-label:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .option-input:checked + .option-label {
+            border-color: var(--primary);
+            background: rgba(108, 92, 231, 0.05);
+            box-shadow: 0 0 0 1px var(--primary);
+        }
+        
+        .option-input:checked + .option-label::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--primary);
+        }
+        
+        /* When reviewing answers */
+        .review-mode .option-input:checked + .option-label.correct {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.correct::after {
+            background: var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.incorrect {
+            border-color: var(--danger);
+            background: rgba(214, 48, 49, 0.05);
+            box-shadow: 0 0 0 1px var(--danger);
+        }
+        
+        .MathJax, .mjx-chtml {
+            overflow-x: auto;
+            max-width: 100%;
+            display: inline-block;
+        }
+
+        
+        .review-mode .option-input:checked + .option-label.incorrect::after {
+            background: var(--danger);
+        }
+        
+        .review-mode .option-label.correct-answer {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-label.correct-answer::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--success);
+        }
+        
+        .solution-container {
+            margin-top: 20px;
+            padding: 16px;
+            background: rgba(108, 92, 231, 0.05);
+            border-radius: 12px;
+            border-left: 3px solid var(--primary);
+        }
+        
+        .solution-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+        
+        /* Question Navigation */
+        .question-nav {
+            position: fixed;
+            top: 60px;
+            right: 0;
+            bottom: 80px;
+            width: 100%;
+            max-width: 320px;
+            background: var(--card-bg);
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            transform: translateX(100%);
+            transition: var(--transition);
+            z-index: 900;
+            overflow-y: auto;
+            padding: 16px;
+        }
+        
+        .question-nav.show {
+            transform: translateX(0);
+        }
+        
+        .nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .nav-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+        
+        .question-stats {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .stat-badge {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        
+        .section-selector {
+            width: 100%;
+            margin-bottom: 16px;
+            border-radius: 12px;
+            padding: 10px 16px;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            font-size: 0.9rem;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 16px;
+        }
+        
+        .question-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+            gap: 8px;
+        }
+        
+        .q-box {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .q-box:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .q-box.attempted {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .q-box.correct {
+            background-color: var(--success);
+            color: white;
+            border-color: var(--success);
+        }
+        
+        .q-box.incorrect {
+            background-color: var(--danger);
+            color: white;
+            border-color: var(--danger);
+        }
+        
+        .q-box.current {
+            border: 2px solid var(--accent) !important;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .q-box.unattempted {
+            background-color: var(--gray);
+            color: white;
+            border-color: var(--gray);
+        }
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: var(--footer-bg);
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            z-index: 800;
+        }
+        
+        .nav-btn {
+            height: 48px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 20px;
+            transition: var(--transition);
+            gap: 8px;
+        }
+        
+        .nav-btn i {
+            font-size: 1rem;
+        }
+        
+        .nav-btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .nav-btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+        
+        .nav-btn-outline:hover {
+            background: rgba(108, 92, 231, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        /* Overlay when nav is open */
+        .nav-overlay {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            bottom: 80px;
+            background: rgba(0,0,0,0.5);
+            z-index: 800;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+        }
+        
+        .nav-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        /* Results Modal */
+        .results-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1100;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+            padding: 16px;
+        }
+        
+        .results-modal.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .results-card {
+            background: white;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+            transform: translateY(20px);
+            transition: var(--transition);
+        }
+        
+        .results-modal.show .results-card {
+            transform: translateY(0);
+        }
+        
+        .results-header {
+            background: var(--header-bg);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .results-title {
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .results-body {
+            padding: 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            color: white;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+        
+        .results-footer {
+            padding: 16px 20px;
+            display: flex;
+            justify-content: center;
+            border-top: 1px solid var(--light-gray);
+        }
+        
+        /* Responsive Adjustments */
+        @media (min-width: 992px) {
+            .question-nav {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-right: 320px;
+            }
+            
+            .nav-overlay {
+                display: none;
+            }
+            
+            .bottom-nav {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .question-grid {
+                grid-template-columns: repeat(auto-fill, minmax(36px, 1fr));
+                gap: 6px;
+            }
+            
+            .q-box {
+                width: 36px;
+                height: 36px;
+                font-size: 0.9rem;
+            }
+            
+            .option-label {
+                padding: 12px 14px;
+            }
+            
+            .question-text {
+                font-size: 1rem;
+            }
+            
+            .header-brand {
+                font-size: 1rem;
+            }
+            
+            .control-btn {
+                width: 32px;
+                height: 32px;
+            }
+            
+            .timer-display {
+                font-size: 0.8rem;
+                padding: 4px 10px;
+            }
+            
+            .nav-btn {
+                height: 44px;
+                padding: 0 16px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="#" class="header-brand">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Mocks Wallah</span>
+            </a>
+            
+            <div class="header-controls">
+                <!-- Timer -->
+                <div class="timer-display">
+                    <i class="far fa-clock"></i>
+                    <span id="timer-display">25:00</span>
+                </div>
+                
+                <!-- Language toggle -->
+                <button class="control-btn" id="lang-btn" onclick="toggleLanguage()">
+                    <span id="lang-text">En</span>
+                </button>
+                
+                <!-- Submit button -->
+                <button class="control-btn" id="submit-btn" onclick="confirmSubmit()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+                
+                <!-- Questions toggle for mobile -->
+                <button class="control-btn nav-toggle-btn" id="nav-toggle" onclick="toggleNav()">
+                    <i class="fas fa-th"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main content -->
+    <main class="main-content" id="main-content">
+        <div class="question-counter" id="question-counter">Question 1 of 23</div>
+        
+        <!-- Questions will be displayed here -->
+        <div id="questions-container"></div>
+    </main>
+    
+    <!-- Overlay for mobile nav -->
+    <div class="nav-overlay" id="nav-overlay" onclick="toggleNav(false)"></div>
+    
+    <!-- Question navigation sidebar -->
+    <aside class="question-nav" id="question-nav">
+        <div class="nav-header">
+            <h3 class="nav-title">Questions</h3>
+            <div class="question-stats">
+                <span class="stat-badge bg-primary" id="attempted-count">0</span>
+                <span class="stat-badge bg-gray" id="total-count">23</span>
+                <button class="control-btn d-lg-none" onclick="toggleNav(false)">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Section selector -->
+        <select class="section-selector" id="section-selector" onchange="switchSection(this.value)">
+            <option value="all">All Sections</option>
+        </select>
+        
+        <!-- Question grid -->
+        <div class="question-grid" id="question-boxes"></div>
+    </aside>
+    
+    <!-- Bottom navigation for mobile -->
+    <nav class="bottom-nav d-lg-none">
+        <button class="nav-btn nav-btn-outline" onclick="prevQuestion()">
+            <i class="fas fa-chevron-left"></i>
+            <span>Previous</span>
+        </button>
+        <button class="nav-btn nav-btn-outline" onclick="nextQuestion()">
+            <span>Next</span>
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </nav>
+    
+    <!-- Results modal -->
+    <div class="results-modal" id="results-modal">
+        <div class="results-card">
+            <div class="results-header">
+                <h3 class="results-title">Test Results</h3>
+            </div>
+            <div class="results-body">
+                <div class="stats-grid">
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark))">
+                        <div class="stat-value" id="score-value">0</div>
+                        <div class="stat-label">Score</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--success), #1b9aaa)">
+                        <div class="stat-value" id="correct-value">0</div>
+                        <div class="stat-label">Correct</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--danger), var(--accent))">
+                        <div class="stat-value" id="incorrect-value">0</div>
+                        <div class="stat-label">Incorrect</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--gray), var(--dark))">
+                        <div class="stat-value" id="unattempted-value">0</div>
+                        <div class="stat-label">Unattempted</div>
+                    </div>
+                </div>
+            </div>
+            <div class="results-footer">
+                <button class="nav-btn nav-btn-primary" onclick="reviewTest()">
+                    <i class="fas fa-search me-1"></i>
+                    <span>Review Test</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Questions data
+        const questions = [];
+        const sections = {};
+        let currentLang = "en";
+        let currentQuestion = 0;
+        let answers = {};
+        let submitted = false;
+        let totalTime = 25 * 60;
+        
+        // Initialize the test
+        window.onload = function() {
+            initializeTest();
+            startTimer();
+            
+            // If on desktop, show the question navigation by default
+            if (window.innerWidth >= 992) {
+                document.getElementById('question-nav').classList.add('show');
+                document.getElementById('main-content').classList.add('with-nav');
+            }
+        };
+        
+        // Initialize test data
+        function initializeTest() {
+            // Add sections and questions
+            
+            sections["17"] = {
+                name: "Quantitative Aptitude",
+                start: 0,
+                end: 21
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="17">Quantitative Aptitude</option>`;
+            
+            sections["misc"] = {
+                name: "Miscellaneous",
+                start: 22,
+                end: 22
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="misc">Miscellaneous</option>`;
+            
+            
+                questions.push({
+                    id: "1",
+                    section: "17",
+                    question_en: "<p>1. <span style=\"font-family: Times New Roman;\">The angle of elevation of the top of an unfinished tower at a point distant 78 m from its base is 30&deg;. How much higher must the tower be raised (in m) so that the angle of elevation of the top of the finished tower at the same point will be 60&deg;?</span></p>",
+                    question_hi: "<p>1. <span style=\"font-family: Baloo;\">78 mकी दूरी पर स्थित एक बिंदु से , एक अधूरे मीनार के शिखर का उन्नयन कोण 30&deg; है। मीनार को कितना ऊंचा उठाया जाना चाहिए (m में) ताकि उसी बिंदु पर तैयार मीनार के शीर्ष का उन्नयन कोण 60&deg; हो?</span></p>",
+                    options_en: ["<p>78<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></p>", "<p>80</p>", 
+                                "<p>52<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></p>", "<p>26<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></p>"],
+                    options_hi: ["<p>78<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></p>", "<p>80</p>",
+                                "<p>52<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></p>", "<p>26<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></p>"],
+                    solution_en: "<p>1.(c) <span style=\"font-family: Times New Roman;\">Let AB = height of tower and AD = part of tower to raised<br><strong id=\"docs-internal-guid-87e2a273-7fff-a9dd-4899-7363ef28e58c\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcSU6mzZuIrdshpTGsXonovMauJWb2UaLu9jOFcMOQUAI7NDtsdh9G5U7lUAwfDPSXIpaDH50l6AHmWxGUYCPP5mZrSbqlT6ySzUt7hkXxDSaWwkZMEDh0MQOCcIiTDpA_diincbqygXdLoBztkrHcPFQg?key=R_Xs2ZSuZ0Y1ToJjqQPHOOzY\" width=\"150\" height=\"178\"><br></strong></span><span style=\"font-family: Times New Roman;\">In <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>&#8710;</mo></math></span><span style=\"font-family: Times New Roman;\">ABC,&nbsp;<br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi>AB</mi><mi>BC</mi></mfrac></math> =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>1</mn><msqrt><mn>3</mn></msqrt></mfrac></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi mathvariant=\"normal\">h</mi><mn>78</mn></mfrac></math> = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>1</mn><msqrt><mn>3</mn></msqrt></mfrac></math><br>h = 26<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math><br>In <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>&#8710;</mo></math>DBC,<br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi>DB</mi><mi>BC</mi></mfrac></math> = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mi mathvariant=\"normal\">h</mi><mo>+</mo><mi mathvariant=\"normal\">x</mi></mrow><mn>78</mn></mfrac></math> = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>26</mn><msqrt><mn>3</mn></msqrt><mo>+</mo><mi mathvariant=\"normal\">x</mi></mrow><mn>78</mn></mfrac></math> = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math><br>26<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math> + x = 78<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math><br>x = 52<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></span></p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>1.(c)&nbsp;<span style=\"font-family: Times New Roman;\">माना , AB = मीनार की ऊँचाई और AD = मीनार का वह भाग जिसे ऊपर उठाया जाना है</span><span style=\"font-family: Times New Roman;\"><br><strong id=\"docs-internal-guid-87e2a273-7fff-a9dd-4899-7363ef28e58c\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcSU6mzZuIrdshpTGsXonovMauJWb2UaLu9jOFcMOQUAI7NDtsdh9G5U7lUAwfDPSXIpaDH50l6AHmWxGUYCPP5mZrSbqlT6ySzUt7hkXxDSaWwkZMEDh0MQOCcIiTDpA_diincbqygXdLoBztkrHcPFQg?key=R_Xs2ZSuZ0Y1ToJjqQPHOOzY\" width=\"150\" height=\"178\"><br></strong></span><span style=\"font-family: Times New Roman;\"><span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>&#8710;</mo></math>ABC में</span>,&nbsp;<br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi>AB</mi><mi>BC</mi></mfrac></math> =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>1</mn><msqrt><mn>3</mn></msqrt></mfrac></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi mathvariant=\"normal\">h</mi><mn>78</mn></mfrac></math> = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>1</mn><msqrt><mn>3</mn></msqrt></mfrac></math><br>h = 26<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>&#8710;</mo></math>DBC में,<br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi>DB</mi><mi>BC</mi></mfrac></math> = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mi mathvariant=\"normal\">h</mi><mo>+</mo><mi mathvariant=\"normal\">x</mi></mrow><mn>78</mn></mfrac></math> = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>26</mn><msqrt><mn>3</mn></msqrt><mo>+</mo><mi mathvariant=\"normal\">x</mi></mrow><mn>78</mn></mfrac></math> = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math><br>26<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math> + x = 78<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math><br>x = 52<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></span></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "2",
+                    section: "17",
+                    question_en: "<p>2. <span style=\"font-family: Times New Roman;\">A vertical pole and a vertical tower are on the same level of ground in such a way that from the top of the pole, the angle of the elevation of the top of the tower is 60&deg; and the angle of the depression of the bottom of the tower is 30&deg;. If the height of the tower is 76 m, then find the height (in m) of the pole.</span></p>",
+                    question_hi: "<p>2. <span style=\"font-family: Baloo;\">एक उर्ध्वाधर खम्भा और एक उर्ध्वाधर मीनार जमीन के एक ही तल पर इस प्रकार हैं कि खम्भे के शीर्ष से मीनार के शिखर का उन्नयन कोण 60&deg; है और मीनार &nbsp;के तल का अवनमन कोण 30&deg; है। यदि मीनार की ऊँचाई 76 m है, तो खम्भे की ऊँचाई (मीटर में) ज्ञात कीजिए।</span></p>",
+                    options_en: ["<p>38</p>", "<p>19<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></p>", 
+                                "<p>19</p>", "<p>57</p>"],
+                    options_hi: ["<p>38</p>", "<p>19<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></p>",
+                                "<p>19</p>", "<p>57</p>"],
+                    solution_en: "<p>2.(c)<span style=\"font-family: Times New Roman;\">Let height of pole ED = h,&nbsp;<br></span><span style=\"font-family: Times New Roman;\">height of tower = AC and distance between pole and tower = x<br></span><span style=\"font-family: Times New Roman;\">According to the question,<br></span><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeyEfWLFMc_aVK301fT01yu15P3PUJ1GvyzVn_lHkPfKNQFn0Cwut841mDhvLe0mzPnXn7HXGNprelYYzQ8Yny6z9uXqkSVMNZoBsyXgJf_tZxo99fZ1O8I2C7dQC_zB3ITKlO_wTb8fISrJUepb0bdfk4?key=R_Xs2ZSuZ0Y1ToJjqQPHOOzY\" width=\"169\" height=\"153\"><br>In &Delta;ABE,<br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math> =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi>AB</mi><mi>BE</mi></mfrac></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math> =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>76</mn><mo>-</mo><mi mathvariant=\"normal\">h</mi></mrow><mi mathvariant=\"normal\">x</mi></mfrac></math>&nbsp; &nbsp; &nbsp; (BE = DC = x)<br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math>x = 76 - h .........(1)<br>In &Delta;EDC,<br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>1</mn><msqrt><mn>3</mn></msqrt></mfrac></math> =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi>ED</mi><mi>DC</mi></mfrac></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>1</mn><msqrt><mn>3</mn></msqrt></mfrac></math> =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi mathvariant=\"normal\">h</mi><mi mathvariant=\"normal\">x</mi></mfrac></math><br>x = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math>h ........(2)<br><span style=\"font-family: Times New Roman;\">Putting&nbsp; x = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math>h</span><span style=\"font-family: Times New Roman;\">&nbsp;</span><span style=\"font-family: Times New Roman;\">in equation (1), we get<br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math>(<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math>h) = 76 - h<br>3h = 76 - h<br>4h = 76<br>h = 19 m</span></p>\n<p>&nbsp;</p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>2.(c) <span style=\"font-family: Baloo;\">माना खम्भा ED की ऊंचाई = h,<br></span><span style=\"font-family: Baloo;\">मीनार की ऊंचाई = AC और खम्भा और मीनार &nbsp;के बीच की दूरी = x<br></span><span style=\"font-family: Baloo;\">प्रश्न के अनुसार,<br></span><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeyEfWLFMc_aVK301fT01yu15P3PUJ1GvyzVn_lHkPfKNQFn0Cwut841mDhvLe0mzPnXn7HXGNprelYYzQ8Yny6z9uXqkSVMNZoBsyXgJf_tZxo99fZ1O8I2C7dQC_zB3ITKlO_wTb8fISrJUepb0bdfk4?key=R_Xs2ZSuZ0Y1ToJjqQPHOOzY\" width=\"169\" height=\"153\"><br>&Delta;ABE में,<br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math> =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi>AB</mi><mi>BE</mi></mfrac></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math> =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>76</mn><mo>-</mo><mi mathvariant=\"normal\">h</mi></mrow><mi mathvariant=\"normal\">x</mi></mfrac></math>&nbsp; &nbsp; &nbsp; (BE = DC = x)<br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math>x = 76 - h .........(1)<br>&Delta;EDC में,<br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>1</mn><msqrt><mn>3</mn></msqrt></mfrac></math> =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi>ED</mi><mi>DC</mi></mfrac></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>1</mn><msqrt><mn>3</mn></msqrt></mfrac></math> =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi mathvariant=\"normal\">h</mi><mi mathvariant=\"normal\">x</mi></mfrac></math><br>x = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math>h ........(2)<br><span style=\"font-family: Times New Roman;\"><span style=\"font-family: Times New Roman;\">समीकरण (1) में x = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math>h रखने पर हमें प्राप्त होता है</span><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math>(<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math>h) = 76 - h<br>3h = 76 - h<br>4h = 76<br>h = 19 m</span></p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>\n<p>&nbsp;</p>\n<p>&nbsp;</p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "3",
+                    section: "17",
+                    question_en: "<p>3. <span style=\"font-family: Times New Roman;\">A pole 23 m long reaches a window which is 3<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>5</mn></msqrt></math></span><span style=\"font-family: Times New Roman;\"> m above the ground on one side of a street. Keeping its foot at the same point, the pole is turned to the other side of the street to reach a window4<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>5</mn></msqrt></math></span><span style=\"font-family: Times New Roman;\"> m high. What is the width (in m) of the street?</span></p>",
+                    question_hi: "<p>3. <span style=\"font-family: Baloo;\">23 मीटर लंबा एक खंभा एक खिड़की तक पहुंचता है जो एक सड़क के एक तरफ जमीन से 3<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>5</mn></msqrt></math></span><span style=\"font-family: Baloo;\"> मीटर ऊपर है। एक ही बिंदु पर अपना पैर रखते हुए, पोल को गली के दूसरी तरफ घुमाया जाता है ताकि वह 4<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>15</mn></msqrt></math></span><span style=\"font-family: Baloo;\">&nbsp;मीटर ऊंची खिड़की तक पहुंच सके। गली की चौड़ाई (मीटर में) क्या है?</span></p>",
+                    options_en: ["<p>17</p>", "<p>35</p>", 
+                                "<p>39</p>", "<p>22</p>"],
+                    options_hi: ["<p>17</p>", "<p>35</p>",
+                                "<p>39</p>", "<p>22</p>"],
+                    solution_en: "<p>3.(c)<br><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdg1h7DxI6bMqMAHmMY-Blr3JM7IWwg16p39ITy0pIFJ9twbmZx0uFzHkheJ9ArxtckiLvokO9hu7NbZO0I2r6-Db-Fh-Iqx9Own3jSHTLKcs9qeiVks7iNVesga7NROc6runEkZVu9_qygk3MwbA5Emw?key=R_Xs2ZSuZ0Y1ToJjqQPHOOzY\" width=\"255\" height=\"107\"><br><span style=\"font-family: Times New Roman;\">Let P be the fixed point of the pole and AB and CD are the two windows.<br></span><span style=\"font-family: Times New Roman;\">Length of the pole is fixed as 23 m,&nbsp;<br></span><span style=\"font-family: Times New Roman;\">In ▷ABP, AP = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><msup><mrow><mo>(</mo><mn>23</mn><mo>)</mo></mrow><mn>2</mn></msup><mo>-</mo><msup><mrow><mo>(</mo><mn>3</mn><msqrt><mn>5</mn></msqrt><mo>)</mo></mrow><mn>2</mn></msup></msqrt></math> = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>529</mn><mo>-</mo><mn>45</mn></msqrt></math> = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>484</mn></msqrt></math> = 22 m</span><span style=\"font-family: Times New Roman;\">.<br></span><span style=\"font-family: Times New Roman;\">In ▷DPC, PC = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><msup><mrow><mo>(</mo><mn>23</mn><mo>)</mo></mrow><mn>2</mn></msup><mo>-</mo><msup><mrow><mo>(</mo><mn>4</mn><msqrt><mn>15</mn></msqrt><mo>)</mo></mrow><mn>2</mn></msup></msqrt></math> =&nbsp; <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>529</mn><mo>-</mo><mn>240</mn></msqrt></math> =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>289</mn></msqrt></math> = 17m.</span><br><span style=\"font-family: Times New Roman;\">Required distance = 22 m + 17 m = 39 m.</span></p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>3.(c)<br><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdg1h7DxI6bMqMAHmMY-Blr3JM7IWwg16p39ITy0pIFJ9twbmZx0uFzHkheJ9ArxtckiLvokO9hu7NbZO0I2r6-Db-Fh-Iqx9Own3jSHTLKcs9qeiVks7iNVesga7NROc6runEkZVu9_qygk3MwbA5Emw?key=R_Xs2ZSuZ0Y1ToJjqQPHOOzY\" width=\"255\" height=\"107\"><br><span style=\"font-family: Baloo;\">मान लीजिए P ध्रुव का स्थिर बिंदु है और AB और CD दो खिड़कियाँ हैं।<br></span><span style=\"font-family: Baloo;\">पोल की लंबाई 23 m तय की गई है,<br></span><span style=\"font-family: Baloo;\">▷ABP में, AP = <span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><msup><mrow><mo>(</mo><mn>23</mn><mo>)</mo></mrow><mn>2</mn></msup><mo>-</mo><msup><mrow><mo>(</mo><mn>3</mn><msqrt><mn>5</mn></msqrt><mo>)</mo></mrow><mn>2</mn></msup></msqrt></math> = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>529</mn><mo>-</mo><mn>45</mn></msqrt></math> = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>484</mn></msqrt></math> = 22 m</span><span style=\"font-family: Times New Roman;\">.<br></span></span><span style=\"font-family: Baloo;\">▷DPC में, PC <span style=\"font-family: Times New Roman;\">=&nbsp; <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><msup><mrow><mo>(</mo><mn>23</mn><mo>)</mo></mrow><mn>2</mn></msup><mo>-</mo><msup><mrow><mo>(</mo><mn>4</mn><msqrt><mn>15</mn></msqrt><mo>)</mo></mrow><mn>2</mn></msup></msqrt></math> =&nbsp; <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>529</mn><mo>-</mo><mn>240</mn></msqrt></math> =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>289</mn></msqrt></math> = 17m.<br></span></span><span style=\"font-family: Baloo;\">अभीष्ट दूरी = 22 m + 17 m = 39 m.</span></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "4",
+                    section: "17",
+                    question_en: "<p>4. <span style=\"font-family: Times New Roman;\">A kite is attached to a string. Find the length of the string(in m) when the height of kite is 90 m and the string makes an angle of&nbsp;&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msup><mn>30</mn><mo>&#8728;</mo></msup></math></span><span style=\"font-family: Times New Roman;\"> with the ground.</span></p>",
+                    question_hi: "<p>4. <span style=\"font-family: Baloo;\">एक पतंग एक तार से जुड़ी होती है। डोरी की लंबाई (मीटर में) ज्ञात कीजिए जब पतंग की ऊंचाई 90 मीटर है और डोरी जमीन से 30&deg; का कोण बनाती है।</span></p>",
+                    options_en: ["<p>180</p>", "<p>90<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></p>", 
+                                "<p>45</p>", "<p>60<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></p>"],
+                    options_hi: ["<p>180</p>", "<p>90<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></p>",
+                                "<p>45</p>", "<p>60<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></p>"],
+                    solution_en: "<p>4.(a) <span style=\"font-family: Times New Roman;\">Let the length of string = x<br><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfmUs6iJ2TJ9N4UrsMx7lLwVJb8NaJGT98bW9wOT3pw-A_UXN9cFP0QqQ2pjAn-fnAsF49Qm3cQ0kAE3BQbbT4RTenOBpBasNrZ9VegyTziVp_dBYgTfV4sxwnCDDAyMCEkWPLoYUYJf6SsL56W5p9kJ3Y?key=R_Xs2ZSuZ0Y1ToJjqQPHOOzY\" width=\"140\" height=\"147\"><strong id=\"docs-internal-guid-c798cbf3-7fff-ec43-6502-b9c9b6d9006a\"><br></strong>Sin 30&deg; =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi>AB</mi><mi>AC</mi></mfrac></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>1</mn><mn>2</mn></mfrac></math> =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>90</mn><mi mathvariant=\"normal\">x</mi></mfrac></math><br>x = 180 m</span></p>\n<p>&nbsp;</p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>4.(a) <span style=\"font-family: Baloo;\">माना तार की लंबाई = x<br><span style=\"font-family: Times New Roman;\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfmUs6iJ2TJ9N4UrsMx7lLwVJb8NaJGT98bW9wOT3pw-A_UXN9cFP0QqQ2pjAn-fnAsF49Qm3cQ0kAE3BQbbT4RTenOBpBasNrZ9VegyTziVp_dBYgTfV4sxwnCDDAyMCEkWPLoYUYJf6SsL56W5p9kJ3Y?key=R_Xs2ZSuZ0Y1ToJjqQPHOOzY\" width=\"140\" height=\"147\"><strong id=\"docs-internal-guid-c798cbf3-7fff-ec43-6502-b9c9b6d9006a\"><br></strong>Sin 30&deg; =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi>AB</mi><mi>AC</mi></mfrac></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>1</mn><mn>2</mn></mfrac></math> =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>90</mn><mi mathvariant=\"normal\">x</mi></mfrac></math><br>x = 180 m</span><br></span></p>\n<p>&nbsp;</p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "5",
+                    section: "17",
+                    question_en: "<p>5. <span style=\"font-family: Times New Roman;\">&nbsp;A vertical pole and a vertical tower are on the same level ground in such a way that, from the top of pole, the angle of elevation of the top of the tower is 60&deg;</span><span style=\"font-family: Times New Roman;\"> and the angle of depression of the bottom of the tower is 30&deg;</span><span style=\"font-family: Times New Roman;\">. If the height of the pole is 24 m, then find the height of the tower (in m).</span></p>",
+                    question_hi: "<p>5.<span style=\"font-family: Baloo;\"> एक उर्ध्वाधर खम्भा और एक उर्ध्वाधर मीनार एक ही समतल जमीन पर इस प्रकार हैं कि खम्भे के शीर्ष से मीनार के शीर्ष का उन्नयन कोण 60&deg;&nbsp;</span><span style=\"font-family: Baloo;\">है और मीनार के तल का अवनमन कोण 30&deg;</span><span style=\"font-family: Baloo;\">&nbsp;है। यदि खम्भे की ऊँचाई 24 मी है, तो मीनार की ऊँचाई (मीटर में) ज्ञात कीजिए।</span></p>",
+                    options_en: ["<p>24<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math>(<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math>+ 1)</p>", "<p>72</p>", 
+                                "<p>96</p>", "<p>24(<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math>+ 1)</p>"],
+                    options_hi: ["<p>24<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math>(<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math>+ 1)</p>", "<p>72</p>",
+                                "<p>96</p>", "<p>24(<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math>+ 1)</p>"],
+                    solution_en: "<p>5.(c) <span style=\"font-family: Times New Roman;\">Let AC be a tower, and ED be a pole. Let AB = h, so AC = h + 24<br><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXckyfP7uNbAcfSzx-yvtx_6PjKOLzqxf7jPsxTpyiX3FlopVRtC-m6X0TqxYHFTPzqBm2vA8wtN6lXI4nWAx02HCyH2FD8BzGibzjqk5cNPS1VUkcsna2LY9sFjKA3xr0l6cAiqaYjSVMY_CJJSMqWzbA?key=R_Xs2ZSuZ0Y1ToJjqQPHOOzY\" width=\"210\" height=\"174\"><br>In &Delta;ABE,<br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math> =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi>AB</mi><mi>BE</mi></mfrac></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math> =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi mathvariant=\"normal\">h</mi><mi mathvariant=\"normal\">x</mi></mfrac></math>&nbsp; &nbsp; &nbsp; &nbsp;(BE = DC = x)<br>h = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math>x ............(1)<br>In &Delta;EDC,<br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>1</mn><msqrt><mn>3</mn></msqrt></mfrac></math> =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>24</mn><mi mathvariant=\"normal\">x</mi></mfrac></math><br>x = 24<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math> ............(2)<br></span><span style=\"font-family: Times New Roman;\">Putting&nbsp;</span><span style=\"font-family: Times New Roman;\"> x = 24<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></span><span style=\"font-family: Times New Roman;\"> in equation (1), we get<br>h = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math>x = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math>(24<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math>) = 72 m<br></span><span style=\"font-family: Times New Roman;\">Height of tower = h + 24 = 72 + 24 = 96 m</span></p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>5.(c)<span style=\"font-family: Baloo;\">मान लीजिए , AC एक मीनार है और ED एक खंभा है। माना AB = h, अतः AC = h + 24<span style=\"font-family: Times New Roman;\"><br><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXckyfP7uNbAcfSzx-yvtx_6PjKOLzqxf7jPsxTpyiX3FlopVRtC-m6X0TqxYHFTPzqBm2vA8wtN6lXI4nWAx02HCyH2FD8BzGibzjqk5cNPS1VUkcsna2LY9sFjKA3xr0l6cAiqaYjSVMY_CJJSMqWzbA?key=R_Xs2ZSuZ0Y1ToJjqQPHOOzY\" width=\"210\" height=\"174\"><br>In &Delta;ABE,<br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math> =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi>AB</mi><mi>BE</mi></mfrac></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math> =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi mathvariant=\"normal\">h</mi><mi mathvariant=\"normal\">x</mi></mfrac></math>&nbsp; &nbsp; &nbsp; &nbsp;(BE = DC = x)<br>h = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math>x ............(1)<br>In &Delta;EDC,<br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>1</mn><msqrt><mn>3</mn></msqrt></mfrac></math> =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>24</mn><mi mathvariant=\"normal\">x</mi></mfrac></math><br>x = 24<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math> ............(2)<br></span></span><span style=\"font-family: Baloo;\">समीकरण (1) में <span style=\"font-family: Times New Roman;\">x = 24<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math> </span></span><span style=\"font-family: Baloo;\">रखने पर हमें प्राप्त होता है<br></span><span style=\"font-family: Times New Roman;\">h = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math>x = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math>(24<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math>) = 72 m<br></span><span style=\"font-family: Baloo;\">मीनार की ऊँचाई = h + 24 = 72 + 24 = 96 m</span></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "6",
+                    section: "17",
+                    question_en: "<p>6. <span style=\"font-family: Times New Roman;\">&nbsp;The angle of elevation of the top of a tall building from the points M and N at the distances of 72m and 128m , respectively, from the base of the building and in the same straight line with it , are complementary . The height of the building ( in m ) is ?</span></p>",
+                    question_hi: "<p>6.<span style=\"font-family: Baloo;\"> 72 m और 128 m की दूरी पर क्रमशः बिंदु M और N से एक ऊंची इमारत के शीर्ष का उन्नयन कोण, इमारत के आधार से और इसके साथ एक ही सीधी रेखा में, पूरक हैं। इमारत की ऊंचाई (मीटर में) क्या है?</span></p>",
+                    options_en: ["<p>84</p>", "<p>96</p>", 
+                                "<p>80</p>", "<p>90</p>"],
+                    options_hi: ["<p>84</p>", "<p>96</p>",
+                                "<p>80</p>", "<p>90</p>"],
+                    solution_en: "<p>6.(b)<span style=\"font-family: Times New Roman;\">Let height of building = h<br><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXerklUwll2nBDwgo591TcUBHcnLPJbn374vP3izxBaG_qjmXl_HEzNuPX_TNrEt_SX38NAqhJlJuLN0u9ywJ17PAFNGHfUURDsVSEVwOmtrZ-A83EGWQf9WfOE0OpTOD4Y_ij9TU_KQ7mQg94jhji4gAHg?key=R_Xs2ZSuZ0Y1ToJjqQPHOOzY\" width=\"173\" height=\"124\"><br>In &Delta;PXM,<br>tan&theta; =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi>PX</mi><mi>MX</mi></mfrac></math><br>tan&theta; =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi mathvariant=\"normal\">h</mi><mn>72</mn></mfrac></math>.........(1)<br>In &Delta;PXN,<br>tan(90 - &theta;) =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi>PX</mi><mi>XN</mi></mfrac></math><br>tan(90 - &theta;) =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi mathvariant=\"normal\">h</mi><mn>128</mn></mfrac></math>.........(2)<br></span><span style=\"font-family: Times New Roman;\">Multiply equation (1) and (2)<br>tan&theta; &times; tan(90 - &theta;) = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi mathvariant=\"normal\">h</mi><mn>72</mn></mfrac></math> &times; <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi mathvariant=\"normal\">h</mi><mn>128</mn></mfrac></math><br>tan&theta; &times; cot&theta; =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><msup><mi mathvariant=\"normal\">h</mi><mn>2</mn></msup><mrow><mn>72</mn><mo>&#215;</mo><mn>128</mn></mrow></mfrac></math><br>1 = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><msup><mi mathvariant=\"normal\">h</mi><mn>2</mn></msup><mrow><mn>72</mn><mo>&#215;</mo><mn>128</mn></mrow></mfrac></math><br>h =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>72</mn><mo>&#215;</mo><mn>128</mn></msqrt></math> =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>9216</mn></msqrt></math> = 96m<br></span></p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>6.(b)&nbsp;<span style=\"font-family: Times New Roman;\">माना भवन की ऊंचाई = h</span><span style=\"font-family: Times New Roman;\"><br><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXerklUwll2nBDwgo591TcUBHcnLPJbn374vP3izxBaG_qjmXl_HEzNuPX_TNrEt_SX38NAqhJlJuLN0u9ywJ17PAFNGHfUURDsVSEVwOmtrZ-A83EGWQf9WfOE0OpTOD4Y_ij9TU_KQ7mQg94jhji4gAHg?key=R_Xs2ZSuZ0Y1ToJjqQPHOOzY\" width=\"173\" height=\"124\"><br>&Delta;PXM में,<br>tan&theta; =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi>PX</mi><mi>MX</mi></mfrac></math><br>tan&theta; =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi mathvariant=\"normal\">h</mi><mn>72</mn></mfrac></math>.........(1)<br>&Delta;PXN&nbsp;में,<br>tan(90 - &theta;) =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi>PX</mi><mi>XN</mi></mfrac></math><br>tan(90 - &theta;) =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi mathvariant=\"normal\">h</mi><mn>128</mn></mfrac></math>.........(2)<br></span><span style=\"font-family: Times New Roman;\">समीकरण (1) और (2) गुणा करने पर<br>tan&theta; &times; tan(90 - &theta;) = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi mathvariant=\"normal\">h</mi><mn>72</mn></mfrac></math> &times; <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi mathvariant=\"normal\">h</mi><mn>128</mn></mfrac></math><br>tan&theta; &times; cot&theta; =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><msup><mi mathvariant=\"normal\">h</mi><mn>2</mn></msup><mrow><mn>72</mn><mo>&#215;</mo><mn>128</mn></mrow></mfrac></math><br>1 = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><msup><mi mathvariant=\"normal\">h</mi><mn>2</mn></msup><mrow><mn>72</mn><mo>&#215;</mo><mn>128</mn></mrow></mfrac></math><br>h =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>72</mn><mo>&#215;</mo><mn>128</mn></msqrt></math> =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>9216</mn></msqrt></math> = 96m<br></span></p>\n<p>&nbsp;</p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "7",
+                    section: "17",
+                    question_en: "<p>7. <span style=\"font-family: Times New Roman;\">From a point P on the level ground, the angle of elevation of the top of the tower is 30&deg; If the tower is 110<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></span><span style=\"font-family: Times New Roman;\">&nbsp;m high, what is the distance(in m) of point P from the foot of the tower?</span></p>",
+                    question_hi: "<p>7.<span style=\"font-family: Baloo;\"> समतल भूमि पर एक बिंदु P से, मीनार के शीर्ष का उन्नयन कोण 30&deg; है यदि मीनार <span style=\"font-family: Times New Roman;\">110<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></span>m ऊँची है, तो बिंदु P की मीनार के पाद से दूरी (मीटर में) क्या है</span></p>",
+                    options_en: ["<p>330</p>", "<p>220</p>", 
+                                "<p>115</p>", "<p>110</p>"],
+                    options_hi: ["<p>330</p>", "<p>220</p>",
+                                "<p>115</p>", "<p>110</p>"],
+                    solution_en: "<p>7.(a) <span style=\"font-family: Times New Roman;\">Let distance between point P and foot of tower = x<br></span><span style=\"font-family: Times New Roman;\">According to the question,<br><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcRCx4eoKMTHPVZWmXix-HoK9sOOsvhCeUYQkVtAkTaRi6X9CVBYgagu2jXJO-I2kN2gmZlCosJIElyHHAKDK_t0pGCN5LEQeVe_nSNOFhkogOSzXwsIlOD0ydKibZaebdIHZMyRqSpZrkILmJN9qu2Lg?key=R_Xs2ZSuZ0Y1ToJjqQPHOOzY\" width=\"133\" height=\"128\"><br>Tan30&deg; =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi>AB</mi><mi>BP</mi></mfrac></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>1</mn><msqrt><mn>3</mn></msqrt></mfrac></math> =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>110</mn><msqrt><mn>3</mn></msqrt></mrow><mi mathvariant=\"normal\">x</mi></mfrac></math><br>x = 330 m</span></p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>7.(a)<span style=\"font-family: Baloo;\">माना बिंदु P और मीनार के आधार के बीच की दूरी = x<br></span><span style=\"font-family: Baloo;\">प्रश्न के अनुसार,<br><span style=\"font-family: Times New Roman;\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcRCx4eoKMTHPVZWmXix-HoK9sOOsvhCeUYQkVtAkTaRi6X9CVBYgagu2jXJO-I2kN2gmZlCosJIElyHHAKDK_t0pGCN5LEQeVe_nSNOFhkogOSzXwsIlOD0ydKibZaebdIHZMyRqSpZrkILmJN9qu2Lg?key=R_Xs2ZSuZ0Y1ToJjqQPHOOzY\" width=\"133\" height=\"128\"><br>Tan30&deg; =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi>AB</mi><mi>BP</mi></mfrac></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>1</mn><msqrt><mn>3</mn></msqrt></mfrac></math> =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>110</mn><msqrt><mn>3</mn></msqrt></mrow><mi mathvariant=\"normal\">x</mi></mfrac></math><br>x = 330 m</span><br></span></p>\n<p>&nbsp;</p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "8",
+                    section: "17",
+                    question_en: "<p>8. <span style=\"font-family: Times New Roman;\">A kite flying at a height of 120 m is attached to a string which makes an angle of 60&deg; with the horizontal. What is the length of the string?</span></p>",
+                    question_hi: "<p>8. <span style=\"font-family: Baloo;\">120 m की ऊंचाई पर उड़ने वाली पतंग एक स्ट्रिंग से जुड़ी होती है जो क्षैतिज के साथ 60&deg; का कोण बनाती है। स्ट्रिंग की लंबाई क्या है?</span></p>",
+                    options_en: ["<p>90<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></p>", "<p>75<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></p>", 
+                                "<p>84<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></p>", "<p>80<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></p>"],
+                    options_hi: ["<p>90<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></p>", "<p>75<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></p>",
+                                "<p>84<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></p>", "<p>80<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></p>"],
+                    solution_en: "<p>8.(d) <span style=\"font-family: Times New Roman;\">Let the length of string = y<br><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfwIvxb4xHWPjDLqgKpBGrXh8JbjHbNlLDGpUAglJmEpFLAXPZdtwQ3hOe955_n8LLKKZcHrOB0RN_1kWHizlGD4ikSdVYMIQPB3eAHyMEr0pH-Cbu5Xhbo6u8fJcynaOSbuA_bMwQ55XBuGH5o3-BO_A?key=R_Xs2ZSuZ0Y1ToJjqQPHOOzY\" width=\"115\" height=\"113\"><br>Sin60&deg; =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi>AB</mi><mi>AC</mi></mfrac></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><msqrt><mn>3</mn></msqrt><mn>2</mn></mfrac></math> =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>120</mn><mi mathvariant=\"normal\">y</mi></mfrac></math><br>y = 80<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math> m</span></p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>8.(d) <span style=\"font-family: Baloo;\">माना तार की लंबाई = y<span style=\"font-family: Times New Roman;\"><br><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfwIvxb4xHWPjDLqgKpBGrXh8JbjHbNlLDGpUAglJmEpFLAXPZdtwQ3hOe955_n8LLKKZcHrOB0RN_1kWHizlGD4ikSdVYMIQPB3eAHyMEr0pH-Cbu5Xhbo6u8fJcynaOSbuA_bMwQ55XBuGH5o3-BO_A?key=R_Xs2ZSuZ0Y1ToJjqQPHOOzY\" width=\"115\" height=\"113\"><br>Sin60&deg; =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi>AB</mi><mi>AC</mi></mfrac></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><msqrt><mn>3</mn></msqrt><mn>2</mn></mfrac></math> =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>120</mn><mi mathvariant=\"normal\">y</mi></mfrac></math><br>y = 80<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math> m</span></span></p>\n<p>&nbsp;</p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "9",
+                    section: "17",
+                    question_en: "<p>9. <span style=\"font-family: Times New Roman;\">From a point P on a level ground, the angle of elevation of the top of the tower is 30&deg;. If the distance of point P from the foot of the tower is 510 m, then 50% of the height of the tower (in m) is:&nbsp;</span></p>",
+                    question_hi: "<p>9. <span style=\"font-family: Baloo;\">समतल भूमि पर स्थित बिंदु P से मीनार के शिखर का उन्नयन कोण 30&deg; है। यदि मीनार के पाद से बिंदु P की दूरी 510 m है, तो मीनार की ऊँचाई (m पर) का 50% है:</span></p>",
+                    options_en: ["<p>85</p>", "<p><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>85</mn><msqrt><mn>3</mn></msqrt></mrow><mn>3</mn></mfrac></math></p>", 
+                                "<p>85<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></p>", "<p>150<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></p>"],
+                    options_hi: ["<p>85</p>", "<p><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>85</mn><msqrt><mn>3</mn></msqrt></mrow><mn>3</mn></mfrac></math></p>",
+                                "<p>85<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></p>", "<p>150<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></p>"],
+                    solution_en: "<p>9.(c)<br><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeh8DnyyBB4Kl1L68GLh6xeZv6EFLr5l8GuFBQkiPUmFQ3zbZ-psNgQ7YQB28jWH3VITfIcN7pia7vhf_tXszXTLlBh5buJLhKX1gPXiF1D26MABVx2JrTvGfvCmyEG51G5g3nOI1X9a57gLFvGjFRcnQk?key=R_Xs2ZSuZ0Y1ToJjqQPHOOzY\" width=\"169\" height=\"108\"><br><span style=\"font-family: Times New Roman;\">Let &ldquo;AB&rdquo; be the tower and PB be the distance from the foot of the tower.<br></span><span style=\"font-family: Times New Roman;\">ATQ,<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math> </span><span style=\"font-family: Times New Roman;\"> units = 510 m,<br></span><span style=\"font-family: Times New Roman;\">1 unit = 170<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></span><span style=\"font-family: Times New Roman;\"> <br></span><span style=\"font-family: Times New Roman;\">50% of the tower = </span><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>1</mn><mn>2</mn></mfrac><mo>&#215;</mo><mn>170</mn><msqrt><mn>3</mn></msqrt><mo>=</mo><mn>85</mn><msqrt><mn>3</mn></msqrt><mi mathvariant=\"normal\">m</mi><mo>&#160;</mo></math><span style=\"font-family: Times New Roman;\"> </span></p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>9.(c)<br><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeh8DnyyBB4Kl1L68GLh6xeZv6EFLr5l8GuFBQkiPUmFQ3zbZ-psNgQ7YQB28jWH3VITfIcN7pia7vhf_tXszXTLlBh5buJLhKX1gPXiF1D26MABVx2JrTvGfvCmyEG51G5g3nOI1X9a57gLFvGjFRcnQk?key=R_Xs2ZSuZ0Y1ToJjqQPHOOzY\" width=\"169\" height=\"108\"><br><span style=\"font-family: Baloo;\">मान लीजिए &ldquo;AB&rdquo; मीनार है और PB मीनार के पाद से दूरी है।<br></span><span style=\"font-family: Baloo;\">प्रश्न के अनुसार, <span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></span></span><span style=\"font-family: Baloo;\"> इकाई = 510 m,<br></span><span style=\"font-family: Baloo;\">1 इकाई = 170<span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></span></span><span style=\"font-family: Times New Roman;\">&nbsp;<br></span><span style=\"font-family: Baloo;\">मीनार का 50% <span style=\"font-family: Times New Roman;\">= </span><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>1</mn><mn>2</mn></mfrac><mo>&#215;</mo><mn>170</mn><msqrt><mn>3</mn></msqrt><mo>=</mo><mn>85</mn><msqrt><mn>3</mn></msqrt><mi mathvariant=\"normal\">m</mi><mo>&#160;</mo></math></span></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "10",
+                    section: "17",
+                    question_en: "<p>10.<span style=\"font-family: Times New Roman;\"> The length of the shadow on the ground of a tall tree of height 45 m is 15<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></span><span style=\"font-family: Times New Roman;\">m. What is the angle ( in degrees) of elevation of the sun?</span></p>",
+                    question_hi: "<p>10. <span style=\"font-family: Baloo;\">45 m ऊंचे पेड़ की जमीन पर छाया की लंबाई 15<span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></span></span><span style=\"font-family: Baloo;\">m है। सूर्य का उन्नयन कोण (डिग्री में) क्या है?</span></p>",
+                    options_en: ["<p>60&deg;</p>", "<p>45&deg;</p>", 
+                                "<p>90&deg;</p>", "<p>30&deg;</p>"],
+                    options_hi: ["<p>60&deg;</p>", "<p>45&deg;</p>",
+                                "<p>90&deg;</p>", "<p>30&deg;</p>"],
+                    solution_en: "<p>10.(a)<span style=\"font-family: Times New Roman;\">According to the question,<br><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfot6Saki-_QTcMzN9SXpHXMUqdhD-MZiqstICnptUiheNMB91S4sPA2dyoyCAiy4bqLa6Qbmq-rS7lpW3DVogCic80Ge5ZYWgIL5CSLbn7js2hdgRCxIidCN5B7h052YwWWdTQwLQxBUEikA8FqBuxn-o?key=R_Xs2ZSuZ0Y1ToJjqQPHOOzY\" width=\"116\" height=\"129\"><br>tan&theta; =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi>AB</mi><mi>BC</mi></mfrac></math><br>tan&theta; =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>45</mn><mrow><mn>15</mn><msqrt><mn>3</mn></msqrt></mrow></mfrac></math>= <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math><br></span><span style=\"font-family: Times New Roman;\">So, angle of elevation</span><span style=\"font-family: Times New Roman;\"> &theta; = 60&deg;</span></p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>10.(a)<span style=\"font-family: Baloo;\">प्रश्न के अनुसार,<span style=\"font-family: Times New Roman;\"><br><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfot6Saki-_QTcMzN9SXpHXMUqdhD-MZiqstICnptUiheNMB91S4sPA2dyoyCAiy4bqLa6Qbmq-rS7lpW3DVogCic80Ge5ZYWgIL5CSLbn7js2hdgRCxIidCN5B7h052YwWWdTQwLQxBUEikA8FqBuxn-o?key=R_Xs2ZSuZ0Y1ToJjqQPHOOzY\" width=\"116\" height=\"129\"><br>tan&theta; =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi>AB</mi><mi>BC</mi></mfrac></math><br>tan&theta; =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>45</mn><mrow><mn>15</mn><msqrt><mn>3</mn></msqrt></mrow></mfrac></math>= <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math><br></span></span><span style=\"font-family: Baloo;\">अत: उन्नयन कोण</span><span style=\"font-family: Times New Roman;\"> &theta; = 60&deg;</span></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "11",
+                    section: "17",
+                    question_en: "<p>11.<span style=\"font-family: Times New Roman;\"> Two poles of height 10 m and 17 m are fixed on a level ground. The distance between the bottom of the poles is 24 m. What is the distance(in m) between their tops?</span></p>",
+                    question_hi: "<p>11. <span style=\"font-family: Baloo;\">&nbsp;10 मीटर और 17 मीटर ऊंचाई के दो खंभे एक समतल जमीन पर लगे हैं। खंभों के तल के बीच की दूरी 24 मीटर है। उनके शीर्षों के बीच की दूरी (मीटर में) क्या है?</span></p>",
+                    options_en: ["<p>25</p>", "<p>24</p>", 
+                                "<p>30</p>", "<p>27</p>"],
+                    options_hi: ["<p>25</p>", "<p>24</p>",
+                                "<p>30</p>", "<p>27</p>"],
+                    solution_en: "<p>11.(a)<span style=\"font-family: Times New Roman;\">According to the question,<br><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcBSORVr9RftfBG8xL2gnODPklDLfRHhCsxnsT8DM3CnFBdbA3Q-7hD69vaJcj2WE0Fxlytur8xeqUntyZ9DCbKojM5eYgeB-6ankTy7M5rfzffwA7HShBucYKFwgzD4ZMDu3G-8nqc7BRm8h5yGvctciE?key=R_Xs2ZSuZ0Y1ToJjqQPHOOzY\" width=\"190\" height=\"135\"><br></span><span style=\"font-family: Times New Roman;\">ED = EC &ndash; DC = 17 &ndash; 10 = 7 m<br></span><span style=\"font-family: Times New Roman;\">AD = BC = 24 m&nbsp;<br>In &Delta;ADE,<br>AE<sup>2</sup> = AD<sup>2</sup> + DE<sup>2</sup> = 24<sup>2</sup> + 7<sup>2</sup> = 25<sup>2</sup><br>So, AE = 25 M<br></span><span style=\"font-family: Times New Roman;\">So, required distance = 25 m</span></p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>11.(a)<span style=\"font-family: Baloo;\">प्रश्न के अनुसार,<br><span style=\"font-family: Times New Roman;\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcBSORVr9RftfBG8xL2gnODPklDLfRHhCsxnsT8DM3CnFBdbA3Q-7hD69vaJcj2WE0Fxlytur8xeqUntyZ9DCbKojM5eYgeB-6ankTy7M5rfzffwA7HShBucYKFwgzD4ZMDu3G-8nqc7BRm8h5yGvctciE?key=R_Xs2ZSuZ0Y1ToJjqQPHOOzY\" width=\"190\" height=\"135\"><br></span></span><span style=\"font-family: Times New Roman;\">ED = EC &ndash; DC = 17 &ndash; 10 = 7 m<br></span><span style=\"font-family: Times New Roman;\">AD = BC = 24 m&nbsp;<br></span><span style=\"font-family: Baloo;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>&#8710;</mo></math>ADE में,<br><span style=\"font-family: Times New Roman;\">AE<sup>2</sup> = AD<sup>2</sup> + DE<sup>2</sup> = 24<sup>2</sup> + 7<sup>2</sup> = 25<sup>2</sup></span> <br>इसलिए, AE = 25 m<br></span><span style=\"font-family: Baloo;\">अत: अभीष्ट दूरी = 25 m</span></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "12",
+                    section: "17",
+                    question_en: "<p>12.<span style=\"font-family: Times New Roman;\"> Exactly midway between the foot of two towers P and Q, the angle of elevation of their tops are 45<span style=\"font-family: Baloo;\">&deg;</span>&nbsp;</span><span style=\"font-family: Times New Roman;\">and <span style=\"font-family: Baloo;\">60&deg;</span></span><span style=\"font-family: Times New Roman;\">, respectively. The ratio of the heights of P and Q is:</span></p>",
+                    question_hi: "<p>12.<span style=\"font-family: Baloo;\"> दो टावरों P और Q के पाद के ठीक बीच में, उनके शीर्षों का उन्नयन कोण क्रमशः 45&deg; </span><span style=\"font-family: Baloo;\">और 60&deg;</span><span style=\"font-family: Baloo;\">&nbsp;है। P और Q की ऊँचाइयों का अनुपात है:</span></p>",
+                    options_en: ["<p>1 : <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></p>", "<p>3 : 1</p>", 
+                                "<p>1 : 3</p>", "<p><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math> : 1</p>"],
+                    options_hi: ["<p>1 :&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></p>", "<p>3 : 1</p>",
+                                "<p>1 : 3</p>", "<p><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math> : 1</p>"],
+                    solution_en: "<p>12.(a) <span style=\"font-family: Times New Roman;\">Let PC = CQ = y and AP = h and BQ = H<br><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXedgf7ghKHgaEelZdAnd77hILvDXYsxD8OAhIU2KMDafS6O3yKBb2mt49Sqa6PMHFw-uRu3dNJrJac57BjXB5R6J5dzysYCZAIlSFJ4kP2TLXS_bLurzU6a2u_BTFrCg18U9GtPIiZbyUxzJ8GSw4bhqH8?key=R_Xs2ZSuZ0Y1ToJjqQPHOOzY\" width=\"136\" height=\"108\"><br>In &Delta;APC,<br>tan45&deg; =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi mathvariant=\"normal\">h</mi><mi mathvariant=\"normal\">y</mi></mfrac></math><br>1 = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi mathvariant=\"normal\">h</mi><mi mathvariant=\"normal\">y</mi></mfrac></math><br>h = y<br>In &Delta;BQC,<br>tan60&deg; =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi mathvariant=\"normal\">H</mi><mi mathvariant=\"normal\">y</mi></mfrac></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math> = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi mathvariant=\"normal\">H</mi><mi mathvariant=\"normal\">y</mi></mfrac></math><br></span>Putting y = h , we get<br><span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math> =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi mathvariant=\"normal\">H</mi><mi mathvariant=\"normal\">h</mi></mfrac></math><br></span>So,&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi mathvariant=\"normal\">h</mi><mi mathvariant=\"normal\">H</mi></mfrac></math> =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>1</mn><msqrt><mn>3</mn></msqrt></mfrac></math></p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>12.(a) <span style=\"font-family: Baloo;\">मान लीजिए PC = CQ = y और AP = h और BQ = H<span style=\"font-family: Times New Roman;\"><br><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXedgf7ghKHgaEelZdAnd77hILvDXYsxD8OAhIU2KMDafS6O3yKBb2mt49Sqa6PMHFw-uRu3dNJrJac57BjXB5R6J5dzysYCZAIlSFJ4kP2TLXS_bLurzU6a2u_BTFrCg18U9GtPIiZbyUxzJ8GSw4bhqH8?key=R_Xs2ZSuZ0Y1ToJjqQPHOOzY\" width=\"136\" height=\"108\"><br>&Delta;APC <span style=\"font-family: Baloo;\"><span style=\"font-family: Times New Roman;\">में</span></span>,<br>tan45&deg; =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi mathvariant=\"normal\">h</mi><mi mathvariant=\"normal\">y</mi></mfrac></math><br>1 = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi mathvariant=\"normal\">h</mi><mi mathvariant=\"normal\">y</mi></mfrac></math><br>h = y<br>&Delta;BQC में,<br>tan60&deg; = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi mathvariant=\"normal\">H</mi><mi mathvariant=\"normal\">y</mi></mfrac></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math> = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi mathvariant=\"normal\">H</mi><mi mathvariant=\"normal\">y</mi></mfrac></math><br></span></span><span style=\"font-family: Baloo;\">y = h रखने पर हमें प्राप्त होता है<br></span><span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math> =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi mathvariant=\"normal\">H</mi><mi mathvariant=\"normal\">h</mi></mfrac></math><br></span>इसलिए, <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi mathvariant=\"normal\">h</mi><mi mathvariant=\"normal\">H</mi></mfrac></math> =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>1</mn><msqrt><mn>3</mn></msqrt></mfrac></math></p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "13",
+                    section: "17",
+                    question_en: "<p>13.<span style=\"font-family: Times New Roman;\"> A poster is on top of a building. A person is standing on the ground at a distance of 50m from the building. The angles of elevation to the top of the poster and bottom of the poster are 45&deg; and 30&deg; , respectively . What is 200% of the height ( in m) of the poster?</span></p>",
+                    question_hi: "<p>13.<span style=\"font-family: Baloo;\"> एक इमारत के ऊपर एक पोस्टर लगा है। एक व्यक्ति इमारत से 50 मीटर की दूरी पर जमीन पर खड़ा है। पोस्टर के शीर्ष और पोस्टर के नीचे के उन्नयन कोण क्रमशः 45&deg; और 30&deg; हैं। पोस्टर की ऊंचाई का 200 प्रतिशत (मीटर में) क्या है?</span></p>",
+                    options_en: ["<p><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>25</mn><mn>3</mn></mfrac></math>(3 -<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math>)</p>", "<p><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>75</mn><mn>3</mn></mfrac></math>(3 -<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math>)</p>", 
+                                "<p><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>50</mn><mn>3</mn></mfrac></math>(3 -<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math>)</p>", "<p><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>100</mn><mn>3</mn></mfrac></math>(3 -<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math>)</p>"],
+                    options_hi: ["<p><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>25</mn><mn>3</mn></mfrac></math>(3 -<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math>)</p>", "<p><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>75</mn><mn>3</mn></mfrac></math>(3 -<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math>)</p>",
+                                "<p><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>50</mn><mn>3</mn></mfrac></math>(3 -<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math>)</p>", "<p><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>100</mn><mn>3</mn></mfrac></math>(3 -<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math>)</p>"],
+                    solution_en: "<p>13.(d) <span style=\"font-family: Times New Roman;\">Let the height of the building be AB and that of the poster be BC.<br></span><span style=\"font-family: Times New Roman;\">&ldquo;P&rdquo; </span><span style=\"font-family: Times New Roman;\">be the</span><span style=\"font-family: Times New Roman;\"> position of the standing person.<br></span><span style=\"font-family: Times New Roman;\">By, using</span><span style=\"font-family: Times New Roman;\"> the right angled triangle ratio we get the following figure.<br><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfXHqvp2ual67l7lYgwvL8hFMO67q7aLUpJaJwi_8FJJWstYtzo_-PDhw5lYrIhCNaczy6tZujasOABuFOcB2JVtMRwg5zZiqxsqHmVJI_IFyqfAqjRAxWYtBXX5UnzwzAsYw8r41IDWG8wfS7epJO3yPk?key=R_Xs2ZSuZ0Y1ToJjqQPHOOzY\" width=\"174\" height=\"133\"><br></span><span style=\"font-family: Times New Roman;\">According To Question,<br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math> units - 50<br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math> - 1 units -&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>50</mn><msqrt><mn>3</mn></msqrt></mfrac></math> &times; (<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math>- 1)<br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>50</mn><msqrt><mn>3</mn></msqrt></mfrac></math>&times; (<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math>- 1) &times;&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><msqrt><mn>3</mn></msqrt><msqrt><mn>3</mn></msqrt></mfrac></math> = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>50</mn><mn>3</mn></mfrac></math> (3 - <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math>)<br></span><span style=\"font-family: Times New Roman;\">200% of the poster =&nbsp;</span><span style=\"font-family: Times New Roman;\"> <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>100</mn><mn>3</mn></mfrac></math>(3 - <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math>) m.</span></p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>13.(d)<span style=\"font-family: Baloo;\">माना भवन की ऊंचाई AB और पोस्टर की BC है।<br></span><span style=\"font-family: Baloo;\">\"P\" खड़े व्यक्ति की स्थिति हो।<br></span><span style=\"font-family: Baloo;\">समकोण त्रिभुज अनुपात का उपयोग करने पर हमें निम्नलिखित आकृति प्राप्त होती है।<br><span style=\"font-family: Times New Roman;\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfXHqvp2ual67l7lYgwvL8hFMO67q7aLUpJaJwi_8FJJWstYtzo_-PDhw5lYrIhCNaczy6tZujasOABuFOcB2JVtMRwg5zZiqxsqHmVJI_IFyqfAqjRAxWYtBXX5UnzwzAsYw8r41IDWG8wfS7epJO3yPk?key=R_Xs2ZSuZ0Y1ToJjqQPHOOzY\" width=\"174\" height=\"133\"></span><br></span><span style=\"font-family: Baloo;\">प्रश्न के अनुसार,<br><span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math> इकाइयां - 50<br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math> - 1 <span style=\"font-family: Baloo;\"><span style=\"font-family: Times New Roman;\">इकाइयां </span></span>- <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>50</mn><msqrt><mn>3</mn></msqrt></mfrac></math> &times; (<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math>- 1)<br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>50</mn><msqrt><mn>3</mn></msqrt></mfrac></math>&times; (<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math>- 1) &times;&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><msqrt><mn>3</mn></msqrt><msqrt><mn>3</mn></msqrt></mfrac></math> = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>50</mn><mn>3</mn></mfrac></math> (3 - <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math>)</span><br></span><span style=\"font-family: Baloo;\">पोस्टर का 200% =&nbsp;</span><span style=\"font-family: Times New Roman;\"> <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>100</mn><mn>3</mn></mfrac></math>(3 - <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math>) m.</span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "14",
+                    section: "17",
+                    question_en: "<p>14. <span style=\"font-family: Times New Roman;\">From the top of a 195m high cliff, the angles of depression of the top and bottom of the tower are 30&deg; and 60&deg; respectively. Find the height of the tower(in m).</span></p>",
+                    question_hi: "<p>14.<span style=\"font-family: Baloo;\"> एक 195 मीटर ऊंची चट्टान की चोटी से, टावर के ऊपर और नीचे के अवनमन कोण क्रमशः 30&deg; और 60&deg; हैं। मीनार की ऊँचाई ज्ञात कीजिए (मीटर में)।</span></p>",
+                    options_en: ["<p>195<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></p>", "<p>195</p>", 
+                                "<p>130</p>", "<p>65</p>"],
+                    options_hi: ["<p>195<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></p>", "<p>195</p>",
+                                "<p>130</p>", "<p>65</p>"],
+                    solution_en: "<p>14.(c) <span style=\"font-family: Times New Roman;\">Let ED be a tower and AC be a cliff of height = 195m&nbsp;<br></span><span style=\"font-family: Times New Roman;\">Let BC = x </span><span style=\"font-family: Times New Roman;\">, so AB = 195 - x<br><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcYg4sv2a-0xdF5Iy0sNPv322OhoqN0KG5stFTpRpW2YktnBdaceYS9vbCjMI2nPET6Y1hLeokGTHoivExlE0sNdpZgs8U_CLuGfNCSrOrK_Ltnwg9LCPo-34SDuZjyw5g7E8QYpOCBzMmg4CI_GCzaEI4?key=R_Xs2ZSuZ0Y1ToJjqQPHOOzY\" width=\"168\" height=\"146\"><br>In &nbsp;&Delta;ACD,<br>tan 60&deg; =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi>AC</mi><mi>CD</mi></mfrac></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math> =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>195</mn><mi mathvariant=\"normal\">y</mi></mfrac></math><br>y = 65<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math>m<br>So, BE = CD = 65<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math> m<br>In &nbsp;&Delta;ABE,<br>tan 30&deg; =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi>AB</mi><mi>BE</mi></mfrac></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>1</mn><msqrt><mn>3</mn></msqrt></mfrac></math> =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>195</mn><mo>-</mo><mi mathvariant=\"normal\">x</mi></mrow><mrow><mn>65</mn><msqrt><mn>3</mn></msqrt></mrow></mfrac></math><br>195 - x = 65<br>x = 130 m<br></span><span style=\"font-family: Times New Roman;\">So, </span><span style=\"font-family: Times New Roman;\">height</span><span style=\"font-family: Times New Roman;\"> </span><span style=\"font-family: Times New Roman;\">of tower</span><span style=\"font-family: Times New Roman;\"> = 130 m &hellip;..(ED = BC)</span></p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>14.(c) <span style=\"font-family: Baloo;\">माना ED एक मीनार है और AC ऊँचाई की चट्टान है = 195m<br></span><span style=\"font-family: Baloo;\">माना BC = x, अत: AB = 195 &ndash; x<span style=\"font-family: Times New Roman;\"><br><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcYg4sv2a-0xdF5Iy0sNPv322OhoqN0KG5stFTpRpW2YktnBdaceYS9vbCjMI2nPET6Y1hLeokGTHoivExlE0sNdpZgs8U_CLuGfNCSrOrK_Ltnwg9LCPo-34SDuZjyw5g7E8QYpOCBzMmg4CI_GCzaEI4?key=R_Xs2ZSuZ0Y1ToJjqQPHOOzY\" width=\"168\" height=\"146\"><br>&Delta;ACD में,<br>tan 60&deg; =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi>AC</mi><mi>CD</mi></mfrac></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math> =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>195</mn><mi mathvariant=\"normal\">y</mi></mfrac></math><br>y = 65<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math>m<br>इसलिए, BE = CD = 65<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math> m<br>&Delta;ABE <span style=\"font-family: Baloo;\"><span style=\"font-family: Times New Roman;\">में</span></span>,<br>tan 30&deg; =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi>AB</mi><mi>BE</mi></mfrac></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>1</mn><msqrt><mn>3</mn></msqrt></mfrac></math> =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>195</mn><mo>-</mo><mi mathvariant=\"normal\">x</mi></mrow><mrow><mn>65</mn><msqrt><mn>3</mn></msqrt></mrow></mfrac></math><br>195 - x = 65<br>x = 130 m<br></span></span><span style=\"font-family: Baloo;\">इसलिए, टावर की ऊंचाई = 130 m &hellip;..(ED = BC)</span></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "15",
+                    section: "17",
+                    question_en: "<p>15.<span style=\"font-family: Gungsuh;\"> The length of the shadow on the ground of a tall tree of height 30 m is 10<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math> m. What is the angle (In degrees) of elevation of the sun?</span></p>",
+                    question_hi: "<p>15. <span style=\"font-family: Arial Unicode MS;\"> 30 मीटर ऊंचे पेड़ की जमीन पर निर्मित छाया की लंबाई 10<span style=\"font-family: Gungsuh;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></span> m है। सूर्य का उन्नयन कोण (डिग्री में) क्या है?</span></p>",
+                    options_en: ["<p>60</p>", "<p>15</p>", 
+                                "<p>30</p>", "<p>45</p>"],
+                    options_hi: ["<p>60</p>", "<p>15</p>",
+                                "<p>30</p>", "<p>45</p>"],
+                    solution_en: "<p>15.(a)<br><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXelb6fPhdPVR3S60ZX1oGCAzVOV88t_oJGhrJhuiN2YD6hAub3y9CPVDfyQhApDx_oDmOtnmR6UYnl_w3UO27kAxqZK3O24oAJSwdRZZLB9cdiErSr9eYkRgL2w6TPZI8QquhinSeha9ahNsj20IyEBQQ?key=R_Xs2ZSuZ0Y1ToJjqQPHOOzY\" width=\"128\" height=\"122\"><br><span style=\"font-family: Times New Roman;\">Tan A = </span><span style=\"font-family: Times New Roman;\"> </span><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi>perpendicular</mi><mi>base</mi></mfrac></math> =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>30</mn><mrow><mn>10</mn><msqrt><mn>3</mn></msqrt></mrow></mfrac></math> =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math><br><span style=\"font-family: Times New Roman;\">A = 60&deg;</span></p>",
+                    solution_hi: "<p>15.(a)<br><strong id=\"docs-internal-guid-a1a46030-7fff-0927-3d4f-cbd6bf64ceff\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdH38m2HbG2ta8CTrbVnLGG4-iEYyz4Cs0MdihqqHV3I_wEOni0X3cRa2aoRP0DyyPgocvd5t3JRL1y7DT2pt8a9_wgj3ued2_4J5svM9y5S8qnN1SD_E622BPyOZiuMwybsGkY4Q?key=msGj7vOMp6Awhv0I333mXwlu\" width=\"117\" height=\"145\"></strong><br><span style=\"font-family: Times New Roman;\">Tan A = </span><span style=\"font-family: Times New Roman;\"> </span><math style=\"font-family: Verdana;\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mi>&#2354;&#2306;&#2348;</mi><mo>&#160;</mo></mrow><mi>&#2310;&#2343;&#2366;&#2352;</mi></mfrac></math> = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>30</mn><mrow><mn>10</mn><msqrt><mn>3</mn></msqrt></mrow></mfrac></math> =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math><br><span style=\"font-family: Times New Roman;\">A = 60&deg;</span></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "16",
+                    section: "17",
+                    question_en: "<p>16. <span style=\"font-family: Times New Roman;\">&nbsp;A 20 m long ladder rests against a wall so that the angle between the ladder and the wall is 30&deg;</span><span style=\"font-family: Times New Roman;\">. How far (in m) is the base of the ladder from the wall?</span></p>",
+                    question_hi: "<p>16. <span style=\"font-family: Baloo;\">&nbsp;एक 20 मीटर लंबी सीढ़ी एक दीवार के सहारे इस प्रकार से टिकी हुई है की सीढ़ी और दीवार के बीच का कोण 30&deg;</span><span style=\"font-family: Baloo;\">&nbsp;है, सीढ़ी का आधार दीवार से कितनी दूर (मीटर में) पर है?</span></p>",
+                    options_en: ["<p>10<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></p>", "<p>20<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></p>", 
+                                "<p>20</p>", "<p>10</p>"],
+                    options_hi: ["<p>10<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></p>", "<p>20<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></p>",
+                                "<p>20</p>", "<p>10</p>"],
+                    solution_en: "<p>16.(d)<br><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcNCCmQMtomKnwII7_3oLroWiwyacl84WvOBa3WAx_Rz9gDZ_soWoAdLseUtcj9e3I7j2FxFxE7CvbYjR7iODIdykqyAxx4AGgjRATlvqmcDvaBfT3J1AtYXkB0l-ztshnN_UBHLRoZeGt2IolnU2EpgII?key=R_Xs2ZSuZ0Y1ToJjqQPHOOzY\" width=\"139\" height=\"147\"><br><span style=\"font-family: Times New Roman;\">In 30,60 ,90 right angle triangle ratio of sides is<br></span><span style=\"font-family: Times New Roman;\">Wall : floor : ladder = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></span><span style=\"font-family: Times New Roman;\">&nbsp;: 1 : 2&nbsp;<br></span><span style=\"font-family: Times New Roman;\">Ladder = 2 units = 20m&nbsp;<br></span><span style=\"font-family: Times New Roman;\">Base = 1 unit = 10m</span></p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>16.(d)<br><strong id=\"docs-internal-guid-4fa98fc5-7fff-83c5-56a4-bb953f82c5cf\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXda18U91sRL_1sa7ywW8QKwr8QnSDYOwzRXb8uHEY9Hf2b9_rtGxDzaOcv5wtyTolrN2VP7ZIhrqPZV1Uz4taibeN2GMZjnX_zH1bXdis8j2h-yw9ApHhGtJ0ex2sRIUQ?key=GqzvR84WLuKsY9oZ1QD7ct7p\" width=\"143\" height=\"141\"></strong><br><span style=\"font-family: Baloo;\">30,60,90 में समकोण त्रिभुज भुजाओं का अनुपात है<br></span><span style=\"font-family: Baloo;\">दीवार : फर्श : सीढ़ी = <span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></span></span><span style=\"font-family: Times New Roman;\">: 1 : 2<br></span><span style=\"font-family: Baloo;\">सीढ़ी = 2 इकाई = 20m<br></span><span style=\"font-family: Baloo;\">आधार = 1 इकाई = 10m</span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "17",
+                    section: "17",
+                    question_en: "<p>17.<span style=\"font-family: Times New Roman;\"> What is the angle of elevation of the sun when the shadow of a 9-m high pole is 3<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math> </span><span style=\"font-family: Times New Roman;\">m long?&nbsp;</span></p>",
+                    question_hi: "<p>17. <span style=\"font-family: Baloo;\">9 m ऊंचे खम्बे की छाया <span style=\"font-family: Times New Roman;\">3<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></span></span><span style=\"font-family: Baloo;\">m लंबी होने पर सूर्य का उन्नयन कोण क्या है?</span></p>",
+                    options_en: ["<p>30&deg;</p>", "<p>45&deg;</p>", 
+                                "<p>60&deg;</p>", "<p>90&deg;</p>"],
+                    options_hi: ["<p>30&deg;</p>", "<p>45&deg;</p>",
+                                "<p>60&deg;</p>", "<p>90&deg;</p>"],
+                    solution_en: "<p>17.(c)<span style=\"font-family: Times New Roman;\">Here pole is perpendicular and shadow is base<br></span>tanA = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mo>&#160;</mo><mi>perpendicular</mi></mrow><mrow><mi>base</mi><mo>&#160;</mo></mrow></mfrac></math> =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>9</mn><mrow><mn>3</mn><msqrt><mn>3</mn></msqrt></mrow></mfrac></math> =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math><br>So, A = 60&deg;</p>\n<p>&nbsp;</p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>17.(c) <span style=\"font-family: Baloo;\">यहाँ खंबा लंब है और छाया आधार है<br></span>tanA = <math style=\"font-family:Verdana\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi>&#2354;&#2306;&#2348;</mi><mi>&#2310;&#2343;&#2366;&#2352;</mi></mfrac></math> = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>9</mn><mrow><mn>3</mn><msqrt><mn>3</mn></msqrt></mrow></mfrac></math> =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math><br>इसलिए, A = 60&deg;</p>\n<p>&nbsp;</p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "18",
+                    section: "17",
+                    question_en: "<p>18. <span style=\"font-family: Times New Roman;\">The tops of two poles of height 18m and 30.5 m are connected by a wire . if the wire makes an angle of 30&deg; with the horizontal , what is the length (in m) of the wire ?</span></p>",
+                    question_hi: "<p>18. <span style=\"font-family: Baloo;\">18 मीटर और 30.5 मीटर ऊंचाई वाले दो खंभों के शीर्ष एक तार से जुड़े हुए हैं। यदि तार क्षैतिज से 30&deg; का कोण बनाता है, तो तार की लंबाई (मीटर में) क्या है?</span></p>",
+                    options_en: ["<p>20</p>", "<p>25</p>", 
+                                "<p>28</p>", "<p>36</p>"],
+                    options_hi: ["<p>20</p>", "<p>25</p>",
+                                "<p>28</p>", "<p>36</p>"],
+                    solution_en: "<p>18.(b)<br><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXenQQAkyyU42pkefBM6ReRgLPdlWm2BBra_pCQedBX2Vt8Mc1fYCUlpAcRWZlYrTGCBiStuu1etZiRltinMFCL3aon7IO-_HzkvcXKTZY66B65vaniou1b0Ws2qvWm7hDxB-zfoXCB9yx5g2cgRr0G8NWI?key=R_Xs2ZSuZ0Y1ToJjqQPHOOzY\" width=\"180\" height=\"171\"><br><span style=\"font-family: Times New Roman;\">Here,<br></span><span style=\"font-family: Times New Roman;\">EA = DC = 18 m&nbsp;<br></span><span style=\"font-family: Times New Roman;\">BE = AB - EA <br></span><span style=\"font-family: Times New Roman;\">BE = 30.5 - 18 = 12.5<br></span><span style=\"font-family: Times New Roman;\">Now <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mi>&#916;BDE</mi><mo>&#160;</mo></math></span><span style=\"font-family: Times New Roman;\">is a 30,60,90 right angle triangle <br></span><span style=\"font-family: Times New Roman;\">So EB : BD : DE = 1: 2 : <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math><br></span><span style=\"font-family: Times New Roman;\">1 unit = 12.5m so&nbsp;<br></span><span style=\"font-family: Times New Roman;\">Length of wire = 2 unit = 25 m</span></p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>18.(b)<br><strong id=\"docs-internal-guid-10e77689-7fff-3247-6aac-598b18b2bc65\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdLaiSjrqNnq6Mjsurbs5MA6asIlciUfFjWaWbPMbmmKk_rIbjrlXvYYMJ5lEqMKCSB9lw3-I70RvUOltFf7cp8Y8oIKsKzn1t2LceL2aEKwqZmywan67CeMlR9FCZVpU6pqUgc?key=0gENOpV6ErMH7LH3Mtauxfuj\" width=\"202\" height=\"192\"></strong><br><span style=\"font-family: Baloo;\">यहां,<br></span><span style=\"font-family: Times New Roman;\">EA = DC = 18 m&nbsp;<br></span><span style=\"font-family: Times New Roman;\">BE = AB - EA&nbsp;<br></span><span style=\"font-family: Times New Roman;\">BE = 30.5 - 18 = 12.5<br></span><span style=\"font-family: Baloo;\">अब <span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mi>&#916;BDE</mi><mo>&#160;</mo></math></span></span><span style=\"font-family: Baloo;\">एक 30,60,90 समकोण त्रिभुज है।<br></span><span style=\"font-family: Baloo;\">अतः EB : BD : DE = 1: 2 : <span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></span><br></span><span style=\"font-family: Baloo;\">1 इकाई = 12.5 m<br></span><span style=\"font-family: Baloo;\">अत: तार की लंबाई = 2 इकाई = 25 m</span></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "19",
+                    section: "17",
+                    question_en: "<p>19.<span style=\"font-family: Times New Roman;\"> A and B are the two points on the same side of a ground , 50 meters apart . The angle of elevation of these points to the top of a tree are 60&deg; and 30&deg;, respectively. What is 40% of the height of the tree (in m) ?</span></p>",
+                    question_hi: "<p>19.<span style=\"font-family: Baloo;\"> A और B एक जमीन के एक ही तरफ 50 मीटर की दूरी पर स्थित दो बिंदु हैं। एक पेड़ की चोटी से इन बिंदुओं का उन्नयन कोण क्रमशः 60&deg; और 30&deg; है। पेड़ की ऊंचाई का 40% (मीटर में) क्या है?</span></p>",
+                    options_en: ["<p>10<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></p>", "<p>15<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></p>", 
+                                "<p>5<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></p>", "<p>25<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></p>"],
+                    options_hi: ["<p>10<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></p>", "<p>15<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></p>",
+                                "<p>5<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></p>", "<p>25<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></p>"],
+                    solution_en: "<p>19.(a)<br><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcaor9xr4bXnKg8CIjNiBeFUu-K7mmf2gbIi113V8DyrGXih497yAhx6vF3FSiYNvtvipulOSg7UJAsjOP6xkg1XaywtdxISKthlIuxCdzFAA_sWZzDG4LV5DqO_4aGGYHYmApU1-ES-rXyxDPWu0dSySM?key=R_Xs2ZSuZ0Y1ToJjqQPHOOzY\" width=\"171\" height=\"131\"><br><span style=\"font-family: Times New Roman;\">In above figure<br></span><span style=\"font-family: \'Times New Roman\';\">CD&nbsp; &nbsp; : DA&nbsp; :&nbsp; &nbsp; AB :&nbsp; DB<br></span><span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math>&nbsp; &nbsp;:&nbsp; &nbsp; 1&nbsp; &nbsp;:&nbsp; &nbsp; &nbsp;2&nbsp; &nbsp;:&nbsp; &nbsp; 3<br></span><span style=\"font-family: Times New Roman;\">According to the question<br></span><span style=\"font-family: Times New Roman;\">2x = 50m&nbsp; &nbsp;<br></span><span style=\"font-family: Times New Roman;\">Height&nbsp; =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math>x = 25<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></span><br><span style=\"font-family: Times New Roman;\">40% of height =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>2</mn><mn>5</mn></mfrac></math>&times; 25<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math> = 10<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></span></p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>19.(a)<br><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcaor9xr4bXnKg8CIjNiBeFUu-K7mmf2gbIi113V8DyrGXih497yAhx6vF3FSiYNvtvipulOSg7UJAsjOP6xkg1XaywtdxISKthlIuxCdzFAA_sWZzDG4LV5DqO_4aGGYHYmApU1-ES-rXyxDPWu0dSySM?key=R_Xs2ZSuZ0Y1ToJjqQPHOOzY\" width=\"171\" height=\"131\"><br><span style=\"font-family: Baloo;\">उपरोक्त आकृति में,<br></span><span style=\"font-family: Times New Roman;\"><span style=\"font-family: \'Times New Roman\';\">CD&nbsp; &nbsp; : DA&nbsp; :&nbsp; &nbsp; AB :&nbsp; DB<br></span><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math>&nbsp; &nbsp;:&nbsp; &nbsp; 1&nbsp; &nbsp;:&nbsp; &nbsp; &nbsp;2&nbsp; &nbsp;:&nbsp; &nbsp; 3 &nbsp;&nbsp;<br></span><span style=\"font-family: Baloo;\">प्रश्न के अनुसार,<br></span><span style=\"font-family: Times New Roman;\">2x = 50m&nbsp;<br></span><span style=\"font-family: Baloo;\">ऊँचाई = <span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math>x = 25<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></span></span><br><span style=\"font-family: Baloo;\">ऊंचाई का 40% = <span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>2</mn><mn>5</mn></mfrac></math>&times; 25<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math> = 10<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></span></span></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "20",
+                    section: "17",
+                    question_en: "<p>20.<span style=\"font-family: Times New Roman;\"> A ladder of length 3.5m just reaches the top of a wall. If the ladder makes an angle of 60&deg; with the wall, then what is the height of the wall( in m) ?</span></p>",
+                    question_hi: "<p>20.<span style=\"font-family: Baloo;\"> 3.5 मीटर लंबाई की एक सीढ़ी एक दीवार के शीर्ष पर पहुँचती है। यदि सीढ़ी दीवार से 60&deg; का कोण बनाती है, तो दीवार की ऊँचाई (m में) क्या है?</span></p>",
+                    options_en: ["<p>1.75</p>", "<p>3.5<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></p>", 
+                                "<p><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>7</mn><msqrt><mn>3</mn></msqrt></mrow><mn>4</mn></mfrac></math></p>", "<p><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>3</mn><mo>.</mo><mn>5</mn></mrow><msqrt><mn>3</mn></msqrt></mfrac></math></p>"],
+                    options_hi: ["<p>1.75</p>", "<p>3.5<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></p>",
+                                "<p><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>7</mn><msqrt><mn>3</mn></msqrt></mrow><mn>4</mn></mfrac></math></p>", "<p><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>3</mn><mo>.</mo><mn>5</mn></mrow><msqrt><mn>3</mn></msqrt></mfrac></math></p>"],
+                    solution_en: "<p>20.(a)<br><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXflBt3lNee-L4fovYw-ZoWZmN7g0-Kcd_60l0RJbYpltKGe3LQY8bDpPWPAw4Qi5F1nnpo6XN6PHyZh61N5ET3JTu0pO0-zaHjEzZGgt6MJhtygVRtohsvFqKIwhEe0HWoSgFr1xMbse15rHHhdwGCmTg?key=R_Xs2ZSuZ0Y1ToJjqQPHOOzY\" width=\"197\" height=\"132\"><br><span style=\"font-family: Times New Roman;\">Ladder : wall : base = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>2</mn><mo>&#160;</mo><mo>:</mo><mo>&#160;</mo><mn>1</mn><mo>&#160;</mo><mo>:</mo><mo>&#160;</mo><msqrt><mn>3</mn></msqrt></math>&nbsp;<br></span><span style=\"font-family: Times New Roman;\">Now,<br></span><span style=\"font-family: Times New Roman;\">Ladder = 2 units = 3.5m<br></span><span style=\"font-family: Times New Roman;\">Wall = 1 unit = 1.75 m </span></p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>20.(a)<br><img src=\"https://chat.google.com/u/0/api/get_attachment_url?url_type=FIFE_URL&amp;content_type=image%2Fpng&amp;attachment_token=AOo0EEVE5fj7CRAeLvtXiozbl%2FhI14%2B1MEZTAC9eoj9bug8ylC%2FRznENtzW19RVsdI48Tcgy1YhdOhtG6vOoXnfH6YImeNYoy%2B8vuxPf2qKEAcSTS4spTS0ztm5%2BeDIrapgO43VHNsyh93aaca20Ew67b4vGGhfJUsi7AQpzgxt9N3%2BKWCFeSbTY%2BT%2FJiMuO1CyO7msNEnafAI5OWtwxALhzEihqTlKcxA1prO1APKcKVLaOe3E4GGJRCHZEHsvs%2FcnxoWotMEjoKcdgH89Quvhg1mkHQJr5Z4F3%2B%2FywioeldnslvJInvoUyCCwYCNQ61V1HtEUQlljjuijztJNXpCs%2FfqPHH2n4utcMY7tnqdf8ics8%2FB8yUjEZ0dqiq5nZAPRygEtTeRholkProlTql%2FWCKVLL4huzkdlltynhF7VH3tmVvXvCJMAp01Fne1TKN7CSmf6T8NRW1sWaOJBqz2%2Fl%2BtngB1A6jg%2BL3T9gYiz5vP1PbHfpec9OTILo6sWRQfMDBrev0HEBJSBBxVq4zSnMRMBPIDQs56tGjLL7VjbqMX8NaPgauKFX%2FbJwttg53DCy&amp;allow_caching=true&amp;sz=w512\" alt=\"image.png\" width=\"329\" height=\"218\"><br><span style=\"font-family: Baloo;\">सीढ़ी : दीवार : आधार = <span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>2</mn><mo>&#160;</mo><mo>:</mo><mo>&#160;</mo><mn>1</mn><mo>&#160;</mo><mo>:</mo><mo>&#160;</mo><msqrt><mn>3</mn></msqrt></math><br></span></span><span style=\"font-family: Baloo;\">सीढ़ी = 2 इकाई = 3.5m<br></span><span style=\"font-family: Baloo;\">दीवार = 1 इकाई = 1.75 m </span></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "21",
+                    section: "17",
+                    question_en: "<p>21.<span style=\"font-family: Times New Roman;\"> The angle of depression of the boat from the masthead of a ship 180m high is 60 degrees. Find the distance of the boat from the ship.</span></p>",
+                    question_hi: "<p>21.<span style=\"font-family: Baloo;\"> 180 मीटर ऊंचे जहाज के मास्टहेड से नाव का अवनमन कोण 60 डिग्री है। जहाज से नाव की दूरी ज्ञात कीजिए।</span></p>",
+                    options_en: ["<p>360</p>", "<p>60<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></p>", 
+                                "<p>180<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></p>", "<p>180</p>"],
+                    options_hi: ["<p>360</p>", "<p>60<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></p>",
+                                "<p>180<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></p>", "<p>180</p>"],
+                    solution_en: "<p>21.(b)<br><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfPWwdZtob2i2iMtyzeADEdo-dakiM4zTY-Mv3d82Tij35J7JxuaEGGwuHwvlbJwUESn84YYemCIWJAsoVmI3UJxl-gSJd9bV3eOD5CTJ7WZwaL23dtfX6owIhmHug-UiePwacggBLfEbo5ZBZJjTm41IM?key=R_Xs2ZSuZ0Y1ToJjqQPHOOzY\" width=\"144\" height=\"153\"><br><span style=\"font-family: Times New Roman;\">Mountain =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math> units&nbsp;</span><span style=\"font-family: Times New Roman;\"> = 180 m<br></span><span style=\"font-family: Times New Roman;\">Distance of boat from mountain = 1 unit = </span><span style=\"font-family: Times New Roman;\"> </span><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>180</mn><msqrt><mn>3</mn></msqrt></mfrac></math> = 60<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math> m</p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>21.(b)<br><img src=\"https://chat.google.com/u/0/api/get_attachment_url?url_type=FIFE_URL&amp;content_type=image%2Fpng&amp;attachment_token=AOo0EEXhvvWjBfmglso7vh%2B6dUNlH0qYxumg51fL9KiCo%2FcCh6tRwhaZO0IbojHJEg6LmmZ4veo9mTe2lxviwryNy37DU2sZ0WWqMPQr7T5V7P%2B3txG5Oy9nD1EAaBhC%2B8zGpHdcTrJozhBUK3xY1pG707BFoxROCRdy1bOUnpKxiNCAyDaSgQzHhCIKnxVHb%2BFbxc3TK8jv0KDyoIQJlG%2Fus1%2FHbVyNXp23ziXut%2F%2BLVEiz7izBgIMere2KcISqbaI%2FNf%2BP08iDbIMzKESEc10taL9lvF2g6L2DzHN6BcVm03c3Osj1%2BNjm59g3HpcFM%2B35d0dWDPy40WjcqXG0MeOuQRTcwLy%2B%2FkLMMikNl7CXwSK1rbK6Bps0lUQAAhIiVKTFJ9hPOkdPfa8qxXvRYycdgQYp%2BXex2MzGnGtZNyr%2Fm%2B6Kl8C6Mvt%2FsV8L3NDngYRf9tXsaP2i5GnrYvdLhgomFdzKre378uwBIZT2RwjR3XEN4zXzmnOjgiHNoCfSISvdiWAk%2Fg6GCbYnYo4pyuALqxCxNB%2BgnjzBsYXtKnYbfrOhBfgscNU5gL0b7rjCSFI%3D&amp;allow_caching=true&amp;sz=w512\" alt=\"image.png\" width=\"159\" height=\"186\"><br><span style=\"font-family: Baloo;\">पर्वत = <span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></span><math style=\"font-family: Verdana;\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>&#160;</mo><mi>&#2311;&#2325;&#2366;&#2312;</mi><mo>&#160;</mo></math> </span><span style=\"font-family: Times New Roman;\">&nbsp;= 180 m<br></span><span style=\"font-family: Baloo;\">पहाड़ से नाव की दूरी = 1 इकाई = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>180</mn><msqrt><mn>3</mn></msqrt></mfrac></math>&nbsp;= 60<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math> m</span></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "22",
+                    section: "17",
+                    question_en: "<p>22. <span style=\"font-family: Times New Roman;\">A ladder 18m long rests against a wall so that the angle between the ladder and the wall is 30&deg; .How far (in m) is the base of the ladder from the wall</span></p>",
+                    question_hi: "<p>22. <span style=\"font-family: Baloo;\">एक 18 m लंबी सीढ़ी एक दीवार के खिलाफ टिकी हुई है ताकि सीढ़ी और दीवार के बीच का कोण 30&deg; हो। दीवार से सीढ़ी का आधार कितनी दूर (m में) है?</span></p>",
+                    options_en: ["<p>18</p>", "<p>9<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></p>", 
+                                "<p>9</p>", "<p>18<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></p>"],
+                    options_hi: ["<p>18</p>", "<p>9<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></p>",
+                                "<p>9</p>", "<p>18<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math></p>"],
+                    solution_en: "<p>22.(c)<br><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXf2l2nasj1TN_ytDA-SPDe9wTRw88z2ipPSLz4dY_O-Rc8iIwNr7sW4P97N6rc75sV5M9QaEVyEFD1jveYGLTjwaWd9hHdMyjZOqKv3tMmB0iYPvK-DUNIVPoM3SuDy08G425u3K6P7A4IR5L-tTVj1ZoU?key=R_Xs2ZSuZ0Y1ToJjqQPHOOzY\" width=\"164\" height=\"166\"><br><span style=\"font-family: Times New Roman;\">&nbsp;wall&nbsp; &nbsp;:&nbsp; &nbsp;base&nbsp; &nbsp;:&nbsp; &nbsp;ladder<br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math>&nbsp; &nbsp;:&nbsp; &nbsp; &nbsp; 1&nbsp; &nbsp; &nbsp; :&nbsp; &nbsp; &nbsp; &nbsp;2<br></span><span style=\"font-family: Times New Roman;\">2 unit = 18 m (given)<br></span><span style=\"font-family: Times New Roman;\">Base = 1 unit = 9 m</span></p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>22.(c)<br><strong id=\"docs-internal-guid-bc7d8523-7fff-f363-30bb-3eb2fd52d797\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXf9goja7JxrDZco6X4wkN99jhsDnQZNu8kADr1a6IhQASRsETvJ_asWynAvY6A1ysDEzFAj_b9XdWeuBB9IzDsX1_sOg6aKHoA7nE9JK_Nip3dad79pn5Ubi6C56pcoEtwtjcrfww?key=gaYRg4VpqCqLXvcuhmL-Ig\" width=\"158\" height=\"157\"></strong><br><span style=\"font-family: Baloo;\">दीवार&nbsp; :&nbsp; आधार&nbsp; :&nbsp; &nbsp;सीढ़ी<br></span><span style=\"font-family: Times New Roman;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt></math>&nbsp; &nbsp;:&nbsp; &nbsp; &nbsp; 1&nbsp; &nbsp; &nbsp; :&nbsp; &nbsp; &nbsp; &nbsp;2<br></span><span style=\"font-family: Baloo;\">2 इकाई = 18 m (दिया गया है)<br></span><span style=\"font-family: Baloo;\">आधार = 1 इकाई = 9 m</span></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "23",
+                    section: "misc",
+                    question_en: "<p>23.<span style=\"font-family: Times New Roman;\"> The length of the shadow of a vertical tower on level ground increases by 8.4 cm when </span><span style=\"font-family: Times New Roman;\">The altitude of the sun changes from&nbsp; 45&deg;&nbsp;</span><span style=\"font-family: Times New Roman;\">to 30&deg;</span><span style=\"font-family: Times New Roman;\">. What is the height of the tower (in m)?</span></p>",
+                    question_hi: "<p>23. <span style=\"font-family: Baloo;\">समतल भूमि पर एक ऊर्ध्वाधर मीनार की छाया की लंबाई 8.4 cm बढ़ जाती है जब सूर्य की ऊँचाई 45&deg;</span><span style=\"font-family: Baloo;\"> से 30&deg;&nbsp;</span><span style=\"font-family: Baloo;\">&nbsp;तक बदल जाती है। टावर की ऊंचाई (m में) क्या है?</span></p>",
+                    options_en: ["<p><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>4</mn><mo>.</mo><mn>2</mn><mo>(</mo><msqrt><mn>3</mn></msqrt><mo>-</mo><mn>1</mn><mo>)</mo></math></p>", "<p><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>8</mn><mo>.</mo><mn>4</mn><mo>(</mo><msqrt><mn>3</mn></msqrt><mo>+</mo><mn>3</mn><mo>)</mo></math></p>", 
+                                "<p><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>4</mn><mo>.</mo><mn>2</mn><mo>(</mo><msqrt><mn>3</mn></msqrt><mo>+</mo><mn>3</mn><mo>)</mo></math></p>", "<p><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>4</mn><mo>.</mo><mn>2</mn><mo>(</mo><msqrt><mn>3</mn></msqrt><mo>+</mo><mn>1</mn><mo>)</mo></math></p>"],
+                    options_hi: ["<p><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>4</mn><mo>.</mo><mn>2</mn><mo>(</mo><msqrt><mn>3</mn></msqrt><mo>-</mo><mn>1</mn><mo>)</mo></math></p>", "<p><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>8</mn><mo>.</mo><mn>4</mn><mo>(</mo><msqrt><mn>3</mn></msqrt><mo>+</mo><mn>3</mn><mo>)</mo></math></p>",
+                                "<p><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>4</mn><mo>.</mo><mn>2</mn><mo>(</mo><msqrt><mn>3</mn></msqrt><mo>+</mo><mn>3</mn><mo>)</mo></math></p>", "<p><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>4</mn><mo>.</mo><mn>2</mn><mo>(</mo><msqrt><mn>3</mn></msqrt><mo>+</mo><mn>1</mn><mo>)</mo></math></p>"],
+                    solution_en: "<p>23.(d)<br><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeAPuB7l4tii5ZWTjb3PBIipknd80OkZC5pwBVyKXVSZDgR5HZ9S-MtHMvvGjsFFKnXNuf-yVs9C0EjlxrS5vriV5KT3ttmXr-rgFQ4IheUojfNrpWtzS0Mgqz970vokBvrg5-F1RBJ_SAONqilWX0kEA?key=R_Xs2ZSuZ0Y1ToJjqQPHOOzY\" width=\"181\" height=\"139\"><br><span style=\"font-family: Times New Roman;\">According to the question&nbsp;<br>CD = (<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt><mo>-</mo><mn>1</mn></math>) units = 8.4cm<br>Height = 1 unit =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>8</mn><mo>.</mo><mn>4</mn></mrow><mrow><msqrt><mn>3</mn></msqrt><mo>-</mo><mn>1</mn></mrow></mfrac></math><br>&rArr; <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>8</mn><mo>.</mo><mn>4</mn></mrow><mrow><msqrt><mn>3</mn></msqrt><mo>-</mo><mn>1</mn></mrow></mfrac></math> = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>8</mn><mo>.</mo><mn>4</mn></mrow><mrow><msqrt><mn>3</mn></msqrt><mo>-</mo><mn>1</mn></mrow></mfrac></math>&times;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><msqrt><mn>3</mn></msqrt><mo>+</mo><mn>1</mn></mrow><mrow><msqrt><mn>3</mn></msqrt><mo>+</mo><mn>1</mn></mrow></mfrac></math>&rArr;&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>8</mn><mo>.</mo><mn>4</mn><mo>(</mo><msqrt><mn>3</mn></msqrt><mo>+</mo><mn>1</mn><mo>)</mo></mrow><mn>2</mn></mfrac></math>= 4.2(<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt><mo>+</mo><mn>1</mn></math>)cm<br></span></p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>23.(d)<br><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeAPuB7l4tii5ZWTjb3PBIipknd80OkZC5pwBVyKXVSZDgR5HZ9S-MtHMvvGjsFFKnXNuf-yVs9C0EjlxrS5vriV5KT3ttmXr-rgFQ4IheUojfNrpWtzS0Mgqz970vokBvrg5-F1RBJ_SAONqilWX0kEA?key=R_Xs2ZSuZ0Y1ToJjqQPHOOzY\" width=\"181\" height=\"139\"><br><span style=\"font-family: Baloo;\">प्रश्न के अनुसार,<br><span style=\"font-family: Times New Roman;\">CD = (<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt><mo>-</mo><mn>1</mn></math>) इकाई = 8.4cm<br>ऊँचाई = 1 <span style=\"font-family: Baloo;\"><span style=\"font-family: Times New Roman;\">इकाई </span></span>= <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>8</mn><mo>.</mo><mn>4</mn></mrow><mrow><msqrt><mn>3</mn></msqrt><mo>-</mo><mn>1</mn></mrow></mfrac></math><br>&rArr; <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>8</mn><mo>.</mo><mn>4</mn></mrow><mrow><msqrt><mn>3</mn></msqrt><mo>-</mo><mn>1</mn></mrow></mfrac></math> = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>8</mn><mo>.</mo><mn>4</mn></mrow><mrow><msqrt><mn>3</mn></msqrt><mo>-</mo><mn>1</mn></mrow></mfrac></math>&times;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><msqrt><mn>3</mn></msqrt><mo>+</mo><mn>1</mn></mrow><mrow><msqrt><mn>3</mn></msqrt><mo>+</mo><mn>1</mn></mrow></mfrac></math>&rArr;&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mn>8</mn><mo>.</mo><mn>4</mn><mo>(</mo><msqrt><mn>3</mn></msqrt><mo>+</mo><mn>1</mn><mo>)</mo></mrow><mn>2</mn></mfrac></math>= 4.2(<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msqrt><mn>3</mn></msqrt><mo>+</mo><mn>1</mn></math>) cm</span><br></span></p>\n<p>&nbsp;</p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+            
+            // Generate question boxes
+            const boxesContainer = document.getElementById('question-boxes');
+            questions.forEach((q, index) => {
+                const box = document.createElement('div');
+                box.className = 'q-box';
+                box.textContent = index + 1;
+                box.onclick = () => showQuestion(index);
+                box.id = `box-${index}`;
+                boxesContainer.appendChild(box);
+            });
+            
+            // Show first question
+            showQuestion(0);
+            updateProgress();
+        }
+        
+        // Show a specific question
+        
+        function formatContent(text) {
+            if (!text) return '';
+            return text.replace(/<img/g, '<img style="max-width:100%;height:auto;"');
+        }
+        
+        function showQuestion(index) {
+            if (index < 0 || index >= questions.length) return;
+            
+            currentQuestion = index;
+            const question = questions[index];
+            
+            // Update question counter
+            document.getElementById('question-counter').textContent = `Question ${index + 1} of ${questions.length}`;
+            
+            // Update question boxes
+            document.querySelectorAll('.q-box').forEach(box => box.classList.remove('current'));
+            document.getElementById(`box-${index}`).classList.add('current');
+            
+            // Generate question HTML
+            let html = `
+                <div class="question-card">
+                    <div class="question-text">
+                        <div class="en">${formatContent(question.question_en)}</div>
+                        <div class="hi" style="display:none">${formatContent(question.question_hi)} </div>
+                    </div>
+                    <div class="options" id="options-container">`;
+            
+            // Add options
+            ['a', 'b', 'c', 'd'].forEach((opt, i) => {
+                let optionClass = '';
+                let isCorrectAnswer = opt === question.correct;
+                let isUserAnswer = answers[question.id] === opt;
+                
+                // When reviewing, add appropriate classes
+                if (submitted) {
+                    if (isCorrectAnswer) {
+                        optionClass += ' correct-answer';
+                    } else if (isUserAnswer && !isCorrectAnswer) {
+                        optionClass += ' incorrect';
+                    }
+                }
+                
+                html += `
+                    <div class="option-item">
+                        <input class="option-input" type="radio" name="q${index}" 
+                            id="opt-${index}-${opt}" value="${opt}" 
+                            ${isUserAnswer ? 'checked' : ''}
+                            onclick="selectAnswer('${question.id}', '${opt}')">
+                       <label class="option-label${optionClass}" for="opt-${index}-${opt}">
+                            <div class="en">${question.options_en[i]}</div>
+                            <div class="hi" style="display:none">${question.options_hi[i]}</div>
+                        </label>
+                    </div>`;
+            });
+            
+            // Add solution if submitted
+            if (submitted) {
+                const isCorrect = answers[question.id] === question.correct;
+                const resultText = answers[question.id] ? (isCorrect ? 'Correct!' : 'Incorrect!') : 'Not attempted';
+                
+                html += `
+                    <div class="solution-container">
+                        <div class="solution-title">${resultText}</div>
+                        <div class="solution-text">
+                            <div class="en">${question.solution_en}</div>
+                            <div class="hi" style="display:none">${question.solution_hi}</div>
+                        </div>
+                    </div>`;
+            }
+            
+            html += `</div></div>`;
+            
+            document.getElementById('questions-container').innerHTML = html;
+            
+            // Apply language settings
+            applyLanguage();
+            
+            // If in mobile view, close the menu
+            if (window.innerWidth < 992) {
+                toggleNav(false);
+            }
+            
+            // Add review mode class if submitted
+            if (submitted) {
+                document.getElementById('options-container').classList.add('review-mode');
+            }
+        }
+        
+        // Apply current language
+        function applyLanguage() {
+            document.querySelectorAll(`.${currentLang}`).forEach(el => el.style.display = 'block');
+            document.querySelectorAll(`.${currentLang === 'en' ? 'hi' : 'en'}`).forEach(el => el.style.display = 'none');
+            
+            // Update language button text
+            document.getElementById('lang-text').textContent = currentLang === 'en' ? 'Hi' : 'En';
+        }
+        
+        // Select an answer
+        function selectAnswer(qId, option) {
+            if (submitted) return;
+            
+            answers[qId] = option;
+            updateProgress();
+            
+            // Mark question as attempted in the navigation
+            const index = questions.findIndex(q => q.id === qId);
+            if (index >= 0) {
+                const box = document.getElementById(`box-${index}`);
+                box.classList.add('attempted');
+                box.classList.remove('unattempted');
+            }
+        }
+        
+        // Navigate to previous/next question
+        function prevQuestion() { 
+            if (currentQuestion > 0) showQuestion(currentQuestion - 1); 
+        }
+        
+        function nextQuestion() { 
+            if (currentQuestion < questions.length - 1) showQuestion(currentQuestion + 1); 
+        }
+        
+        // Switch section
+        function switchSection(sectionId) {
+            if (sectionId === 'all') {
+                showQuestion(0);
+                return;
+            }
+            
+            const section = sections[sectionId];
+            if (section) showQuestion(section.start);
+        }
+        
+        // Toggle language
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'hi' : 'en';
+            applyLanguage();
+        }
+        
+        // Toggle navigation sidebar
+        function toggleNav(show) {
+            const nav = document.getElementById('question-nav');
+            const overlay = document.getElementById('nav-overlay');
+            
+            if (show === undefined) {
+                show = !nav.classList.contains('show');
+            }
+            
+            if (show) {
+                nav.classList.add('show');
+                overlay.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            } else {
+                nav.classList.remove('show');
+                overlay.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+        }
+        
+        // Update progress
+        function updateProgress() {
+            const attempted = Object.keys(answers).length;
+            document.getElementById('attempted-count').textContent = attempted;
+        }
+        
+        // Start timer
+        function startTimer() {
+            const timerDisplay = document.getElementById('timer-display');
+            let timeLeft = totalTime;
+            
+            const timerInterval = setInterval(() => {
+                if (timeLeft <= 0 || submitted) {
+                    clearInterval(timerInterval);
+                    if (!submitted) submitTest();
+                    return;
+                }
+                
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                timeLeft--;
+            }, 1000);
+        }
+        
+        // Confirm before submitting
+        function confirmSubmit() {
+            if (submitted) return;
+            
+            const attempted = Object.keys(answers).length;
+            const remaining = questions.length - attempted;
+            
+            // Create a more modern confirmation dialog
+            const confirmHtml = `
+                <div style="text-align: center; padding: 20px;">
+                    <h4 style="margin-bottom: 16px; color: var(--dark);">Confirm Submission</h4>
+                    <p style="margin-bottom: 24px; color: var(--gray);">
+                        You have attempted ${attempted} of ${questions.length} questions.<br>
+                        ${remaining} questions are unattempted.
+                    </p>
+                    <div style="display: flex; justify-content: center; gap: 12px;">
+                        <button onclick="this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; border: 1px solid var(--light-gray); background: white; border-radius: 8px; cursor: pointer;">
+                            Cancel
+                        </button>
+                        <button onclick="submitTest(); this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer;">
+                            Submit Test
+                        </button>
+                    </div>
+                </div>`;
+            
+            // Create modal element
+            const modal = document.createElement('div');
+            modal.className = 'results-modal show';
+            modal.innerHTML = `
+                <div class="results-card" style="max-width: 400px;">
+                    <button class="cancel-btn" style="position: absolute; top: 12px; right: 12px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--gray);" onclick="this.closest('.results-modal').remove()">
+                        ×
+                    </button>
+                    ${confirmHtml}
+                </div>`;
+            
+            document.body.appendChild(modal);
+        }
+        
+        // Submit test
+        function submitTest() {
+            if (submitted) return;
+            
+            submitted = true;
+            
+            let score = 0;
+            let correctCount = 0;
+            let incorrectCount = 0;
+            let unattemptedCount = 0;
+            
+            questions.forEach((q, index) => {
+                const userAns = answers[q.id];
+                const box = document.getElementById(`box-${index}`);
+                
+                box.classList.remove('attempted');
+                
+                if (!userAns) {
+                    unattemptedCount++;
+                    box.classList.add('unattempted');
+                } else if (userAns === q.correct) {
+                    correctCount++;
+                    score += q.pos_marks;
+                    box.classList.add('correct');
+                } else {
+                    incorrectCount++;
+                    score -= q.neg_marks;
+                    box.classList.add('incorrect');
+                }
+            });
+            
+            // Update result values
+            document.getElementById('score-value').textContent = score.toFixed(2);
+            document.getElementById('correct-value').textContent = correctCount;
+            document.getElementById('incorrect-value').textContent = incorrectCount;
+            document.getElementById('unattempted-value').textContent = unattemptedCount;
+            
+            // Show the results modal
+            document.getElementById('results-modal').classList.add('show');
+            
+            // Disable submit button
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-check"></i>';
+            submitBtn.style.backgroundColor = 'var(--success)';
+            
+            // Refresh current question view to show solution
+            showQuestion(currentQuestion);
+        }
+        
+        // Review test
+        function reviewTest() {
+            document.getElementById('results-modal').classList.remove('show');
+            showQuestion(0);
+        }
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target === document.getElementById('results-modal')) {
+                document.getElementById('results-modal').classList.remove('show');
+            }
+        });
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') prevQuestion();
+            if (e.key === 'ArrowRight') nextQuestion();
+        });
+    </script>
+</body>
+</html>

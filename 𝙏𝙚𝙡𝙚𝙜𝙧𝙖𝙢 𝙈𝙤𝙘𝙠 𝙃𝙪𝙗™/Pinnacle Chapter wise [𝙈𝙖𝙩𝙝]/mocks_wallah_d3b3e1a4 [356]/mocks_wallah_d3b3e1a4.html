@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mocks Wallah</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --primary-light: #a29bfe;
+            --primary-dark: #5649c0;
+            --secondary: #00cec9;
+            --accent: #fd79a8;
+            --success: #00b894;
+            --warning: #fdcb6e;
+            --danger: #d63031;
+            --light: #f8f9fa;
+            --dark: #2d3436;
+            --gray: #636e72;
+            --light-gray: #dfe6e9;
+            --card-bg: #ffffff;
+            --body-bg: #f5f6fa;
+            --header-bg: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            --footer-bg: #ffffff;
+            --box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            --box-shadow-sm: 0 2px 10px rgba(0,0,0,0.05);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background-color: var(--body-bg);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            color: var(--dark);
+            line-height: 1.6;
+            padding-bottom: 80px; /* Space for fixed navigation */
+            overflow-x: hidden;
+        }
+        
+        /* Header Styles */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: var(--header-bg);
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            z-index: 1000;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .header-brand {
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .header-brand i {
+            margin-right: 8px;
+            font-size: 1.2rem;
+        }
+        
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .control-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .control-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .control-btn.active {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .timer-display {
+            background: rgba(0,0,0,0.2);
+            border-radius: 18px;
+            padding: 4px 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+        
+        .timer-display i {
+            margin-right: 6px;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-top: 60px;
+            padding: 16px;
+            min-height: calc(100vh - 140px);
+        }
+        
+        .question-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--box-shadow-sm);
+            border: none;
+            transition: var(--transition);
+        }
+        
+        .question-counter {
+            font-size: 0.9rem;
+            color: var(--gray);
+            text-align: center;
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+        
+        .question-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+        
+        .option-item {
+            margin-bottom: 12px;
+            position: relative;
+        }
+        
+        .option-input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+            .question-text {
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        hyphens: auto;
+        max-width: 100%;
+    }
+
+    .question-text img,
+    .option-label img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 8px 0;
+        border-radius: 8px;
+    }
+
+    .option-label {
+        overflow: hidden;
+    }
+
+    .question-card {
+        overflow: hidden;
+    }
+        
+        .option-label {
+            display: block;
+            padding: 14px 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--light-gray);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .option-label:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .option-input:checked + .option-label {
+            border-color: var(--primary);
+            background: rgba(108, 92, 231, 0.05);
+            box-shadow: 0 0 0 1px var(--primary);
+        }
+        
+        .option-input:checked + .option-label::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--primary);
+        }
+        
+        /* When reviewing answers */
+        .review-mode .option-input:checked + .option-label.correct {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.correct::after {
+            background: var(--success);
+        }
+        
+        .review-mode .option-input:checked + .option-label.incorrect {
+            border-color: var(--danger);
+            background: rgba(214, 48, 49, 0.05);
+            box-shadow: 0 0 0 1px var(--danger);
+        }
+        
+        .MathJax, .mjx-chtml {
+            overflow-x: auto;
+            max-width: 100%;
+            display: inline-block;
+        }
+
+        
+        .review-mode .option-input:checked + .option-label.incorrect::after {
+            background: var(--danger);
+        }
+        
+        .review-mode .option-label.correct-answer {
+            border-color: var(--success);
+            background: rgba(0, 184, 148, 0.05);
+            box-shadow: 0 0 0 1px var(--success);
+        }
+        
+        .review-mode .option-label.correct-answer::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--success);
+        }
+        
+        .solution-container {
+            margin-top: 20px;
+            padding: 16px;
+            background: rgba(108, 92, 231, 0.05);
+            border-radius: 12px;
+            border-left: 3px solid var(--primary);
+        }
+        
+        .solution-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+        
+        /* Question Navigation */
+        .question-nav {
+            position: fixed;
+            top: 60px;
+            right: 0;
+            bottom: 80px;
+            width: 100%;
+            max-width: 320px;
+            background: var(--card-bg);
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            transform: translateX(100%);
+            transition: var(--transition);
+            z-index: 900;
+            overflow-y: auto;
+            padding: 16px;
+        }
+        
+        .question-nav.show {
+            transform: translateX(0);
+        }
+        
+        .nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .nav-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+        
+        .question-stats {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .stat-badge {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        
+        .section-selector {
+            width: 100%;
+            margin-bottom: 16px;
+            border-radius: 12px;
+            padding: 10px 16px;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            font-size: 0.9rem;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 16px;
+        }
+        
+        .question-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+            gap: 8px;
+        }
+        
+        .q-box {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            border: 1px solid var(--light-gray);
+            background: var(--card-bg);
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .q-box:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .q-box.attempted {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .q-box.correct {
+            background-color: var(--success);
+            color: white;
+            border-color: var(--success);
+        }
+        
+        .q-box.incorrect {
+            background-color: var(--danger);
+            color: white;
+            border-color: var(--danger);
+        }
+        
+        .q-box.current {
+            border: 2px solid var(--accent) !important;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .q-box.unattempted {
+            background-color: var(--gray);
+            color: white;
+            border-color: var(--gray);
+        }
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: var(--footer-bg);
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            z-index: 800;
+        }
+        
+        .nav-btn {
+            height: 48px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 20px;
+            transition: var(--transition);
+            gap: 8px;
+        }
+        
+        .nav-btn i {
+            font-size: 1rem;
+        }
+        
+        .nav-btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .nav-btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+        
+        .nav-btn-outline:hover {
+            background: rgba(108, 92, 231, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        /* Overlay when nav is open */
+        .nav-overlay {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            bottom: 80px;
+            background: rgba(0,0,0,0.5);
+            z-index: 800;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+        }
+        
+        .nav-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        /* Results Modal */
+        .results-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1100;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+            padding: 16px;
+        }
+        
+        .results-modal.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .results-card {
+            background: white;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+            transform: translateY(20px);
+            transition: var(--transition);
+        }
+        
+        .results-modal.show .results-card {
+            transform: translateY(0);
+        }
+        
+        .results-header {
+            background: var(--header-bg);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .results-title {
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .results-body {
+            padding: 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            color: white;
+            box-shadow: var(--box-shadow-sm);
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+        
+        .results-footer {
+            padding: 16px 20px;
+            display: flex;
+            justify-content: center;
+            border-top: 1px solid var(--light-gray);
+        }
+        
+        /* Responsive Adjustments */
+        @media (min-width: 992px) {
+            .question-nav {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-right: 320px;
+            }
+            
+            .nav-overlay {
+                display: none;
+            }
+            
+            .bottom-nav {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .question-grid {
+                grid-template-columns: repeat(auto-fill, minmax(36px, 1fr));
+                gap: 6px;
+            }
+            
+            .q-box {
+                width: 36px;
+                height: 36px;
+                font-size: 0.9rem;
+            }
+            
+            .option-label {
+                padding: 12px 14px;
+            }
+            
+            .question-text {
+                font-size: 1rem;
+            }
+            
+            .header-brand {
+                font-size: 1rem;
+            }
+            
+            .control-btn {
+                width: 32px;
+                height: 32px;
+            }
+            
+            .timer-display {
+                font-size: 0.8rem;
+                padding: 4px 10px;
+            }
+            
+            .nav-btn {
+                height: 44px;
+                padding: 0 16px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="#" class="header-brand">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Mocks Wallah</span>
+            </a>
+            
+            <div class="header-controls">
+                <!-- Timer -->
+                <div class="timer-display">
+                    <i class="far fa-clock"></i>
+                    <span id="timer-display">25:00</span>
+                </div>
+                
+                <!-- Language toggle -->
+                <button class="control-btn" id="lang-btn" onclick="toggleLanguage()">
+                    <span id="lang-text">En</span>
+                </button>
+                
+                <!-- Submit button -->
+                <button class="control-btn" id="submit-btn" onclick="confirmSubmit()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+                
+                <!-- Questions toggle for mobile -->
+                <button class="control-btn nav-toggle-btn" id="nav-toggle" onclick="toggleNav()">
+                    <i class="fas fa-th"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main content -->
+    <main class="main-content" id="main-content">
+        <div class="question-counter" id="question-counter">Question 1 of 20</div>
+        
+        <!-- Questions will be displayed here -->
+        <div id="questions-container"></div>
+    </main>
+    
+    <!-- Overlay for mobile nav -->
+    <div class="nav-overlay" id="nav-overlay" onclick="toggleNav(false)"></div>
+    
+    <!-- Question navigation sidebar -->
+    <aside class="question-nav" id="question-nav">
+        <div class="nav-header">
+            <h3 class="nav-title">Questions</h3>
+            <div class="question-stats">
+                <span class="stat-badge bg-primary" id="attempted-count">0</span>
+                <span class="stat-badge bg-gray" id="total-count">20</span>
+                <button class="control-btn d-lg-none" onclick="toggleNav(false)">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Section selector -->
+        <select class="section-selector" id="section-selector" onchange="switchSection(this.value)">
+            <option value="all">All Sections</option>
+        </select>
+        
+        <!-- Question grid -->
+        <div class="question-grid" id="question-boxes"></div>
+    </aside>
+    
+    <!-- Bottom navigation for mobile -->
+    <nav class="bottom-nav d-lg-none">
+        <button class="nav-btn nav-btn-outline" onclick="prevQuestion()">
+            <i class="fas fa-chevron-left"></i>
+            <span>Previous</span>
+        </button>
+        <button class="nav-btn nav-btn-outline" onclick="nextQuestion()">
+            <span>Next</span>
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </nav>
+    
+    <!-- Results modal -->
+    <div class="results-modal" id="results-modal">
+        <div class="results-card">
+            <div class="results-header">
+                <h3 class="results-title">Test Results</h3>
+            </div>
+            <div class="results-body">
+                <div class="stats-grid">
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark))">
+                        <div class="stat-value" id="score-value">0</div>
+                        <div class="stat-label">Score</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--success), #1b9aaa)">
+                        <div class="stat-value" id="correct-value">0</div>
+                        <div class="stat-label">Correct</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--danger), var(--accent))">
+                        <div class="stat-value" id="incorrect-value">0</div>
+                        <div class="stat-label">Incorrect</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--gray), var(--dark))">
+                        <div class="stat-value" id="unattempted-value">0</div>
+                        <div class="stat-label">Unattempted</div>
+                    </div>
+                </div>
+            </div>
+            <div class="results-footer">
+                <button class="nav-btn nav-btn-primary" onclick="reviewTest()">
+                    <i class="fas fa-search me-1"></i>
+                    <span>Review Test</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Questions data
+        const questions = [];
+        const sections = {};
+        let currentLang = "en";
+        let currentQuestion = 0;
+        let answers = {};
+        let submitted = false;
+        let totalTime = 25 * 60;
+        
+        // Initialize the test
+        window.onload = function() {
+            initializeTest();
+            startTimer();
+            
+            // If on desktop, show the question navigation by default
+            if (window.innerWidth >= 992) {
+                document.getElementById('question-nav').classList.add('show');
+                document.getElementById('main-content').classList.add('with-nav');
+            }
+        };
+        
+        // Initialize test data
+        function initializeTest() {
+            // Add sections and questions
+            
+            sections["17"] = {
+                name: "Quantitative Aptitude",
+                start: 0,
+                end: 18
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="17">Quantitative Aptitude</option>`;
+            
+            sections["misc"] = {
+                name: "Miscellaneous",
+                start: 19,
+                end: 19
+            };
+            
+            document.getElementById('section-selector').innerHTML += 
+                `<option value="misc">Miscellaneous</option>`;
+            
+            
+                questions.push({
+                    id: "1",
+                    section: "17",
+                    question_en: "<p>1. <span style=\"font-family: Times New Roman;\">AB is </span><span style=\"font-family: Times New Roman;\">a diameter</span><span style=\"font-family: Times New Roman;\"> of a circle with </span><span style=\"font-family: Times New Roman;\">centre</span><span style=\"font-family: Gungsuh;\"> O. A tangent is drawn at point A. C is a point on the circle such that BC produced meets the tangent at P. If &ang;APC = 62&deg;, then find the measure of the minor arc AC.</span></p>",
+                    question_hi: "<p>1. <span style=\"font-family: Arial Unicode MS;\">AB, O केंद्र वाले वृत्त का व्यास है। बिंदु A पर एक स्पर्श रेखा खींची जाती है। C वृत्त पर एक ऐसा बिंदु है जिससे उत्पन्न BC स्पर्श रेखा बिंदु P पर मिलती है। यदि &ang;APC=62&deg; है तो लघु चाप AC का माप ज्ञात कीजिए ?</span></p>",
+                    options_en: ["<p>56&deg;</p>", "<p>62&deg;</p>", 
+                                "<p>28&deg;</p>", "<p>31&deg;</p>"],
+                    options_hi: ["<p>56&deg;</p>", "<p>62&deg;</p>",
+                                "<p>28&deg;</p>", "<p>31&deg;</p>"],
+                    solution_en: "<p>1.(c)</p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1656068709/word/media/image1.png\" width=\"181\" height=\"127\"></p>\n<p><span style=\"font-family: Times New Roman;\">The tangent through diameter is perpendicular to the diameter.</span><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>&#8736;</mo><mi mathvariant=\"normal\">A</mi><mo>=</mo><mn>90</mn><mo>&#176;</mo><mo>,</mo><mo>&#160;</mo></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mi>Now</mi><mo>&#8736;</mo><mi>ABP</mi><mo>&#160;</mo><mo>+</mo><mo>&#8736;</mo><mi>APB</mi><mo>=</mo><mn>90</mn><mo>&#176;</mo><mo>&#160;</mo></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>&#8736;</mo><mi>ABP</mi><mo>+</mo><mn>62</mn><mo>&#176;</mo><mo>=</mo><mn>90</mn><mo>&#176;</mo><mo>&#160;</mo></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>&#8736;</mo><mi>ABP</mi><mo>=</mo><mn>28</mn><mo>&#176;</mo></math><br>&ang;ABC marks arc AC. So &ang;ABC is the correct angle to show a measure of arc AC.</p>",
+                    solution_hi: "<p>1.(c)</p>\n<p><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1656068709/word/media/image1.png\" width=\"183\" height=\"128\"></p>\n<p><span style=\"font-family: Baloo;\">व्यास के माध्यम से स्पर्शरेखा व्यास के लंबवत है।</span><br><span style=\"font-family: Gungsuh;\">&ang;A = 90<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>&#176;</mo></math></span><span style=\"font-family: Times New Roman;\">,</span><br><span style=\"font-family: Baloo;\">अब </span><span style=\"font-family: Gungsuh;\">&ang;ABP +&ang;APB = 90<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>&#176;</mo></math></span><br><span style=\"font-family: Gungsuh;\">&ang;ABP + 62<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>&#176;</mo></math></span><span style=\"font-family: Times New Roman;\">= 90<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>&#176;</mo></math></span><br><span style=\"font-family: Gungsuh;\">&ang;ABP = 28<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>&#176;</mo></math></span><br><span style=\"font-family: Gungsuh;\">&ang;ABC चाप AC को दर्शाता है। अतः चाप AC का माप दर्शाने के लिए &ang;ABC सही कोण है।</span></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "2",
+                    section: "17",
+                    question_en: "<p>2. <span style=\"font-family: Cardo;\">In a &Delta;ABC, points P, Q and R are taken on AB, BC and CA, respectively, such that BQ = PQ and QC = QR. If &ang;BAC = 75&deg;, what is the measure of &ang;PQR (in degrees)?</span></p>",
+                    question_hi: "<p>2. <span style=\"font-family: Arial Unicode MS;\">एक त्रिभुज &Delta;ABC में, बिंदु P, Q और R को क्रमशः AB, BC और CA पर इस प्रकार लिया जाता है कि BQ = PQ और QC = QR हैं। यदि &ang;BAC = 75&deg; है, तो &ang;PQR (डिग्री में) का माप क्या है?</span></p>",
+                    options_en: ["<p>40</p>", "<p>30</p>", 
+                                "<p>50</p>", "<p>75</p>"],
+                    options_hi: ["<p>40</p>", "<p>30</p>",
+                                "<p>50</p>", "<p>75</p>"],
+                    solution_en: "<p>2.(b)<br><strong id=\"docs-internal-guid-be4deab5-7fff-f87f-df35-9a121eac5950\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdF583dptDQB-mL83X65w26RECtthn3VRXoUndKepB2n2ikoG1wtJGThBlQmBqScw7WPGeNfLJcFpJnJdLRoGV9latoY6JBcavY4YUqQ85Q5gIOnCbQj6-zCALB99yHKfsU5wihkDYbC5IUISr5Tf7G5Jk?key=3SaRaJGuopBvFKeyeymUn1QI\" width=\"164\" height=\"147\"></strong><br><span style=\"font-family: Gungsuh;\">As BQ = PQ, &ang;BPQ = &ang; PBQ = x,</span><br><span style=\"font-family: Gungsuh;\">As QC = QR, &ang;QRC = &ang;QCR = y,</span><br><span style=\"font-family: Times New Roman;\">In triangle ABC, 75 + x + y = 180.</span><br><span style=\"font-family: Times New Roman;\">x + y = 105</span><br><span style=\"font-family: Times New Roman;\">In △PQB and △RQC ,</span><br><span style=\"font-family: Gungsuh;\">x + x + &ang;PQB + y + y + &ang;RQC = 360</span><br><span style=\"font-family: Gungsuh;\">2(x+y) + &ang;PQB + &ang;RQC = 360</span><br><span style=\"font-family: Gungsuh;\">210 + &ang;PQB + &ang;RQC = 360</span><br><span style=\"font-family: Gungsuh;\">&ang;PQB + &ang;RQC = 150.</span><br><span style=\"font-family: Times New Roman;\">Now as BC is a straight line,</span><br><span style=\"font-family: Gungsuh;\">&ang;PQB + &ang;RQC + &ang;PQR = 180</span><br><span style=\"font-family: Gungsuh;\">&ang;PQR = 180 - 150 = 30</span><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>2.(b)<br><br><strong id=\"docs-internal-guid-be4deab5-7fff-f87f-df35-9a121eac5950\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdF583dptDQB-mL83X65w26RECtthn3VRXoUndKepB2n2ikoG1wtJGThBlQmBqScw7WPGeNfLJcFpJnJdLRoGV9latoY6JBcavY4YUqQ85Q5gIOnCbQj6-zCALB99yHKfsU5wihkDYbC5IUISr5Tf7G5Jk?key=3SaRaJGuopBvFKeyeymUn1QI\" width=\"157\" height=\"140\"></strong><br><span style=\"font-family: Arial Unicode MS;\">चूंकि BQ = PQ, &ang;BPQ = &ang; PBQ = x,</span><br><span style=\"font-family: Arial Unicode MS;\">चूंकि QC = QR, &ang;QRC = &ang;QCR = y,</span><br><span style=\"font-family: Baloo;\">त्रिभुज ABC में, 75 + x + y = 180.</span><br><span style=\"font-family: Times New Roman;\">x + y = 105</span><br><span style=\"font-family: Baloo;\">△PQB और △RQC में,</span><br><span style=\"font-family: Gungsuh;\">x + x + &ang;PQB + y + y + &ang;RQC = 360</span><br><span style=\"font-family: Gungsuh;\">2(x+y) + &ang;PQB + &ang;RQC = 360</span><br><span style=\"font-family: Gungsuh;\">210 + &ang;PQB + &ang;RQC = 360</span><br><span style=\"font-family: Gungsuh;\">&ang;PQB + &ang;RQC = 150.</span><br><span style=\"font-family: Baloo;\">अब चूंकि BC एक सीधी रेखा है,</span><br><span style=\"font-family: Gungsuh;\">&ang;PQB + &ang;RQC + &ang;PQR = 180</span><br><span style=\"font-family: Gungsuh;\">&ang;PQR = 180 &ndash; 150 = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>30</mn><mo>&#176;</mo></math></span><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "3",
+                    section: "17",
+                    question_en: "<p>3.<span style=\"font-family: Times New Roman;\"> The lengths of the three sides of a right-angled triangle are (x&ndash;1)cm, (x + 1)cm and (x+3)cm, respectively. The hypotenuse of the right-angled triangle (in cm) is :</span></p>",
+                    question_hi: "<p>3.<span style=\"font-family: Baloo;\"> एक समकोण त्रिभुज की तीनों भुजाओं की लंबाइयाँ क्रमशः (x &ndash;1) cm, (x + 1)cm और (x + 3) cm हैं। समकोण त्रिभुज का कर्ण (cm में) क्या है:</span></p>",
+                    options_en: ["<p>6</p>", "<p>10</p>", 
+                                "<p>12</p>", "<p>7</p>"],
+                    options_hi: ["<p>6</p>", "<p>10</p>",
+                                "<p>12</p>", "<p>7</p>"],
+                    solution_en: "<p>3.(b)</p>\n<p><strong id=\"docs-internal-guid-3703f33b-7fff-c5bf-46d9-f05895a78dcc\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeygji8gZVfbx_42HJtH6ayDnQ5bak9GE_kER_D8xL-gocE0e5iL1lji54cBP-T8yafdckC3oRAd3v9vy8_8mOuTUMmC8aJPWYTXok1JJdYmdFTnnStHo61znDRw9SLv9vbt-0K4G6atVs11faWcDm34-4?key=3SaRaJGuopBvFKeyeymUn1QI\" width=\"129\" height=\"127\"></strong><br><span style=\"font-family: Times New Roman;\">Applying pythagoras theorem, we get</span><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>(</mo><mi mathvariant=\"normal\">x</mi><mo>-</mo><mn>1</mn><msup><mo>)</mo><mn>2</mn></msup><mo>+</mo><mo>(</mo><mi mathvariant=\"normal\">x</mi><mo>+</mo><mn>1</mn><msup><mo>)</mo><mn>2</mn></msup><mo>=</mo><mo>(</mo><mi mathvariant=\"normal\">x</mi><mo>+</mo><mn>3</mn><msup><mo>)</mo><mn>2</mn></msup></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msup><mi mathvariant=\"normal\">x</mi><mn>2</mn></msup><mo>-</mo><mn>2</mn><mi mathvariant=\"normal\">x</mi><mo>+</mo><mn>1</mn><mo>+</mo><msup><mi mathvariant=\"normal\">x</mi><mn>2</mn></msup><mo>+</mo><mn>2</mn><mi mathvariant=\"normal\">x</mi><mo>+</mo><mn>1</mn><mo>=</mo><msup><mi mathvariant=\"normal\">x</mi><mn>2</mn></msup><mo>+</mo><mn>6</mn><mi mathvariant=\"normal\">x</mi><mo>+</mo><mn>9</mn></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msup><mi mathvariant=\"normal\">x</mi><mn>2</mn></msup><mo>-</mo><mn>6</mn><mi mathvariant=\"normal\">x</mi><mo>-</mo><mn>7</mn><mo>=</mo><mn>0</mn></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msup><mi mathvariant=\"normal\">x</mi><mn>2</mn></msup><mo>-</mo><mn>7</mn><mi mathvariant=\"normal\">x</mi><mo>+</mo><mi mathvariant=\"normal\">x</mi><mo>-</mo><mn>7</mn><mo>=</mo><mn>0</mn></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mi mathvariant=\"normal\">x</mi><mo>(</mo><mi mathvariant=\"normal\">x</mi><mo>-</mo><mn>7</mn><mo>)</mo><mo>+</mo><mn>1</mn><mo>(</mo><mi mathvariant=\"normal\">x</mi><mo>-</mo><mn>7</mn><mo>)</mo><mo>=</mo><mn>0</mn></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>(</mo><mi mathvariant=\"normal\">x</mi><mo>-</mo><mn>7</mn><mo>)</mo><mo>(</mo><mi mathvariant=\"normal\">x</mi><mo>+</mo><mn>1</mn><mo>)</mo><mo>=</mo><mn>0</mn></math><br><span style=\"font-family: Times New Roman;\">x =&nbsp; &ndash; 1 [ not possible ]</span><br><span style=\"font-family: Times New Roman;\">so , </span><span style=\"font-family: Times New Roman;\">&nbsp;= 7</span><br><span style=\"font-family: Times New Roman;\">Putting </span><span style=\"font-family: Times New Roman;\">&nbsp;= 7 in hypotenuse, we get</span><br><span style=\"font-family: Times New Roman;\">AC = </span><span style=\"font-family: Times New Roman;\"> <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mi mathvariant=\"normal\">x</mi><mo>+</mo><mn>3</mn><mo>&#160;</mo><mo>=</mo><mo>&#160;</mo><mn>7</mn><mo>&#160;</mo><mo>+</mo><mo>&#160;</mo><mn>3</mn><mo>&#160;</mo></math> = 10 cm</span></p>",
+                    solution_hi: "<p>3.(b)<br><strong id=\"docs-internal-guid-3703f33b-7fff-c5bf-46d9-f05895a78dcc\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeygji8gZVfbx_42HJtH6ayDnQ5bak9GE_kER_D8xL-gocE0e5iL1lji54cBP-T8yafdckC3oRAd3v9vy8_8mOuTUMmC8aJPWYTXok1JJdYmdFTnnStHo61znDRw9SLv9vbt-0K4G6atVs11faWcDm34-4?key=3SaRaJGuopBvFKeyeymUn1QI\" width=\"150\" height=\"148\"></strong><br><span style=\"font-family: Baloo;\">पाइथागोरस प्रमेय को लागू करने पर, हम प्राप्त करते हैं</span><br><math style=\"font-family:Verdana\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>(</mo><mi mathvariant=\"normal\">x</mi><mo>-</mo><mn>1</mn><msup><mo>)</mo><mn>2</mn></msup><mo>+</mo><mo>(</mo><mi mathvariant=\"normal\">x</mi><mo>+</mo><mn>1</mn><msup><mo>)</mo><mn>2</mn></msup><mo>=</mo><mo>(</mo><mi mathvariant=\"normal\">x</mi><mo>+</mo><mn>3</mn><msup><mo>)</mo><mn>2</mn></msup></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msup><mi mathvariant=\"normal\">x</mi><mn>2</mn></msup><mo>-</mo><mn>2</mn><mi mathvariant=\"normal\">x</mi><mo>+</mo><mn>1</mn><mo>+</mo><msup><mi mathvariant=\"normal\">x</mi><mn>2</mn></msup><mo>+</mo><mn>2</mn><mi mathvariant=\"normal\">x</mi><mo>+</mo><mn>1</mn><mo>=</mo><msup><mi mathvariant=\"normal\">x</mi><mn>2</mn></msup><mo>+</mo><mn>6</mn><mi mathvariant=\"normal\">x</mi><mo>+</mo><mn>9</mn></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msup><mi mathvariant=\"normal\">x</mi><mn>2</mn></msup><mo>-</mo><mn>6</mn><mi mathvariant=\"normal\">x</mi><mo>-</mo><mn>7</mn><mo>=</mo><mn>0</mn></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msup><mi mathvariant=\"normal\">x</mi><mn>2</mn></msup><mo>-</mo><mn>7</mn><mi mathvariant=\"normal\">x</mi><mo>+</mo><mi mathvariant=\"normal\">x</mi><mo>-</mo><mn>7</mn><mo>=</mo><mn>0</mn></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mi mathvariant=\"normal\">x</mi><mo>(</mo><mi mathvariant=\"normal\">x</mi><mo>-</mo><mn>7</mn><mo>)</mo><mo>+</mo><mn>1</mn><mo>(</mo><mi mathvariant=\"normal\">x</mi><mo>-</mo><mn>7</mn><mo>)</mo><mo>=</mo><mn>0</mn></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>(</mo><mi mathvariant=\"normal\">x</mi><mo>-</mo><mn>7</mn><mo>)</mo><mo>(</mo><mi mathvariant=\"normal\">x</mi><mo>+</mo><mn>1</mn><mo>)</mo><mo>=</mo><mn>0</mn></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mi>x</mi><mo>=</mo><mo>&#8211;</mo><mn>1</mn><mo>&#160;</mo><mo>[</mo><mo>&#160;</mo><mi>&#2360;&#2306;&#2349;&#2357;</mi><mo>&#160;</mo><mo>&#160;</mo><mi>&#2344;&#2361;&#2368;&#2306;</mi><mo>&#160;</mo><mo>&#160;</mo><mi>&#2361;&#2376;</mi><mo>&#160;</mo><mo>]</mo><mo>&#160;</mo></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mi>&#2311;&#2360;&#2354;&#2367;&#2319;</mi><mo>,</mo><mo>&#160;</mo><mi>x</mi><mo>=</mo><mn>7</mn></math><br><math style=\"font-family:Verdana\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mi mathvariant=\"normal\">x</mi><mo>=</mo><mn>7</mn><mo>&#160;</mo><mo>&#160;</mo><mi>&#2325;&#2379;</mi><mo>&#160;</mo><mo>&#160;</mo><mi>&#2325;&#2352;&#2381;&#2339;</mi><mo>&#160;</mo><mo>&#160;</mo><mi>&#2350;&#2375;&#2306;</mi><mo>&#160;</mo><mo>&#160;</mo><mi>&#2352;&#2326;&#2344;&#2375;</mi><mo>&#160;</mo><mo>&#160;</mo><mi>&#2346;&#2352;</mi><mo>&#160;</mo><mo>,</mo><mi>&#2361;&#2350;&#2375;&#2306;</mi><mo>&#160;</mo><mo>&#160;</mo><mi>&#2346;&#2381;&#2352;&#2366;&#2346;&#2381;&#2340;</mi><mo>&#160;</mo><mo>&#160;</mo><mi>&#2361;&#2379;&#2340;&#2366;</mi><mo>&#160;</mo><mi>&#2361;&#2376;</mi><mo>&#160;</mo></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mi>AC</mi><mo>=</mo><mi mathvariant=\"normal\">x</mi><mo>+</mo><mn>3</mn><mo>=</mo><mn>7</mn><mo>+</mo><mn>3</mn><mo>=</mo><mn>10</mn><mi>cm</mi></math></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "4",
+                    section: "17",
+                    question_en: "<p>4.<span style=\"font-family: Gungsuh;\"> An equilateral triangle ABC is inscribed in a circle with centre O. D is a point on the minor arc BC and &ang;CBD = 40&deg;. Find the measure of &ang;BCD.</span></p>",
+                    question_hi: "<p>4. <span style=\"font-family: Arial Unicode MS;\">एक समबाहु त्रिभुज ABC, केंद्र O वाले वृत्त में अंकित है। D लघु चाप BC पर एक बिंदु है और &ang;CBD = 40&deg; है। &ang;BCD का माप ज्ञात कीजिए ?</span></p>",
+                    options_en: ["<p>30&deg;</p>", "<p>50&deg;</p>", 
+                                "<p>20&deg;</p>", "<p>40&deg;</p>"],
+                    options_hi: ["<p>30&deg;</p>", "<p>50&deg;</p>",
+                                "<p>20&deg;</p>", "<p>40&deg;</p>"],
+                    solution_en: "<p>4.(c)</p>\n<p><strong id=\"docs-internal-guid-6857c6ff-7fff-c679-2d43-1adccfc1ffb4\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcuFAwEqQICgAU4cGywkhDVRCxaCSbBHly-9EM8MgXeyuLKAFeQW6cc9CtNE5GIjBmpG6YiDoHqsAUcDuvyqFcKP4XVBgwZSUQN_fHASn25xj4CfMQU3TFyc8wnPdLgX2Hwp5cm4fAq-gDVH2evjOk-JfY?key=3SaRaJGuopBvFKeyeymUn1QI\" width=\"126\" height=\"150\"></strong></p>\n<p><span style=\"font-family: Gungsuh;\">Triangle ABC is equilateral triangle, so &ang;A = &ang;B = &ang;C = 60&deg;</span><br><span style=\"font-family: Gungsuh;\">&ang;ABC + &ang;CBD + &ang;ACB + &ang;BCD (in cyclic quadrilateral sum of opposite angles = 180&deg;)</span><br><span style=\"font-family: Gungsuh;\">60&deg; + 40&deg; + 60&deg; + &ang;BCD = 180&deg;</span><br><span style=\"font-family: Gungsuh;\">&ang;BCD = 20&deg; </span></p>",
+                    solution_hi: "<p>4.(c)</p>\n<p><strong id=\"docs-internal-guid-6857c6ff-7fff-c679-2d43-1adccfc1ffb4\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcuFAwEqQICgAU4cGywkhDVRCxaCSbBHly-9EM8MgXeyuLKAFeQW6cc9CtNE5GIjBmpG6YiDoHqsAUcDuvyqFcKP4XVBgwZSUQN_fHASn25xj4CfMQU3TFyc8wnPdLgX2Hwp5cm4fAq-gDVH2evjOk-JfY?key=3SaRaJGuopBvFKeyeymUn1QI\" width=\"107\" height=\"127\"></strong></p>\n<p><span style=\"font-family: Baloo;\">त्रिभुज ABC एक समबाहु त्रिभुज है, इसलिए A = B = C = 60&deg;</span><br><span style=\"font-family: Arial Unicode MS;\">&ang;ABC + &ang;CBD + &ang;ACB + &ang;BCD (विपरीत कोणों के चक्रीय चतुर्भुज योग में = 180&deg;)</span><br><span style=\"font-family: Gungsuh;\">60&deg; + 40&deg; + 60&deg; + &ang;BCD = 180&deg;</span><br><span style=\"font-family: Gungsuh;\">&ang;BCD = 20&deg; </span></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "5",
+                    section: "17",
+                    question_en: "<p>5. <span style=\"font-family: Times New Roman;\">In a circle with </span><span style=\"font-family: Times New Roman;\">centre</span><span style=\"font-family: Gungsuh;\"> O, chords PR and QS meet at the point T, when produced, and PQ is a diameter. If &ang;ROS = 42&deg;, then the measure of &ang;PTQ is :</span></p>",
+                    question_hi: "<p>5.<span style=\"font-family: Baloo;\"> केंद्र O वाले एक वृत्त में, जीवाएँ PR और QS उत्पन्न होने पर बिंदु T पर मिलती हैं, और PQ एक व्यास है। </span><span style=\"font-family: Arial Unicode MS;\">यदि &ang;ROS = 42&deg;, तो &ang;PTQ का माप ज्ञात कीजिए ?</span></p>",
+                    options_en: ["<p>59&deg;</p>", "<p>58&deg;</p>", 
+                                "<p>48&deg;</p>", "<p>69&deg;</p>"],
+                    options_hi: ["<p>59&deg;</p>", "<p>58&deg;</p>",
+                                "<p>48&deg;</p>", "<p>69&deg;</p>"],
+                    solution_en: "<p>5.(d) <span style=\"font-family: Times New Roman;\"><strong>Construction </strong>: </span><span style=\"font-family: Times New Roman;\">we join P and S.</span><br><span style=\"font-family: Gungsuh;\">As PQ is diameter &ang;PST = 90&deg;</span><br><span style=\"font-family: Gungsuh;\">&ang;SPT =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>1</mn><mn>2</mn></mfrac></math> , </span><span style=\"font-family: Gungsuh;\">&ang;ROS = </span><span style=\"font-family: Times New Roman;\"> <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>42</mn><mn>2</mn></mfrac><mo>=</mo><mn>21</mn><mo>&#176;</mo></math></span><br><strong id=\"docs-internal-guid-a24dcea4-7fff-777a-1137-e7ce6ffc5cdc\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcvPIm9UQZu246DqG_X_pPm4E0-Ii5OujXHBTDZCxT-NK8NPgiwt-MShleC5e1mjbYKS4Z1fmlFgtTOCd_Co3aOL5jhkkbK1UzvuMYZ_TeSC2FFS-N3YbHsRxl9e4gM7Uv4ZqbTNeHFR40cHNv2lGPyVm8?key=3SaRaJGuopBvFKeyeymUn1QI\" width=\"181\" height=\"125\"></strong><br><span style=\"font-family: Times New Roman;\">Now, in <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>&#8710;</mo></math></span><span style=\"font-family: Gungsuh;\">PST, &ang;PTS = 180&deg; &ndash; 90&deg; &ndash; 21&deg; = 69&deg;</span></p>",
+                    solution_hi: "<p>5.(d) <strong><span style=\"font-family: Baloo;\">कंस्ट्रक्शन </span></strong><span style=\"font-family: Baloo;\"><strong>:</strong> हम P और S को मिलाते हैं।</span><br><span style=\"font-family: Arial Unicode MS;\">चूँकि PQ का व्यास है, &ang;PST = 90&deg;</span><br><span style=\"font-family: Arial Unicode MS;\">&ang;SPT =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>1</mn><mn>2</mn></mfrac></math>&ang;ROS =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>42</mn><mn>2</mn></mfrac></math>= 21&deg;</span><br><strong id=\"docs-internal-guid-a24dcea4-7fff-777a-1137-e7ce6ffc5cdc\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXcvPIm9UQZu246DqG_X_pPm4E0-Ii5OujXHBTDZCxT-NK8NPgiwt-MShleC5e1mjbYKS4Z1fmlFgtTOCd_Co3aOL5jhkkbK1UzvuMYZ_TeSC2FFS-N3YbHsRxl9e4gM7Uv4ZqbTNeHFR40cHNv2lGPyVm8?key=3SaRaJGuopBvFKeyeymUn1QI\" width=\"181\" height=\"125\"></strong><br><span style=\"font-family: Baloo;\">अब, △PST में, PTS = 180&deg; &ndash; 90&deg; &ndash; 21&deg; = 69&deg;</span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "6",
+                    section: "17",
+                    question_en: "<p>6.<span style=\"font-family: Times New Roman;\"> &lsquo;O&rsquo; is the </span><span style=\"font-family: Times New Roman;\">centre</span><span style=\"font-family: Times New Roman;\"> of a circle with a diameter 20 cm. T is a point outside the circle and TA is a tangent to a circle. If OT is 26 cm, what is the length (in cm) of the tangent TA?</span></p>",
+                    question_hi: "<p>6. &lsquo;<span style=\"font-family: Baloo;\">O&rsquo; एक वृत्त का केंद्र है जिसका व्यास 20 cm है। T वृत्त के बाहर एक बिंदु है और TA एक ​​वृत्त की स्पर्श रेखा है। यदि OT 26 cm है, तो स्पर्शरेखा TA की लंबाई (cm में) क्या है?</span></p>",
+                    options_en: ["<p>20</p>", "<p>26</p>", 
+                                "<p>24</p>", "<p>18</p>"],
+                    options_hi: ["<p>20</p>", "<p>26</p>",
+                                "<p>24</p>", "<p>18</p>"],
+                    solution_en: "<p>6.(c)</p>\n<p><strong id=\"docs-internal-guid-3ccf89e9-7fff-230a-6790-0822fb2d4117\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdn2fcUW3SUW8iqts2X-gVJic0n99T7Y7P-iP6yOfcQhVR28Ewv7hwVzEDl8SZwVV762KnLdQXOY6Xln794H3EqljStF5J6dgziwyoj7JTv2CmPugDZbYJ2Ce2g1nKTPBekfQ8pXxIh4zrHrtmJFH8rqYo?key=3SaRaJGuopBvFKeyeymUn1QI\" width=\"111\" height=\"158\"></strong></p>\n<p><span style=\"font-family: Times New Roman;\">Radius OA =<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>20</mn><mn>2</mn></mfrac></math> </span><span style=\"font-family: Times New Roman;\">&nbsp;= 10 cm and OT = 26 cm (given)</span><br><span style=\"font-family: Times New Roman;\">Radius drawn from the </span><span style=\"font-family: Times New Roman;\">centre</span><span style=\"font-family: Times New Roman;\"> is perpendicular to the tangent at point of contact.</span><br><span style=\"font-family: Times New Roman;\">So,</span><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msup><mi>OT</mi><mn>2</mn></msup><mo>=</mo><msup><mi>OA</mi><mn>2</mn></msup><mo>+</mo><msup><mi>TA</mi><mn>2</mn></msup></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msup><mi>TA</mi><mn>2</mn></msup><mo>=</mo><msup><mn>26</mn><mn>2</mn></msup><mo>&#8211;</mo><msup><mn>10</mn><mn>2</mn></msup><mo>=</mo><msup><mn>24</mn><mn>2</mn></msup></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mi>So</mi><mo>,</mo><mi>TA</mi><mo>=</mo><mn>24</mn><mi>cm</mi></math></p>\n<p><span style=\"font-family: Times New Roman;\"> </span></p>",
+                    solution_hi: "<p>6.(c)</p>\n<p><strong id=\"docs-internal-guid-3ccf89e9-7fff-230a-6790-0822fb2d4117\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXdn2fcUW3SUW8iqts2X-gVJic0n99T7Y7P-iP6yOfcQhVR28Ewv7hwVzEDl8SZwVV762KnLdQXOY6Xln794H3EqljStF5J6dgziwyoj7JTv2CmPugDZbYJ2Ce2g1nKTPBekfQ8pXxIh4zrHrtmJFH8rqYo?key=3SaRaJGuopBvFKeyeymUn1QI\" width=\"103\" height=\"147\"></strong></p>\n<pre><span style=\"font-family: Baloo;\">त्रिज्या OA = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>20</mn><mn>2</mn></mfrac></math></span><span style=\"font-family: Baloo;\"> = 10 cm और OT = 26 cm (दिया गया है)</span><br><span style=\"font-family: Baloo;\">केंद्र से खींची गई त्रिज्या संपर्क बिंदु पर स्पर्शरेखा के लंबवत होती है।</span><br><span style=\"font-family: Baloo;\">इसलिए,</span><span style=\"font-family: Times New Roman;\"> </span><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msup><mi>OT</mi><mn>2</mn></msup><mo>=</mo><msup><mi>OA</mi><mn>2</mn></msup><mo>+</mo><msup><mi>TA</mi><mn>2</mn></msup></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msup><mi>TA</mi><mn>2</mn></msup><mo>=</mo><msup><mn>26</mn><mn>2</mn></msup><mo>&#8211;</mo><msup><mn>10</mn><mn>2</mn></msup><mo>=</mo><msup><mn>24</mn><mn>2</mn></msup></math><br><span style=\"font-family: Baloo;\">अतः TA = 24 cm </span></pre>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "7",
+                    section: "17",
+                    question_en: "<p>7. <span style=\"font-family: Times New Roman;\">What is the height (in cm) of an equilateral triangle whose each side is 8 cm?</span></p>",
+                    question_hi: "<p>7. <span style=\"font-family: Baloo;\">एक समबाहु त्रिभुज की ऊँचाई (cm में) क्या है, जिसकी प्रत्येक भुजा 8 cm है?</span></p>",
+                    options_en: ["<p><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>4</mn><msqrt><mn>3</mn></msqrt></math></p>", "<p><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>3</mn><msqrt><mn>2</mn></msqrt></math></p>", 
+                                "<p><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>4</mn><msqrt><mn>2</mn></msqrt></math></p>", "<p><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>3</mn><msqrt><mn>5</mn></msqrt></math></p>"],
+                    options_hi: ["<p><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>4</mn><msqrt><mn>3</mn></msqrt></math></p>", "<p><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>3</mn><msqrt><mn>2</mn></msqrt></math></p>",
+                                "<p><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>4</mn><msqrt><mn>2</mn></msqrt></math></p>", "<p><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>3</mn><msqrt><mn>5</mn></msqrt></math></p>"],
+                    solution_en: "<p>7.(a) <span style=\"font-family: Times New Roman;\">Height =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><msqrt><mn>3</mn></msqrt><mn>2</mn></mfrac><mo>&#215;</mo></math></span><span style=\"font-family: Times New Roman;\">&nbsp;</span><span style=\"font-family: Times New Roman;\">side =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><msqrt><mn>3</mn></msqrt><mn>2</mn></mfrac><mo>&#215;</mo><mn>8</mn><mo>=</mo><mn>4</mn><msqrt><mn>3</mn></msqrt><mo>&#160;</mo><mi>c</mi><mi>m</mi></math></span></p>",
+                    solution_hi: "<p>7.(a) <math style=\"font-family: Verdana;\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mi>&#2314;&#2305;&#2330;&#2366;&#2312;</mi><mo>&#160;</mo><mo>=</mo><mo>&#160;</mo><mfrac><msqrt><mn>3</mn></msqrt><mn>2</mn></mfrac><mo>&#215;</mo><mo>&#160;</mo><mi>&#2349;&#2369;&#2332;&#2366;</mi><mo>&#160;</mo><mo>=</mo><mo>&#160;</mo><mfrac><msqrt><mn>3</mn></msqrt><mn>2</mn></mfrac><mo>&#160;</mo><mo>&#215;</mo><mo>&#160;</mo><mn>8</mn><mo>&#160;</mo><mo>=</mo><mo>&#160;</mo><mn>4</mn><msqrt><mn>3</mn></msqrt><mo>&#160;</mo><mi>c</mi><mi>m</mi></math></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "8",
+                    section: "17",
+                    question_en: "<p>8.<span style=\"font-family: Gungsuh;\"> In ∆LMN, the bisectors of &ang;L and &ang;N intersect at an angle of&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msup><mn>112</mn><mi>&#1086;</mi></msup></math></span><span style=\"font-family: Gungsuh;\">. What is the measure ( in degrees ) of &ang;M ?</span></p>",
+                    question_hi: "<p>8. <span style=\"font-family: Arial Unicode MS;\">&Delta;LMN में, &ang;L और &ang;N के समद्विभाजक 112&deg; के कोण पर प्रतिच्छेद करते हैं। &ang;M का माप (डिग्री में) क्या है?</span></p>",
+                    options_en: ["<p>62</p>", "<p>60</p>", 
+                                "<p>44</p>", "<p>72</p>"],
+                    options_hi: ["<p>62</p>", "<p>60</p>",
+                                "<p>44</p>", "<p>72</p>"],
+                    solution_en: "<p>8.(c) <span style=\"font-family: Gungsuh;\">Let bisectors of &ang;L and &ang;N meet at point O.</span><br><br><strong id=\"docs-internal-guid-cd65eb98-7fff-9687-964f-9c5fcafb8160\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfXXI5axUprSzBsOgfeS3vGXljM8uK_xZxRS72eU1jmMhxW7ZOBME8hXFlnxLjDiLKFigkj1jqHxbpKPbxJJG_HFIx90libmHIJIWVpCVHdnVawrgrRedVuHZKPeNtb11BAC2NxOfZPZihCi_05HUKd3A?key=3SaRaJGuopBvFKeyeymUn1QI\" width=\"130\" height=\"135\"></strong><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>&#8736;</mo><mi>LON</mi><mo>=</mo><mn>90</mn><mo>&#176;</mo><mo>+</mo><mfrac><mrow><mo>&#160;</mo><mo>&#8736;</mo><mi mathvariant=\"normal\">M</mi></mrow><mn>2</mn></mfrac><mo>&#160;</mo></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>112</mn><mo>&#176;</mo><mo>=</mo><mn>90</mn><mo>&#176;</mo><mo>+</mo><mfrac><mrow><mo>&#8736;</mo><mi mathvariant=\"normal\">M</mi></mrow><mn>2</mn></mfrac><mo>&#160;</mo><mo>&#160;</mo></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mo>&#8736;</mo><mi mathvariant=\"normal\">M</mi></mrow><mn>2</mn></mfrac><mo>=</mo><mn>22</mn><mo>&#176;</mo><mo>&#160;</mo></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>&#8736;</mo><mi mathvariant=\"normal\">M</mi><mo>=</mo><mn>44</mn><mo>&#176;</mo></math></p>",
+                    solution_hi: "<p>8.(c) <span style=\"font-family: Arial Unicode MS;\">माना L और &ang;N के समद्विभाजक बिंदु O पर मिलते हैं।</span><br><strong id=\"docs-internal-guid-cd65eb98-7fff-9687-964f-9c5fcafb8160\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfXXI5axUprSzBsOgfeS3vGXljM8uK_xZxRS72eU1jmMhxW7ZOBME8hXFlnxLjDiLKFigkj1jqHxbpKPbxJJG_HFIx90libmHIJIWVpCVHdnVawrgrRedVuHZKPeNtb11BAC2NxOfZPZihCi_05HUKd3A?key=3SaRaJGuopBvFKeyeymUn1QI\" width=\"130\" height=\"135\"><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>&#8736;</mo><mi>LON</mi><mo>=</mo><mn>90</mn><mo>&#176;</mo><mo>+</mo><mfrac><mrow><mo>&#160;</mo><mo>&#8736;</mo><mi mathvariant=\"normal\">M</mi></mrow><mn>2</mn></mfrac><mo>&#160;</mo></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>112</mn><mo>&#176;</mo><mo>=</mo><mn>90</mn><mo>&#176;</mo><mo>+</mo><mfrac><mrow><mo>&#8736;</mo><mi mathvariant=\"normal\">M</mi></mrow><mn>2</mn></mfrac><mo>&#160;</mo><mo>&#160;</mo></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mo>&#8736;</mo><mi mathvariant=\"normal\">M</mi></mrow><mn>2</mn></mfrac><mo>=</mo><mn>22</mn><mo>&#176;</mo><mo>&#160;</mo></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>&#8736;</mo><mi mathvariant=\"normal\">M</mi><mo>=</mo><mn>44</mn><mo>&#176;</mo></math></strong></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "9",
+                    section: "17",
+                    question_en: "<p>9. <span style=\"font-family: Gungsuh;\">In ∆ACD, B and E are two points on side AC and AD respectively, such that BE is parallel to CD. CD = 9 cm, BE = 6 cm, AB = 5 cm and ED = 2 cm. What is the measure of the lengths(in cm) of AE and BC?</span></p>",
+                    question_hi: "<p>9. <span style=\"font-family: Arial Unicode MS;\">∆ACD में, B और E क्रमशः भुजा AC और AD पर दो बिंदु इस प्रकार हैं कि BE, CD के समानांतर है। CD= 9 cm, BE = 6 cm, AB = 5 cm और ED = 2 cm। AE और BC की लंबाई (cm में) का माप क्या है?</span></p>",
+                    options_en: ["<p>4, 2.5</p>", "<p>3, 4</p>", 
+                                "<p>4, 3</p>", "<p>2.5, 4</p>"],
+                    options_hi: ["<p>4, 2.5</p>", "<p>3, 4</p>",
+                                "<p>4, 3</p>", "<p>2.5, 4</p>"],
+                    solution_en: "<p>9.(a) <span style=\"font-family: Times New Roman;\">Let AE = y and BC = x</span><br><strong id=\"docs-internal-guid-f0ee0b3f-7fff-4fcb-6df9-144175a02854\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXc1zUXH5uCyXpPsZMatSArJgQth5j9GO-DYTnuDWQrw5RXRDjjl8A6ZsFjJtx4V33_D4lrPwwHptyxztl50TfkWLnxLlxjLZQ7O7_ZsolQiL3K2M2Qcc44YEFcNkAPNBhLztH_RJW4_9aMUXuHRbbKZMN0?key=3SaRaJGuopBvFKeyeymUn1QI\" width=\"140\" height=\"146\"></strong><br>In <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mi>&#916;ABC</mi><mo>&#160;</mo><mi>and</mi><mo>&#160;</mo><mi>&#916;ACD</mi><mo>,</mo><mo>&#160;</mo><menclose notation=\"top\"><mi>BE</mi></menclose><mo>&#160;</mo><mo>&#8741;</mo><menclose notation=\"top\"><mi>CD</mi></menclose><mo>&#160;</mo><mo>&#160;</mo></math><br>so,<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi>AB</mi><mi>AC</mi></mfrac><mo>&#160;</mo><mo>=</mo><mo>&#160;</mo><mfrac><mi>BE</mi><mi>CD</mi></mfrac></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>5</mn><mrow><mn>5</mn><mo>&#160;</mo><mo>+</mo><mo>&#160;</mo><mi mathvariant=\"normal\">x</mi></mrow></mfrac><mo>&#160;</mo><mo>=</mo><mo>&#160;</mo><mfrac><mrow><mn>6</mn><mo>&#160;</mo></mrow><mn>9</mn></mfrac></math><br>45 = 30 + 6x<br>x = 2.5<br>Also, <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi>AE</mi><mi>AD</mi></mfrac><mo>&#160;</mo><mo>=</mo><mo>&#160;</mo><mfrac><mi>BE</mi><mi>CD</mi></mfrac><mo>&#160;</mo><mo>&#160;</mo></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi mathvariant=\"normal\">y</mi><mrow><mi mathvariant=\"normal\">y</mi><mo>&#160;</mo><mo>+</mo><mo>&#160;</mo><mn>2</mn></mrow></mfrac><mo>&#160;</mo><mo>=</mo><mfrac><mrow><mo>&#160;</mo><mn>6</mn></mrow><mn>9</mn></mfrac><mo>&#160;</mo><mo>&#160;</mo></math><br>9y = 6y + 12<br>3y = 12<br>y = 4</p>",
+                    solution_hi: "<p>9.(a) <span style=\"font-family: Baloo;\">माना AE = y और BC = x</span><br><strong id=\"docs-internal-guid-f0ee0b3f-7fff-4fcb-6df9-144175a02854\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXc1zUXH5uCyXpPsZMatSArJgQth5j9GO-DYTnuDWQrw5RXRDjjl8A6ZsFjJtx4V33_D4lrPwwHptyxztl50TfkWLnxLlxjLZQ7O7_ZsolQiL3K2M2Qcc44YEFcNkAPNBhLztH_RJW4_9aMUXuHRbbKZMN0?key=3SaRaJGuopBvFKeyeymUn1QI\" width=\"140\" height=\"146\"></strong><br><math style=\"font-family: Verdana;\" xmlns=\"http://www.w3.org/1998/Math/MathML\"><mi>&#916;ABC</mi><mo>&#160;</mo><mi>&#2324;&#2352;</mi><mo>&#160;</mo><mo>&#160;</mo><mi>&#916;ACD</mi><mo>&#160;</mo><mi>&#2350;&#2375;&#2306;</mi><mo>,</mo><mo>&#160;</mo><mo>&#160;</mo><menclose notation=\"top\"><mi>BE</mi></menclose><mo>&#160;</mo><mo>&#8741;</mo><menclose notation=\"top\"><mi>CD</mi></menclose></math><br>अतः&nbsp; <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi>AB</mi><mi>AC</mi></mfrac><mo>&#160;</mo><mo>=</mo><mo>&#160;</mo><mfrac><mi>BE</mi><mi>CD</mi></mfrac></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>5</mn><mrow><mn>5</mn><mo>&#160;</mo><mo>+</mo><mo>&#160;</mo><mi mathvariant=\"normal\">x</mi></mrow></mfrac><mo>&#160;</mo><mo>=</mo><mo>&#160;</mo><mfrac><mrow><mn>6</mn><mo>&#160;</mo></mrow><mn>9</mn></mfrac></math><br>45 = 30 + 6x<br>x = 2.5<br><strong id=\"docs-internal-guid-fdc3991d-7fff-80b6-af9d-50283a2c08b8\"></strong>साथ ही,&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi>AE</mi><mi>AD</mi></mfrac><mo>&#160;</mo><mo>=</mo><mo>&#160;</mo><mfrac><mi>BE</mi><mi>CD</mi></mfrac><mo>&#160;</mo><mo>&#160;</mo></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mi mathvariant=\"normal\">y</mi><mrow><mi mathvariant=\"normal\">y</mi><mo>&#160;</mo><mo>+</mo><mo>&#160;</mo><mn>2</mn></mrow></mfrac><mo>&#160;</mo><mo>=</mo><mfrac><mrow><mo>&#160;</mo><mn>6</mn></mrow><mn>9</mn></mfrac><mo>&#160;</mo><mo>&#160;</mo></math><br>9y = 6y + 12<br>3y = 12<br>y = 4</p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "10",
+                    section: "17",
+                    question_en: "<p>10. <span style=\"font-family: Gungsuh;\">Two circles touch each other externally at T, RS is a direct common tangent to the two circles touching the circles at P and Q. &ang;TPQ =<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msup><mn>42</mn><mi>&#1086;</mi></msup></math> </span><span style=\"font-family: Gungsuh;\">, &ang;PQT (in degrees) is:</span></p>",
+                    question_hi: "<p>10. <span style=\"font-family: Arial Unicode MS;\">दो वृत्त एक-दूसरे को T पर बाह्य रूप से स्पर्श करते हैं, RS, P और Q पर वृत्तों को स्पर्श करने वाले दो वृत्तों की सीधी उभयनिष्ठ स्पर्श रेखा है। &ang;TPQ = 42&deg;, &ang;PQT का मान क्या है (डिग्री में) ?</span></p>",
+                    options_en: ["<p>48</p>", "<p>45</p>", 
+                                "<p>42</p>", "<p>60</p>"],
+                    options_hi: ["<p>48</p>", "<p>45</p>",
+                                "<p>42</p>", "<p>60</p>"],
+                    solution_en: "<p>10.(a)<br><br><strong id=\"docs-internal-guid-9a5a947b-7fff-72fb-4717-b611adfeb81a\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXenm23MZiVIDg5d9AWKfuWK6WWPom8EZ5OufTVr6f53NO-ZqbnDwqIHojkURrz4PPOXaTy4Agw1mx8ZKmPLnDJ5740fR8SnNYMnDzTihYAd4HPk1M9Qi2OcsJD6dF7Ceant0ITU_mSF7GFrgSTHBQ45sAo?key=3SaRaJGuopBvFKeyeymUn1QI\" width=\"195\" height=\"113\"></strong><br><span style=\"font-family: Times New Roman;\"><strong>Construction :</strong> </span><span style=\"font-family: Times New Roman;\">we join ST such that it is tangent to both circles.</span><br><span style=\"font-family: Gungsuh;\">ST = SQ, &ang;SQT = &ang;STQ = x</span><br><span style=\"font-family: Gungsuh;\">ST = SP, &ang;SPT = &ang;STP = y</span><br><span style=\"font-family: Times New Roman;\">In &Delta;PQT , x + x + y + y = 180&deg;</span><br><span style=\"font-family: Times New Roman;\">x + y = 90&deg;</span><br><span style=\"font-family: Gungsuh;\">&nbsp;&ang;TPQ = y = 42&deg; (given)</span><br><span style=\"font-family: Gungsuh;\">&nbsp;&ang;PQT = x = 90&deg; &ndash; y = 48&deg;</span><br><strong><span style=\"font-family: Times New Roman;\">TRICK</span></strong><br><span style=\"font-family: Gungsuh;\">Remember in such cases, &ang;PTQ = 90&deg;</span></p>",
+                    solution_hi: "<p>10.(a)<br><strong id=\"docs-internal-guid-9a5a947b-7fff-72fb-4717-b611adfeb81a\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXenm23MZiVIDg5d9AWKfuWK6WWPom8EZ5OufTVr6f53NO-ZqbnDwqIHojkURrz4PPOXaTy4Agw1mx8ZKmPLnDJ5740fR8SnNYMnDzTihYAd4HPk1M9Qi2OcsJD6dF7Ceant0ITU_mSF7GFrgSTHBQ45sAo?key=3SaRaJGuopBvFKeyeymUn1QI\" width=\"195\" height=\"113\"></strong><br><br><strong><span style=\"font-family: Baloo;\">कंस्ट्रक्शन : </span></strong><span style=\"font-family: Baloo;\">हम ST को इस प्रकार मिलाते हैं कि यह दोनों वृत्तों की स्पर्श रेखा हो।</span><br><span style=\"font-family: Gungsuh;\">ST = SQ, &ang;SQT = &ang;STQ = x</span><br><span style=\"font-family: Gungsuh;\">ST = SP, &ang;SPT = &ang;STP = y</span><br><span style=\"font-family: Baloo;\">&Delta;PQT में, x + x + y + y = 180&deg;</span><br><span style=\"font-family: Times New Roman;\">x + y = 90&deg;</span><br><span style=\"font-family: Arial Unicode MS;\"> &ang;TPQ = y = 42&deg;</span><span style=\"font-family: Arial Unicode MS;\">(दिया गया है)</span><br><span style=\"font-family: Gungsuh;\">&nbsp;&ang;PQT = x = 90&deg; &ndash; y = 48&deg;</span><br><strong><span style=\"font-family: Times New Roman;\">TRICK</span></strong><br><span style=\"font-family: Arial Unicode MS;\">ऐसी स्थिति में याद रखें, &ang;PTQ = 90&deg;</span></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "11",
+                    section: "17",
+                    question_en: "<p>11. <span style=\"font-family: Times New Roman;\">AB is the diameter of a circle with center O , C and D are two points on the circumference </span><span style=\"font-family: Gungsuh;\">of the circle on either side of AB such that &ang;CAB =&nbsp;<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msup><mn>42</mn><mi>&#1086;</mi></msup></math>&nbsp;</span><span style=\"font-family: Times New Roman;\"> and </span><span style=\"font-family: Times New Roman;\"> </span><span style=\"font-family: Gungsuh;\">&ang;ABD = <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msup><mn>57</mn><mi>&#1086;</mi></msup></math></span><span style=\"font-family: Times New Roman;\"> </span><span style=\"font-family: Times New Roman;\">. </span><span style=\"font-family: Gungsuh;\">What is the difference ( in degrees) between the measure of &ang;CAD and &ang;CBD?</span></p>",
+                    question_hi: "<p>11. <span style=\"font-family: Arial Unicode MS;\">AB एक वृत्त का व्यास है जिसका केंद्र O है, C और D दो बिंदु हैं जो AB के दोनों ओर वृत्त की परिधि पर इस प्रकार हैं कि &ang;CAB = 42&deg; और &ang;</span><span style=\"font-family: Times New Roman;\">ABD</span><span style=\"font-family: Arial Unicode MS;\"> = 57&deg;। &ang;CAD और &ang;CBD के माप में क्या अंतर (डिग्री में) है?</span></p>",
+                    options_en: ["<p>105 and 75</p>", "<p>75 and 105</p>", 
+                                "<p>81 and 99</p>", "<p>99 and 81</p>"],
+                    options_hi: ["<p>105 और 75</p>", "<p>75 और 105</p>",
+                                "<p>81 और 99</p>", "<p>99 और 81</p>"],
+                    solution_en: "<p>11.(b) <span style=\"font-family: Gungsuh;\">As AB is the diameter, &ang;C = &ang;D = 90&deg;</span><br><span style=\"font-family: Gungsuh;\">&ang;BAD = 90&deg; &ndash; &ang;DBA = 90&deg; &ndash; 57&deg; = 33&deg;</span><br><span style=\"font-family: Gungsuh;\">&ang;CBA = 90&deg; &ndash; &ang;CAB = 90&deg; &ndash; 42&deg; = 48&deg;</span><br><strong id=\"docs-internal-guid-fd0933e4-7fff-5092-8301-02d9574e22f2\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfoEgTRjwrLjXGlERHl0F7FEbR-T-eJ8Nvu9zAmVYcFfcWNWVpwdu0xb8niVwyg1wtKGLJ7z0mG3_BMc5TgBv3WqOXsg2J-Jwn_zFbG6rXrxcEqKodInS63Cz7QcWEC3f_16ndcZEEWjzqbC-xcwGXEUg?key=3SaRaJGuopBvFKeyeymUn1QI\" width=\"146\" height=\"116\"></strong><br><span style=\"font-family: Gungsuh;\">&ang;CAD = &ang;BAD + &ang;CAB = 33&deg; + 42&deg; = 75&deg;</span><br><span style=\"font-family: Gungsuh;\">&ang;CBD = &ang;DBA + &ang;CBA = 57&deg; + 48&deg; = 105&deg;</span></p>",
+                    solution_hi: "<p>11.(b) <span style=\"font-family: Arial Unicode MS;\">चूँकि AB व्यास है, &ang;C = &ang;D = 90&deg;</span><br><span style=\"font-family: Gungsuh;\">&ang;BAD = 90&deg; &ndash; &ang;DBA = 90&deg; &ndash; 57&deg; = 33&deg;</span><br><span style=\"font-family: Gungsuh;\">&ang;CBA = 90&deg; &ndash; &ang;CAB = 90&deg; &ndash; 42&deg; = 48&deg;</span><br><strong id=\"docs-internal-guid-fd0933e4-7fff-5092-8301-02d9574e22f2\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfoEgTRjwrLjXGlERHl0F7FEbR-T-eJ8Nvu9zAmVYcFfcWNWVpwdu0xb8niVwyg1wtKGLJ7z0mG3_BMc5TgBv3WqOXsg2J-Jwn_zFbG6rXrxcEqKodInS63Cz7QcWEC3f_16ndcZEEWjzqbC-xcwGXEUg?key=3SaRaJGuopBvFKeyeymUn1QI\" width=\"127\" height=\"101\"></strong><br><span style=\"font-family: Gungsuh;\">&ang;CAD = &ang;BAD + &ang;CAB = 33&deg; + 42&deg; = 75&deg;</span><br><span style=\"font-family: Gungsuh;\">&ang;CBD = &ang;DBA + &ang;CBA = 57&deg; + 48&deg; = 105&deg;</span></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "12",
+                    section: "17",
+                    question_en: "<p>12.<span style=\"font-family: Times New Roman;\"> The difference between the two perpendiculars sides of a right angled triangle is 17 cm and its area is 84<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msup><mi>cm</mi><mn>2</mn></msup></math></span><span style=\"font-family: Times New Roman;\">. What is the perimeter (in cm) of the triangle?</span></p>",
+                    question_hi: "<p>12. <span style=\"font-family: Baloo;\">एक समकोण त्रिभुज की दो लंब भुजाओं के बीच का अंतर 17cm है और इसका क्षेत्रफल 84<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msup><mi>cm</mi><mn>2</mn></msup></math> </span><span style=\"font-family: Baloo;\">&nbsp;है। त्रिभुज का परिमाप (cm में) क्या है?</span></p>",
+                    options_en: ["<p>40</p>", "<p>49</p>", 
+                                "<p>36</p>", "<p>56</p>"],
+                    options_hi: ["<p>40</p>", "<p>49</p>",
+                                "<p>36</p>", "<p>56</p>"],
+                    solution_en: "<p>12.(d) <span style=\"font-family: Times New Roman;\">Let , two perpendicular sides of a right angled triangle be x and y.</span><br><strong id=\"docs-internal-guid-87b18bfe-7fff-5b38-c442-30cffb9dea45\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeGeLX5SUUbIx9NSpqypxDEaApFLedtkliod-aSwqomiPIHV495B8usUl1V3s6S_Jhc0HbaKA1eSMMfEHChSZIJohR2JHs-BVOt95dvXDek1MmGOPjnF_FcPRYTFvWs0AG_XpjqOfmF4m-kYMtJpzo7xmo?key=3SaRaJGuopBvFKeyeymUn1QI\" width=\"129\" height=\"157\"></strong><br><span style=\"font-family: Times New Roman;\">According to the question,</span><br><span style=\"font-family: Times New Roman;\">x &ndash; y = 17 &hellip;.(1)</span><br><span style=\"font-family: Times New Roman;\">Area = </span><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>1</mn><mn>2</mn></mfrac><mo>&#160;</mo><mo>&#215;</mo><mo>&#160;</mo><mo>(</mo><mi mathvariant=\"normal\">x</mi><mo>)</mo><mo>&#160;</mo><mo>&#215;</mo><mo>&#160;</mo><mo>(</mo><mi mathvariant=\"normal\">y</mi><mo>)</mo></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>84</mn><mo>&#160;</mo><mo>=</mo><mo>&#160;</mo><mfrac><mn>1</mn><mn>2</mn></mfrac><mo>&#160;</mo><mo>&#215;</mo><mo>&#160;</mo><mo>(</mo><mi mathvariant=\"normal\">x</mi><mo>)</mo><mo>&#160;</mo><mo>&#215;</mo><mo>&#160;</mo><mo>(</mo><mi mathvariant=\"normal\">y</mi><mo>)</mo><mo>&#160;</mo></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mi>xy</mi><mo>&#160;</mo><mo>=</mo><mo>&#160;</mo><mn>168</mn><mo>&#160;</mo><mo>&#8230;</mo><mo>&#8230;</mo><mo>.</mo><mo>(</mo><mn>2</mn><mo>)</mo></math><br><span style=\"font-family: Times New Roman;\">Putting x = 17 + y in equation (2), we get</span><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>(</mo><mn>17</mn><mo>+</mo><mi mathvariant=\"normal\">y</mi><mo>)</mo><mi mathvariant=\"normal\">y</mi><mo>=</mo><mn>168</mn></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>17</mn><mi>y</mi><mo>+</mo><msup><mi mathvariant=\"normal\">y</mi><mn>2</mn></msup><mo>=</mo><mn>168</mn></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msup><mi mathvariant=\"normal\">y</mi><mn>2</mn></msup><mo>+</mo><mn>17</mn><mi mathvariant=\"normal\">y</mi><mo>&#8211;</mo><mn>168</mn><mo>=</mo><mn>0</mn></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msup><mi mathvariant=\"normal\">y</mi><mn>2</mn></msup><mo>+</mo><mn>24</mn><mi mathvariant=\"normal\">y</mi><mo>&#8211;</mo><mn>7</mn><mi mathvariant=\"normal\">y</mi><mo>&#8211;</mo><mn>168</mn><mo>=</mo><mn>0</mn></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mi mathvariant=\"normal\">y</mi><mo>(</mo><mi mathvariant=\"normal\">y</mi><mo>+</mo><mn>24</mn><mo>)</mo><mo>&#8211;</mo><mn>7</mn><mo>(</mo><mi mathvariant=\"normal\">y</mi><mo>+</mo><mn>24</mn><mo>)</mo><mo>=</mo><mn>0</mn></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>(</mo><mi mathvariant=\"normal\">y</mi><mo>+</mo><mn>24</mn><mo>)</mo><mo>(</mo><mi mathvariant=\"normal\">y</mi><mo>&#8211;</mo><mn>7</mn><mo>)</mo><mo>=</mo><mn>0</mn></math><br><span style=\"font-family: Times New Roman;\"> <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mi mathvariant=\"normal\">y</mi><mo>&#160;</mo><mo>=</mo><mo>&#160;</mo><mo>&#8211;</mo><mn>24</mn><mo>&#160;</mo></math> not possible, so y </span><span style=\"font-family: Times New Roman;\">= 7 cm</span><br><span style=\"font-family: Times New Roman;\">So, x = 17 + y = 17 + 7 = 24 cm</span><br><span style=\"font-family: Times New Roman;\">Hypotenuse </span><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mi>A</mi><mi>C</mi><mo>=</mo><msqrt><mo>(</mo><msup><mn>24</mn><mn>2</mn></msup><mo>+</mo><msup><mn>7</mn><mn>2</mn></msup><mo>)</mo></msqrt><mo>=</mo><msqrt><mo>(</mo><msup><mn>25</mn><mn>2</mn></msup><mo>)</mo></msqrt><mo>=</mo><mn>25</mn><mi>c</mi><mi>m</mi></math><br><span style=\"font-family: Times New Roman;\">So, perimeter = AB + BC + AC = 24 + 7 + 25 = 56 cm</span></p>",
+                    solution_hi: "<p>12.(d) <span style=\"font-family: Baloo;\">मान लीजिए , एक समकोण त्रिभुज की दो लम्ब भुजाएँ x और y हैं।</span><br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1656068709/word/media/image15.png\" width=\"115\" height=\"140\"><br><span style=\"font-family: Baloo;\">प्रश्न के अनुसार,</span><br><span style=\"font-family: Times New Roman;\">x - y = 17 &hellip;.(1)</span><br><span style=\"font-family: Baloo;\">क्षेत्रफल = </span><span style=\"font-family: Times New Roman;\"> </span><span style=\"font-family: Times New Roman;\"> </span><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>1</mn><mn>2</mn></mfrac><mo>&#160;</mo><mo>&#215;</mo><mo>&#160;</mo><mo>(</mo><mi mathvariant=\"normal\">x</mi><mo>)</mo><mo>&#160;</mo><mo>&#215;</mo><mo>&#160;</mo><mo>(</mo><mi mathvariant=\"normal\">y</mi><mo>)</mo></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>&#160;</mo><mn>84</mn><mo>&#160;</mo><mo>=</mo><mo>&#160;</mo><mfrac><mn>1</mn><mn>2</mn></mfrac><mo>&#160;</mo><mo>&#215;</mo><mo>&#160;</mo><mo>(</mo><mi mathvariant=\"normal\">x</mi><mo>)</mo><mo>&#160;</mo><mo>&#215;</mo><mo>&#160;</mo><mo>(</mo><mi mathvariant=\"normal\">y</mi><mo>)</mo><mo>&#160;</mo></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mi>xy</mi><mo>&#160;</mo><mo>=</mo><mo>&#160;</mo><mn>168</mn><mo>&#160;</mo><mo>&#8230;</mo><mo>&#8230;</mo><mo>.</mo><mo>(</mo><mn>2</mn><mo>)</mo></math><br><span style=\"font-family: Baloo;\">समीकरण (2) में x = 17 + y का मान रखने पर , हमें प्राप्त होता है<br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>(</mo><mn>17</mn><mo>+</mo><mi mathvariant=\"normal\">y</mi><mo>)</mo><mi mathvariant=\"normal\">y</mi><mo>=</mo><mn>168</mn></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>17</mn><mi>y</mi><mo>+</mo><msup><mi mathvariant=\"normal\">y</mi><mn>2</mn></msup><mo>=</mo><mn>168</mn></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msup><mi mathvariant=\"normal\">y</mi><mn>2</mn></msup><mo>+</mo><mn>17</mn><mi mathvariant=\"normal\">y</mi><mo>&#8211;</mo><mn>168</mn><mo>=</mo><mn>0</mn></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msup><mi mathvariant=\"normal\">y</mi><mn>2</mn></msup><mo>+</mo><mn>24</mn><mi mathvariant=\"normal\">y</mi><mo>&#8211;</mo><mn>7</mn><mi mathvariant=\"normal\">y</mi><mo>&#8211;</mo><mn>168</mn><mo>=</mo><mn>0</mn></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mi mathvariant=\"normal\">y</mi><mo>(</mo><mi mathvariant=\"normal\">y</mi><mo>+</mo><mn>24</mn><mo>)</mo><mo>&#8211;</mo><mn>7</mn><mo>(</mo><mi mathvariant=\"normal\">y</mi><mo>+</mo><mn>24</mn><mo>)</mo><mo>=</mo><mn>0</mn></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>(</mo><mi mathvariant=\"normal\">y</mi><mo>+</mo><mn>24</mn><mo>)</mo><mo>(</mo><mi mathvariant=\"normal\">y</mi><mo>&#8211;</mo><mn>7</mn><mo>)</mo><mo>=</mo><mn>0</mn></math></span><br><span style=\"font-family: Baloo;\">y =&nbsp; &ndash; 24 संभव नहीं है, इसलिए y </span><span style=\"font-family: Times New Roman;\">= 7 cm</span><br><span style=\"font-family: Times New Roman;\">x = 17 + y = 17 + 7 = 24 cm</span><br><span style=\"font-family: Baloo;\">कर्ण </span><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mi>AC</mi><mo>=</mo><msqrt><mo>(</mo><msup><mn>24</mn><mn>2</mn></msup><mo>+</mo><msup><mn>7</mn><mn>2</mn></msup><mo>)</mo></msqrt><mo>=</mo><msqrt><mo>(</mo><msup><mn>25</mn><mn>2</mn></msup><mo>)</mo></msqrt><mo>=</mo><mn>25</mn><mi>cm</mi></math><br><span style=\"font-family: Baloo;\">अतः परिमाप = AB + BC + AC = 24 + 7 + 25 = 56 cm</span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "13",
+                    section: "17",
+                    question_en: "<p>13. <span style=\"font-family: Gungsuh;\">The bisector of &ang;B in &Delta;ABC meets AC at D. If AB = 12 cm, BC = 18 cm and AC = 15 cm, then the length of AD (in cm) is:</span></p>",
+                    question_hi: "<p>13. <span style=\"font-family: Arial Unicode MS;\">&Delta;ABC में , &ang;B का समद्विभाजक AC से D पर मिलता है। यदि AB = 12 सेमी, BC = 18 सेमी और AC = 15 सेमी है, तो AD की लंबाई (सेमी में) ज्ञात कीजिए ?</span></p>",
+                    options_en: ["<p>6</p>", "<p>5</p>", 
+                                "<p>12</p>", "<p>9</p>"],
+                    options_hi: ["<p>6</p>", "<p>5</p>",
+                                "<p>12</p>", "<p>9</p>"],
+                    solution_en: "<p>13.(a) <span style=\"font-family: Times New Roman;\">Let AD = x</span><br><img src=\"https://ssccglpinnacle.com/images/mceu_82302038611668918821185.png\" width=\"155\" height=\"149\"><br><span style=\"font-family: Times New Roman;\">According to the angle bisector theorem,</span><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mi>A</mi><mi>B</mi></mrow><mrow><mi>B</mi><mi>C</mi></mrow></mfrac><mo>=</mo><mfrac><mrow><mo>&#160;</mo><mi>A</mi><mi>D</mi></mrow><mrow><mi>D</mi><mi>C</mi></mrow></mfrac></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>12</mn><mn>18</mn></mfrac><mo>=</mo><mfrac><mrow><mi>x</mi><mo>&#160;</mo></mrow><mrow><mn>15</mn><mo>-</mo><mi>x</mi></mrow></mfrac></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>2</mn><mn>3</mn></mfrac><mo>=</mo><mfrac><mi>x</mi><mrow><mn>15</mn><mo>-</mo><mi>x</mi></mrow></mfrac><mo>&#160;</mo></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>30</mn><mo>&#160;</mo><mo>&#8211;</mo><mn>2</mn><mi>x</mi><mo>=</mo><mn>3</mn><mi>x</mi><mo>&#160;</mo></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>5</mn><mi>x</mi><mo>=</mo><mn>30</mn><mo>&#160;</mo><mo>&#160;</mo></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mi>x</mi><mo>=</mo><mn>6</mn><mo>&#160;</mo><mi>c</mi><mi>m</mi></math></p>",
+                    solution_hi: "<p>13.(a) <span style=\"font-family: Baloo;\">माना , AD = x</span><br><img src=\"https://ssccglpinnacle.com/images/mceu_32709740411668918917843.png\" width=\"147\" height=\"141\"><br><span style=\"font-family: Baloo;\">कोण द्वि-भाजक प्रमेय के अनुसार,</span><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mi>A</mi><mi>B</mi></mrow><mrow><mi>B</mi><mi>C</mi></mrow></mfrac><mo>=</mo><mfrac><mrow><mi>A</mi><mi>D</mi></mrow><mrow><mi>D</mi><mi>C</mi></mrow></mfrac><mo>&#160;</mo></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mn>12</mn><mn>18</mn></mfrac><mo>=</mo><mfrac><mi>x</mi><mrow><mn>15</mn><mo>&#160;</mo><mo>-</mo><mo>&#160;</mo><mi>x</mi></mrow></mfrac></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mo>&#160;</mo><mn>2</mn></mrow><mrow><mn>3</mn><mo>&#160;</mo></mrow></mfrac><mo>=</mo><mfrac><mi>x</mi><mrow><mn>15</mn><mo>&#160;</mo><mo>-</mo><mo>&#160;</mo><mi>x</mi></mrow></mfrac><mo>&#160;</mo></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>30</mn><mo>&#8211;</mo><mn>2</mn><mi>x</mi><mo>=</mo><mn>3</mn><mi>x</mi><mo>&#160;</mo></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>5</mn><mi>x</mi><mo>=</mo><mn>30</mn><mo>&#160;</mo><mo>&#160;</mo></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mi>x</mi><mo>=</mo><mn>6</mn><mo>&#160;</mo><mi>c</mi><mi>m</mi></math></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "14",
+                    section: "17",
+                    question_en: "<p>14.<span style=\"font-family: Times New Roman;\"> A tangent is drawn from a point P to a circle, which meets the circle at T such that PT = 10.5 cm. A secant PAB intersects the circle in points A and B. If PA = 7 cm, what is the length(in cm) of the chord AB?</span></p>",
+                    question_hi: "<p>14.<span style=\"font-family: Baloo;\"> एक बिंदु P से एक वृत्त पर एक स्पर्श रेखा खींची जाती है जो वृत्त को T पर इस प्रकार मिलती है जहाँ PT = 10.5 सेमी है। एक छेदक PAB वृत्त को बिंदु A और B में काटता है। यदि PA = 7 सेमी है, तो जीवा AB की लंबाई (सेमी में) क्या है?</span></p>",
+                    options_en: ["<p>8.5</p>", "<p>8.75</p>", 
+                                "<p>7.75</p>", "<p>8.45</p>"],
+                    options_hi: ["<p>8.5</p>", "<p>8.75</p>",
+                                "<p>7.75</p>", "<p>8.45</p>"],
+                    solution_en: "<p>14.(b)<br><span style=\"font-family: \'Times New Roman\';\"><img style=\"font-family: Helvetica, Arial, sans-serif;\" src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXedOEA6QdovdRNf-j7y0GfcM6wdkS5OqrEF9j1dpyzNeETvFYL5mLmu-6rNE-vvU8NRBzQa7J3C8bOQCCkRQ1q_KiP680WsqO8xKDHyoJeOMsArbrqOjgk2x7wilhxCkwGdBNMh5HPFvU6KB_x4_EIthc4?key=3SaRaJGuopBvFKeyeymUn1QI\" width=\"199\" height=\"109\"></span><br>PT<sup>2</sup> = PA PB<br>10.5<sup>2</sup> = 7 (PA + AB)<br>15.75 = 7 + AB<br>AB = 8.75 cm</p>",
+                    solution_hi: "<p>14.(b)<br><span style=\"font-family: \'Times New Roman\';\"><img style=\"font-family: Helvetica, Arial, sans-serif;\" src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXedOEA6QdovdRNf-j7y0GfcM6wdkS5OqrEF9j1dpyzNeETvFYL5mLmu-6rNE-vvU8NRBzQa7J3C8bOQCCkRQ1q_KiP680WsqO8xKDHyoJeOMsArbrqOjgk2x7wilhxCkwGdBNMh5HPFvU6KB_x4_EIthc4?key=3SaRaJGuopBvFKeyeymUn1QI\" width=\"199\" height=\"109\"></span><br>PT<sup>2</sup> = PA PB<br>10.5<sup>2</sup> = 7 (PA + AB)<br>15.75 = 7 + AB<br>AB = 8.75 cm</p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "15",
+                    section: "17",
+                    question_en: "<p>15. <span style=\"font-family: Times New Roman;\">Two common tangents AC and BD touch two equal circles each of radius 7 cm, at points A, C, B and D, respectively, as shown in the figure. If the length of BD is 48 cm, what is the </span><span style=\"font-family: Times New Roman;\">length of AC?</span></p>\n<p><strong id=\"docs-internal-guid-6ad2cb56-7fff-164d-c9c5-ff4ed927c51a\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeeeHb_VMIlyI2tKapOCJFoxJgtUyLKN1svBiOnpo2Ohg5oHlAnon7j3alCfp2M9_Ek5VDBfCu1yJ1Cq8URjJ4YnkdQcdUoBxV8AAW7g6xEvjmJ7uB7HlrlWdeRfTaD_67DACA_oTD1UdG_3Vi1TRFt8Q?key=3SaRaJGuopBvFKeyeymUn1QI\" width=\"163\" height=\"115\"></strong></p>",
+                    question_hi: "<p>15. <span style=\"font-family: Baloo;\">दो उभयनिष्ठ स्पर्श रेखाएँ AC और BD, 7 सेमी त्रिज्या वाले दो समान वृत्तों को क्रमशः बिन्दु A, C, B और D पर स्पर्श करती हैं, जैसा कि चित्र में दिखाया गया है। </span><span style=\"font-family: Baloo;\">यदि BD की लंबाई 48 सेमी है, तो AC की लंबाई क्या है?</span></p>\n<p><strong id=\"docs-internal-guid-6ad2cb56-7fff-164d-c9c5-ff4ed927c51a\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXeeeHb_VMIlyI2tKapOCJFoxJgtUyLKN1svBiOnpo2Ohg5oHlAnon7j3alCfp2M9_Ek5VDBfCu1yJ1Cq8URjJ4YnkdQcdUoBxV8AAW7g6xEvjmJ7uB7HlrlWdeRfTaD_67DACA_oTD1UdG_3Vi1TRFt8Q?key=3SaRaJGuopBvFKeyeymUn1QI\" width=\"140\" height=\"99\"></strong></p>",
+                    options_en: ["<p>40 cm</p>", "<p>30 cm</p>", 
+                                "<p>50 cm</p>", "<p>48 cm</p>"],
+                    options_hi: ["<p>40 cm</p>", "<p>30 cm</p>",
+                                "<p>50 cm</p>", "<p>48 cm</p>"],
+                    solution_en: "<p>15.(c) <span style=\"font-family: Times New Roman;\">Here radius r = 7 cm (both circles)</span><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mi>BD</mi><mo>=</mo><msqrt><mo>(</mo><msup><mi>AC</mi><mn>2</mn></msup><mo>-</mo><mo>(</mo><mi mathvariant=\"normal\">r</mi><mo>+</mo><mi mathvariant=\"normal\">r</mi><msup><mo>)</mo><mn>2</mn></msup><mo>)</mo></msqrt></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msup><mi>BD</mi><mn>2</mn></msup><mo>=</mo><msup><mi>AC</mi><mn>2</mn></msup><mo>-</mo><mo>(</mo><mn>2</mn><mi mathvariant=\"normal\">r</mi><msup><mo>)</mo><mn>2</mn></msup></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msup><mn>48</mn><mn>2</mn></msup><mo>=</mo><msup><mi>AC</mi><mn>2</mn></msup><mo>-</mo><mo>(</mo><mn>14</mn><msup><mo>)</mo><mn>2</mn></msup></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msup><mi>AC</mi><mn>2</mn></msup><mo>=</mo><mn>2304</mn><mo>+</mo><mn>196</mn><mo>=</mo><mn>2500</mn></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mi>AC</mi><mo>=</mo><mn>50</mn><mi>cm</mi></math></p>",
+                    solution_hi: "<p>15.(c) &nbsp;यहाँ त्रिज्या r = 7 सेमी (दोनों वृतो के लिए)<br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mi>BD</mi><mo>=</mo><msqrt><mo>(</mo><msup><mi>AC</mi><mn>2</mn></msup><mo>-</mo><mo>(</mo><mi mathvariant=\"normal\">r</mi><mo>+</mo><mi mathvariant=\"normal\">r</mi><msup><mo>)</mo><mn>2</mn></msup><mo>)</mo></msqrt></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msup><mi>BD</mi><mn>2</mn></msup><mo>=</mo><msup><mi>AC</mi><mn>2</mn></msup><mo>-</mo><mo>(</mo><mn>2</mn><mi mathvariant=\"normal\">r</mi><msup><mo>)</mo><mn>2</mn></msup></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msup><mn>48</mn><mn>2</mn></msup><mo>=</mo><msup><mi>AC</mi><mn>2</mn></msup><mo>-</mo><mo>(</mo><mn>14</mn><msup><mo>)</mo><mn>2</mn></msup></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msup><mi>AC</mi><mn>2</mn></msup><mo>=</mo><mn>2304</mn><mo>+</mo><mn>196</mn><mo>=</mo><mn>2500</mn></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mi>AC</mi><mo>=</mo><mn>50</mn><mi>cm</mi></math></p>",
+                    correct: "c",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "16",
+                    section: "17",
+                    question_en: "<p>16. <span style=\"font-family: Gungsuh;\">&nbsp;In a quadrilateral ABCD, the bisector &ang;C and &ang;D meet at a point E. If &ang;CED = 57&deg; and &ang;A = 47&deg; , then the measure of &ang;B is: </span></p>",
+                    question_hi: "<p>16. <span style=\"font-family: Arial Unicode MS;\"> एक चतुर्भुज ABCD में, समद्विभाजक &ang;C और &ang;D एक बिंदु E पर मिलते हैं। यदि <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>&#8710;</mo></math>CED = 57&deg; और A = 47&deg; है, तो &ang;B का माप क्या है?</span></p>",
+                    options_en: ["<p>47&deg;</p>", "<p>67&deg;</p>", 
+                                "<p>77&deg;</p>", "<p>57&deg;</p>"],
+                    options_hi: ["<p>47&deg;</p>", "<p>67&deg;</p>",
+                                "<p>77&deg;</p>", "<p>57&deg;</p>"],
+                    solution_en: "<p>16.(b)<br><strong id=\"docs-internal-guid-e5f41933-7fff-9a17-03df-01ca104db5f5\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfcpSB7JvOifUOeWyAZZPIwWHTNa8pdtbbwDESe_yPa7LcqBIr3yWO148D1Rvuwe7gYGZ5wMZOCc7PJiU8g-ue69TdL8GjpcRHEFpyEDR_4BL7O1rN-_pB9mgIf5DHf0gnpK1w-pPRk3m9Fb-tF0vy02g?key=3SaRaJGuopBvFKeyeymUn1QI\" width=\"149\" height=\"132\"><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>&#8736;</mo><mi>CED</mi><mo>=</mo><mn>180</mn><mo>&#176;</mo><mo>&#8211;</mo><mfrac><mrow><mo>&#8736;</mo><mi mathvariant=\"normal\">C</mi></mrow><mn>2</mn></mfrac><mo>&#8211;</mo><mfrac><mrow><mo>&#8736;</mo><mi mathvariant=\"normal\">D</mi></mrow><mn>2</mn></mfrac><mo>=</mo><mn>57</mn><mo>&#176;</mo><mo>&#160;</mo><mo>&#160;</mo></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mo>&#8736;</mo><mi mathvariant=\"normal\">C</mi></mrow><mn>2</mn></mfrac><mo>+</mo><mfrac><mrow><mo>&#8736;</mo><mi mathvariant=\"normal\">D</mi></mrow><mn>2</mn></mfrac><mo>=</mo><mn>180</mn><mo>&#176;</mo><mo>&#8211;</mo><mn>57</mn><mo>&#176;</mo><mo>&#160;</mo></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mo>&#8736;</mo><mi mathvariant=\"normal\">C</mi><mo>+</mo><mo>&#8736;</mo><mi mathvariant=\"normal\">D</mi></mrow><mn>2</mn></mfrac><mo>=</mo><mn>123</mn><mo>&#176;</mo><mo>&#160;</mo></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>&#8736;</mo><mi mathvariant=\"normal\">C</mi><mo>+</mo><mo>&#8736;</mo><mi mathvariant=\"normal\">D</mi><mo>=</mo><mn>246</mn><mo>&#176;</mo><mo>&#160;</mo></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>&#8736;</mo><mi mathvariant=\"normal\">A</mi><mo>+</mo><mo>&#8736;</mo><mi mathvariant=\"normal\">B</mi><mo>=</mo><mn>360</mn><mo>&#176;</mo><mo>&#8211;</mo><mn>246</mn><mo>&#176;</mo><mo>=</mo><mn>114</mn><mo>&#176;</mo></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>&#160;</mo><mn>47</mn><mo>&#176;</mo><mo>+</mo><mo>&#8736;</mo><mi mathvariant=\"normal\">B</mi><mo>=</mo><mn>114</mn><mo>&#176;</mo><mo>&#160;</mo><mo>&#160;</mo></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>&#8736;</mo><mi mathvariant=\"normal\">B</mi><mo>=</mo><mn>67</mn><mo>&#176;</mo></math></strong></p>",
+                    solution_hi: "<p>16.(b)<br><strong id=\"docs-internal-guid-c2111002-7fff-1cb1-574a-dd01d1650f52\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfcpSB7JvOifUOeWyAZZPIwWHTNa8pdtbbwDESe_yPa7LcqBIr3yWO148D1Rvuwe7gYGZ5wMZOCc7PJiU8g-ue69TdL8GjpcRHEFpyEDR_4BL7O1rN-_pB9mgIf5DHf0gnpK1w-pPRk3m9Fb-tF0vy02g?key=3SaRaJGuopBvFKeyeymUn1QI\" width=\"149\" height=\"132\"></strong><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>&#8736;</mo><mi>CED</mi><mo>=</mo><mn>180</mn><mo>&#176;</mo><mo>&#8211;</mo><mfrac><mrow><mo>&#8736;</mo><mi mathvariant=\"normal\">C</mi></mrow><mn>2</mn></mfrac><mo>&#8211;</mo><mfrac><mrow><mo>&#8736;</mo><mi mathvariant=\"normal\">D</mi></mrow><mn>2</mn></mfrac><mo>=</mo><mn>57</mn><mo>&#176;</mo><mo>&#160;</mo><mo>&#160;</mo></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mo>&#8736;</mo><mi mathvariant=\"normal\">C</mi></mrow><mn>2</mn></mfrac><mo>+</mo><mfrac><mrow><mo>&#8736;</mo><mi mathvariant=\"normal\">D</mi></mrow><mn>2</mn></mfrac><mo>=</mo><mn>180</mn><mo>&#176;</mo><mo>&#8211;</mo><mn>57</mn><mo>&#176;</mo><mo>&#160;</mo></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow><mo>&#8736;</mo><mi mathvariant=\"normal\">C</mi><mo>+</mo><mo>&#8736;</mo><mi mathvariant=\"normal\">D</mi></mrow><mn>2</mn></mfrac><mo>=</mo><mn>123</mn><mo>&#176;</mo><mo>&#160;</mo></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>&#8736;</mo><mi mathvariant=\"normal\">C</mi><mo>+</mo><mo>&#8736;</mo><mi mathvariant=\"normal\">D</mi><mo>=</mo><mn>246</mn><mo>&#176;</mo><mo>&#160;</mo></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>&#8736;</mo><mi mathvariant=\"normal\">A</mi><mo>+</mo><mo>&#8736;</mo><mi mathvariant=\"normal\">B</mi><mo>=</mo><mn>360</mn><mo>&#176;</mo><mo>&#8211;</mo><mn>246</mn><mo>&#176;</mo><mo>=</mo><mn>114</mn><mo>&#176;</mo></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>&#160;</mo><mn>47</mn><mo>&#176;</mo><mo>+</mo><mo>&#8736;</mo><mi mathvariant=\"normal\">B</mi><mo>=</mo><mn>114</mn><mo>&#176;</mo><mo>&#160;</mo><mo>&#160;</mo></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>&#8736;</mo><mi mathvariant=\"normal\">B</mi><mo>=</mo><mn>67</mn><mo>&#176;</mo></math></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "17",
+                    section: "17",
+                    question_en: "<p>17. <span style=\"font-family: Times New Roman;\"> In <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>&#8710;</mo></math></span><span style=\"font-family: Gungsuh;\">ABC ,&ang;A=88&deg;. If I is the incentre of the triangle , then the measure of &ang;BIC is ;&nbsp;</span></p>",
+                    question_hi: "<p>17.<span style=\"font-family: Times New Roman;\"> <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>&#8710;</mo></math></span><span style=\"font-family: Arial Unicode MS;\">ABC में ,&ang;A=88&deg;. यदि I त्रिभुज का अंतःकेंद्र है, तो &ang;BIC का माप क्या है?</span></p>",
+                    options_en: ["<p>112&deg;</p>", "<p>134&deg;</p>", 
+                                "<p>56&deg;</p>", "<p>68&deg;</p>"],
+                    options_hi: ["<p>112&deg;</p>", "<p>134&deg;</p>",
+                                "<p>56&deg;</p>", "<p>68&deg;</p>"],
+                    solution_en: "<p>17.(b) <br><span style=\"font-family: Gungsuh;\">&ang;BIC = </span><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>90</mn><mo>&#176;</mo><mo>+</mo><mfrac><mrow><mo>&#160;</mo><mo>&#8736;</mo><mi mathvariant=\"normal\">A</mi></mrow><mn>2</mn></mfrac><mo>=</mo><mn>90</mn><mo>&#176;</mo><mo>+</mo><mfrac><mrow><mo>&#160;</mo><mn>88</mn><mo>&#176;</mo></mrow><mn>2</mn></mfrac><mo>&#160;</mo></math><span style=\"font-family: Times New Roman;\">&nbsp;<br></span><span style=\"font-family: Times New Roman;\">= 90&deg; + 44&deg; = 134&deg;</span></p>",
+                    solution_hi: "<p>17.(b) <br><span style=\"font-family: Gungsuh;\">&ang;BIC = </span><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>90</mn><mo>&#176;</mo><mo>+</mo><mfrac><mrow><mo>&#160;</mo><mo>&#8736;</mo><mi mathvariant=\"normal\">A</mi></mrow><mn>2</mn></mfrac><mo>=</mo><mn>90</mn><mo>&#176;</mo><mo>+</mo><mfrac><mrow><mo>&#160;</mo><mn>88</mn><mo>&#176;</mo></mrow><mn>2</mn></mfrac><mo>&#160;</mo></math><span style=\"font-family: Times New Roman;\">&nbsp;<br></span><span style=\"font-family: Times New Roman;\">= 90&deg; + 44&deg; = 134&deg;</span></p>",
+                    correct: "b",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "18",
+                    section: "17",
+                    question_en: "<p>18. <span style=\"font-family: Times New Roman;\"> Sides AB and AC of <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mi>&#916;</mi><mi>A</mi><mi>B</mi><mi>C</mi></math></span><span style=\"font-family: Gungsuh;\"> are produced to point D and E , respectively, The bisectors of &ang;CBD and &ang;BCE meet at P. If &ang;A = 78&deg;, then the measure of &ang;P is :&nbsp;</span></p>",
+                    question_hi: "<p>18. <math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mi>&#916;</mi><mi>A</mi><mi>B</mi><mi>C</mi></math><span style=\"font-family: Times New Roman;\"> </span><span style=\"font-family: Arial Unicode MS;\">&nbsp;की भुजाएँ AB और AC को क्रमशः बिंदु D और E तक बढ़ाया गया है, &ang;CBD और &ang;BCE के समद्विभाजक P पर मिलते हैं। यदि &ang;A = 78&deg; है, तो &ang;P का माप क्या है ?</span></p>",
+                    options_en: ["<p>51&deg;</p>", "<p>61&deg;</p>", 
+                                "<p>55&deg;</p>", "<p>56&deg;</p>"],
+                    options_hi: ["<p>51&deg;</p>", "<p>61&deg;</p>",
+                                "<p>55&deg;</p>", "<p>56&deg;</p>"],
+                    solution_en: "<p>18.(a) <span style=\"font-family: Times New Roman;\">According to the question,</span><br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1656068709/word/media/image11.png\" width=\"139\" height=\"124\"><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>&#8736;</mo><mi mathvariant=\"normal\">P</mi><mo>=</mo><mn>90</mn><mo>&#176;</mo><mo>&#8211;</mo><mfrac><mrow><mo>&#8736;</mo><mi mathvariant=\"normal\">A</mi></mrow><mn>2</mn></mfrac><mo>=</mo><mn>90</mn><mo>&#176;</mo><mo>&#8211;</mo><mfrac><mrow><mo>&#160;</mo><mn>78</mn><mo>&#176;</mo></mrow><mn>2</mn></mfrac><mo>&#160;</mo></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>=</mo><mo>&#160;</mo><mn>90</mn><mo>&#176;</mo><mo>&#8211;</mo><mn>39</mn><mo>&#176;</mo><mo>=</mo><mn>51</mn><mo>&#176;</mo></math></p>",
+                    solution_hi: "<p>18.(a) <span style=\"font-family: Baloo;\">प्रश्न के अनुसार,</span><br><img src=\"https://ssccglpinnacle.com/admin/resources/qdocs/test-1-EN-1/1656068709/word/media/image11.png\"><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>&#8736;</mo><mi mathvariant=\"normal\">P</mi><mo>=</mo><mn>90</mn><mo>&#176;</mo><mo>&#8211;</mo><mfrac><mrow><mo>&#8736;</mo><mi mathvariant=\"normal\">A</mi></mrow><mn>2</mn></mfrac><mo>=</mo><mn>90</mn><mo>&#176;</mo><mo>&#8211;</mo><mfrac><mrow><mo>&#160;</mo><mn>78</mn><mo>&#176;</mo></mrow><mn>2</mn></mfrac><mo>&#160;</mo></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>=</mo><mo>&#160;</mo><mn>90</mn><mo>&#176;</mo><mo>&#8211;</mo><mn>39</mn><mo>&#176;</mo><mo>=</mo><mn>51</mn><mo>&#176;</mo></math></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "19",
+                    section: "17",
+                    question_en: "<p>19. <span style=\"font-family: Gungsuh;\">&nbsp;A cyclic quadrilateral ABCD is drawn in a circle with centre O. A and C are joined to O. If &ang;ABC = 2p and &ang;ADC = 3p, what is the measure (in degrees) of the &ang;AOC reflex?</span></p>",
+                    question_hi: "<p>19.&nbsp;<span style=\"font-family: Arial Unicode MS;\">एक चक्रीय चतुर्भुज ABCD केंद्र O वाले एक वृत्त में बनाया गया है। A और C, O से जुड़े हुए हैं। यदि ABC = 2p और &ang;ADC = 3p है, तो &ang;AOC प्रतिवर्त का माप (डिग्री में) क्या है?</span></p>",
+                    options_en: ["<p>200</p>", "<p>245</p>", 
+                                "<p>210</p>", "<p>216</p>"],
+                    options_hi: ["<p>200</p>", "<p>245</p>",
+                                "<p>210</p>", "<p>216</p>"],
+                    solution_en: "<p>19.(d)<br><strong id=\"docs-internal-guid-1636f7ce-7fff-f0b4-0432-48da918425e5\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfTnCQMMyX7VAbcNgISD3SUQ2pJsM-_nwKWCg19_xra7JzTt2BDDnPPhznKQjncunJ0E2v9ww7lR3mbnX_wtE5qTk9JP7cNejmVzLK85bQKJ1g-FrIoHfaR7LNumVvDIdjmsDZhkGmlMCoe8b4q8MYE5qQ?key=3SaRaJGuopBvFKeyeymUn1QI\" width=\"124\" height=\"117\"></strong><br><span style=\"font-family: Times New Roman;\">As ABCD is a cyclic quadrilateral,</span><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>&#8736;</mo><mi mathvariant=\"normal\">B</mi><mo>+</mo><mo>&#8736;</mo><mi mathvariant=\"normal\">D</mi><mo>=</mo><mn>180</mn><mo>&#176;</mo><mo>&#160;</mo></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>2</mn><mi mathvariant=\"normal\">p</mi><mo>+</mo><mn>3</mn><mi mathvariant=\"normal\">p</mi><mo>=</mo><mn>180</mn><mo>&#176;</mo><mo>&#160;</mo></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>5</mn><mi mathvariant=\"normal\">p</mi><mo>=</mo><mn>180</mn><mo>&#176;</mo><mo>&#160;</mo></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mi mathvariant=\"normal\">p</mi><mo>=</mo><mn>36</mn><mo>&#176;</mo><mo>&#160;</mo></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>&#8736;</mo><mi>ABC</mi><mo>=</mo><mn>2</mn><mi mathvariant=\"normal\">p</mi><mo>=</mo><mn>72</mn><mo>&#176;</mo><mo>&#160;</mo></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>&#8736;</mo><mi>AOC</mi><mo>=</mo><mn>2</mn><mo>&#215;</mo><mn>72</mn><mo>=</mo><mn>144</mn><mo>&#176;</mo><mo>&#160;</mo></math><br>Reflux<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>&#8736;</mo><mi>AOC</mi><mo>=</mo><mn>360</mn><mo>&#176;</mo><mo>&#8211;</mo><mn>144</mn><mo>&#176;</mo><mo>=</mo><mn>216</mn><mo>&#176;</mo></math></p>",
+                    solution_hi: "<p>19.(d)<br><br><strong id=\"docs-internal-guid-1636f7ce-7fff-f0b4-0432-48da918425e5\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXfTnCQMMyX7VAbcNgISD3SUQ2pJsM-_nwKWCg19_xra7JzTt2BDDnPPhznKQjncunJ0E2v9ww7lR3mbnX_wtE5qTk9JP7cNejmVzLK85bQKJ1g-FrIoHfaR7LNumVvDIdjmsDZhkGmlMCoe8b4q8MYE5qQ?key=3SaRaJGuopBvFKeyeymUn1QI\" width=\"112\" height=\"106\"></strong><br><span style=\"font-family: Baloo;\">चूँकि ABCD एक चक्रीय चतुर्भुज है,</span><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>&#8736;</mo><mi mathvariant=\"normal\">B</mi><mo>+</mo><mo>&#8736;</mo><mi mathvariant=\"normal\">D</mi><mo>=</mo><mn>180</mn><mo>&#176;</mo><mo>&#160;</mo></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>2</mn><mi mathvariant=\"normal\">p</mi><mo>+</mo><mn>3</mn><mi mathvariant=\"normal\">p</mi><mo>=</mo><mn>180</mn><mo>&#176;</mo><mo>&#160;</mo></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mn>5</mn><mi mathvariant=\"normal\">p</mi><mo>=</mo><mn>180</mn><mo>&#176;</mo><mo>&#160;</mo></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mi mathvariant=\"normal\">p</mi><mo>=</mo><mn>36</mn><mo>&#176;</mo><mo>&#160;</mo></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>&#8736;</mo><mi>ABC</mi><mo>=</mo><mn>2</mn><mi mathvariant=\"normal\">p</mi><mo>=</mo><mn>72</mn><mo>&#176;</mo><mo>&#160;</mo></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>&#8736;</mo><mi>AOC</mi><mo>=</mo><mn>2</mn><mo>&#215;</mo><mn>72</mn><mo>=</mo><mn>144</mn><mo>&#176;</mo><mo>&#160;</mo></math><br><span style=\"font-family: Times New Roman;\">Reflux<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>&#8736;</mo></math></span><span style=\"font-family: Times New Roman;\">AOC = 360&deg; &ndash; 144&deg; = 216&deg;</span></p>",
+                    correct: "d",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+                questions.push({
+                    id: "20",
+                    section: "misc",
+                    question_en: "<p>20.<span style=\"font-family: Times New Roman;\"> In </span><span style=\"font-family: Gungsuh;\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mi>&#916;ABC</mi></math>, AD is perpendicular to BC and AE is the bisector of &ang;BAC.if &ang;ABC = 58&deg; and &ang;ACB = 34&deg;, then find the measure of &ang;DAE.</span></p>",
+                    question_hi: "<p>20. &Delta;<span style=\"font-family: Arial Unicode MS;\">ABC में, AD BC पर लंबवत है और AE &ang;BAC का समद्विभाजक है। यदि &ang;ABC=58&deg; और &ang;ACB=34&deg; है, तो &ang;DAE का माप ज्ञात कीजिए।</span></p>",
+                    options_en: ["<p>12&deg;</p>", "<p>11&deg;</p>", 
+                                "<p>22&deg;</p>", "<p>15&deg;</p>"],
+                    options_hi: ["<p>12&deg;</p>", "<p>11&deg;</p>",
+                                "<p>22&deg;</p>", "<p>15&deg;</p>"],
+                    solution_en: "<p>20.(a) <span style=\"font-family: Times New Roman;\">According to the question,</span><br><strong id=\"docs-internal-guid-ab577835-7fff-47a2-0f6f-7128daf3cb31\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXepYiNUDkEsl4RDluk85ScRLX6UBR4jYzYetBa9jr7MUXX6r7pjLPoZNaQLPi0R6pJ-go-UDXzI9kokSUrSJwMrKDKTTbRejnBTwHP9-EEv5ln5Gaeo-w8SAMlmqepjekZ5UirnSGh-E4xg8UJNUM50Fjk?key=3SaRaJGuopBvFKeyeymUn1QI\" width=\"165\" height=\"139\"></strong><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>&#8736;</mo><mi>DAE</mi><mo>=</mo><mfrac><mn>1</mn><mn>2</mn></mfrac><mo>&#160;</mo><mo>(</mo><mo>&#8736;</mo><mi>ABC</mi><mo>&#8211;</mo><mo>&#8736;</mo><mi>ACB</mi><mo>)</mo><mo>&#160;</mo></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>=</mo><mfrac><mn>1</mn><mn>2</mn></mfrac><mo>&#160;</mo><mo>(</mo><mn>58</mn><mo>&#176;</mo><mo>&#8211;</mo><mn>34</mn><mo>&#176;</mo><mo>)</mo><mo>&#160;</mo></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>=</mo><mfrac><mn>1</mn><mn>2</mn></mfrac><mo>&#215;</mo><mn>24</mn><mo>&#176;</mo><mo>=</mo><mn>12</mn><mo>&#176;</mo></math></p>",
+                    solution_hi: "<p>20.(a)<span style=\"font-family: Baloo;\">प्रश्न के अनुसार,</span><br><strong id=\"docs-internal-guid-ab577835-7fff-47a2-0f6f-7128daf3cb31\"><img src=\"https://lh7-rt.googleusercontent.com/docsz/AD_4nXepYiNUDkEsl4RDluk85ScRLX6UBR4jYzYetBa9jr7MUXX6r7pjLPoZNaQLPi0R6pJ-go-UDXzI9kokSUrSJwMrKDKTTbRejnBTwHP9-EEv5ln5Gaeo-w8SAMlmqepjekZ5UirnSGh-E4xg8UJNUM50Fjk?key=3SaRaJGuopBvFKeyeymUn1QI\" width=\"165\" height=\"139\"></strong><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>&#8736;</mo><mi>DAE</mi><mo>=</mo><mfrac><mn>1</mn><mn>2</mn></mfrac><mo>&#160;</mo><mo>(</mo><mo>&#8736;</mo><mi>ABC</mi><mo>&#8211;</mo><mo>&#8736;</mo><mi>ACB</mi><mo>)</mo><mo>&#160;</mo></math><br><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mo>=</mo><mo>&#160;</mo><mfrac><mn>1</mn><mn>2</mn></mfrac><mo>&#160;</mo><mo>(</mo><mn>58</mn><mo>&#176;</mo><mo>-</mo><mn>34</mn><mo>&#176;</mo><mo>)</mo><mo>=</mo><mfrac><mn>1</mn><mn>2</mn></mfrac><mo>&#215;</mo><mn>24</mn><mo>&#176;</mo><mo>=</mo><mn>12</mn><mo>&#176;</mo></math></p>",
+                    correct: "a",
+                    pos_marks: 2.0,
+                    neg_marks: 0.5
+                });
+            
+            // Generate question boxes
+            const boxesContainer = document.getElementById('question-boxes');
+            questions.forEach((q, index) => {
+                const box = document.createElement('div');
+                box.className = 'q-box';
+                box.textContent = index + 1;
+                box.onclick = () => showQuestion(index);
+                box.id = `box-${index}`;
+                boxesContainer.appendChild(box);
+            });
+            
+            // Show first question
+            showQuestion(0);
+            updateProgress();
+        }
+        
+        // Show a specific question
+        
+        function formatContent(text) {
+            if (!text) return '';
+            return text.replace(/<img/g, '<img style="max-width:100%;height:auto;"');
+        }
+        
+        function showQuestion(index) {
+            if (index < 0 || index >= questions.length) return;
+            
+            currentQuestion = index;
+            const question = questions[index];
+            
+            // Update question counter
+            document.getElementById('question-counter').textContent = `Question ${index + 1} of ${questions.length}`;
+            
+            // Update question boxes
+            document.querySelectorAll('.q-box').forEach(box => box.classList.remove('current'));
+            document.getElementById(`box-${index}`).classList.add('current');
+            
+            // Generate question HTML
+            let html = `
+                <div class="question-card">
+                    <div class="question-text">
+                        <div class="en">${formatContent(question.question_en)}</div>
+                        <div class="hi" style="display:none">${formatContent(question.question_hi)} </div>
+                    </div>
+                    <div class="options" id="options-container">`;
+            
+            // Add options
+            ['a', 'b', 'c', 'd'].forEach((opt, i) => {
+                let optionClass = '';
+                let isCorrectAnswer = opt === question.correct;
+                let isUserAnswer = answers[question.id] === opt;
+                
+                // When reviewing, add appropriate classes
+                if (submitted) {
+                    if (isCorrectAnswer) {
+                        optionClass += ' correct-answer';
+                    } else if (isUserAnswer && !isCorrectAnswer) {
+                        optionClass += ' incorrect';
+                    }
+                }
+                
+                html += `
+                    <div class="option-item">
+                        <input class="option-input" type="radio" name="q${index}" 
+                            id="opt-${index}-${opt}" value="${opt}" 
+                            ${isUserAnswer ? 'checked' : ''}
+                            onclick="selectAnswer('${question.id}', '${opt}')">
+                       <label class="option-label${optionClass}" for="opt-${index}-${opt}">
+                            <div class="en">${question.options_en[i]}</div>
+                            <div class="hi" style="display:none">${question.options_hi[i]}</div>
+                        </label>
+                    </div>`;
+            });
+            
+            // Add solution if submitted
+            if (submitted) {
+                const isCorrect = answers[question.id] === question.correct;
+                const resultText = answers[question.id] ? (isCorrect ? 'Correct!' : 'Incorrect!') : 'Not attempted';
+                
+                html += `
+                    <div class="solution-container">
+                        <div class="solution-title">${resultText}</div>
+                        <div class="solution-text">
+                            <div class="en">${question.solution_en}</div>
+                            <div class="hi" style="display:none">${question.solution_hi}</div>
+                        </div>
+                    </div>`;
+            }
+            
+            html += `</div></div>`;
+            
+            document.getElementById('questions-container').innerHTML = html;
+            
+            // Apply language settings
+            applyLanguage();
+            
+            // If in mobile view, close the menu
+            if (window.innerWidth < 992) {
+                toggleNav(false);
+            }
+            
+            // Add review mode class if submitted
+            if (submitted) {
+                document.getElementById('options-container').classList.add('review-mode');
+            }
+        }
+        
+        // Apply current language
+        function applyLanguage() {
+            document.querySelectorAll(`.${currentLang}`).forEach(el => el.style.display = 'block');
+            document.querySelectorAll(`.${currentLang === 'en' ? 'hi' : 'en'}`).forEach(el => el.style.display = 'none');
+            
+            // Update language button text
+            document.getElementById('lang-text').textContent = currentLang === 'en' ? 'Hi' : 'En';
+        }
+        
+        // Select an answer
+        function selectAnswer(qId, option) {
+            if (submitted) return;
+            
+            answers[qId] = option;
+            updateProgress();
+            
+            // Mark question as attempted in the navigation
+            const index = questions.findIndex(q => q.id === qId);
+            if (index >= 0) {
+                const box = document.getElementById(`box-${index}`);
+                box.classList.add('attempted');
+                box.classList.remove('unattempted');
+            }
+        }
+        
+        // Navigate to previous/next question
+        function prevQuestion() { 
+            if (currentQuestion > 0) showQuestion(currentQuestion - 1); 
+        }
+        
+        function nextQuestion() { 
+            if (currentQuestion < questions.length - 1) showQuestion(currentQuestion + 1); 
+        }
+        
+        // Switch section
+        function switchSection(sectionId) {
+            if (sectionId === 'all') {
+                showQuestion(0);
+                return;
+            }
+            
+            const section = sections[sectionId];
+            if (section) showQuestion(section.start);
+        }
+        
+        // Toggle language
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'hi' : 'en';
+            applyLanguage();
+        }
+        
+        // Toggle navigation sidebar
+        function toggleNav(show) {
+            const nav = document.getElementById('question-nav');
+            const overlay = document.getElementById('nav-overlay');
+            
+            if (show === undefined) {
+                show = !nav.classList.contains('show');
+            }
+            
+            if (show) {
+                nav.classList.add('show');
+                overlay.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            } else {
+                nav.classList.remove('show');
+                overlay.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+        }
+        
+        // Update progress
+        function updateProgress() {
+            const attempted = Object.keys(answers).length;
+            document.getElementById('attempted-count').textContent = attempted;
+        }
+        
+        // Start timer
+        function startTimer() {
+            const timerDisplay = document.getElementById('timer-display');
+            let timeLeft = totalTime;
+            
+            const timerInterval = setInterval(() => {
+                if (timeLeft <= 0 || submitted) {
+                    clearInterval(timerInterval);
+                    if (!submitted) submitTest();
+                    return;
+                }
+                
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                timeLeft--;
+            }, 1000);
+        }
+        
+        // Confirm before submitting
+        function confirmSubmit() {
+            if (submitted) return;
+            
+            const attempted = Object.keys(answers).length;
+            const remaining = questions.length - attempted;
+            
+            // Create a more modern confirmation dialog
+            const confirmHtml = `
+                <div style="text-align: center; padding: 20px;">
+                    <h4 style="margin-bottom: 16px; color: var(--dark);">Confirm Submission</h4>
+                    <p style="margin-bottom: 24px; color: var(--gray);">
+                        You have attempted ${attempted} of ${questions.length} questions.<br>
+                        ${remaining} questions are unattempted.
+                    </p>
+                    <div style="display: flex; justify-content: center; gap: 12px;">
+                        <button onclick="this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; border: 1px solid var(--light-gray); background: white; border-radius: 8px; cursor: pointer;">
+                            Cancel
+                        </button>
+                        <button onclick="submitTest(); this.closest('.modal').querySelector('.cancel-btn').click()" 
+                            style="padding: 8px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer;">
+                            Submit Test
+                        </button>
+                    </div>
+                </div>`;
+            
+            // Create modal element
+            const modal = document.createElement('div');
+            modal.className = 'results-modal show';
+            modal.innerHTML = `
+                <div class="results-card" style="max-width: 400px;">
+                    <button class="cancel-btn" style="position: absolute; top: 12px; right: 12px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--gray);" onclick="this.closest('.results-modal').remove()">
+                        ×
+                    </button>
+                    ${confirmHtml}
+                </div>`;
+            
+            document.body.appendChild(modal);
+        }
+        
+        // Submit test
+        function submitTest() {
+            if (submitted) return;
+            
+            submitted = true;
+            
+            let score = 0;
+            let correctCount = 0;
+            let incorrectCount = 0;
+            let unattemptedCount = 0;
+            
+            questions.forEach((q, index) => {
+                const userAns = answers[q.id];
+                const box = document.getElementById(`box-${index}`);
+                
+                box.classList.remove('attempted');
+                
+                if (!userAns) {
+                    unattemptedCount++;
+                    box.classList.add('unattempted');
+                } else if (userAns === q.correct) {
+                    correctCount++;
+                    score += q.pos_marks;
+                    box.classList.add('correct');
+                } else {
+                    incorrectCount++;
+                    score -= q.neg_marks;
+                    box.classList.add('incorrect');
+                }
+            });
+            
+            // Update result values
+            document.getElementById('score-value').textContent = score.toFixed(2);
+            document.getElementById('correct-value').textContent = correctCount;
+            document.getElementById('incorrect-value').textContent = incorrectCount;
+            document.getElementById('unattempted-value').textContent = unattemptedCount;
+            
+            // Show the results modal
+            document.getElementById('results-modal').classList.add('show');
+            
+            // Disable submit button
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-check"></i>';
+            submitBtn.style.backgroundColor = 'var(--success)';
+            
+            // Refresh current question view to show solution
+            showQuestion(currentQuestion);
+        }
+        
+        // Review test
+        function reviewTest() {
+            document.getElementById('results-modal').classList.remove('show');
+            showQuestion(0);
+        }
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target === document.getElementById('results-modal')) {
+                document.getElementById('results-modal').classList.remove('show');
+            }
+        });
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') prevQuestion();
+            if (e.key === 'ArrowRight') nextQuestion();
+        });
+    </script>
+</body>
+</html>
