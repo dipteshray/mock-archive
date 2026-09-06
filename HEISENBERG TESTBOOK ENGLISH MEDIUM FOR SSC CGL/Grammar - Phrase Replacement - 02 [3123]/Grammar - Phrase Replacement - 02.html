@@ -1,0 +1,1483 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<script>MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']]},options:{skipHtmlTags:['script','noscript','style','textarea','pre']}};</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<title>Grammar - Phrase Replacement - 02</title>
+<style>
+/* ── RESET ── */
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Noto Sans',sans-serif;
+  background:#f5f5f5;color:#1a1a1a;font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+
+/* ════════════════════════════════════
+   ATTEMPT MODE — BLACK HEADER (exact)
+   ════════════════════════════════════ */
+#hdr-attempt{
+  display:flex;align-items:center;justify-content:space-between;
+  background:#1a1a2e;color:#fff;
+  height:56px;padding:0 14px;
+  position:sticky;top:0;z-index:600;
+  box-shadow:0 2px 6px rgba(0,0,0,.4)
+}
+.hdr-left{display:flex;align-items:center;gap:10px}
+.hdr-pause{
+  width:34px;height:34px;border-radius:50%;
+  border:2px solid #fff;background:transparent;
+  color:#fff;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;flex-shrink:0
+}
+.hdr-timer{font-size:20px;font-weight:700;letter-spacing:.5px;color:#fff}
+.hdr-testname{font-size:13px;color:#ccc;max-width:200px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hdr-hamburger{
+  width:34px;height:34px;background:transparent;
+  border:none;color:#fff;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px
+}
+.hdr-hamburger span{width:22px;height:2px;background:#fff;border-radius:2px;display:block}
+
+/* ════════════════════════════════════
+   VIEW MODE — WHITE HEADER
+   ════════════════════════════════════ */
+#hdr-view{
+  display:none;
+  align-items:center;
+  background:#1a1a2e;color:#fff;
+  height:56px;padding:0 14px;gap:12px;
+  position:sticky;top:0;z-index:600;
+  box-shadow:0 2px 6px rgba(0,0,0,.3)
+}
+.hdr-back{background:transparent;border:none;color:#fff;
+  font-size:22px;cursor:pointer;padding:4px 6px}
+.hdr-vtitle{font-size:15px;font-weight:600;color:#fff;flex:1;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hdr-lang-icon{
+  width:34px;height:34px;border-radius:4px;
+  background:rgba(255,255,255,.15);
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;color:#fff;cursor:pointer
+}
+.hdr-hamburger2{
+  width:34px;height:34px;background:transparent;
+  border:none;color:#fff;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px
+}
+.hdr-hamburger2 span{width:22px;height:2px;background:#fff;border-radius:2px;display:block}
+
+/* ════════════════════════════════════
+   SECTION TABS (both modes)
+   ════════════════════════════════════ */
+.sec-tabs{
+  background:#fff;
+  border-bottom:1px solid #e0e0e0;
+  display:flex;overflow-x:auto;
+  position:sticky;top:56px;z-index:500;
+  scrollbar-width:none
+}
+.sec-tabs::-webkit-scrollbar{display:none}
+.stab{
+  padding:0 18px;height:48px;
+  border:none;background:transparent;
+  font-size:14px;font-weight:500;color:#666;
+  cursor:pointer;white-space:nowrap;
+  border-bottom:3px solid transparent;
+  margin-bottom:-1px;transition:color .15s
+}
+.stab.active{color:#1a1a2e;border-bottom-color:#1a1a2e;font-weight:700}
+.stab:hover{color:#1a1a2e}
+
+/* ════════════════════════════════════
+   ATTEMPT MODE LAYOUT — single column
+   ════════════════════════════════════ */
+#mode-attempt{display:block}
+#mode-view{display:none}
+.attempt-body{max-width:780px;margin:0 auto;padding:12px 12px 80px}
+
+/* ── per-question header row (Q number + time + marks + icons) ── */
+.qrow-hdr{
+  display:flex;align-items:center;gap:8px;
+  padding:10px 0 6px;
+  border-bottom:1px solid #ebebeb;
+  margin-bottom:0
+}
+.qnum-circle{
+  width:32px;height:32px;border-radius:50%;
+  background:#bbb;color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:700;flex-shrink:0;
+  transition:background .2s
+}
+.qnum-circle.attempted{background:#2196f3}
+.qnum-circle.marked{background:#ff9800}
+.qnum-circle.correct{background:#4caf50}
+.qnum-circle.wrong{background:#f44336}
+.qtimer{display:flex;align-items:center;gap:4px;font-size:12px;color:#888}
+.qtimer svg{opacity:.6}
+.badge-pos{
+  background:#e8f5e9;color:#388e3c;
+  font-size:12px;font-weight:700;
+  padding:2px 8px;border-radius:4px;border:1px solid #c8e6c9
+}
+.badge-neg{
+  background:#fce4ec;color:#c62828;
+  font-size:12px;font-weight:700;
+  padding:2px 8px;border-radius:4px;border:1px solid #f8bbd0
+}
+.qicons{margin-left:auto;display:flex;align-items:center;gap:14px}
+.qicon-btn{background:none;border:none;cursor:pointer;color:#aaa;
+  display:flex;align-items:center;font-size:18px;padding:2px}
+.qicon-btn.star-on{color:#f59e0b}
+.qicon-btn.bookmark-on{color:#2196f3}
+
+/* ── question card (attempt) ── */
+.qcard-attempt{
+  background:#fff;
+  border-radius:0;
+  margin-bottom:0;
+  padding-bottom:14px;
+  border-bottom:6px solid #f5f5f5;
+  display:none
+}
+.qcard-attempt.active-card{
+  display:block
+}
+.qcard-body-a{padding:14px 0 0}
+.qtext{font-size:15px;line-height:1.9;word-break:break-word;color:#1a1a1a}
+.qtext img{max-width:100%;height:auto;display:block;margin:8px 0;border-radius:4px}
+.passage{
+  background:#fff8e1;border-left:3px solid #fbc02d;
+  padding:10px 12px;margin-bottom:12px;
+  border-radius:0 4px 4px 0;font-size:14px;line-height:1.8
+}
+.passage img{max-width:100%;height:auto}
+
+/* ── options (attempt) ── */
+.opts-wrap{margin-top:14px;display:flex;flex-direction:column;gap:0}
+.opt-a{
+  display:flex;align-items:center;
+  padding:13px 14px;
+  border:1px solid #e0e0e0;
+  border-radius:6px;
+  margin-bottom:8px;
+  cursor:pointer;
+  background:#fff;
+  transition:border-color .12s,background .12s;
+  position:relative
+}
+.opt-a:hover{border-color:#aaa}
+.opt-num{
+  font-size:13px;color:#888;font-style:italic;
+  margin-right:12px;min-width:18px;flex-shrink:0
+}
+.opt-body-a{flex:1;font-size:15px;line-height:1.7;word-break:break-word}
+.opt-body-a img{max-width:100%;height:auto}
+
+/* selected (blue border + light blue bg) */
+.opt-a.sel{
+  border-color:#2196f3;
+  background:#e3f2fd
+}
+/* after submit — correct */
+.opt-a.reveal-correct{
+  border-color:#4caf50;background:#e8f5e9
+}
+/* after submit — user wrong */
+.opt-a.reveal-wrong{
+  border-color:#f44336;background:#fce4ec
+}
+.opt-a .opt-icon{
+  margin-left:10px;flex-shrink:0;
+  font-size:18px
+}
+
+/* ── bottom 3-button bar (attempt) ── */
+.bottom-bar{
+  position:fixed;bottom:0;left:0;right:0;
+  background:#fff;
+  border-top:1px solid #e0e0e0;
+  display:flex;align-items:center;gap:0;
+  padding:8px 12px;z-index:550;
+  box-shadow:0 -2px 8px rgba(0,0,0,.07)
+}
+.btn-mark-next{
+  flex:1;padding:11px 4px;
+  border:1.5px solid #888;border-radius:6px;
+  background:#fff;color:#333;
+  font-size:13px;font-weight:600;cursor:pointer;
+  margin-right:8px
+}
+.btn-clear{
+  flex:1;padding:11px 4px;
+  border:1.5px solid #888;border-radius:6px;
+  background:#fff;color:#333;
+  font-size:13px;font-weight:600;cursor:pointer;
+  margin-right:8px
+}
+.btn-save-next{
+  flex:1;padding:11px 4px;
+  border:none;border-radius:6px;
+  background:#4a6cf7;color:#fff;
+  font-size:13px;font-weight:600;cursor:pointer
+}
+
+/* ════════════════════════════════════
+   SIDE PANEL (hamburger drawer)
+   ════════════════════════════════════ */
+#side-overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,.45);z-index:700
+}
+#side-panel{
+  position:fixed;top:0;right:0;bottom:0;width:320px;
+  background:#fff;z-index:800;
+  transform:translateX(100%);transition:transform .25s ease;
+  display:flex;flex-direction:column;overflow:hidden
+}
+#side-panel.open{transform:translateX(0)}
+.sp-tabs{
+  display:flex;border-bottom:2px solid #f0f0f0;flex-shrink:0
+}
+.sp-tab{
+  flex:1;padding:14px;border:none;background:transparent;
+  font-size:14px;font-weight:600;cursor:pointer;color:#888;
+  border-bottom:3px solid transparent;margin-bottom:-2px
+}
+.sp-tab.active{color:#1a1a2e;border-bottom-color:#1a1a2e}
+.sp-body{flex:1;overflow-y:auto;padding:0}
+.sp-body::-webkit-scrollbar{width:4px}
+.sp-body::-webkit-scrollbar-thumb{background:#ddd}
+.sp-instructions{
+  display:flex;align-items:center;gap:8px;
+  padding:12px 16px;border-bottom:1px solid #f0f0f0;
+  cursor:pointer;font-size:14px;color:#555
+}
+/* legend */
+.sp-legend{
+  display:flex;flex-wrap:wrap;gap:12px;
+  padding:12px 16px;border-bottom:1px solid #f0f0f0
+}
+.leg-item{display:flex;align-items:center;gap:7px;font-size:12px;color:#555}
+.leg-dot{
+  width:20px;height:20px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px
+}
+.leg-star{background:transparent;font-size:18px;color:#f44336}
+.leg-grey{background:#bbb}
+.leg-blue{background:#2196f3}
+.leg-white{background:#fff;border:1.5px solid #ccc}
+/* section block */
+.sp-sec-block{border-bottom:1px solid #f0f0f0}
+.sp-sec-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 16px;cursor:pointer;font-weight:700;font-size:14px
+}
+.sp-sec-stats{
+  display:flex;align-items:center;gap:12px;
+  padding:4px 16px 10px;font-size:13px
+}
+.sp-stat{display:flex;align-items:center;gap:5px}
+.sp-stat .dot{width:14px;height:14px;border-radius:50%;flex-shrink:0}
+.sp-pal{
+  display:flex;flex-wrap:wrap;gap:8px;
+  padding:4px 16px 14px
+}
+.pal-btn{
+  width:38px;height:38px;border-radius:50%;
+  border:1.5px solid #ccc;background:#fff;
+  font-size:13px;font-weight:600;color:#555;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:all .15s;flex-shrink:0
+}
+.pal-btn:hover{border-color:#2196f3;color:#2196f3}
+.pal-btn.p-attempted{background:#2196f3;border-color:#2196f3;color:#fff}
+.pal-btn.p-marked{background:#ff9800;border-color:#ff9800;color:#fff}
+.pal-btn.p-correct{background:#4caf50;border-color:#4caf50;color:#fff}
+.pal-btn.p-wrong{background:#f44336;border-color:#f44336;color:#fff}
+.pal-btn.p-current{box-shadow:0 0 0 3px rgba(33,150,243,.4)}
+/* submit btn */
+.sp-submit{
+  flex-shrink:0;padding:14px 16px;
+  border-top:1px solid #e0e0e0
+}
+.sp-submit-btn{
+  width:100%;padding:13px;
+  background:#78909c;color:#fff;
+  border:none;border-radius:6px;
+  font-size:15px;font-weight:700;letter-spacing:.5px;
+  cursor:pointer;text-transform:uppercase
+}
+.sp-submit-btn:hover{background:#546e7a}
+
+/* submit confirm modal */
+#submit-modal{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,.5);z-index:900;
+  align-items:center;justify-content:center
+}
+#submit-modal.show{display:flex}
+.modal-box{
+  background:#fff;border-radius:12px;
+  padding:24px;width:320px;max-width:90vw
+}
+.modal-row{display:flex;justify-content:space-between;
+  padding:10px 0;border-bottom:1px solid #f0f0f0;font-size:14px}
+.modal-row:last-of-type{border-bottom:none}
+.modal-label{color:#555}
+.modal-val{font-weight:700;color:#333}
+.modal-timer{color:#2196f3;font-weight:700}
+.modal-q{font-weight:700;font-size:15px;margin:16px 0 14px;text-align:center}
+.modal-btns{display:flex;gap:10px;margin-top:4px}
+.modal-yes{
+  flex:1;padding:12px;border:none;border-radius:6px;
+  background:#4a6cf7;color:#fff;font-size:14px;font-weight:700;cursor:pointer
+}
+.modal-no{
+  flex:1;padding:12px;border:none;border-radius:6px;
+  background:#90a4ae;color:#fff;font-size:14px;font-weight:700;cursor:pointer
+}
+
+/* ════════════════════════════════════
+   VIEW / SOLUTIONS MODE
+   ════════════════════════════════════ */
+.view-body{padding:0}
+/* top Q-number filter row */
+.sol-qrow{
+  background:#fff;
+  border-bottom:1px solid #e0e0e0;
+  display:flex;overflow-x:auto;gap:8px;
+  padding:10px 12px;
+  position:sticky;top:104px;z-index:490;
+  scrollbar-width:none
+}
+.sol-qrow::-webkit-scrollbar{display:none}
+.sol-qbtn{
+  width:34px;height:34px;border-radius:50%;flex-shrink:0;
+  border:1.5px solid #ccc;background:#f5f5f5;
+  font-size:12px;font-weight:600;color:#555;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .15s
+}
+.sol-qbtn.sq-correct{background:#4caf50;border-color:#4caf50;color:#fff}
+.sol-qbtn.sq-wrong{background:#f44336;border-color:#f44336;color:#fff}
+.sol-qbtn.sq-skip{background:#bbb;border-color:#bbb;color:#fff}
+/* solution question card */
+.sol-card{
+  background:#fff;
+  border-bottom:6px solid #f5f5f5
+}
+.sol-card-hdr{
+  display:flex;align-items:center;gap:8px;
+  padding:12px 14px 8px;border-bottom:1px solid #f0f0f0
+}
+.sol-card-body{padding:12px 14px}
+/* option in solution view */
+.opt-sol{
+  display:flex;align-items:center;
+  padding:12px 14px;
+  border:1px solid #e8e8e8;border-radius:6px;
+  margin-bottom:8px;background:#fff;position:relative
+}
+.opt-sol.sol-correct{
+  border-color:#4caf50;background:#f1f8e9
+}
+.opt-sol.sol-wrong-sel{
+  border-color:#f44336;background:#fce4ec
+}
+.your-answer-badge{
+  display:inline-block;
+  background:#2196f3;color:#fff;
+  font-size:10px;font-weight:700;letter-spacing:.3px;
+  padding:3px 8px;border-radius:10px;
+  margin-left:8px;text-transform:uppercase;flex-shrink:0
+}
+.status-badge{
+  display:inline-block;font-size:12px;font-weight:700;
+  padding:3px 10px;border-radius:4px;border:1px solid transparent;
+  margin-right:6px
+}
+.status-skip{background:#eceff1;color:#546e7a;border-color:#cfd8dc}
+.status-ok{background:#e8f5e9;color:#388e3c;border-color:#c8e6c9}
+.status-err{background:#fce4ec;color:#c62828;border-color:#f8bbd0}
+.opt-sol-num{font-size:13px;color:#888;font-style:italic;
+  margin-right:12px;min-width:18px;flex-shrink:0}
+.opt-sol-body{flex:1;font-size:15px;line-height:1.7;word-break:break-word}
+.opt-sol-body img{max-width:100%;height:auto}
+.opt-sol-icon{
+  margin-left:10px;flex-shrink:0;
+  display:flex;align-items:center;gap:4px
+}
+/* "Correct Answers Is: X" bar */
+.correct-bar{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:10px 14px;font-size:13px;font-weight:600;color:#333;
+  border-top:1px solid #e8e8e8
+}
+.correct-pct{color:#888;font-weight:400}
+/* SOLUTION section */
+.solution-section{padding:12px 14px 4px}
+.sol-heading{
+  font-size:13px;font-weight:700;
+  letter-spacing:.5px;color:#333;
+  text-transform:uppercase;margin-bottom:10px
+}
+.sol-text{font-size:14px;line-height:1.9;word-break:break-word}
+.sol-text img{max-width:100%;height:auto;display:block;margin:8px 0}
+/* bottom bar solutions */
+.sol-bottom-bar{
+  position:fixed;bottom:0;left:0;right:0;
+  background:#fff;border-top:1px solid #e0e0e0;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 14px;z-index:550;gap:10px;
+  box-shadow:0 -2px 6px rgba(0,0,0,.07)
+}
+.sol-reattempt{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:500;color:#333}
+.toggle-wrap{position:relative;width:44px;height:24px;cursor:pointer}
+.toggle-track{
+  width:44px;height:24px;border-radius:12px;
+  background:#4a6cf7;transition:background .2s
+}
+.toggle-track.off{background:#ccc}
+.toggle-thumb{
+  position:absolute;top:3px;left:3px;
+  width:18px;height:18px;border-radius:50%;
+  background:#fff;transition:left .2s;
+  box-shadow:0 1px 3px rgba(0,0,0,.3)
+}
+.toggle-track:not(.off) + .toggle-thumb,
+.toggle-thumb.on{left:23px}
+.sol-nav{display:flex;gap:8px}
+.sol-nav-btn{
+  width:42px;height:42px;border-radius:50%;
+  background:#4a6cf7;border:none;color:#fff;
+  font-size:18px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center
+}
+.sol-nav-btn:disabled{background:#ccc;cursor:default}
+
+/* ── section filter in solutions header ── */
+.sol-sec-dropdown{
+  font-size:13px;color:#4a6cf7;font-weight:600;
+  display:flex;align-items:center;gap:4px;cursor:pointer;
+  padding:4px 0
+}
+
+/* ════════════════════════════════════
+   ANALYSIS / RESULTS PAGE
+   ════════════════════════════════════ */
+#mode-analysis{display:none}
+.analysis-body{max-width:600px;margin:0 auto;padding:16px 14px 80px}
+.analysis-header{
+  background:linear-gradient(135deg,#1a1a2e 0%,#16213e 100%);
+  color:#fff;border-radius:12px;padding:20px;margin-bottom:16px;
+  text-align:center
+}
+.analysis-title{font-size:18px;font-weight:700;margin-bottom:4px}
+.analysis-subtitle{font-size:13px;color:#aaa;margin-bottom:16px}
+.analysis-score-big{font-size:42px;font-weight:800;color:#4a6cf7}
+.analysis-score-max{font-size:16px;color:#aaa;font-weight:400}
+.analysis-stats-row{
+  display:flex;justify-content:space-around;
+  margin-top:18px;padding-top:16px;
+  border-top:1px solid rgba(255,255,255,.15)
+}
+.analysis-stat{text-align:center}
+.analysis-stat-val{font-size:22px;font-weight:700}
+.analysis-stat-label{font-size:11px;color:#aaa;margin-top:2px}
+.analysis-card{
+  background:#fff;border-radius:10px;
+  padding:16px;margin-bottom:12px;
+  box-shadow:0 1px 4px rgba(0,0,0,.08)
+}
+.analysis-card-title{font-size:14px;font-weight:700;color:#333;margin-bottom:12px}
+.rank-row{display:flex;justify-content:space-around;gap:10px}
+.rank-box{flex:1;text-align:center;background:#f4f6ff;border:1px solid #e2e8ff;
+  border-radius:10px;padding:12px 6px}
+.rank-val{font-size:22px;font-weight:800;color:#4a6cf7}
+.rank-label{font-size:11px;color:#888;margin-top:3px}
+.rank-meta{font-size:11.5px;color:#999;margin-top:10px;line-height:1.5}
+.analysis-bar-row{
+  display:flex;align-items:center;gap:10px;margin-bottom:10px
+}
+.analysis-bar-label{font-size:13px;color:#555;min-width:80px}
+.analysis-bar-track{flex:1;height:8px;background:#eee;border-radius:4px;overflow:hidden}
+.analysis-bar-fill{height:100%;border-radius:4px;transition:width .5s}
+.analysis-bar-val{font-size:13px;font-weight:600;min-width:30px;text-align:right}
+.analysis-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.analysis-grid-item{
+  background:#f8f9fa;border-radius:8px;padding:12px;text-align:center
+}
+.analysis-grid-val{font-size:20px;font-weight:700}
+.analysis-grid-label{font-size:11px;color:#888;margin-top:2px}
+.analysis-grid-item.ag-correct .analysis-grid-val{color:#4caf50}
+.analysis-grid-item.ag-wrong .analysis-grid-val{color:#f44336}
+.analysis-grid-item.ag-skip .analysis-grid-val{color:#ff9800}
+.analysis-grid-item.ag-total .analysis-grid-val{color:#2196f3}
+.btn-view-solutions{
+  width:100%;padding:14px;border:none;border-radius:8px;
+  background:#4a6cf7;color:#fff;font-size:15px;font-weight:700;
+  cursor:pointer;margin-top:16px;letter-spacing:.3px
+}
+.btn-view-solutions:hover{background:#3d5ce0}
+
+/* section filter circles (solutions view) */
+.sol-sec-circles{
+  display:flex;gap:6px;align-items:center;padding:2px 0
+}
+.sol-sec-circle{
+  width:28px;height:28px;border-radius:50%;
+  border:2px solid #ccc;background:transparent;
+  font-size:11px;font-weight:700;color:#aaa;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:all .15s
+}
+.sol-sec-circle.sec-active{border-color:#4a6cf7;color:#4a6cf7;background:rgba(74,108,247,.1)}
+.sol-sec-circle.sec-all{font-size:9px;min-width:32px;border-radius:12px;padding:0 6px}
+
+/* offline notice */
+.offline-notice{
+  background:#fff3cd;color:#856404;border-bottom:1px solid #ffc107;
+  padding:6px 14px;font-size:12px;text-align:center;
+  display:none
+}
+
+/* ── responsive ── */
+@media(min-width:780px){
+  .attempt-body{padding:12px 20px 80px}
+  .bottom-bar{padding:8px 20px}
+}
+</style>
+</head>
+<body>
+
+<div class="offline-notice" id="offline-notice">
+  ⚠ Offline Mode — Images won't load. Everything else works normally.
+</div>
+
+<!-- ════════ ATTEMPT MODE HEADER ════════ -->
+<header id="hdr-attempt">
+  <div class="hdr-left">
+    <button class="hdr-pause" id="btn-pause" onclick="togglePause()">⏸</button>
+    <div>
+      <div class="hdr-timer" id="hdr-timer">30:00:00</div>
+      <div class="hdr-testname">Grammar - Phrase Replacement - 02</div>
+    </div>
+  </div>
+  <button class="hdr-hamburger" onclick="openPanel()">
+    <span></span><span></span><span></span>
+  </button>
+</header>
+
+<!-- ════════ VIEW MODE HEADER ════════ -->
+<header id="hdr-view">
+  <button class="hdr-back" onclick="switchMode('attempt')">‹</button>
+  <div>
+    <div class="hdr-vtitle">Grammar - Phrase Replacement - 02</div>
+    <div class="sol-sec-circles" id="sol-sec-circles"></div>
+  </div>
+  <div class="hdr-lang-icon">E अ</div>
+  <button class="hdr-hamburger2" onclick="openPanel()">
+    <span></span><span></span><span></span>
+  </button>
+</header>
+
+<!-- ════════ SECTION TABS ════════ -->
+<nav class="sec-tabs" id="sec-tabs"></nav>
+
+<!-- ════════ ATTEMPT MODE ════════ -->
+<div id="mode-attempt">
+  <div class="attempt-body" id="attempt-body"></div>
+</div>
+
+<!-- ════════ VIEW / SOLUTIONS MODE ════════ -->
+<div id="mode-view">
+  <div class="sol-qrow" id="sol-qrow"></div>
+  <div class="view-body" id="view-body"></div>
+</div>
+
+<!-- ════════ ANALYSIS / RESULTS PAGE ════════ -->
+<div id="mode-analysis">
+  <header id="hdr-analysis" style="display:flex;align-items:center;background:#1a1a2e;color:#fff;height:56px;padding:0 14px;gap:12px;box-shadow:0 2px 6px rgba(0,0,0,.3)">
+    <button class="hdr-back" onclick="switchMode('attempt')">&#8249;</button>
+    <div class="hdr-vtitle">Grammar - Phrase Replacement - 02</div>
+  </header>
+  <div class="analysis-body">
+    <div class="analysis-header">
+      <div class="analysis-title">Grammar - Phrase Replacement - 02</div>
+      <div class="analysis-subtitle">QUICK SUMMARY</div>
+      <div class="analysis-score-big"><span id="ana-score">0</span><span class="analysis-score-max"> / <span id="ana-max">0</span></span></div>
+      <div class="analysis-stats-row">
+        <div class="analysis-stat">
+          <div class="analysis-stat-val" id="ana-accuracy">0%</div>
+          <div class="analysis-stat-label">Accuracy</div>
+        </div>
+        <div class="analysis-stat">
+          <div class="analysis-stat-val" id="ana-attempted">0</div>
+          <div class="analysis-stat-label">Qs. Attempted</div>
+        </div>
+        <div class="analysis-stat">
+          <div class="analysis-stat-val" style="color:#4caf50" id="ana-correct-count">0</div>
+          <div class="analysis-stat-label">Correct</div>
+        </div>
+        <div class="analysis-stat">
+          <div class="analysis-stat-val" style="color:#f44336" id="ana-wrong-count">0</div>
+          <div class="analysis-stat-label">Incorrect</div>
+        </div>
+      </div>
+    </div>
+    <!-- Rank / percentile — shown only when Testbook attempt stats are present -->
+    <div class="analysis-card" id="ana-rank-card" style="display:none">
+      <div class="analysis-card-title">Rank &amp; Percentile <span style="font-size:11px;color:#999;font-weight:400">(estimated)</span></div>
+      <div class="rank-row">
+        <div class="rank-box">
+          <div class="rank-val" id="ana-rank">-</div>
+          <div class="rank-label">Est. Rank</div>
+        </div>
+        <div class="rank-box">
+          <div class="rank-val" id="ana-percentile">-</div>
+          <div class="rank-label">Percentile</div>
+        </div>
+        <div class="rank-box">
+          <div class="rank-val" id="ana-attempts">-</div>
+          <div class="rank-label">Total Attempts</div>
+        </div>
+      </div>
+      <div class="rank-meta" id="ana-rank-meta"></div>
+    </div>
+    <div class="analysis-card">
+      <div class="analysis-card-title">Question Analysis</div>
+      <div class="analysis-grid" id="ana-grid"></div>
+    </div>
+    <div class="analysis-card">
+      <div class="analysis-card-title">Section-wise Performance</div>
+      <div id="ana-sections"></div>
+    </div>
+    <button class="btn-view-solutions" onclick="switchMode('view')">Solutions &#8594;</button>
+  </div>
+</div>
+
+<!-- ════════ ATTEMPT BOTTOM BAR ════════ -->
+<div class="bottom-bar" id="attempt-bar">
+  <button class="btn-mark-next" onclick="prevQ()" id="btn-prevq" style="flex:0.6">&#8592; Prev</button>
+  <button class="btn-mark-next" onclick="markAndNext()">Mark &amp; Next</button>
+  <button class="btn-clear" onclick="clearCurrent()">Clear</button>
+  <button class="btn-save-next" onclick="saveAndNext()">Save &amp; Next</button>
+</div>
+
+<!-- ════════ SOLUTIONS BOTTOM BAR ════════ -->
+<div class="sol-bottom-bar" id="sol-bar" style="display:none">
+  <div class="sol-reattempt">
+    <div class="toggle-wrap" onclick="toggleReattempt()">
+      <div class="toggle-track" id="rt-track"></div>
+      <div class="toggle-thumb" id="rt-thumb"></div>
+    </div>
+    Reattempt Mode
+  </div>
+  <div class="sol-nav">
+    <button class="sol-nav-btn" id="btn-prev" onclick="solNav(-1)">←</button>
+    <button class="sol-nav-btn" id="btn-next" onclick="solNav(1)">→</button>
+  </div>
+</div>
+
+<!-- ════════ SIDE PANEL ════════ -->
+<div id="side-overlay" onclick="closePanel()"></div>
+<div id="side-panel">
+  <div class="sp-tabs">
+    <button class="sp-tab active" onclick="spTab(0)">Grid View</button>
+    <button class="sp-tab" onclick="spTab(1)">List View</button>
+  </div>
+  <div class="sp-body" id="sp-body">
+    <div class="sp-instructions">
+      <span style="font-size:18px;color:#555">ℹ</span>
+      <span>View Instructions</span>
+    </div>
+    <div class="sp-legend">
+      <div class="leg-item"><span class="leg-dot leg-star">★</span> Marked for Review</div>
+      <div class="leg-item"><div class="leg-dot leg-grey"></div> Unattempted</div>
+      <div class="leg-item"><div class="leg-dot leg-blue"></div> Attempted</div>
+      <div class="leg-item"><div class="leg-dot leg-white"></div> Unseen</div>
+    </div>
+    <div id="sp-sections"></div>
+  </div>
+  <div class="sp-submit">
+    <button class="sp-submit-btn" onclick="openSubmitModal()">Submit Test</button>
+  </div>
+</div>
+
+<!-- ════════ SUBMIT CONFIRM MODAL ════════ -->
+<div id="submit-modal">
+  <div class="modal-box">
+    <div class="modal-row">
+      <span class="modal-label">Time Left</span>
+      <span class="modal-val modal-timer" id="modal-timer">30:00:00</span>
+    </div>
+    <div class="modal-row">
+      <span class="modal-label">Attempted</span>
+      <span class="modal-val" id="modal-attempted">0</span>
+    </div>
+    <div class="modal-row">
+      <span class="modal-label">Unattempted</span>
+      <span class="modal-val" id="modal-unattempted">50</span>
+    </div>
+    <div class="modal-row">
+      <span class="modal-label">Marked</span>
+      <span class="modal-val" id="modal-marked">0</span>
+    </div>
+    <div class="modal-q">Are you sure you want to submit the test?</div>
+    <div class="modal-btns">
+      <button class="modal-yes" onclick="confirmSubmit()">Yes</button>
+      <button class="modal-no" onclick="closeSubmitModal()">No</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════
+var Q_MAP      = {"1": {"correct": 2, "pos": 1, "neg": 0, "si": 0}, "2": {"correct": 0, "pos": 1, "neg": 0, "si": 0}, "3": {"correct": 2, "pos": 1, "neg": 0, "si": 0}, "4": {"correct": 2, "pos": 1, "neg": 0, "si": 0}, "5": {"correct": 2, "pos": 1, "neg": 0, "si": 0}, "6": {"correct": 3, "pos": 1, "neg": 0, "si": 0}, "7": {"correct": 0, "pos": 1, "neg": 0, "si": 0}, "8": {"correct": 3, "pos": 1, "neg": 0, "si": 0}, "9": {"correct": 3, "pos": 1, "neg": 0, "si": 0}, "10": {"correct": 2, "pos": 1, "neg": 0, "si": 0}, "11": {"correct": 3, "pos": 1, "neg": 0, "si": 0}, "12": {"correct": 2, "pos": 1, "neg": 0, "si": 0}, "13": {"correct": 3, "pos": 1, "neg": 0, "si": 0}, "14": {"correct": 1, "pos": 1, "neg": 0, "si": 0}, "15": {"correct": 3, "pos": 1, "neg": 0, "si": 0}, "16": {"correct": 2, "pos": 1, "neg": 0, "si": 0}, "17": {"correct": 3, "pos": 1, "neg": 0, "si": 0}, "18": {"correct": 2, "pos": 1, "neg": 0, "si": 0}, "19": {"correct": 3, "pos": 1, "neg": 0, "si": 0}, "20": {"correct": 1, "pos": 1, "neg": 0, "si": 0}, "21": {"correct": 3, "pos": 1, "neg": 0, "si": 0}, "22": {"correct": 2, "pos": 1, "neg": 0, "si": 0}, "23": {"correct": 3, "pos": 1, "neg": 0, "si": 0}, "24": {"correct": 3, "pos": 1, "neg": 0, "si": 0}, "25": {"correct": 1, "pos": 1, "neg": 0, "si": 0}, "26": {"correct": 2, "pos": 1, "neg": 0, "si": 0}, "27": {"correct": 2, "pos": 1, "neg": 0, "si": 0}, "28": {"correct": 0, "pos": 1, "neg": 0, "si": 0}, "29": {"correct": 3, "pos": 1, "neg": 0, "si": 0}, "30": {"correct": 0, "pos": 1, "neg": 0, "si": 0}, "31": {"correct": 2, "pos": 1, "neg": 0, "si": 0}, "32": {"correct": 0, "pos": 1, "neg": 0, "si": 0}, "33": {"correct": 1, "pos": 1, "neg": 0, "si": 0}, "34": {"correct": 0, "pos": 1, "neg": 0, "si": 0}, "35": {"correct": 2, "pos": 1, "neg": 0, "si": 0}, "36": {"correct": 2, "pos": 1, "neg": 0, "si": 0}, "37": {"correct": 1, "pos": 1, "neg": 0, "si": 0}, "38": {"correct": 3, "pos": 1, "neg": 0, "si": 0}, "39": {"correct": 3, "pos": 1, "neg": 0, "si": 0}, "40": {"correct": 2, "pos": 1, "neg": 0, "si": 0}, "41": {"correct": 3, "pos": 1, "neg": 0, "si": 0}, "42": {"correct": 0, "pos": 1, "neg": 0, "si": 0}, "43": {"correct": 1, "pos": 1, "neg": 0, "si": 0}, "44": {"correct": 3, "pos": 1, "neg": 0, "si": 0}, "45": {"correct": 3, "pos": 1, "neg": 0, "si": 0}, "46": {"correct": 0, "pos": 1, "neg": 0, "si": 0}, "47": {"correct": 0, "pos": 1, "neg": 0, "si": 0}, "48": {"correct": 3, "pos": 1, "neg": 0, "si": 0}, "49": {"correct": 3, "pos": 1, "neg": 0, "si": 0}, "50": {"correct": 2, "pos": 1, "neg": 0, "si": 0}};
+var Q_DATA     = [{"n": 1, "si": 0, "text": "<p>Select the most appropriate option that can substitute the underlined segment in the given sentence.</p>\n\n<p>He is <u>waiting upon</u> you in the compound.</p>\n", "comp": "", "opts": ["<span style=\"\">waiting on</span>", "<span style=\"\">waiting at</span>", "<span style=\"\">waiting for</span>", "<span style=\"\">waiting up</span>"], "cidx": 2, "sol": "The most appropriate option that can substitute the underlined segment in \"He is waiting upon you in the compound.\" is waiting for.\u00a0Here the preposition 'for' is the appropriate option for upon.", "pos": 0, "neg": 0}, {"n": 2, "si": 0, "text": "Select the option that can substitute/replace the bracketed word correctly and complete the sentence.<br />\n<br />\nIf he runs, he (get) there in time.", "comp": "", "opts": ["will get", "is getting", "got there in time", "has to get"], "cidx": 0, "sol": "<p>The correct answer is <span style=\"font-weight: 700;\">&#39;1&#39;</span><span style=\"font-weight: 700;\"> </span><span style=\"font-weight: 700;\">i.e.</span><span style=\"font-weight: 700;\"> will get</span>.</p>\n\n<p><span style=\"display: flex; gap: 6px; align-items: center;\"><span style=\"display: flex; gap: 6px; align-items: center;\"><span style=\"display: flex; gap: 6px; align-items: center;\"><span style=\"display: flex; gap: 6px; align-items: center;\"><span style=\"display: flex; gap: 6px; align-items: center;\"><img height=\"26px\" src=\"//cdn.testbook.com/resources/lms_creative_elements/key-point-image.png\" width=\"26px\" /><strong><span style=\"vertical-align: middle; font-size: 21px;\"><u>Key Points</u></span></strong></span></span></span></span></span></p>\n\n<ul>\n\t<li>The correct option should follow the<strong> &quot;if&quot;</strong> clause in the future tense.</li>\n\t<li><strong>&quot;Will get&quot;</strong> correctly follows modals with the base form of the verb to form future tense for conditional sentences.</li>\n</ul>\n\n<p>Hence, the correct answer is <span style=\"font-weight: 700;\">option 1</span>.</p>\n\n<p><span style=\"display: flex;gap: 6px;align-items: center;\"><img height=\"26px\" src=\"//cdn.testbook.com/resources/lms_creative_elements/additional-information-image.png\" width=\"26px\" /><strong><span style=\"vertical-align: middle;font-size: 21px;\"><u>Additional Information</u></span><span style=\"font-family: var(--bs-body-font-family); font-size: var(--bs-body-font-size); font-weight: var(--bs-body-font-weight); text-align: var(--bs-body-text-align);\"> </span></strong></span></p>\n\n<ul style=\"color:  (33, 37, 41);\">\n\t<li><strong>&quot;Is getting&quot;</strong> is present continuous and does not fit in the conditional structure.</li>\n\t<li><strong>&quot;Got there in time&quot;</strong> is past tense and does not work with the present/future conditional.</li>\n\t<li><strong>&quot;Has to get&quot;</strong> implies obligation and changes the meaning of the sentence.</li>\n</ul>\n", "pos": 0, "neg": 0}, {"n": 3, "si": 0, "text": "In the following sentence the underlined part contains an error. Alternatives to the underlined part are given as options. Select the correct alternative.<br />\nYesterday was the <u>worse</u> day of my life.", "comp": "", "opts": ["most bad", "ill", "worst", "bad"], "cidx": 2, "sol": "<p style=\"\">The correct answer is\u00a0<span style=\"font-weight: 700;\">'3'</span><span style=\"font-weight: 700;\">\u00a0i.e.</span><span style=\"font-weight: 700;\">\u00a0worst</span>\u00a0<span style=\"font-weight: 700;\">.</span></p>\n\n<p style=\"\"><span style=\"display: flex; gap: 6px; align-items: center;\"><span style=\"display: flex; gap: 6px; align-items: center;\"><span style=\"display: flex; gap: 6px; align-items: center;\"><span style=\"display: flex; gap: 6px; align-items: center;\"><span style=\"display: flex;gap: 6px;align-items: center;\"><img height=\"26px\" src=\"//cdn.testbook.com/resources/lms_creative_elements/key-point-image.png\" width=\"26px\" /><strong><span style=\"vertical-align: middle;font-size: 21px;\"><u>Key Points</u></span></strong></span></span></span></span></span></p>\n\n<ul style=\"\">\n        <li>The given sentence talks about a particular day in the past that was extremely bad, hence it requires the superlative form of the adjective.</li>\n        <li>The word \"worse\" is the comparative form of \"bad,\" while \"worst\" is the superlative form.</li>\n        <li>Since the sentence states that it was the single most bad day, the correct word to use is \"worst\".</li>\n</ul>\n\n<p style=\"\"><span style=\"font-weight: 700;\">Correct sentence:</span>\u00a0<em>Yesterday was the worst day of my life</em>.</p>\n\n<p style=\"\"><span style=\"display: flex;gap: 6px;align-items: center;\"><img height=\"26px\" src=\"//cdn.testbook.com/resources/lms_creative_elements/additional-information-image.png\" width=\"26px\" /><strong><span style=\"vertical-align: middle;font-size: 21px;\"><u>Additional Information</u></span></strong></span></p>\n\n<ul>\n        <li><strong>Comparative and Superlative Forms:</strong>\n\n        <ul>\n                <li><strong>Comparative:</strong> Used to compare two things. Example: \"better\" is the comparative form of \"good.\"</li>\n                <li><strong>Superlative:</strong> Used to describe the highest degree of something among three or more things. Example: \"best\" is the superlative form of \"good.\"</li>\n        </ul>\n        </li>\n</ul>", "pos": 0, "neg": 0}, {"n": 4, "si": 0, "text": "<p><strong>Select the most appropriate option to substitute the underlined segment in the given sentence. If there is no need to substitute it, select No improvement.</strong></p>\n\n<p>Rashmi is not only smart <u>but very beautiful.</u></p>\n", "comp": "", "opts": ["but beautiful", "No improvement", "but also very beautiful", "very beautiful"], "cidx": 2, "sol": "<p>The correct answer is&nbsp;<u><strong>but also very beautiful</strong></u></p>\n\n<p><u><strong><span style=\"display: flex;gap: 6px;align-items: center;\"><img height=\"26px\" src=\"//cdn.testbook.com/resources/lms_creative_elements/key-point-image.png\" width=\"26px\" /><strong><span style=\"vertical-align: middle;font-size: 21px;\"><u>Key Points</u></span></strong></span></strong></u></p>\n\n<ul>\n\t<li>The conjunction pair is <u>not only...but also</u>.</li>\n\t<li><span style=\"color: rgb(47, 51, 51);  \">Correlative conjunctions always come in pairs and they relate one part of the sentence to the other. &quot;Not only... but also&quot; can be used to connect either nouns or clauses.&nbsp;</span></li>\n</ul>\n\n<p><span style=\"display: flex;gap: 6px;align-items: center;\"><img height=\"26px\" src=\"//cdn.testbook.com/resources/lms_creative_elements/additional-information-image.png\" width=\"26px\" /><strong><span style=\"vertical-align: middle;font-size: 21px;\"><u>Additional Information</u></span></strong></span></p>\n\n<ul>\n\t<li><strong><span style=\"color: rgb(59, 62, 77);  \">Using&nbsp;</span><em style=\"color: rgb(59, 62, 77);  \">not only . . . but also</em></strong><span style=\"color: rgb(59, 62, 77);  \"><strong>&nbsp;in a sentence</strong>,&nbsp;</span><strong><span style=\"color: inherit; position: relative;  \">parallelism</span></strong><span style=\"color: rgb(59, 62, 77);  \"><strong>&nbsp;should be the goal</strong>. It means that the words following both parts of this correlative conjunction (i.e.,&nbsp;</span><em style=\"color: rgb(59, 62, 77);  \">not only</em><span style=\"color: rgb(59, 62, 77);  \">&nbsp;and&nbsp;</span><em style=\"color: rgb(59, 62, 77);  \">but also</em><span style=\"color: rgb(59, 62, 77);  \">) should belong to the same parts of speech. For example, if a verb follows&nbsp;</span><em style=\"color: rgb(59, 62, 77);  \">not only</em><span style=\"color: rgb(59, 62, 77);  \">, then a verb should also follow&nbsp;</span><em style=\"color: rgb(59, 62, 77);  \">but also</em><span style=\"color: rgb(59, 62, 77);  \">. Using different parts of speech after each part of&nbsp;</span><em style=\"color: rgb(59, 62, 77);  \">not only . . . but also</em><span style=\"color: rgb(59, 62, 77);  \">&nbsp;makes the sentence imbalanced and, frankly, just awkward.</span>&nbsp;<br />\n\t<strong>Example:&nbsp;</strong>He&rsquo;s not only intelligent but also has a great sense of humor.<br />\n\t&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;He&rsquo;s not only intelligent but also funny.<br />\n\t&nbsp;</li>\n</ul>\n\n<p><strong>Thus the correct sentence will be:</strong>&nbsp;<em>Rashmi is not only smart&nbsp;but also very beautiful.</em></p>\n", "pos": 0, "neg": 0}, {"n": 5, "si": 0, "text": "<p><strong>Directions: Select the most appropriate option to substitute the underlined segment in the given sentence. If no substitution is required, select &lsquo;No substitution&rsquo;.</strong></p>\n\n<p>Sunil <u>have been working</u> as a personal assistant to the Director for two years.</p>\n", "comp": "", "opts": ["has been worked", "is working", "has been working", "No substitution"], "cidx": 2, "sol": "<p style=\"\">The correct answer is&nbsp;<span style=\"font-weight: 700;\">&#39;has been working</span>.<span style=\"font-weight: 700;\">&#39;</span></p>\n\n<p style=\"\"><span style=\"display: flex;gap: 6px;align-items: center;\"><img height=\"26px\" src=\"//cdn.testbook.com/resources/lms_creative_elements/key-point-image.png\" width=\"26px\" /><strong><span style=\"vertical-align: middle;font-size: 21px;\"><u>Key Points</u></span></strong></span></p>\n\n<ul style=\"\">\n\t<li>In the underlined segment, the&nbsp;<span style=\"font-weight: 700;\">plural&nbsp;form of the verb</span>&nbsp;<span style=\"font-weight: 700;\">&#39;&#39;have&#39;&#39;</span>&nbsp;is&nbsp;<span style=\"font-weight: 700;\">incorrect</span>.</li>\n\t<li>The&nbsp;<span style=\"font-weight: 700;\">subject &#39;Sunil&#39;</span>&nbsp;in the given sentence&nbsp;is a&nbsp;<span style=\"font-weight: 700;\">singular subject</span>.</li>\n\t<li>The&nbsp;<span style=\"font-weight: 700;\">singular form of the verb</span>&nbsp;&#39;<span style=\"font-weight: 700;\">has</span>&#39;&nbsp;should be used&nbsp;with the&nbsp;<span style=\"font-weight: 700;\">singular subject</span>&nbsp;&#39;<span style=\"font-weight: 700;\">Sunil</span>&#39;.</li>\n\t<li>Therefore, the&nbsp;<span style=\"font-weight: 700;\">singular form of the verb</span>&nbsp;<span style=\"font-weight: 700;\">&#39;&#39;has&#39;&#39;</span>&nbsp;should be used&nbsp;<span style=\"font-weight: 700;\">in place of</span>&nbsp;the&nbsp;<span style=\"font-weight: 700;\">plural form</span>&nbsp;&#39;<span style=\"font-weight: 700;\">have</span>&#39;.<br />\n\t&nbsp;</li>\n</ul>\n\n<p style=\"\">Hence, the correct answer is&nbsp;<span style=\"font-weight: 700;\">option 3</span>.</p>\n\n<p style=\"\"><span style=\"font-weight: 700;\">Correct sentence:</span>&nbsp;<em>Sunil <strong>has been working</strong> as a personal assistant to the Director for two years</em>.<br />\n<br />\n<span style=\"display: flex; gap: 6px; align-items: center;\"><span style=\"display: flex; gap: 6px; align-items: center;\"><span style=\"display: flex; gap: 6px; align-items: center;\"><span style=\"display: flex; gap: 6px; align-items: center;\"><span style=\"display: flex;gap: 6px;align-items: center;\"><img height=\"26px\" src=\"//cdn.testbook.com/resources/lms_creative_elements/additional-information-image.png\" width=\"26px\" /><strong><span style=\"vertical-align: middle;font-size: 21px;\"><u>Additional Information</u></span></strong></span></span></span></span></span></p>\n\n<ul style=\"\">\n\t<li><span style=\"font-weight: 700;\">Subjects and verbs must agree with one another in number</span>&nbsp;(singular or plural). (\u0935\u093f\u0937\u092f \u0914\u0930 \u0915\u094d\u0930\u093f\u092f\u093e \u090f\u0915 \u0926\u0942\u0938\u0930\u0947 \u0915\u0947 \u0938\u093e\u0925 \u0938\u0902\u0916\u094d\u092f\u093e (\u090f\u0915\u0935\u091a\u0928 \u092f\u093e \u092c\u0939\u0941\u0935\u091a\u0928) \u092e\u0947\u0902 \u0938\u0939\u092e\u0924 \u0939\u094b\u0928\u093e \u091a\u093e\u0939\u093f\u090f)</li>\n\t<li>Thus,&nbsp;<span style=\"font-weight: 700;\">if a subject is singular</span>, its&nbsp;<span style=\"font-weight: 700;\">verb must also be singular</span>;&nbsp;<span style=\"font-weight: 700;\">if</span>&nbsp;the&nbsp;<span style=\"font-weight: 700;\">subject is plural</span>, its&nbsp;<span style=\"font-weight: 700;\">verb must also be plural</span>. (\u0907\u0938 \u092a\u094d\u0930\u0915\u093e\u0930, \u092f\u0926\u093f \u0915\u094b\u0908 \u0935\u093f\u0937\u092f \u090f\u0915\u0935\u091a\u0928 \u0939\u0948 , \u0924\u094b \u0909\u0938\u0915\u0940 \u0915\u094d\u0930\u093f\u092f\u093e \u092d\u0940 \u090f\u0915\u0935\u091a\u0928 \u0939\u094b\u0928\u0940 \u091a\u093e\u0939\u093f\u090f ; \u092f\u0926\u093f \u0935\u093f\u0937\u092f \u092c\u0939\u0941\u0935\u091a\u0928 \u0939\u0948 , \u0924\u094b \u0909\u0938\u0915\u0940 \u0915\u094d\u0930\u093f\u092f\u093e \u092d\u0940 \u092c\u0939\u0941\u0935\u091a\u0928 \u0939\u094b\u0928\u0940 \u091a\u093e\u0939\u093f\u090f)<br />\n\t&nbsp;</li>\n</ul>\n\n<p style=\"\"><span style=\"display: flex; gap: 6px; align-items: center;\"><span style=\"display: flex; gap: 6px; align-items: center;\"><span style=\"display: flex; gap: 6px; align-items: center;\"><span style=\"display: flex; gap: 6px; align-items: center;\"><span style=\"display: flex;gap: 6px;align-items: center;\"><img height=\"26px\" src=\"//cdn.testbook.com/resources/lms_creative_elements/hinglish-image.png\" width=\"26px\" /><strong><span style=\"vertical-align: middle;font-size: 21px;\"><u>Hinglish</u></span></strong></span></span></span></span></span></p>\n\n<ul style=\"\">\n\t<li>\u0930\u0947\u0916\u093e\u0902\u0915\u093f\u0924 \u0916\u0902\u0921 \u092e\u0947\u0902&nbsp;<span style=\"font-weight: 700;\">\u0915\u094d\u0930\u093f\u092f\u093e &#39;have&#39;&nbsp;\u0915\u093e \u092c\u0939\u0941\u0935\u091a\u0928 \u0930\u0942\u092a</span>&nbsp;<span style=\"font-weight: 700;\">\u0917\u0932\u0924 \u0939\u0948</span>&nbsp;\u0964</li>\n\t<li>\u0926\u093f\u090f \u0917\u090f \u0935\u093e\u0915\u094d\u092f \u092e\u0947\u0902&nbsp;<span style=\"font-weight: 700;\">subject &#39;Sunil&#39;</span>&nbsp;\u090f\u0915&nbsp;<span style=\"font-weight: 700;\">\u090f\u0915\u0935\u091a\u0928</span><span style=\"font-weight: 700;\">&nbsp;subject</span>&nbsp;\u0939\u0948\u0964</li>\n\t<li><span style=\"font-weight: 700;\">\u0915\u094d\u0930\u093f\u092f\u093e \u0915\u093e \u090f\u0915\u0935\u091a\u0928 \u0930\u0942\u092a &#39;has&#39;</span>,&nbsp;<span style=\"font-weight: 700;\">\u090f\u0915\u0935\u091a\u0928 subject &#39;Sunil&#39;</span>&nbsp;\u0915\u0947 \u0938\u093e\u0925 \u092a\u094d\u0930\u092f\u094b\u0917 \u0915\u093f\u092f\u093e \u091c\u093e\u0928\u093e \u091a\u093e\u0939\u093f\u090f\u0964</li>\n\t<li>\u0907\u0938\u0932\u093f\u090f&nbsp;<span style=\"font-weight: 700;\">\u092c\u0939\u0941\u0935\u091a\u0928 \u0915\u094d\u0930\u093f\u092f\u093e</span>&nbsp;&#39;<span style=\"font-weight: 700;\">have</span>&#39;&nbsp;\u0915\u0947 \u0938\u094d\u0925\u093e\u0928 \u092a\u0930&nbsp;<span style=\"font-weight: 700;\">\u090f\u0915\u0935\u091a\u0928 \u0915\u094d\u0930\u093f\u092f\u093e</span>&nbsp;&#39;<span style=\"font-weight: 700;\">has</span>&#39;&nbsp;\u0915\u093e \u092a\u094d\u0930\u092f\u094b\u0917 \u0915\u093f\u092f\u093e \u091c\u093e\u0928\u093e \u091a\u093e\u0939\u093f\u090f\u0964<br />\n\t&nbsp;</li>\n</ul>\n\n<p style=\"\">\u0905\u0924: \u0938\u0939\u0940 \u0909\u0924\u094d\u0924\u0930&nbsp;<span style=\"font-weight: 700;\">\u0935\u093f\u0915\u0932\u094d\u092a 3&nbsp;</span>\u0939\u0948\u0964</p>\n\n<p style=\"\"><span style=\"font-weight: 700;\">\u0938\u0939\u0940 \u0935\u093e\u0915\u094d\u092f:</span>&nbsp;<em>Sunil&nbsp;<span style=\"font-weight: 700;\">has been working</span>&nbsp;as a personal assistant to the Director for two years</em><span style=\"\">.</span></p>\n", "pos": 0, "neg": 0}, {"n": 6, "si": 0, "text": "<p><strong>Select the most appropriate option that can substitute the underlined segment in the given sentence. If there is no need to substitute it, select &lsquo;No substitution required&rsquo;.</strong></p>\n\n<p>The investigation <u><strong>revealed that both of they</strong></u> had given false information to obtain the certificates.</p>\n", "comp": "", "opts": ["No substitution required", "reveal that them both", "reveals that how they both", "revealed that both of them"], "cidx": 3, "sol": "<p>Here,\u00a0'revealed that both of them'\u00a0should be used instead of\u00a0'revealed that both of they'.\u00a0We know that after\u00a0'both of'\u00a0the\u00a0object case\u00a0of the\u00a0pronouns\u00a0is\u00a0used. Correct\u00a0Sentence:\u00a0The investigation\u00a0revealed that both of them\u00a0had given false information to obtain the certificates.\u00a0</p>\n", "pos": 0, "neg": 0}, {"n": 7, "si": 0, "text": "<p><strong>Improve the underlined part of the sentence. Choose &lsquo;No improvement&rsquo; as an answer if the sentence is grammatically correct.</strong></p>\n\n<p>She cuts her <u><strong>haired short</strong></u> in the summer.</p>\n", "comp": "", "opts": ["hair short", "hairy short", "No improvement", "hair shortest"], "cidx": 0, "sol": "The correct answer is \"hair short\".\u00a0The word\u00a0\"short\"\u00a0is an\u00a0adjective\u00a0that describes the length of her hair.\u00a0The noun here is\u00a0'hair'\u00a0which is being described by the adjective\u00a0'short'. Correct sentence:\u00a0She cuts her\u00a0hair short\u00a0in the summer.", "pos": 0, "neg": 0}, {"n": 8, "si": 0, "text": "<p><strong>Direction: Improve the underlined part of the sentence. Choose &#39;No improvement&#39; as an answer if the sentence is grammatically correct.</strong></p>\n\n<p>I have work in the morning, but I&nbsp;<strong><u>is freer</u></strong>&nbsp;in the afternoon.</p>\n", "comp": "", "opts": ["is freed", "No improvement", "am frees", "am free"], "cidx": 3, "sol": "<p>We always use subject pronouns which means that the form \"am\" is never used without the pronoun \"I\" so we always say \"I am.\" Example: I am free to attend your meeting. The correct verb form for the first person singular present tense is 'am'. The correct adjective form to describe 'I' in this sentence is 'free', which agrees with the subject 'I'. Correct sentence: I have work in the morning, but I am free in the afternoon.</p>\n", "pos": 0, "neg": 0}, {"n": 9, "si": 0, "text": "<p><strong>Select the most appropriate option that can substitute the underlined segment in the given sentence. If there is no need to substitute it, select &#39;No substitution required&#39;.</strong></p>\n\n<p>As it was getting late Lata&nbsp;<u>leave the party</u>&nbsp;midway.</p>\n", "comp": "", "opts": ["No substitution required", "is left the party", "leaving the party", "left the party"], "cidx": 3, "sol": "<p>Here,\u00a0'Left the party'\u00a0should be used instead of\u00a0'Leave the party'. The given sentence is in\u00a0simple past tense, therefore,\u00a0the verb should be used in its\u00a0simple past form (left)\u00a0and not in\u00a0the present form (leave). Therefore, the correct sentence is - As it was getting late Lata\u00a0left the party\u00a0midway.\u00a0\u00a0</p>\n", "pos": 0, "neg": 0}, {"n": 10, "si": 0, "text": "<p><strong>Direction: Select the most appropriate option that can replace the underlined part of the following sentence.</strong></p>\n\n<p>It has been raining <strong><u>from</u></strong> morning.</p>\n", "comp": "", "opts": ["for", "though", "since", "till"], "cidx": 2, "sol": "<p>The word \"since\" is used to indicate the starting point of a period of time. It refers to a time (an action that begun in the past and is still continuing). In this sentence, \"since\" is the most appropriate option as it indicates that the rain started in the morning and is still continuing. Example: We have been married since 1996. Correct sentence: It has been raining since morning.</p>\n", "pos": 0, "neg": 0}, {"n": 11, "si": 0, "text": "<p><strong>Select the most appropriate option that can substitute the underlined segment in the&nbsp;given sentence.</strong></p>\n\n<p>You can always&nbsp;<u>dependent on me</u>.</p>\n", "comp": "", "opts": ["depend over me", "depend for me", "depend at me", "depend on me"], "cidx": 3, "sol": "\"Dependent\" is an adjective, while \"depend\" is the verb that should be used in this context. The corrected sentence, \"You can always depend on me,\" is grammatically accurate and effectively communicates the intended meaning.", "pos": 0, "neg": 0}, {"n": 12, "si": 0, "text": "<p><strong>Direction: Select the most appropriate option that can substitute the underlined segment in the given sentence. If there is no need to substitute it, select &#39;No substitution&#39;.</strong></p>\n\n<p>Abraham Lincoln has been the sixteenth president of the United States and <strong><u>save the Union at</u></strong> the American Civil war.</p>\n", "comp": "", "opts": ["No substitution", "save the Union alongside", "saved the Union during", "saved the Union on"], "cidx": 2, "sol": "<p>The error lies in the use of the word \"save.\" The error in the sentence is the use of \"save\" instead of \"saved.\" The use of \"saved\" in the corrected sentence is appropriate because it reflects the past action of Abraham Lincoln during the American Civil War. Abraham Lincoln played a crucial role in preserving the Union during that conflict, and \"saved\" is the past tense form of the verb \"save.\"\u00a0The word \"during\" is used to indicate the time frame in which an action occurred. In this case, \"during\" is appropriate because it specifies the period when Abraham Lincoln saved the Union\u2014namely, the time of the American Civil War.\u00a0Correct sentence: Abraham Lincoln has been the sixteenth president of the United States and saved the Union during the American Civil War.</p>\n", "pos": 0, "neg": 0}, {"n": 13, "si": 0, "text": "<p>Select the most appropriate option that can rectify the underlined segment in the given sentence. If there is no need to rectify it, select &lsquo;no rectification needed&rsquo;.</p>\n\n<p>You are the <u>beautiful</u> woman I have ever seen.</p>\n", "comp": "", "opts": ["no rectification needed", "more beautiful", "beauty", "most beautiful"], "cidx": 3, "sol": "<p style=\"\">The correct answer is: <strong>most beautiful.</strong></p>\n\n<p style=\"\"><span style=\"display: flex; gap: 6px; align-items: center;\"><span style=\"display: flex; gap: 6px; align-items: center;\"><span style=\"display: flex; gap: 6px; align-items: center;\"><span style=\"display: flex; gap: 6px; align-items: center;\"><span style=\"display: flex;gap: 6px;align-items: center;\"><img height=\"26px\" src=\"//cdn.testbook.com/resources/lms_creative_elements/key-point-image.png\" width=\"26px\" /><strong><span style=\"vertical-align: middle;font-size: 21px;\"><u>Key Points</u></span></strong></span></span></span></span></span></p>\n\n<ul style=\"\">\n\t<li>In the given sentence, the&nbsp;<span style=\"font-weight: 700;\">correct superlative form</span>&nbsp;of the adjective should be used.</li>\n\t<li>The term <strong>&#39;beautiful&#39;</strong> is an <strong>adjective</strong> that can be modified to its <strong>superlative </strong>form for comparison.</li>\n\t<li>The presence of <strong>&#39;the&#39; </strong>before &#39;beautiful&#39; hints at the fact that the<strong>&nbsp;superlative form </strong>of <strong>&#39;beautiful&#39; </strong>should be used.</li>\n\t<li>The correct superlative form of <strong>&#39;beautiful&#39;</strong> is <strong>&#39;most beautiful&#39;</strong>, indicating that no other woman is more beautiful than the one being referred to.</li>\n</ul>\n\n<p style=\"\">Hence, the correct answer is&nbsp;<span style=\"font-weight: 700;\">option 4</span>.</p>\n\n<p style=\"\"><span style=\"font-weight: 700;\">Correct sentence:</span>&nbsp;<em>You are the most beautiful woman I have ever seen</em>.<br />\n<br />\n<span style=\"display: flex; gap: 6px; align-items: center;\"><span style=\"display: flex; gap: 6px; align-items: center;\"><span style=\"display: flex; gap: 6px; align-items: center;\"><span style=\"display: flex; gap: 6px; align-items: center;\"><span style=\"display: flex;gap: 6px;align-items: center;\"><img height=\"26px\" src=\"//cdn.testbook.com/resources/lms_creative_elements/additional-information-image.png\" width=\"26px\" /><strong><span style=\"vertical-align: middle;font-size: 21px;\"><u>Additional Information</u></span></strong></span></span></span></span></span></p>\n\n<ul style=\"\">\n\t<li>In English grammar, adjectives have three degrees of comparison: positive, comparative, and superlative.\n\t<ul>\n\t\t<li><strong>Positive degree:</strong> describes a single item/person (e.g., beautiful).</li>\n\t\t<li><strong>Comparative degree:</strong> compares two items/people (e.g., more beautiful).</li>\n\t\t<li><strong>Superlative degree:</strong> compares more than two items/people (e.g., most beautiful).</li>\n\t</ul>\n\t</li>\n</ul>\n", "pos": 0, "neg": 0}, {"n": 14, "si": 0, "text": "<p>Select the most appropriate option that can substitute the underlined segment in the given sentence.</p>\n\n<p>They <u>are sell their company&rsquo;s</u> products to people.</p>\n", "comp": "", "opts": ["are sell the company", "are selling their company&rsquo;s", "was sell the company&rsquo;s", "is selling they company&rsquo;s"], "cidx": 1, "sol": "<p style=\"\">The correct answer is:&nbsp;<strong><span style=\"color: rgb(33, 37, 41);\">are selling their company&rsquo;s.</span></strong></p>\n\n<p style=\"\"><span style=\"display: flex; gap: 6px; align-items: center;\"><span style=\"display: flex; gap: 6px; align-items: center;\"><span style=\"display: flex; gap: 6px; align-items: center;\"><span style=\"display: flex; gap: 6px; align-items: center;\"><span style=\"display: flex;gap: 6px;align-items: center;\"><img height=\"26px\" src=\"//cdn.testbook.com/resources/lms_creative_elements/key-point-image.png\" width=\"26px\" /><strong><span style=\"vertical-align: middle;font-size: 21px;\"><u>Key Points</u></span></strong></span></span></span></span></span></p>\n\n<ul>\n\t<li>The original sentence has a <strong>subject-verb agreement </strong>issue.</li>\n\t<li><strong>&quot;They&quot;</strong> is <strong>plural</strong>, so the correct verb form should be <strong>&quot;are selling&quot;</strong>.</li>\n\t<li>&quot;Are selling their company&rsquo;s products&quot; correctly matches the plural subject &quot;They&quot; with the present continuous verb form &quot;are selling&quot;.</li>\n\t<li><span style=\"color: rgb(33, 37, 41);\"><strong>&quot;Their&quot;</strong> is the possessive pronoun that correctly shows ownership of<strong> &quot;company&rsquo;s products&quot;</strong>.</span></li>\n\t<li>&quot;Their company&rsquo;s products&quot; correctly identifies the possession of the products by the company.</li>\n</ul>\n\n<p><br />\nTherefore, the corrected sentence is:&nbsp;<em>They <span style=\"color: rgb(33, 37, 41);\"><strong>are selling their company&rsquo;s</strong>&nbsp;</span>products to people</em>.</p>\n", "pos": 0, "neg": 0}, {"n": 15, "si": 0, "text": "<p><strong>Direction: Select the most appropriate option to substitute the underlined segment in the given sentence. If no substitution is required, select &lsquo;No substitution&rsquo;.</strong></p>\n\n<p>Swami learned music when <strong><u>he is studying</u></strong> in the third class.</p>\n", "comp": "", "opts": ["he will study", "No substitution", "he will be studying", "he was studying"], "cidx": 3, "sol": "The error in the sentence \"Swami learned music when he is studying in the third class\" lies in the tense inconsistency.\u00a0The verb tense needs to match the past tense of \"learned.\" \"Is studying\" is in the present tense. \"When\" indicates a specific time in the past, so the past continuous tense is needed. The correct form of the past continuous tense for \"he\" is \"he was studying.\" Correct sentence: \"Swami learned music when he was studying in the third class.\"", "pos": 0, "neg": 0}, {"n": 16, "si": 0, "text": "<p>Select the most appropriate option that can substitute the underlined segment in the given sentence.</p>\n\n<p>She <u>finished her quickly breakfast</u> and rushed to school.&nbsp;</p>\n", "comp": "", "opts": ["her breakfast finished quickly", "quickly her breakfast finished&nbsp;", "finished her breakfast quickly", "finished breakfast hers quickly"], "cidx": 2, "sol": "The correct answer: Finished her breakfast quickly. Explanation: Option 3 is grammatically correct because it maintains the proper order of the subject, verb, and object, and places the adverb 'quickly' appropriately at the end.", "pos": 0, "neg": 0}, {"n": 17, "si": 0, "text": "<p>Select the most appropriate option to substitute the underlined segment in the following sentence.</p>\n\n<p><u>We are decorate</u> the living - room at the moment.&nbsp;</p>\n", "comp": "", "opts": ["We are being decorating", "We are decorates&nbsp;", "We are being decorate", "We are decorating"], "cidx": 3, "sol": "<strong>The correct answer:</strong> We are decorating <strong>Explanation:</strong> The marked option is correct because it uses the present continuous tense properly to indicate an ongoing action at the moment.", "pos": 0, "neg": 0}, {"n": 18, "si": 0, "text": "<strong>Select the most appropriate option that can substitute the underlined segment in the given sentence.</strong><br />\nOscar is the most prestigious award which is <u>introduced to good</u> actors in that year.", "comp": "", "opts": ["rewarded to good", "nominated to fine", "awarded to the best", "attached to fine"], "cidx": 2, "sol": "<div><span style=\"\">The correct answer is <strong>Option 3</strong>.</span></div>\n\n<div>&nbsp;</div>\n\n<div><span style=\"\"><span style=\"display: flex;gap: 6px;align-items: center;\"><img height=\"26px\" src=\"//cdn.testbook.com/resources/lms_creative_elements/key-point-image.png\" width=\"26px\" /><strong><span style=\"vertical-align: middle;font-size: 21px;\"><u>Key Points</u></span></strong></span></span></div>\n\n<ul>\n\t<li><span style=\"\">The sentence requires a phrase that accurately describes the Oscars being given to top actors for their performances.</span></li>\n\t<li><span style=\"\">&quot;<strong>Awarded to the best&quot; correctly captures the idea that the Oscars are given to the best actors.</strong></span></li>\n</ul>\n\n<div><span style=\"\">Therefore, the correct answer is <strong>Option 3</strong>.</span></div>\n\n<div>&nbsp;</div>\n\n<div><span style=\"\"><span style=\"display: flex;gap: 6px;align-items: center;\"><img height=\"26px\" src=\"//cdn.testbook.com/resources/lms_creative_elements/additional-information-image.png\" width=\"26px\" /><strong><span style=\"vertical-align: middle;font-size: 21px;\"><u>Additional Information</u></span></strong></span></span></div>\n\n<ul>\n\t<li><span style=\"\"><strong>Option 1: rewarded to good</strong> &ndash; Inappropriate because <strong>&quot;rewarded&quot; is not the proper verb and &quot;good&quot; lacks the right connotation.</strong></span></li>\n\t<li><span style=\"\"><strong>Option 2: nominated to fine</strong> &ndash; Inappropriate because<strong> it talks about nominations and &quot;fine&quot; does not fit well.</strong></span></li>\n\t<li><span style=\"\"><strong>Option 4: attached to fine</strong> &ndash; Inappropriate because <strong>it does not make sense in this context.</strong></span></li>\n</ul>\n", "pos": 0, "neg": 0}, {"n": 19, "si": 0, "text": "<p>Select the most appropriate option to substitute the underlined segment in the given sentence. If there is no need to substitute it, select &lsquo;No substitution required&rsquo;.</p>\n\n<p><u>This is place</u> where Krishna was born.</p>\n", "comp": "", "opts": ["This be the place", "No substitution required", "This is a place", "This is the place"], "cidx": 3, "sol": "<p><strong>The correct answer is option 4.</strong></p>\n\n<p>The given sentence is representing a particular place where Krishna was born.</p>\n\n<p>So, the <strong>definite article &#39;the&#39; </strong>should be used to <strong>&#39;when explaining which person/place or thing one means&#39;.</strong></p>\n\n<p>Therefore, the correct sentence is <strong>&#39;This is the place where Krishna was born&#39;.</strong></p>\n", "pos": 0, "neg": 0}, {"n": 20, "si": 0, "text": "<p><strong>Select the most appropriate option that can substitute the underlined segment in the given sentence. If there is no need to substitute it, select &lsquo;No substitution required&rsquo;.</strong></p>\n\n<p>I imagine you have learnt a valuable lesson from this experience, <u>didn&rsquo;t you?</u></p>\n", "comp": "", "opts": ["No substitution required&nbsp;", "haven&rsquo;t you?", "have you?", "did you?"], "cidx": 1, "sol": "<p>The correct answer is<strong> &#39;haven&#39;t you?&#39;.</strong></p>\n\n<p><span style=\"display: flex;gap: 6px;align-items: center;\"><img height=\"26px\" src=\"//cdn.testbook.com/resources/lms_creative_elements/key-point-image.png\" width=\"26px\" /><strong><span style=\"vertical-align: middle;font-size: 21px;\"><u>Key Points</u></span></strong></span></p>\n\n<ul>\n\t<li>The underlined part in the given sentence is grammatically incorrect.</li>\n\t<li>Here,<strong> &#39;haven&#39;t you&#39; </strong>should be used instead of<strong> &#39;didn&#39;t you&#39;.</strong></li>\n\t<li><span style=\"\">We know that a&nbsp;</span><span style=\" font-weight: 700;\">positive statement&nbsp;</span><span style=\"\">is followed by a&nbsp;</span><span style=\" font-weight: 700;\">negative</span><span style=\"\">&nbsp;</span><span style=\" font-weight: 700;\">question</span><span style=\"\">&nbsp;tag whereas a&nbsp;</span><span style=\" font-weight: 700;\">negative statement&nbsp;</span><span style=\"\">is followed by&nbsp;</span><span style=\" font-weight: 700;\">a positive question tag.&nbsp;</span>\u200b\n\t<ul>\n\t\t<li><em>Example:&nbsp;Jack is from Spain, <strong>isn&#39;t he?</strong></em></li>\n\t</ul>\n\t</li>\n\t<li>In the given sentence the question tag of <strong>&#39;you have learnt&#39;</strong> is<strong> &#39;haven&#39;t you&#39;.</strong></li>\n\t<li>Thus, the correct answer is<strong> Option 2.</strong><br />\n\t&nbsp;</li>\n</ul>\n\n<p><strong><u>Correct Sentence:</u></strong>&nbsp;<em>I imagine you have learnt a valuable lesson from this experience, <strong>haven&#39;t you?</strong></em><strong>&nbsp;</strong></p>\n", "pos": 0, "neg": 0}, {"n": 21, "si": 0, "text": "<p><strong>Direction: Select the most appropriate option that can substitute the underlined segment in the following sentence. If there is no need to substitute it, select &lsquo;No substitution required.&rsquo;</strong></p>\n\n<p>The invigilator did not know that the four friends were exchanging notes right <strong><u>at the</u> <u>front of him</u></strong>.</p>\n", "comp": "", "opts": ["of front of him", "for front of him", "No substitution required", "in front of him"], "cidx": 3, "sol": "<p>The error lies in the part \"at the front of him.\" \"In front of\" is the correct preposition to use when describing the location of someone or something that is directly ahead. The other options do not make grammatical sense in this context. Correct sentence: The invigilator did not know that the four friends were exchanging notes right in front of him.</p>\n", "pos": 0, "neg": 0}, {"n": 22, "si": 0, "text": "<p>Select the most appropriate option that can substitute the underlined word in the following sentence.</p>\n\n<p>His flight departs <u>in</u> 5:00 pm.</p>\n", "comp": "", "opts": ["from", "for", "at", "of&nbsp;"], "cidx": 2, "sol": "The correct answer is: at. The word \"at\" is the correct preposition to use when referring to a specific time. Hence, \"His flight departs at 5:00 pm\" is grammatically correct.", "pos": 0, "neg": 0}, {"n": 23, "si": 0, "text": "<p>Select the word segment which substitutes the bracketed word correctly and completes the sentence meaningfully.</p>\n\n<p>Mathematics (are not) easy to learn.&nbsp;</p>\n", "comp": "", "opts": ["were not", "was not&nbsp;", "has not", "is not"], "cidx": 3, "sol": "<p style=\"\">The correct answer is&nbsp;<span style=\"font-weight: 700;\">&#39;is not&#39;</span>&nbsp;.</p>\n\n<p style=\"\"><span style=\"display: flex; gap: 6px; align-items: center;\"><span style=\"display: flex; gap: 6px; align-items: center;\"><span style=\"display: flex; gap: 6px; align-items: center;\"><span style=\"display: flex; gap: 6px; align-items: center;\"><span style=\"display: flex;gap: 6px;align-items: center;\"><img height=\"26px\" src=\"//cdn.testbook.com/resources/lms_creative_elements/key-point-image.png\" width=\"26px\" /><strong><span style=\"vertical-align: middle;font-size: 21px;\"><u>Key Points</u></span></strong></span></span></span></span></span></p>\n\n<ul style=\"\">\n\t<li>The word &#39;<strong>Mathematics</strong>&#39; is a singular noun, despite ending in &#39;s&#39;.</li>\n\t<li>When referring to a subject like Mathematics, the verb should be in the singular form.</li>\n\t<li>The phrase &#39;<strong>are not</strong>&#39; is incorrect because it uses the plural form of the verb.</li>\n\t<li>The correct phrase should use the singular form of the verb, which is &#39;<strong>is not</strong>&#39;.</li>\n</ul>\n\n<p style=\"\">Therefore, the correct answer is&nbsp;<span style=\"font-weight: 700;\">&#39;Option 4&#39;</span>.</p>\n\n<p style=\"\"><strong>Correct Sentence</strong>:&nbsp;<span style=\"\"><em>Mathematics <strong>is not</strong> easy to learn.</em>&nbsp;</span></p>\n\n<p style=\"\"><span style=\"display: flex;gap: 6px;align-items: center;\"><img height=\"26px\" src=\"//cdn.testbook.com/resources/lms_creative_elements/additional-information-image.png\" width=\"26px\" /><strong><span style=\"vertical-align: middle;font-size: 21px;\"><u>Additional Information</u></span></strong></span></p>\n\n<ul style=\"\">\n\t<li><strong>Option 1: &#39;were not&#39;</strong> is incorrect because &#39;were&#39; is used for plural subjects, whereas &#39;Mathematics&#39; is singular.</li>\n\t<li><strong>Option 2: &#39;was not&#39;</strong> is incorrect because it does not fit the present tense of the sentence.</li>\n\t<li><strong>Option 3: &#39;has not&#39;</strong> is incorrect because it implies a perfect tense which does not suit the context of the sentence.</li>\n</ul>\n", "pos": 0, "neg": 0}, {"n": 24, "si": 0, "text": "<p>Select the most appropriate option that can substitute the underlined segment in the given sentence.</p>\n\n<p><u>Their was a large snake</u> found in the garden last evening.</p>\n", "comp": "", "opts": ["Their was the larger snake", "There was the larger snake", "There was not a large snake", "There was a large snake"], "cidx": 3, "sol": "The correct answer is: There was a large snake. The marked option is correct grammatically because \"There\" indicates the existence of something, whereas \"Their\" is a possessive pronoun.", "pos": 0, "neg": 0}, {"n": 25, "si": 0, "text": "<p><strong>Select the alternative that will improve the underlined part of the sentence. In case there is no improvement select &lsquo;No improvement&rsquo;.</strong></p>\n\n<p>Sidharth <u>want to become</u> a football player but needs to practice more rigorously.</p>\n", "comp": "", "opts": ["wanted becoming", "wants to become", "is wanting to become", "No improvement<span style=\"display: none;\">&nbsp;</span>"], "cidx": 1, "sol": "<p><span style=\"font-variant-numeric: normal; font-variant-east-asian: normal; white-space: pre-wrap;\">The correct answer is - </span><strong>wants to become</strong>.</p>\n\n<p><span style=\"display: flex;gap: 6px;align-items: center;\"><img height=\"26px\" src=\"//cdn.testbook.com/resources/lms_creative_elements/key-point-image.png\" width=\"26px\" /><strong><span style=\"vertical-align: middle;font-size: 21px;\"><u>Key Points</u></span></strong></span></p>\n\n<ul>\n\t<li>The&nbsp;<span style=\"font-weight: 700;\">simple&nbsp;present&nbsp;</span>tense is used when&nbsp;<span style=\"font-weight: 700;\">an action is&nbsp;happening right now,&nbsp;</span><span style=\"font-weight: 700;\">to state or ask about things in general,&nbsp;</span><span style=\"font-weight: 700;\">or when it happens&nbsp;regularly or unceasingly.</span></li>\n\t<li>The structure is given below:\n\t<ul>\n\t\t<li><span style=\"font-weight: 700;\">Subject + V<span style=\"position: relative; line-height: 0; vertical-align: baseline; bottom: -0.25em; font-size:10.5px;\">1</span>&nbsp;+ object.</span></li>\n\t</ul>\n\t</li>\n\t<li>The<span style=\"font-weight: 700;\">&nbsp;verb</span>&nbsp;will take<span style=\"font-weight: 700;\">&nbsp;&#39;s/es&#39;</span>&nbsp;if the given&nbsp;<span style=\"font-weight: 700;\">noun/pronoun (3rd person) is singular.</span></li>\n\t<li>Example:\n\t<ul>\n\t\t<li><em><span style=\"font-weight: 700;\">\u200b</span>He&nbsp;<span style=\"font-weight: 700;\">plays&nbsp;</span>badminton daily.<em>\u200b</em></em></li>\n\t</ul>\n\t</li>\n\t<li>Certain verbs used only in the&nbsp;<span style=\"font-weight: 700;\">simple&nbsp;present tense&nbsp;</span>are given below:\n\t<ul>\n\t\t<li><span style=\"font-weight: 700;\">\u200bverbs of perception (see, hear, smell, etc.), think, know, has/have, possess, like, want, desire, hate, seem, imagine, etc.</span></li>\n\t</ul>\n\t</li>\n\t<li><span style=\"font-weight: 700;\">Example:</span>\n\t<ul>\n\t\t<li><em><span style=\"font-weight: 700;\">\u200b</span>My brother&nbsp;<span style=\"font-weight: 700;\">is&nbsp;</span><span style=\"font-weight: 700;\">owning</span>&nbsp;a car. (incorrect)</em></li>\n\t\t<li><em><span style=\"font-weight: 700;\">\u200b</span>My brother&nbsp;<span style=\"font-weight: 700;\">owns</span>&nbsp;a car. (correct)</em></li>\n\t</ul>\n\t</li>\n\t<li>As per the rules given above, the <strong>2nd option i.e. wants to become</strong> is the correct choice.<br />\n\t&nbsp;</li>\n</ul>\n\n<p><u style=\"font-weight: 700;\">Correct Sentence</u><span style=\"font-weight: 700;\">:&nbsp;</span><em>Sidharth <strong>wants to become</strong> a football player but needs to practice more rigorously.</em></p>\n", "pos": 0, "neg": 0}, {"n": 26, "si": 0, "text": "<p><strong>Select the most appropriate option to substitute the underlined segment in the given sentence. If there is no need to substitute it, select &lsquo;No improvement&rsquo;.</strong></p>\n\n<p>The teacher said that all <u>that</u> students who did not complete the task in the given time should attempt it again.</p>\n", "comp": "", "opts": ["No improvement", "them", "those", "this"], "cidx": 2, "sol": "<ul>\n\t<li>The given sentence is\u00a0<span style=\"font-weight: 700;\">grammatically incorrect.</span>\u00a0We know that here\u00a0<span style=\"font-weight: 700;\">'those'</span>\u00a0should be used.\u00a0</li>\n\t<li>We use\u00a0<span style=\"font-weight: 700;\">'this' and 'that' with a singular noun.\u00a0</span></li>\n\t<li>And\u00a0<span style=\"font-weight: 700;\">we use 'these' and 'those' with a plural noun.</span>\u00a0<span style=\"font-weight: 700;\">'These'</span>\u00a0is\u00a0<span style=\"font-weight: 700;\">the plural version of 'this</span>' and<span style=\"font-weight: 700;\">\u00a0'those' is the plural version of 'that'.\u00a0</span></li>\n\t<li>We use\u00a0<span style=\"font-weight: 700;\">that/those\u00a0</span>to refer\u00a0<span style=\"font-weight: 700;\">to people and things, situations, and experiences</span>\u00a0that are\u00a0<span style=\"font-weight: 700;\">more distant, either in time or physically.</span></li>\n\t<li>In the given sentence\u00a0<span style=\"font-weight: 700;\">'students'\u00a0</span>is plural. And the given sentence is talking about\u00a0<span style=\"font-weight: 700;\">a situation that is distant in time.\u00a0</span><br />\n\t\u00a0</li>\n</ul>\n\n<p><span style=\"font-weight: 700;\"><u>Correct Answer:</u></span>\u00a0<i>The teacher said that all\u00a0<span style=\"font-weight: 700;\">those\u00a0</span>students who did not complete the tasks in the given time should attempt it again.\u00a0</i></p>\n", "pos": 0, "neg": 0}, {"n": 27, "si": 0, "text": "Select the option that can substitute/replace the bracketed word correctly and complete the sentence.<br />\n<br />\nI said I (don&rsquo;t) understand.", "comp": "", "opts": ["doesn&#39;t", "am doing", "didn&#39;t", "done"], "cidx": 2, "sol": "<p>The correct answer is&nbsp;<span style=\"font-weight: 700;\">&#39;3&#39;</span><span style=\"font-weight: 700;\">&nbsp;</span><span style=\"font-weight: 700;\">i.e.</span><span style=\"font-weight: 700;\">&nbsp;didn&#39;t</span>.</p>\n\n<p><span style=\"display: flex; gap: 6px; align-items: center;\"><span style=\"display: flex; gap: 6px; align-items: center;\"><span style=\"display: flex; gap: 6px; align-items: center;\"><span style=\"display: flex; gap: 6px; align-items: center;\"><span style=\"display: flex; gap: 6px; align-items: center;\"><img height=\"26px\" src=\"//cdn.testbook.com/resources/lms_creative_elements/key-point-image.png\" width=\"26px\" /><strong><span style=\"vertical-align: middle; font-size: 21px;\"><u>Key Points</u></span></strong></span></span></span></span></span></p>\n\n<ul>\n\t<li>The phrase<strong> &quot;I said I didn&#39;t understand&quot; </strong>correctly uses the past tense to match the past tense verb &quot;said&quot; in the sentence.</li>\n\t<li>The other options do not fit the context:\n\t<ul>\n\t\t<li><strong>&quot;Doesn&#39;t&quot;</strong> is present tense and does not match the past tense &quot;said.&quot;</li>\n\t\t<li><strong>&quot;Am doing&quot;</strong> is present continuous and does not relate to understanding.</li>\n\t\t<li><strong>&quot;Done&quot; </strong>is past participle and incorrect in this context.</li>\n\t</ul>\n\t</li>\n</ul>\n\n<p>Hence, the correct answer is&nbsp;<span style=\"font-weight: 700;\">option 3</span>.</p>\n", "pos": 0, "neg": 0}, {"n": 28, "si": 0, "text": "Select the most appropriate option to substitute the underlined segment in the given&nbsp;sentence. If there is no need to substitute it, select &#39;No substitution&#39;.<br />\nYou have finished your work, <u>have you</u>?", "comp": "", "opts": ["haven&#39;t you", "did you", "didn&#39;t you", "No substitution"], "cidx": 0, "sol": "<p>The correct answer is<strong> option 1) i.e. &#39;haven&#39;t you?&#39;</strong></p>\n\n<ul>\n\t<li>The <strong>sentence</strong> is in<strong> &#39;Interro-negative tone&#39;</strong>. In the sentence, <strong>&#39;the course of action (finish of work)&nbsp;is being questioned</strong>.&nbsp;</li>\n\t<li><strong>&#39;Have&#39;</strong> is used for &#39;<strong>present perfect tense</strong> (action began in the past, completed in the present)&#39;.&nbsp;</li>\n\t<li><strong>&#39;Haven&#39;t( have not) you&#39;</strong> is used for asking the <strong>current status of action (completed in present or not).&nbsp;</strong></li>\n\t<li>&#39;<strong>Haven&#39;t&#39;</strong> is the past particle form of the verb used in the interro-negative&nbsp;sense where there is a use and sense &#39;not&#39; in the sentence (appropriate structure: Have+ not= Haven&#39;t).</li>\n</ul>\n\n<p><strong>Thus and so, option 1)&nbsp;</strong></p>\n", "pos": 0, "neg": 0}, {"n": 29, "si": 0, "text": "<p><strong>Select the option that will substitute the underlined part of the given sentence. In case no substitution is needed, select &lsquo;No substitution required&rsquo;.</strong></p>\n\n<p>When I met the couple yesterday I noticed that the wife was <u>more taller</u> than her husband.</p>\n", "comp": "", "opts": ["much tallest", "much tall", "No substitution required", "&nbsp;taller"], "cidx": 3, "sol": "<p>The correct answer is&nbsp;<strong>option 4) i.e., &#39;taller&#39;.&nbsp;</strong></p>\n\n<p><span style=\"display: flex;gap: 6px;align-items: center;\"><img height=\"26px\" src=\"//cdn.testbook.com/resources/lms_creative_elements/key-point-image.png\" width=\"26px\" /><strong><span style=\"vertical-align: middle;font-size: 21px;\"><u>Key Points</u></span></strong></span></p>\n\n<ul>\n\t<li>The underlined part is <strong>grammatically incorrect.</strong></li>\n\t<li><strong>Taller&nbsp;</strong>is a&nbsp;<strong>comparative&nbsp;</strong>form of the adjective&nbsp;<strong>tall.&nbsp;</strong></li>\n\t<li>We cannot use<strong> more </strong>before it.&nbsp;</li>\n\t<li>Hence, <strong>option 4</strong> is the correct answer.&nbsp;</li>\n</ul>\n\n<p><span style=\"display: flex;gap: 6px;align-items: center;\"><img height=\"26px\" src=\"//cdn.testbook.com/resources/lms_creative_elements/additional-information-image.png\" width=\"26px\" /><strong><span style=\"vertical-align: middle;font-size: 21px;\"><u>Additional Information</u></span></strong></span></p>\n\n<ul>\n\t<li>&nbsp;For&nbsp;<strong>one syllable adjectives&nbsp;</strong>\n\n\t<ul>\n\t\t<li>add <strong>-er for the comparative</strong> and <strong>-est for the superlative.</strong></li>\n\t\t<li>If the adjective has a consonant + single vowel + consonant spelling, the final consonant must be doubled before adding the ending.</li>\n\t\t<li><strong>Examples -&nbsp;</strong>tall - taller -tallest; big - bigger -biggest</li>\n\t</ul>\n\t</li>\n\t<li><span style=\"\">For&nbsp;</span><span style=\"font-weight: 700; \">two syllables adjectives</span>\n\t<ul>\n\t\t<li><span style=\"font-weight: 700; \">\u200b</span>form the <strong>comparative either by adding -er</strong> or by <strong>preceding the adjective with more</strong>.</li>\n\t\t<li>These adjectives form the <strong>superlative</strong> either by <strong>adding -est</strong> or by <strong>preceding the adjective with most.</strong></li>\n\t\t<li><span style=\"font-weight: 700;\">Examples -&nbsp;</span>happy - happier -happiest; tangled - more tangled - most tangled</li>\n\t</ul>\n\t</li>\n\t<li>For&nbsp;<span style=\"font-weight: 700;\">three or more syllables adjectives</span>\n\t<ul>\n\t\t<li>form the <strong>comparative by putting more</strong> in front of the adjective, and the <strong>superlative by putting most</strong> in front.</li>\n\t\t<li><span style=\"font-weight: 700;\">Examples -&nbsp;</span>important - more important - most important</li>\n\t</ul>\n\t</li>\n</ul>\n", "pos": 0, "neg": 0}, {"n": 30, "si": 0, "text": "Select the most appropriate option to substitute the underlined segment in the given sentence.<br />\nA computer can&#39;t function without <u>it&#39;s</u> mother board.", "comp": "", "opts": ["its", "his", "their", "it is"], "cidx": 0, "sol": "<p style=\"\">The correct answer is<strong>&nbsp;<span font-weight:=\"\" style=\"\">Option 1</span>.</strong></p>\n\n<p style=\"\"><span style=\"display: flex;gap: 6px;align-items: center;\"><img height=\"26px\" src=\"//cdn.testbook.com/resources/lms_creative_elements/key-point-image.png\" width=\"26px\" /><strong><span style=\"vertical-align: middle;font-size: 21px;\"><u>Key Points</u></span></strong></span></p>\n\n<ul style=\"\">\n\t<li>In the given sentence, the word &quot;<strong>its</strong>&quot; is the correct possessive form of the pronoun &quot;it,&quot; showing ownership of the motherboard.</li>\n\t<li>The contraction &quot;<strong>it&#39;s</strong>&quot; means &quot;it is,&quot; which would be grammatically incorrect in this context.</li>\n\t<li>Thus, the correct choice is <strong>Option 1</strong>, &quot;its.&quot;</li>\n</ul>\n\n<p style=\"\">Therefore, the correct answer is&nbsp;<span font-weight:=\"\" style=\"\">Option 1</span>.</p>\n\n<p style=\"\"><span font-weight:=\"\" style=\"\">Correct sentence:</span>&nbsp;<em>A computer can&#39;t function without <strong>its</strong> motherboard.</em></p>\n", "pos": 0, "neg": 0}, {"n": 31, "si": 0, "text": "Select the most appropriate option to substitute the underlined segment in the given sentence.<br />\n<br />\nThe branches of the tree <u>is</u> very long.", "comp": "", "opts": ["had", "was", "are", "has"], "cidx": 2, "sol": "<p style=\"\">The correct answer is\u00a0<span style=\"font-weight: 700;\">'3'</span><span style=\"font-weight: 700;\">\u00a0i.e.</span><span style=\"font-weight: 700;\">\u00a0are</span>\u00a0<span style=\"font-weight: 700;\">.</span></p>\n\n<p style=\"\"><span style=\"display: flex; gap: 6px; align-items: center;\"><span style=\"display: flex; gap: 6px; align-items: center;\"><span style=\"display: flex; gap: 6px; align-items: center;\"><span style=\"display: flex; gap: 6px; align-items: center;\"><span style=\"display: flex;gap: 6px;align-items: center;\"><img height=\"26px\" src=\"//cdn.testbook.com/resources/lms_creative_elements/key-point-image.png\" width=\"26px\" /><strong><span style=\"vertical-align: middle;font-size: 21px;\"><u>Key Points</u></span></strong></span></span></span></span></span></p>\n\n<ul style=\"\">\n        <li>The subject of the sentence is <strong>\"The branches\"</strong>, which is plural.</li>\n        <li>In English, a plural subject must be followed by a plural verb.</li>\n        <li>The correct form of the verb to use with a plural subject in the present tense is <strong>\"are\"</strong>.</li>\n</ul>\n\n<p style=\"\"><span style=\"font-weight: 700;\">Correct sentence:</span>\u00a0<em>The branches of the tree\u00a0<strong>are</strong>\u00a0very long</em>.</p>\n\n<p style=\"\"><span style=\"display: flex;gap: 6px;align-items: center;\"><img height=\"26px\" src=\"//cdn.testbook.com/resources/lms_creative_elements/additional-information-image.png\" width=\"26px\" /><strong><span style=\"vertical-align: middle;font-size: 21px;\"><u>Additional Information</u></span></strong></span></p>\n\n<ul>\n        <li><strong>Subject-Verb Agreement:</strong>\n\n        <ul>\n                <li>Singular subjects take singular verbs.</li>\n                <li>Plural subjects take plural verbs.</li>\n                <li>Example: The cat runs fast. (singular) / The cats run fast. (plural)</li>\n        </ul>\n        </li>\n</ul>", "pos": 0, "neg": 0}, {"n": 32, "si": 0, "text": "<p><strong>Direction: Select the most appropriate option that can substitute the underlined segment in the given sentence.</strong></p>\n\n<p>The girl in the water whistled with full might and waved <strong><u>my arms</u></strong> to draw attention to her plight.</p>\n", "comp": "", "opts": ["her arms", "our arms", "his arms", "their arms"], "cidx": 0, "sol": "The error in the sentence is a pronoun mismatch. In the original sentence, it says, \"waved my arms,\" which suggests that the narrator (the person speaking or writing) is waving their own arms. However, considering the context, it is more likely that the girl in the water is the one waving her arms. Therefore, the pronoun \"her\" should be used to correctly refer to the girl in the water. Correct sentence: The girl in the water whistled with full might and waved her arms to draw attention to her plight.", "pos": 0, "neg": 0}, {"n": 33, "si": 0, "text": "<p style=\"\"><strong>Select the most appropriate option to substitute the underlined segment in the given sentence. If there is no need to substitute it, select &lsquo;No substitution required&rsquo;.</strong></p>\n\n<p style=\"\">Karan was so <u>deep effected</u> by the film that he didn&rsquo;t speak a word.</p>\n", "comp": "", "opts": ["<span style=\"\">deeper affect</span>", "<span style=\"\">deeply affected</span>", "<span style=\"\">deeply effective</span>", "<span style=\"\">No substitution required&nbsp;</span>"], "cidx": 1, "sol": "<p>The correct answer is <strong>&#39;deeply effected&#39;</strong></p>\n\n<p><span style=\"display: flex;gap: 6px;align-items: center;\"><img height=\"26px\" src=\"//cdn.testbook.com/resources/lms_creative_elements/key-point-image.png\" width=\"26px\" /><strong><span style=\"vertical-align: middle;font-size: 21px;\"><u>Key Points</u></span></strong></span></p>\n\n<ul>\n\t<li>The verb in the sentence is the <strong>affect</strong> that the film has on Karan. so the <strong>adverb</strong> is <strong>deep</strong> since it <strong>describes</strong> the affect.</li>\n\t<li>Adverbs usually end with the suffix -ly. So the correct form of the adverb in the sentence should be<strong> &#39;deeply&#39;.</strong></li>\n</ul>\n\n<ul>\n\t<li>The given sentence talks about the <strong>impact</strong> of the film and affect means impact. So the correct form here should be <strong>affected.</strong></li>\n</ul>\n\n<p><strong>Hence, the correct sentence is: </strong><em>Karan was so <strong><u>deeply affected</u></strong> by the film that he didn&rsquo;t speak a word</em>.</p>\n\n<p><span style=\"display: flex;gap: 6px;align-items: center;\"><img height=\"26px\" src=\"//cdn.testbook.com/resources/lms_creative_elements/additional-information-image.png\" width=\"26px\" /><strong><span style=\"vertical-align: middle;font-size: 21px;\"><u>Additional Information</u></span></strong></span></p>\n\n<ul>\n\t<li>Affect is a <strong>verb</strong> and <strong>effect </strong>is a <strong>noun </strong>usually.&nbsp; Affect stands for <strong>action</strong>.</li>\n\t<li>For example:\n\t<ul>\n\t\t<li>Lack of sleep <u><strong>affected</strong></u> her performance on the IQ test.</li>\n\t</ul>\n\t</li>\n\t<li>Effect is the noun. It can be understood as the <strong>result </strong>or<strong> consequence</strong> of a change or action.</li>\n\t<li>For example:\n\t<ul>\n\t\t<li>The cheat meals had an <u><strong>effect</strong></u> on the weight loss program.</li>\n\t</ul>\n\t</li>\n</ul>\n\n<p><span style=\"display: flex;gap: 6px;align-items: center;\"><img height=\"26px\" src=\"//cdn.testbook.com/resources/lms_creative_elements/alternate-methord-image.png\" width=\"26px\" /><strong><span style=\"vertical-align: middle;font-size: 21px;\"><u>Alternate Method</u></span></strong></span></p>\n\n<ul>\n\t<li>An adverb modifies the verb in the sentence</li>\n\t<li>Example: She ate her dinner <u><strong>quickly.</strong></u></li>\n\t<li>An adjective modifies the noun in the sentence\n\t<ul>\n\t\t<li>Example: Anam wore a <strong>beautiful</strong> gown at the wedding.</li>\n\t</ul>\n\t</li>\n</ul>\n", "pos": 0, "neg": 0}, {"n": 34, "si": 0, "text": "Select the most appropriate option to substitute the underlined segment in the given sentence. If no substitution is required, select &#39;No substitution required&#39;.<br />\n<br />\nManisha had a great feeling for those who were <u>junior than</u> her.", "comp": "", "opts": ["junior to", "junior of", "junior from", "No substitution required"], "cidx": 0, "sol": "<div><span style=\"\">The correct answer is <strong>Option 1</strong>.</span></div>\n\n<div>&nbsp;</div>\n\n<div><span style=\"\"><span style=\"display: flex;gap: 6px;align-items: center;\"><img height=\"26px\" src=\"//cdn.testbook.com/resources/lms_creative_elements/key-point-image.png\" width=\"26px\" /><strong><span style=\"vertical-align: middle;font-size: 21px;\"><u>Key Points</u></span></strong></span></span></div>\n\n<ul>\n\t<li><span style=\"\">The adjective &quot;<strong>junior</strong>&quot; is a comparative that is always followed by the preposition &quot;<strong>to</strong>&quot;, not &quot;<em>than</em>&quot;.</span></li>\n\t<li><span style=\"\">This rule also applies to other similar comparatives like &quot;<strong>senior</strong>&quot;, &quot;<strong>inferior</strong>&quot;, &quot;<strong>superior</strong>&quot;, etc.</span></li>\n\t<li><span style=\"\">Using &quot;<strong>than</strong>&quot; after &quot;<strong>junior</strong>&quot; is grammatically incorrect in standard English usage.</span></li>\n\t<li><span style=\"\">Therefore, the phrase &quot;<strong>junior than her</strong>&quot; must be corrected to &quot;<strong>junior to her</strong>&quot;.</span></li>\n</ul>\n\n<div><span style=\"\">Hence, the correct answer is <strong>Option 1: junior to</strong>.</span></div>\n\n<div>&nbsp;</div>\n\n<div><span style=\"\"><strong>Correct Sentence:</strong> <em>&quot;Manisha had a great feeling for those who were junior to her.&quot;</em></span></div>\n\n<div>&nbsp;</div>\n\n<div><span style=\"\"><span style=\"display: flex;gap: 6px;align-items: center;\"><img height=\"26px\" src=\"//cdn.testbook.com/resources/lms_creative_elements/additional-information-image.png\" width=\"26px\" /><strong><span style=\"vertical-align: middle;font-size: 21px;\"><u>Additional Information</u></span></strong></span></span></div>\n\n<ul>\n\t<li><span style=\"\"><strong>&quot;Junior to&quot;</strong> is the correct grammatical construction when comparing relative rank or age.</span></li>\n\t<li><span style=\"\">Examples: &quot;He is junior to me in the company.&quot; / &quot;They are senior to us by two years.&quot;</span></li>\n</ul>\n", "pos": 0, "neg": 0}, {"n": 35, "si": 0, "text": "<p>Select the most appropriate option that can substitute the underlined segment in the given sentence.</p>\n\n<p>She <u>will handling</u> the baby as tenderly as possible.</p>\n", "comp": "", "opts": ["wills handle", "shall handles", "will handle", "will handled"], "cidx": 2, "sol": "<p style=\"\">The correct answer is: <strong>will handle</strong>.</p>\n\n<p style=\"\"><span style=\"display: flex; gap: 6px; align-items: center;\"><span style=\"display: flex; gap: 6px; align-items: center;\"><span style=\"display: flex; gap: 6px; align-items: center;\"><span style=\"display: flex; gap: 6px; align-items: center;\"><span style=\"display: flex; gap: 6px; align-items: center;\"><img height=\"26px\" src=\"//cdn.testbook.com/resources/lms_creative_elements/key-point-image.png\" width=\"26px\" /><strong><span style=\"vertical-align: middle;font-size: 21px;\"><u>Key Points</u></span></strong></span></span></span></span></span></p>\n\n<ul style=\"\">\n\t<li>In the given sentence, the verb <span style=\"font-weight: 700;\">&#39;handling&#39;</span> is incorrect as it should be in its base form <span style=\"font-weight: 700;\">&#39;handle&#39;</span> to match with the auxiliary verb <span style=\"font-weight: 700;\">&#39;will&#39;</span>.</li>\n\t<li>The correct structure for future tense is <span style=\"font-weight: 700;\">&#39;will + base form of the verb&#39;</span>.</li>\n\t<li>Therefore, the correct form of the verb should be <span style=\"font-weight: 700;\">&#39;handle&#39;</span> instead of <span style=\"font-weight: 700;\">&#39;handling&#39;</span>.</li>\n</ul>\n\n<p style=\"\">Hence, the correct answer is&nbsp;<span style=\"font-weight: 700;\">option 3</span>.</p>\n\n<p style=\"\"><span style=\"font-weight: 700;\">Correct sentence:</span>&nbsp;<em>She will handle the baby as tenderly as possible</em>.<br />\n<br />\n<span style=\"display: flex; gap: 6px; align-items: center;\"><span style=\"display: flex; gap: 6px; align-items: center;\"><span style=\"display: flex; gap: 6px; align-items: center;\"><span style=\"display: flex; gap: 6px; align-items: center;\"><span style=\"display: flex; gap: 6px; align-items: center;\"><img height=\"26px\" src=\"//cdn.testbook.com/resources/lms_creative_elements/additional-information-image.png\" width=\"26px\" /><strong><span style=\"vertical-align: middle;font-size: 21px;\"><u>Additional Information</u></span></strong></span></span></span></span></span></p>\n\n<ul style=\"\">\n\t<li>When using modal verbs like <span style=\"font-weight: 700;\">&#39;will&#39;, &#39;shall&#39;, &#39;can&#39;, &#39;could&#39;, &#39;may&#39;, &#39;might&#39;, &#39;must&#39;, &#39;should&#39;</span>, always use the base form of the main verb.\n\n\t<ul>\n\t\t<li><strong>Example:</strong> <em>She <strong>can handle</strong> the situation well.</em></li>\n\t</ul>\n\t</li>\n</ul>\n", "pos": 0, "neg": 0}, {"n": 36, "si": 0, "text": "<p>Select the most appropriate option to substitute the underlined segment in the given sentence.</p>\n\n<p>They are the people <u>which are looking to expand</u> their horizons in the fast growing tourism industry.&nbsp;&nbsp;</p>\n", "comp": "", "opts": ["which looked to expand&nbsp;", "who is looking to expand&nbsp;", "who are looking to expand&nbsp;&nbsp;", "that are looked to expand&nbsp;"], "cidx": 2, "sol": "<div><span style=\"\">The correct answer is <strong>&#39;Option 3&#39; </strong>i.e.<strong> &#39;who are looking to expand&#39;.</strong></span></div>\n\n<div><span style=\"display: flex;gap: 6px;align-items: center;\"><img height=\"26px\" src=\"//cdn.testbook.com/resources/lms_creative_elements/key-point-image.png\" width=\"26px\" /><strong><span style=\"vertical-align: middle;font-size: 21px;\"><u>Key Points</u></span></strong></span></div>\n\n<ul>\n\t<li><span style=\"\">The <strong>sentence is referring</strong> to the group of people who have a certain aim to expand their horizons in the tourism industry. In English grammar, when<strong> referring to</strong> <strong>people</strong>, we use<strong> &#39;who&#39;</strong> not &#39;<strong>which&#39;.</strong></span></li>\n\t<li><span style=\"\">The error in the sentence lies in the usage of the relative pronoun &#39;which&#39; for referring to people. The correct relative pronoun to use for people is &#39;who&#39;.</span></li>\n\t<li><span style=\"\">The verb form <strong>&#39;are looking to expand&#39;</strong> correctly maintains agreement with the plural subject (the people).</span></li>\n</ul>\n\n<div><span style=\"\">Therefore, the<strong> corrected sentence</strong> should be &quot;<em>They are the people <strong>who are looking to expand</strong> their horizons in the fast growing tourism industry.&quot;</em></span></div>\n\n<div><span style=\"display: flex;gap: 6px;align-items: center;\"><img height=\"26px\" src=\"//cdn.testbook.com/resources/lms_creative_elements/additional-information-image.png\" width=\"26px\" /><strong><span style=\"vertical-align: middle;font-size: 21px;\"><u>Additional Information</u></span></strong></span></div>\n\n<ul>\n\t<li><span style=\"\"><strong>Option 1: </strong>&#39;which looked to expand&#39; is incorrect because &#39;which&#39; is not the correct relative pronoun to refer to people. Also, the use of past tense &#39;looked&#39; is not consistent with the other verbs of the sentence that are in the present tense.</span></li>\n\t<li><span style=\"\"><strong>Option 2: </strong>&#39;who is looking to expand&#39; is grammatically incorrect. &#39;Is looking&#39; would be incorrect verb agreement for the plural subject &#39;people&#39;.</span></li>\n\t<li><span style=\"\"><strong>Option 4:</strong> &#39;that are looked to expand&#39; is grammatically incorrect. The verb phrase &#39;are looked to expand&#39; doesn&#39;t make sense in the context of the sentence.</span></li>\n</ul>\n", "pos": 0, "neg": 0}, {"n": 37, "si": 0, "text": "<p>Select the most appropriate option that can substitute the underlined segment in the given sentence.</p>\n\n<p>The players distributed the reward <u>between themselves&nbsp;</u>&nbsp;</p>\n", "comp": "", "opts": ["between them&nbsp;", "among themselves&nbsp;", "between their selves", "amongst their self&nbsp;"], "cidx": 1, "sol": "The reflexive pronoun \"themselves\" implies \"they\" i.e. more than two people, players. Between is used to suggest only two things, so it is used incorrectly. The correct preposition to use is \"among.\"", "pos": 0, "neg": 0}, {"n": 38, "si": 0, "text": "<p><strong>Select the most appropriate option that can substitute the underlined segment in the given sentence.</strong></p>\n\n<p>He&nbsp;<u>will talk about</u>&nbsp;nothing but films.</p>\n", "comp": "", "opts": ["was talking at", "is talking in", "shall talking of", "talks about"], "cidx": 3, "sol": "The most appropriate option that can substitute the underlined segment in the given sentence is talks about. The original sentence states that \"He will talk about nothing but films.\"\u00a0\"talks about\" is in the simple present tense, which can be used to express general truths or habitual actions.", "pos": 0, "neg": 0}, {"n": 39, "si": 0, "text": "<p>Select the most appropriate option that can substitute the underlined word in the given sentence.</p>\n\n<p>Modest stores and welcoming residents populated the <u>charming</u> tiny town.&nbsp;</p>\n", "comp": "", "opts": ["hideous", "nasty", "unpleasant", "delightful"], "cidx": 3, "sol": "The correct answer is: delightful. The word \"delightful\" correctly substitutes \"charming\" as it conveys a sense of pleasure and attractiveness, fitting the description of the tiny town in the sentence.", "pos": 0, "neg": 0}, {"n": 40, "si": 0, "text": "<p>Select the most appropriate option to substitute the underlined segment in the given sentence. If there is no need to substitute it, select &#39;No substitution required&#39;.</p>\n\n<p>The green shirt is too <u>lose for me</u> to wear.&nbsp;</p>\n", "comp": "", "opts": ["lost for me", "No substitution required", "loose for me", "loss for me"], "cidx": 2, "sol": "<div>The correct answer is&nbsp;<strong>&#39;loose for me&#39;.</strong></div>\n\n<div><span style=\"display: flex;gap: 6px;align-items: center;\"><img height=\"26px\" src=\"//cdn.testbook.com/resources/lms_creative_elements/key-point-image.png\" width=\"26px\" /><strong><span style=\"vertical-align: middle;font-size: 21px;\"><u>Key Points</u></span></strong></span></div>\n\n<ul>\n\t<li>The sentence is about the <strong>clothe&nbsp;<em>i.e.&nbsp;</em>shirt.&nbsp;</strong></li>\n\t<li>Either it can be <strong>tight </strong>or <strong>loose</strong>.</li>\n\t<li>Hence, the correct answer is&nbsp;<strong>option 3.</strong></li>\n</ul>\n\n<div><span style=\"display: flex;gap: 6px;align-items: center;\"><img height=\"26px\" src=\"//cdn.testbook.com/resources/lms_creative_elements/additional-information-image.png\" width=\"26px\" /><strong><span style=\"vertical-align: middle;font-size: 21px;\"><u>Additional Information</u></span></strong></span>Let&#39;s understand the meaning of other words.</div>\n\n<ul>\n\t<li><strong>Lost - not knowing one&#39;s whereabouts</strong> - <em>I <strong>lost </strong>my younger brother in a big &#39;Kumbh&#39; fair.</em></li>\n\t<li><strong>Loss - the process of losing something</strong> - <em>He faced financial <strong>loss </strong>at an&nbsp;early age and gained experience&nbsp;to tackle such issues.</em></li>\n</ul>\n", "pos": 0, "neg": 0}, {"n": 41, "si": 0, "text": "<p><strong>Select the most appropriate option to substitute the underlined segment in the given sentence.</strong></p>\n\n<p>All the employees of the nationalized banks are <u>in</u> strike.</p>\n", "comp": "", "opts": ["with", "by", "for", "on"], "cidx": 3, "sol": "<p><span style=\"font-variant-numeric: normal; font-variant-east-asian: normal; white-space: pre-wrap;\">The correct answer is<span style=\"font-weight: 700;\">- on.</span></span></p>\n\n<p><span style=\"display: flex;gap: 6px;align-items: center;\"><img height=\"26px\" src=\"//cdn.testbook.com/resources/lms_creative_elements/key-point-image.png\" width=\"26px\" /><strong><span style=\"vertical-align: middle;font-size: 21px;\"><u>Key Points</u></span></strong></span>\u200b</p>\n\n<ul>\n\t<li><span style=\"font-weight: 700;\">\u200b</span>There are some fixed prepositional phrases given below:\n\n\t<ul>\n\t\t<li><span style=\"font-weight: 700;\">\u200bby the dint of, out of jealousy, on strike, by the dozen,&nbsp;owing to, on a trip, for a change, etc.</span></li>\n\t</ul>\n\t</li>\n\t<li>For example:\n\t<ul>\n\t\t<li><em>\u200bI went&nbsp;<span style=\"font-weight: 700;\">on a trip</span>&nbsp;to Goa last month.</em></li>\n\t</ul>\n\t</li>\n\t<li>\u200bThe phrase &#39;<b>on strike</b>&#39; means&nbsp;<strong>(of employees) refuse to work as a form of organized protest, typically in an attempt to obtain a particular concession from their employer<span style=\"font-weight: 700;\">.</span></strong></li>\n\t<li>Thus the preposition&nbsp;&#39;<b>on</b>&#39; will be the correct choice.<br />\n\t&nbsp;</li>\n</ul>\n\n<p><u style=\"font-weight: 700;\">Correct Sentence</u><span style=\"font-weight: 700;\">:&nbsp;</span><em>All the employees of the nationalized banks are <strong>on </strong>strike.</em></p>\n\n<p><em><span style=\"font-weight: 700;\"><span style=\"display: flex;gap: 6px;align-items: center;\"><img height=\"26px\" src=\"//cdn.testbook.com/resources/lms_creative_elements/additional-information-image.png\" width=\"26px\" /><strong><span style=\"vertical-align: middle;font-size: 21px;\"><u>Additional Information</u></span></strong></span></span></em></p>\n\n<ul>\n\t<li>There are some&nbsp;<span style=\"font-weight: 700;\">verbs/nouns/adjectives</span>&nbsp;which are followed by<span style=\"font-weight: 700;\">&nbsp;fixed</span>&nbsp;preposition given below:\n\n\t<ul>\n\t\t<li><span style=\"font-weight: 700;\">\u200bExonerate from, refrain from, suspicious of,&nbsp;interested in, inured to, accused of, predilection for, respite from, vexed at,</span>&nbsp;etc.</li>\n\t</ul>\n\t</li>\n\t<li>Example:\n\t<ul>\n\t\t<li><em>\u200b</em>After spending some time on the island they became<span style=\"font-weight: 700;\">&nbsp;inured to&nbsp;</span>the hardships.</li>\n\t</ul>\n\t</li>\n</ul>\n", "pos": 0, "neg": 0}, {"n": 42, "si": 0, "text": "<p>Select the option that will improve the underlined part of the sentence. In case no improvement is needed, select &lsquo;No improvement required&rsquo;.</p>\n\n<p>He blew out the candle and <u>went to sleepy.&nbsp;</u></p>\n", "comp": "", "opts": ["went to sleep", "go on sleep", "No improvement required", "gone to sleep"], "cidx": 0, "sol": "The correct answer is \"<span style=\"color: rgb(33, 37, 41);\">went to sleep\". It\u00a0correctly uses the past tense \"went to sleep\" to describe the action of the subject after blowing out the candle. Improved sentence:\u00a0</span>He blew out the candle and\u00a0went to sleep.", "pos": 0, "neg": 0}, {"n": 43, "si": 0, "text": "<p>Select the option that will improve the given sentence by using the most appropriate verb.</p>\n\n<p>Alexa have being working as a teacher for five years now.</p>\n", "comp": "", "opts": ["Alexa has being working as a teacher for five years now.&nbsp;", "Alexa has been working as a teacher for five years now.", "Alexa was been working as a teacher for five years now", "Alexa is being working as a teacher for five years now."], "cidx": 1, "sol": "<p>The correct answer is: <strong>B. Alexa has been working as a teacher for five years now.</strong> The sentence requires the present perfect continuous tense (\"has been working\") because the subject \"Alexa\" is singular and the action started in the past and continues to the present.</p>", "pos": 0, "neg": 0}, {"n": 44, "si": 0, "text": "<p><strong>Select the most appropriate option to substitute the underlined segment in the given sentence. If there is no need to substitute it, select No Improvement.</strong></p>\n\n<p>When the little girl <u>loses her doll</u>, she began to cry.</p>\n", "comp": "", "opts": ["No Improvement", "loss her doll", "losing her doll", "lost her doll"], "cidx": 3, "sol": "<p>The correct answer is <strong>&#39;lost her doll&#39;</strong>.</p>\n\n<p><span style=\"display: flex;gap: 6px;align-items: center;\"><img height=\"26px\" src=\"//cdn.testbook.com/resources/lms_creative_elements/key-point-image.png\" width=\"26px\" /><strong><span style=\"vertical-align: middle;font-size: 21px;\"><u>Key Points</u></span></strong></span></p>\n\n<ul>\n\t<li>The given sentence is in the <strong>past tense</strong> as can be seen by the word&nbsp;<strong>&#39;began&#39;.</strong></li>\n\t<li>The first half of the sentence should be in the past tense. So, we should use&nbsp;<strong>&#39;lost her doll&#39;.</strong></li>\n\t<li><strong>Option 2&nbsp;</strong>&quot;loss her doll&quot; is grammatically incorrect.</li>\n\t<li><strong>Option 3 </strong>&quot;losing her doll&quot;&nbsp;does not fit the context as it is a participle.</li>\n\t<li>Hence, the correct sentence is:&nbsp;<em>When the little girl&nbsp;<strong>lost her doll</strong>, she began to cry.</em></li>\n</ul>\n", "pos": 0, "neg": 0}, {"n": 45, "si": 0, "text": "Select the most appropriate form of comparative degree that can substitute the underlined segment in the given sentence.<br />\n<br />\nMaheshwari is three years <u>junior than me</u>.", "comp": "", "opts": ["junior than that of me", "more junior than me", "junior than any other to me", "junior to me"], "cidx": 3, "sol": "<p style=\"\">The correct answer is\u00a0<span style=\"font-weight: 700;\">'4'</span><span style=\"font-weight: 700;\">\u00a0i.e.</span><span style=\"font-weight: 700;\">\u00a0junior to me</span>\u00a0<span style=\"font-weight: 700;\">.</span></p>\n\n<p style=\"\"><span style=\"display: flex; gap: 6px; align-items: center;\"><span style=\"display: flex; gap: 6px; align-items: center;\"><span style=\"display: flex; gap: 6px; align-items: center;\"><span style=\"display: flex; gap: 6px; align-items: center;\"><span style=\"display: flex;gap: 6px;align-items: center;\"><img height=\"26px\" src=\"//cdn.testbook.com/resources/lms_creative_elements/key-point-image.png\" width=\"26px\" /><strong><span style=\"vertical-align: middle;font-size: 21px;\"><u>Key Points</u></span></strong></span></span></span></span></span></p>\n\n<ul style=\"\">\n        <li>The word <strong>\"junior\"</strong> is a comparative adjective that does not take the word <strong>\"than\"</strong> after it. Instead, it is followed by <strong>\"to\"</strong>.</li>\n        <li>In the given sentence, the usage of <strong>\"junior than me\"</strong> is grammatically incorrect.</li>\n        <li>The correct form of the sentence would replace <strong>\"junior than me\"</strong> with <strong>\"junior to me\"</strong>.</li>\n</ul>\n\n<p style=\"\"><span style=\"font-weight: 700;\">Correct sentence:</span>\u00a0<em>Maheshwari is three years\u00a0<strong>junior to me</strong>.</em></p>\n\n<p style=\"\"><span style=\"display: flex;gap: 6px;align-items: center;\"><img height=\"26px\" src=\"//cdn.testbook.com/resources/lms_creative_elements/additional-information-image.png\" width=\"26px\" /><strong><span style=\"vertical-align: middle;font-size: 21px;\"><u>Additional Information</u></span></strong></span></p>\n\n<ul>\n        <li>Other adjectives like <strong>senior, inferior, superior, elder, and preferable</strong> also follow the same rule and take <strong>\"to\"</strong> instead of <strong>\"than\"</strong> after them.</li>\n        <li><strong>Example:</strong> She is senior to me in the company.</li>\n        <li>Always remember this rule when using such adjectives in comparative degrees.</li>\n</ul>", "pos": 0, "neg": 0}, {"n": 46, "si": 0, "text": "<p><strong>Select the most appropriate option that can substitute the underlined segment in the given sentence.</strong></p>\n\n<p>We will leave <u>towards</u> 6.00 a.m.</p>\n", "comp": "", "opts": ["at", "on", "for", "from"], "cidx": 0, "sol": "<p>The correct answer is &quot;<span style=\"\"><strong>at</strong>&quot;.</span></p>\n\n<p><span style=\"\"><span style=\"display: flex;gap: 6px;align-items: center;\"><img height=\"26px\" src=\"//cdn.testbook.com/resources/lms_creative_elements/key-point-image.png\" width=\"26px\" /><strong><span style=\"vertical-align: middle;font-size: 21px;\"><u>Key Points</u></span></strong></span></span></p>\n\n<ul>\n\t<li>In the given sentence the usage of the preposition &quot;<strong>towards</strong>&quot;&nbsp;is <strong>incorrect</strong>.</li>\n\t<li>We need to use the preposition &quot;<strong>at</strong>&quot; in the given sentence.</li>\n\t<li>The preposition &quot;<strong>at</strong>&quot; is used before&nbsp;<strong>specific times of the day.</strong></li>\n\t<li>The preposition <strong>&quot;at&quot;</strong> is also known as the&nbsp;<strong>preposition of time.</strong></li>\n</ul>\n\n<p><strong>\u200bThe correct sentence is:<em>&nbsp;</em></strong><em>We will leave <strong><u>at</u>&nbsp;</strong>6.00 a.m.</em></p>\n\n<p>Hence, the correct answer is<strong> option 1.</strong></p>\n", "pos": 0, "neg": 0}, {"n": 47, "si": 0, "text": "<p><strong>Select the appropriate adverb for the underlined word in the sentence.</strong></p>\n\n<p>We considered <u>in brief</u> the long term solution to the problem.</p>\n", "comp": "", "opts": ["briefly", "briefless", "brief", "briefness"], "cidx": 0, "sol": "The correct answer is\u00a0'briefly'.\u00a0Briefly\u00a0means\u00a0for a short time; quickly.\u00a0Example: He stopped over\u00a0briefly\u00a0in Los Angeles.\u00a0Correct Sentence:\u00a0We considered\u00a0briefly\u00a0the long-term solution to the problem.", "pos": 0, "neg": 0}, {"n": 48, "si": 0, "text": "<p><strong>Select the most appropriate option that can substitute the underlined segment in the given sentence.</strong></p>\n\n<p>My friend Meera and her mother <u>is visiting</u> me this weekend.</p>\n", "comp": "", "opts": ["have visiting&nbsp;", "am visiting", "was visiting", "are visiting"], "cidx": 3, "sol": "The subject of the sentence is \"My friend Meera and her mother\", which is plural. Therefore, the verb must also be plural to agree with the subject. \"Are visiting\" is the correct verb form for a plural subject.", "pos": 0, "neg": 0}, {"n": 49, "si": 0, "text": "<p>Select the most appropriate option to substitute the underlined segment in the given sentence.</p>\n\n<p>The boys and the teacher <u>wants to win</u>.</p>\n", "comp": "", "opts": ["wants to won", "want to won", "want win", "want to win"], "cidx": 3, "sol": "The correct answer is &quot;<strong>want to win.</strong>&quot;<br />\n<br />\n<span style=\"display: flex;gap: 6px;align-items: center;\"><img height=\"26px\" src=\"//cdn.testbook.com/resources/lms_creative_elements/key-point-image.png\" width=\"26px\" /><strong><span style=\"vertical-align: middle;font-size: 21px;\"><u>Key Points</u></span></strong></span>&nbsp;\n\n<ul>\n\t<li><strong>The subject of the sentence is &quot;the boys and the teacher,&quot; which is plural. </strong></li>\n\t<li><strong>Therefore, the verb should also be plural.</strong></li>\n\t<li><strong>&quot;Want&quot; is the correct verb form for the plural subject.</strong></li>\n\t<li>&quot;To win&quot; is the correct infinitive phrase to express the desired action.</li>\n\t<li>Thus, the correct phrase to use in the blank would be &quot;want to win.&quot;</li>\n\t<li>The sentence would be: The boys and the teacher <u>want to win</u>.</li>\n</ul>\nHence, <strong>the correct answer is option 4</strong>.", "pos": 0, "neg": 0}, {"n": 50, "si": 0, "text": "<p>Select the most appropriate option that can substitute the underlined word in the given sentence.</p>\n\n<p>Loud noise <u>effects</u> our ability to concentrate.</p>\n", "comp": "", "opts": ["intensifies", "bestows", "affects", "results"], "cidx": 2, "sol": "<p>The correct answer is: <strong>affects</strong>. \"Affects\" is the correct verb meaning to influence or produce a change in something, whereas \"effects\" is typically used as a noun. In this sentence, a verb is required to describe the impact of loud noise on the ability to concentrate.</span></div>", "pos": 0, "neg": 0}];
+var SEC_NAMES  = ["Test"];
+var SEC_QNUMS  = [[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50]];
+var ANALYSIS   = {};   // attempt/rank stats from Testbook (may be empty)
+var TOTAL      = 50;
+var NUM_SECS   = SEC_NAMES.length;
+
+// State
+var answers   = {};  // qnum(str) -> optIdx or -1
+var marked    = {};  // qnum(str) -> bool
+var qTimes    = {};  // qnum(str) -> seconds spent
+var qVisited  = {};  // qnum(str) -> bool
+var submitted = false;
+var reattempt = true;
+
+var curQ   = 1;       // 1-based
+var curSec = 0;
+var curMode = 'attempt'; // 'attempt' | 'view'
+var solFilter = -1;   // -1 = all sections, else section index
+
+// timer
+var timerSecs = 108000;
+var timerInterval = null;
+var paused = false;
+var qStartTime = Date.now();
+
+// init
+Object.keys(Q_MAP).forEach(function(k){
+  answers[k] = -1;
+  marked[k]  = false;
+  qTimes[k]  = 0;
+  qVisited[k] = false;
+});
+
+// ══════════════════════════════════════════
+// BUILD DOM
+// ══════════════════════════════════════════
+function buildAll() {
+  buildSecTabs();
+  buildAttemptCards();
+  buildSidePanel();
+  buildSolQRow();
+  buildSolSecCircles();
+  buildViewCards();
+  goToQ(1);
+  startTimer();
+}
+
+function buildSecTabs() {
+  var t = document.getElementById('sec-tabs');
+  t.innerHTML = '';
+  SEC_NAMES.forEach(function(name, i) {
+    var b = document.createElement('button');
+    b.className = 'stab' + (i===0?' active':'');
+    b.textContent = name;
+    b.onclick = function(){ secTabClick(i); };
+    t.appendChild(b);
+  });
+}
+
+function buildAttemptCards() {
+  var body = document.getElementById('attempt-body');
+  body.innerHTML = '';
+  Q_DATA.forEach(function(q) {
+    var div = document.createElement('div');
+    div.className = 'qcard-attempt';
+    div.id = 'acard' + q.n;
+    div.innerHTML = buildAttemptCard(q);
+    body.appendChild(div);
+  });
+}
+
+function buildAttemptCard(q) {
+  var pos = q.pos || ''; var neg = q.neg || '';
+  var badges = '';
+  if(pos) badges += '<span class="badge-pos">+ ' + pos + '</span>';
+  if(neg) badges += '<span class="badge-neg">- ' + neg + '</span>';
+
+  var comp = q.comp ? '<div class="passage">' + q.comp + '</div>' : '';
+
+  var opts = '';
+  q.opts.forEach(function(ot, oi) {
+    opts += '<div class="opt-a" id="opta_' + q.n + '_' + oi + '" onclick="selectOpt(' + q.n + ',' + oi + ')">' +
+      '<span class="opt-num">' + (oi+1) + '.</span>' +
+      '<span class="opt-body-a">' + ot + '</span>' +
+      '<span class="opt-icon" id="oicon_' + q.n + '_' + oi + '"></span>' +
+      '</div>';
+  });
+
+  return '<div class="qrow-hdr">' +
+    '<div class="qnum-circle" id="qnc' + q.n + '">' + q.n + '</div>' +
+    '<div class="qtimer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span id="qt' + q.n + '">00:00</span></div>' +
+    badges +
+    '<div class="qicons">' +
+      '<button class="qicon-btn" id="qibookmark' + q.n + '" onclick="toggleBookmark(' + q.n + ',event)" title="Bookmark">🔖</button>' +
+      '<button class="qicon-btn" id="qistar' + q.n + '" onclick="toggleStar(' + q.n + ',event)" title="Mark">☆</button>' +
+    '</div>' +
+    '</div>' +
+    '<div class="qcard-body-a">' +
+    comp +
+    '<div class="qtext">' + q.text + '</div>' +
+    '<div class="opts-wrap">' + opts + '</div>' +
+    '</div>';
+}
+
+function buildSidePanel() {
+  var sp = document.getElementById('sp-sections');
+  sp.innerHTML = '';
+  SEC_NAMES.forEach(function(name, si) {
+    var block = document.createElement('div');
+    block.className = 'sp-sec-block';
+    block.id = 'spblock' + si;
+    block.innerHTML =
+      '<div class="sp-sec-hdr" onclick="toggleSpSec(' + si + ')">' +
+        '<span>' + name + '</span>' +
+        '<span id="sp-arrow' + si + '">∧</span>' +
+      '</div>' +
+      '<div class="sp-sec-stats" id="spstats' + si + '"></div>' +
+      '<div class="sp-pal" id="sppal' + si + '"></div>';
+    sp.appendChild(block);
+  });
+  // Build palette buttons
+  Q_DATA.forEach(function(q) {
+    var btn = document.createElement('button');
+    btn.className = 'pal-btn';
+    btn.id = 'palbtn' + q.n;
+    btn.textContent = q.n;
+    btn.onclick = function(){ goToQ(q.n); closePanel(); };
+    document.getElementById('sppal' + q.si).appendChild(btn);
+  });
+  refreshPalette();
+}
+
+function buildSolQRow() {
+  var row = document.getElementById('sol-qrow');
+  row.innerHTML = '';
+  Q_DATA.forEach(function(q) {
+    var btn = document.createElement('button');
+    btn.className = 'sol-qbtn';
+    btn.id = 'sqbtn' + q.n;
+    btn.textContent = q.n;
+    btn.onclick = function(){ solScrollToQ(q.n); };
+    row.appendChild(btn);
+  });
+}
+
+function buildViewCards() {
+  var body = document.getElementById('view-body');
+  body.innerHTML = '';
+  Q_DATA.forEach(function(q) {
+    var div = document.createElement('div');
+    div.className = 'sol-card';
+    div.id = 'vcard' + q.n;
+    div.innerHTML = buildViewCard(q);
+    body.appendChild(div);
+  });
+}
+
+function buildViewCard(q) {
+  var pos = q.pos||''; var neg = q.neg||'';
+  var badges = '';
+
+  var myAns   = answers[String(q.n)];
+  var correct = q.cidx;
+
+  // Status badge — show whether the user skipped / got it right / got it wrong
+  if(myAns === -1 || myAns === undefined) {
+    badges += '<span class="status-badge status-skip">⏭ Skipped</span>';
+  } else if(myAns === correct) {
+    badges += '<span class="status-badge status-ok">✓ Correct</span>';
+  } else {
+    badges += '<span class="status-badge status-err">✗ Incorrect</span>';
+  }
+
+  if(pos) badges += '<span class="badge-pos">+ '+pos+'</span>';
+  if(neg) badges += '<span class="badge-neg">- '+neg+'</span>';
+
+  var comp = q.comp ? '<div class="passage">'+q.comp+'</div>' : '';
+
+  var opts = '';
+  q.opts.forEach(function(ot, oi) {
+    var cls = 'opt-sol';
+    var icon = '';
+    var youLabel = '';
+    var isCorrect = (oi === correct);
+    var isMine    = (myAns !== -1 && myAns !== undefined && oi === myAns);
+
+    if(isCorrect) {
+      cls += ' sol-correct';
+      icon = '<span class="opt-sol-icon" style="color:#4caf50;font-size:18px">✓</span>';
+    }
+    if(isMine && !isCorrect) {
+      cls += ' sol-wrong-sel';
+      icon = '<span class="opt-sol-icon" style="color:#f44336;font-size:18px">✗</span>';
+    }
+    if(isMine) {
+      youLabel = '<span class="your-answer-badge">Your Answer</span>';
+    }
+
+    opts += '<div class="' + cls + '">' +
+      '<span class="opt-sol-num">' + (oi+1) + '.</span>' +
+      '<span class="opt-sol-body">' + ot + '</span>' +
+      youLabel +
+      icon +
+      '</div>';
+  });
+
+  var correctAns = correct + 1;
+  var pctHtml = '<span class="correct-pct">-- got this right</span>';
+
+  var solHtml = '';
+  if(q.sol) {
+    solHtml = '<div class="solution-section">' +
+      '<div class="sol-heading">Solution</div>' +
+      '<div class="sol-text">' + q.sol + '</div>' +
+      '</div>';
+  }
+
+  var timeSpent = qTimes[String(q.n)] || 0;
+  var ts = timeSpent < 3 ? timeSpent + 'sec' : Math.floor(timeSpent/60) ? Math.floor(timeSpent/60)+'min '+( timeSpent%60)+'sec' : timeSpent+'sec';
+
+  return '<div class="sol-card-hdr">' +
+    '<div class="qnum-circle ' + stateClass(q.n) + '" style="width:28px;height:28px;font-size:12px">' + q.n + '</div>' +
+    '<div class="qtimer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' + ts + '</div>' +
+    badges +
+    '</div>' +
+    '<div class="sol-card-body">' +
+    comp +
+    '<div class="qtext">' + q.text + '</div>' +
+    '<div class="opts-wrap" style="margin-top:14px">' + opts + '</div>' +
+    '<div class="correct-bar"><span>Correct Answers Is: ' + correctAns + '</span>' + pctHtml + '</div>' +
+    solHtml +
+    '</div>';
+}
+
+// ══════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════
+function goToQ(n) {
+  // save time for previous question
+  if(curQ && curMode === 'attempt') {
+    qTimes[String(curQ)] += Math.round((Date.now() - qStartTime) / 1000);
+    qVisited[String(curQ)] = true;
+    // update per-question timer display
+    var ts = qTimes[String(curQ)];
+    var el = document.getElementById('qt' + curQ);
+    if(el) el.textContent = (ts >= 60 ? Math.floor(ts/60)+':'+pad(ts%60) : '00:'+pad(ts));
+  }
+  // hide previous card
+  var prevCard = document.getElementById('acard' + curQ);
+  if(prevCard) prevCard.classList.remove('active-card');
+
+  qStartTime = Date.now();
+  curQ = n;
+  qVisited[String(n)] = true;
+
+  var q = Q_DATA[n-1];
+  curSec = q.si;
+  // update sec tabs
+  document.querySelectorAll('.stab').forEach(function(b,i){
+    b.classList.toggle('active', i === curSec);
+  });
+  // show current card only
+  var card = document.getElementById('acard' + n);
+  if(card) {
+    card.classList.add('active-card');
+    window.scrollTo(0, 0);
+  }
+  refreshPalette();
+}
+
+function secTabClick(si) {
+  curSec = si;
+  document.querySelectorAll('.stab').forEach(function(b,i){
+    b.classList.toggle('active', i===si);
+  });
+  // go to first q of this section
+  if(SEC_QNUMS[si] && SEC_QNUMS[si].length) goToQ(SEC_QNUMS[si][0]);
+}
+
+function saveAndNext() {
+  // just advance
+  nextQ();
+}
+
+function markAndNext() {
+  marked[String(curQ)] = true;
+  refreshPalette();
+  updateQCircle(curQ);
+  nextQ();
+}
+
+function clearCurrent() {
+  answers[String(curQ)] = -1;
+  marked[String(curQ)] = false;
+  renderOpts(curQ);
+  updateQCircle(curQ);
+  refreshPalette();
+}
+
+function nextQ() {
+  if(curQ < TOTAL) goToQ(curQ + 1);
+}
+
+function prevQ() {
+  if(curQ > 1) goToQ(curQ - 1);
+}
+
+// ══════════════════════════════════════════
+// OPTION SELECT
+// ══════════════════════════════════════════
+function selectOpt(qn, oi) {
+  if(submitted && !reattempt) return;
+  if(submitted && reattempt) {
+    // reattempt mode: allow re-selection
+    answers[String(qn)] = oi;
+    renderOpts(qn);
+    return;
+  }
+  // toggle
+  if(answers[String(qn)] === oi) {
+    answers[String(qn)] = -1;
+  } else {
+    answers[String(qn)] = oi;
+  }
+  renderOpts(qn);
+  updateQCircle(qn);
+  refreshPalette();
+}
+
+function renderOpts(qn) {
+  var q = Q_DATA[qn-1];
+  q.opts.forEach(function(_, oi) {
+    var el = document.getElementById('opta_' + qn + '_' + oi);
+    if(!el) return;
+    el.classList.remove('sel','reveal-correct','reveal-wrong');
+    var icon = document.getElementById('oicon_' + qn + '_' + oi);
+    if(icon) icon.innerHTML = '';
+
+    if(submitted && !reattempt) {
+      if(oi === q.cidx) {
+        el.classList.add('reveal-correct');
+        if(icon) icon.innerHTML = '<span style="color:#4caf50;font-size:18px">✓</span>';
+      } else if(oi === answers[String(qn)] && answers[String(qn)] !== q.cidx) {
+        el.classList.add('reveal-wrong');
+        if(icon) icon.innerHTML = '<span style="color:#f44336">✗ <span style="color:#aaa;font-size:12px">○</span> <span style="color:#4caf50">↺</span></span>';
+      }
+    } else if(answers[String(qn)] === oi) {
+      el.classList.add('sel');
+    }
+  });
+}
+
+// ══════════════════════════════════════════
+// Q CIRCLE / PALETTE
+// ══════════════════════════════════════════
+function stateClass(qn) {
+  if(submitted) {
+    var ans = answers[String(qn)];
+    var correct = Q_MAP[String(qn)].correct;
+    if(ans === -1) return '';
+    return ans === correct ? 'correct' : 'wrong';
+  }
+  if(marked[String(qn)]) return 'marked';
+  if(answers[String(qn)] !== -1) return 'attempted';
+  return '';
+}
+
+function updateQCircle(qn) {
+  var el = document.getElementById('qnc' + qn);
+  if(!el) return;
+  el.className = 'qnum-circle ' + stateClass(qn);
+}
+
+function refreshPalette() {
+  // update palette buttons
+  Q_DATA.forEach(function(q) {
+    var btn = document.getElementById('palbtn' + q.n);
+    if(!btn) return;
+    btn.className = 'pal-btn';
+    var sc = stateClass(q.n);
+    if(sc === 'attempted') btn.classList.add('p-attempted');
+    else if(sc === 'marked') btn.classList.add('p-marked');
+    else if(sc === 'correct') btn.classList.add('p-correct');
+    else if(sc === 'wrong') btn.classList.add('p-wrong');
+    if(q.n === curQ) btn.classList.add('p-current');
+  });
+  // update section stats
+  SEC_NAMES.forEach(function(_, si) {
+    var qns = SEC_QNUMS[si];
+    var att=0, mrk=0, unatt=0, unseen=0;
+    qns.forEach(function(qn) {
+      if(marked[String(qn)]) mrk++;
+      else if(answers[String(qn)] !== -1) att++;
+      else if(!qVisited[String(qn)]) unseen++;
+      else unatt++;
+    });
+    var el = document.getElementById('spstats' + si);
+    if(el) el.innerHTML =
+      '<div class="sp-stat"><div class="dot" style="background:#f44336"></div><span style="color:#f44336">★ '+mrk+'</span></div>' +
+      '<div class="sp-stat"><div class="dot" style="background:#2196f3"></div><span>'+att+'</span></div>' +
+      '<div class="sp-stat"><div class="dot" style="background:#bbb"></div><span>'+unatt+'</span></div>' +
+      '<div class="sp-stat"><div class="dot" style="border:1.5px solid #ccc;background:#fff"></div><span>'+unseen+'</span></div>';
+  });
+  // update q circles for all
+  Q_DATA.forEach(function(q) { updateQCircle(q.n); });
+}
+
+function toggleSpSec(si) {
+  var pal = document.getElementById('sppal'+si);
+  var arrow = document.getElementById('sp-arrow'+si);
+  if(!pal) return;
+  if(pal.style.display === 'none') {
+    pal.style.display = '';
+    if(arrow) arrow.textContent = '∧';
+  } else {
+    pal.style.display = 'none';
+    if(arrow) arrow.textContent = '∨';
+  }
+}
+
+// ══════════════════════════════════════════
+// BOOKMARK / STAR
+// ══════════════════════════════════════════
+function toggleBookmark(qn, e) {
+  e.stopPropagation();
+  var btn = document.getElementById('qibookmark'+qn);
+  if(!btn) return;
+  btn.classList.toggle('bookmark-on');
+}
+function toggleStar(qn, e) {
+  e.stopPropagation();
+  marked[String(qn)] = !marked[String(qn)];
+  var btn = document.getElementById('qistar'+qn);
+  if(btn) { btn.classList.toggle('star-on', marked[String(qn)]); btn.textContent = marked[String(qn)] ? '★' : '☆'; }
+  updateQCircle(qn);
+  refreshPalette();
+}
+
+// ══════════════════════════════════════════
+// PANEL
+// ══════════════════════════════════════════
+function openPanel() {
+  document.getElementById('side-overlay').style.display = 'block';
+  document.getElementById('side-panel').classList.add('open');
+  refreshPalette();
+}
+function closePanel() {
+  document.getElementById('side-overlay').style.display = 'none';
+  document.getElementById('side-panel').classList.remove('open');
+}
+function spTab(i) {
+  document.querySelectorAll('.sp-tab').forEach(function(b,idx){ b.classList.toggle('active',idx===i); });
+}
+
+// ══════════════════════════════════════════
+// SUBMIT
+// ══════════════════════════════════════════
+function openSubmitModal() {
+  var att=0, mrk=0;
+  Object.keys(answers).forEach(function(k){ if(answers[k]!==-1) att++; if(marked[k]) mrk++; });
+  document.getElementById('modal-attempted').textContent    = att;
+  document.getElementById('modal-unattempted').textContent  = TOTAL - att;
+  document.getElementById('modal-marked').textContent       = mrk;
+  document.getElementById('modal-timer').textContent        = document.getElementById('hdr-timer').textContent;
+  document.getElementById('submit-modal').classList.add('show');
+  closePanel();
+}
+function closeSubmitModal() {
+  document.getElementById('submit-modal').classList.remove('show');
+}
+function confirmSubmit() {
+  closeSubmitModal();
+  submitted = true;
+  clearInterval(timerInterval);
+  // reveal all opts in attempt mode
+  Q_DATA.forEach(function(q) { renderOpts(q.n); });
+  refreshPalette();
+  // show analysis page
+  showAnalysis();
+}
+
+function normCdf(z) {
+  // Abramowitz-Stegun approximation of the standard normal CDF.
+  var t = 1/(1+0.2316419*Math.abs(z));
+  var d = 0.3989423*Math.exp(-z*z/2);
+  var p = d*t*(0.3193815+t*(-0.3565638+t*(1.781478+t*(-1.821256+t*1.330274))));
+  return z>0 ? 1-p : p;
+}
+
+function renderRank(score, maxScore) {
+  var card = document.getElementById('ana-rank-card');
+  var A = ANALYSIS || {};
+  var attempts = A.attempts || 0;
+  var maxMarks = A.maxMarks || maxScore || 0;
+  var topper   = A.topperMarks || 0;
+  var avg      = A.avgMarks;
+  // Nothing useful to estimate from → hide the card entirely.
+  if(!attempts && (avg===undefined||avg===null) && !topper) { card.style.display='none'; return; }
+  // Approximate the score distribution as a normal curve.
+  if(avg===undefined||avg===null) avg = topper ? topper*0.45 : maxMarks*0.35;
+  var std = (topper && topper>avg) ? (topper-avg)/3 : Math.max(1,(maxMarks||1)*0.15);
+  if(std<=0) std = Math.max(1,(maxMarks||1)*0.15);
+  var z = (score-avg)/std;
+  var pct = normCdf(z)*100;
+  if(topper && score>=topper) pct = 99.9;
+  pct = Math.max(0.1, Math.min(99.9, pct));
+  document.getElementById('ana-percentile').textContent = pct.toFixed(1) + ' %ile';
+  if(attempts) {
+    var rank = Math.max(1, Math.round((1-pct/100)*attempts));
+    if(topper && score>=topper) rank = 1;
+    document.getElementById('ana-rank').textContent = '#' + rank.toLocaleString();
+    document.getElementById('ana-attempts').textContent = attempts.toLocaleString();
+  } else {
+    document.getElementById('ana-rank').textContent = '-';
+    document.getElementById('ana-attempts').textContent = '-';
+  }
+  var meta = [];
+  if(topper) meta.push('Topper: ' + (topper%1===0?topper:topper.toFixed(1)) + ' / ' + maxMarks);
+  if(A.avgMarks!==undefined && A.avgMarks!==null) meta.push('Avg: ' + (A.avgMarks%1===0?A.avgMarks:A.avgMarks.toFixed(1)));
+  if(A.cutoff) meta.push('Cutoff: ' + A.cutoff);
+  meta.push('Estimated from Testbook attempt data — actual rank may vary.');
+  document.getElementById('ana-rank-meta').innerHTML = meta.join(' &nbsp;•&nbsp; ');
+  card.style.display = 'block';
+}
+
+function showAnalysis() {
+  var totalCorrect=0, totalWrong=0, totalSkip=0;
+  var totalScore=0, maxScore=0;
+  Q_DATA.forEach(function(q) {
+    var ans = answers[String(q.n)];
+    var pos = Q_MAP[String(q.n)].pos || 1;
+    var neg = Q_MAP[String(q.n)].neg || 0;
+    maxScore += pos;
+    if(ans === -1) { totalSkip++; }
+    else if(ans === q.cidx) { totalCorrect++; totalScore += pos; }
+    else { totalWrong++; totalScore -= neg; }
+  });
+  var attempted = totalCorrect + totalWrong;
+  var accuracy = attempted > 0 ? Math.round((totalCorrect / attempted) * 100) : 0;
+
+  document.getElementById('ana-score').textContent = totalScore % 1 === 0 ? totalScore : totalScore.toFixed(2);
+  document.getElementById('ana-max').textContent = maxScore % 1 === 0 ? maxScore : maxScore.toFixed(2);
+  document.getElementById('ana-accuracy').textContent = accuracy + ' %';
+  document.getElementById('ana-attempted').textContent = attempted + '/' + TOTAL;
+  document.getElementById('ana-correct-count').textContent = totalCorrect;
+  document.getElementById('ana-wrong-count').textContent = totalWrong;
+
+  // Estimated rank & percentile (only when Testbook attempt stats exist)
+  renderRank(totalScore, maxScore);
+
+  // Question analysis grid
+  document.getElementById('ana-grid').innerHTML =
+    '<div class="analysis-grid-item ag-correct"><div class="analysis-grid-val">' + totalCorrect + '</div><div class="analysis-grid-label">Correct</div></div>' +
+    '<div class="analysis-grid-item ag-wrong"><div class="analysis-grid-val">' + totalWrong + '</div><div class="analysis-grid-label">Incorrect</div></div>' +
+    '<div class="analysis-grid-item ag-skip"><div class="analysis-grid-val">' + totalSkip + '</div><div class="analysis-grid-label">Unattempted</div></div>' +
+    '<div class="analysis-grid-item ag-total"><div class="analysis-grid-val">' + TOTAL + '</div><div class="analysis-grid-label">Total Questions</div></div>';
+
+  // Section-wise breakdown
+  var secHtml = '';
+  SEC_NAMES.forEach(function(name, si) {
+    var qns = SEC_QNUMS[si];
+    var sc=0, wc=0, sk=0, secScore=0, secMax=0;
+    qns.forEach(function(qn) {
+      var ans = answers[String(qn)];
+      var pos = Q_MAP[String(qn)].pos || 1;
+      var neg = Q_MAP[String(qn)].neg || 0;
+      secMax += pos;
+      if(ans === -1) sk++;
+      else if(ans === Q_MAP[String(qn)].correct) { sc++; secScore += pos; }
+      else { wc++; secScore -= neg; }
+    });
+    var pct = secMax > 0 ? Math.round(Math.max(0, secScore) / secMax * 100) : 0;
+    secHtml += '<div class="analysis-bar-row">' +
+      '<span class="analysis-bar-label">' + name + '</span>' +
+      '<div class="analysis-bar-track"><div class="analysis-bar-fill" style="width:' + pct + '%;background:' + (pct >= 50 ? '#4caf50' : '#f44336') + '"></div></div>' +
+      '<span class="analysis-bar-val">' + (secScore % 1 === 0 ? secScore : secScore.toFixed(1)) + '/' + secMax + '</span>' +
+      '</div>';
+  });
+  document.getElementById('ana-sections').innerHTML = secHtml;
+
+  switchMode('analysis');
+}
+
+// ══════════════════════════════════════════
+// MODE SWITCH
+// ══════════════════════════════════════════
+function switchMode(mode) {
+  curMode = mode;
+  var isAttempt = mode === 'attempt';
+  var isView = mode === 'view';
+  var isAnalysis = mode === 'analysis';
+  document.getElementById('hdr-attempt').style.display = isAttempt ? 'flex' : 'none';
+  document.getElementById('hdr-view').style.display    = isView ? 'flex' : 'none';
+  document.getElementById('mode-attempt').style.display = isAttempt ? 'block' : 'none';
+  document.getElementById('mode-view').style.display    = isView ? 'block' : 'none';
+  document.getElementById('mode-analysis').style.display = isAnalysis ? 'block' : 'none';
+  document.getElementById('attempt-bar').style.display  = isAttempt ? 'flex' : 'none';
+  document.getElementById('sol-bar').style.display      = isView ? 'flex' : 'none';
+  document.getElementById('sec-tabs').style.display     = isAnalysis ? 'none' : 'flex';
+  if(isView) {
+    // rebuild view cards with current answer state
+    buildViewCards();
+    refreshSolQRow();
+    solScrollToQ(1);
+  }
+}
+
+function refreshSolQRow() {
+  Q_DATA.forEach(function(q) {
+    var btn = document.getElementById('sqbtn' + q.n);
+    if(!btn) return;
+    btn.className = 'sol-qbtn';
+    var ans = answers[String(q.n)];
+    if(ans === -1) btn.classList.add('sq-skip');
+    else if(ans === q.cidx) btn.classList.add('sq-correct');
+    else btn.classList.add('sq-wrong');
+  });
+}
+
+function solScrollToQ(n) {
+  curQ = n;
+  var card = document.getElementById('vcard' + n);
+  if(card) card.scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function solNav(dir) {
+  var newQ = curQ + dir;
+  if(newQ < 1) newQ = 1;
+  if(newQ > TOTAL) newQ = TOTAL;
+  solScrollToQ(newQ);
+  document.getElementById('btn-prev').disabled = (newQ <= 1);
+  document.getElementById('btn-next').disabled = (newQ >= TOTAL);
+}
+
+function buildSolSecCircles() {
+  var container = document.getElementById('sol-sec-circles');
+  if(!container) return;
+  container.innerHTML = '';
+  var allBtn = document.createElement('button');
+  allBtn.className = 'sol-sec-circle sec-all sec-active';
+  allBtn.textContent = 'All';
+  allBtn.onclick = function() { filterSolSec(-1); };
+  allBtn.id = 'sol-sec-all';
+  container.appendChild(allBtn);
+  SEC_NAMES.forEach(function(name, i) {
+    var btn = document.createElement('button');
+    btn.className = 'sol-sec-circle';
+    btn.textContent = (i + 1);
+    btn.title = name;
+    btn.id = 'sol-sec-btn' + i;
+    btn.onclick = function() { filterSolSec(i); };
+    container.appendChild(btn);
+  });
+}
+
+function filterSolSec(si) {
+  solFilter = si;
+  var allBtn = document.getElementById('sol-sec-all');
+  if(allBtn) allBtn.classList.toggle('sec-active', si === -1);
+  SEC_NAMES.forEach(function(_, i) {
+    var btn = document.getElementById('sol-sec-btn' + i);
+    if(btn) btn.classList.toggle('sec-active', i === si);
+  });
+  Q_DATA.forEach(function(q) {
+    var card = document.getElementById('vcard' + q.n);
+    var qbtn = document.getElementById('sqbtn' + q.n);
+    var show = (si === -1 || q.si === si);
+    if(card) card.style.display = show ? 'block' : 'none';
+    if(qbtn) qbtn.style.display = show ? 'flex' : 'none';
+  });
+}
+
+// ══════════════════════════════════════════
+// REATTEMPT TOGGLE
+// ══════════════════════════════════════════
+function toggleReattempt() {
+  reattempt = !reattempt;
+  var track = document.getElementById('rt-track');
+  var thumb = document.getElementById('rt-thumb');
+  track.classList.toggle('off', !reattempt);
+  thumb.classList.toggle('on', reattempt);
+}
+
+// ══════════════════════════════════════════
+// TIMER
+// ══════════════════════════════════════════
+function startTimer() {
+  timerInterval = setInterval(function() {
+    if(paused) return;
+    timerSecs--;
+    if(timerSecs <= 0) { timerSecs = 0; clearInterval(timerInterval); confirmSubmit(); }
+    var h = Math.floor(timerSecs/3600);
+    var m = Math.floor((timerSecs%3600)/60);
+    var s = timerSecs%60;
+    var str = pad(h)+':'+pad(m)+':'+pad(s);
+    document.getElementById('hdr-timer').textContent = str;
+    document.getElementById('modal-timer').textContent = str;
+  }, 1000);
+}
+function pad(n){ return n<10?'0'+n:n; }
+function togglePause() {
+  paused = !paused;
+  document.getElementById('btn-pause').textContent = paused ? '▶' : '⏸';
+}
+
+// ══════════════════════════════════════════
+// OFFLINE SUPPORT
+// ══════════════════════════════════════════
+if(!navigator.onLine) {
+  document.getElementById('offline-notice').style.display = 'block';
+}
+window.addEventListener('offline', function() {
+  document.getElementById('offline-notice').style.display = 'block';
+});
+window.addEventListener('online', function() {
+  document.getElementById('offline-notice').style.display = 'none';
+});
+document.addEventListener('error', function(e) {
+  if(e.target.tagName === 'IMG' && !e.target.dataset.fixed) {
+    e.target.dataset.fixed = '1';
+    var src = e.target.getAttribute('src') || '';
+    // Fix protocol-relative URL
+    if(src.indexOf('//') === 0) {
+      e.target.src = 'https:' + src;
+      return;
+    }
+    // Show small placeholder only after fixing attempt
+    e.target.style.cssText = 'max-width:100%;min-height:40px;background:#f5f5f5;border:1px dashed #ddd;border-radius:4px';
+    e.target.alt = navigator.onLine ? 'Image failed to load' : 'Offline - image unavailable';
+  }
+}, true);
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+buildAll();
+</script>
+</body>
+</html>
